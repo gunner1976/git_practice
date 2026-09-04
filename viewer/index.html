@@ -61,6 +61,24 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
 .card .row{display:flex;gap:8px;align-items:center}
 .card .row .sp{flex:1}
 .card .note{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:10px}
+.card .imgs{display:flex;gap:6px;margin-top:10px}
+.card .imgs:empty{display:none}
+.card .imgs img{height:44px;width:auto;max-width:80px;object-fit:cover;border-radius:3px;border:1px solid var(--line2)}
+.card .imgs .lb{font-family:var(--mono);font-size:10px;color:var(--muted);align-self:center}
+.slotlv{margin:12px 0 4px;font-family:var(--serif);font-style:italic;font-size:16px;color:var(--text)}
+.slotlv.cur{color:var(--eosin2)}
+.slot{display:grid;grid-template-columns:56px 1fr;gap:10px;align-items:start;padding:8px 0;border-bottom:1px solid rgba(38,48,63,.6)}
+.slot .th{width:56px;height:56px;border:1px dashed var(--line2);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--dim);font-family:var(--mono);font-size:10px;overflow:hidden;cursor:pointer;background:var(--ink)}
+.slot .th img{width:100%;height:100%;object-fit:cover}
+.slot .th.over{border-color:var(--hema2);border-style:solid}
+.slot .lb{font-size:12.5px;color:var(--text)}
+.slot .st{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin:2px 0 6px}
+.slot .st.ok{color:var(--hema2)}
+.slot .act{display:flex;gap:6px;flex-wrap:wrap}
+.slot .act button{padding:3px 8px;font-size:11.5px}
+.slot details{margin-top:6px}
+.slot summary{cursor:pointer;font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.slot .pr{font-size:11.5px;color:#C9C4B8;margin:6px 0;line-height:1.4}
 
 /* drawer */
 .drawer{position:absolute;right:18px;top:64px;bottom:18px;width:min(300px,calc(100vw - 36px));z-index:4;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:6px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);overflow:hidden;transition:transform .25s ease,opacity .25s ease}
@@ -178,6 +196,7 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
       <span class="sp"></span>
       <button id="btnReset" title="Reset view (R)">Reset view</button>
     </div>
+    <div class="imgs" id="cImgs"></div>
     <div class="note" id="cNote"></div>
   </aside>
 
@@ -185,6 +204,7 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
     <div class="tabs" role="tablist">
       <button class="on" data-pane="layers" role="tab">Layers</button>
       <button data-pane="render" role="tab">Render</button>
+      <button data-pane="imagery" role="tab">Imagery</button>
       <button data-pane="scan" role="tab">Load scan</button>
     </div>
     <div class="pane on" id="pane-layers">
@@ -205,6 +225,12 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
       <div class="ctl"><label for="rBg">Ground</label><select id="rBg"><option value="studio" selected>Studio</option><option value="black">Black</option><option value="slate">Slate</option></select></div>
       <div class="ctl"><label for="rBar">Scale bar</label><input id="rBar" type="checkbox" checked></div>
       <p class="help" style="margin-top:14px">Keys: <code>↓</code>/<code>↑</code> dive and surface, <code>R</code> reset, <code>Space</code> pause orbit, <code>1–9</code> jump to a level, <code>H</code> hide this panel.</p>
+    </div>
+    <div class="pane" id="pane-imagery">
+      <p class="help">Each rung can be rendered from real or AI-generated imagery: a person’s front and back photos shape and color the body; a heart photograph wraps the heart; micrographs texture the tissue, the cell and the mitochondrion. Drop an image on a slot, or commit files named by slot key to <code>viewer/imagery/</code> in the repo to bake them in.</p>
+      <div class="ctl"><label for="iHeight">Person’s height (m)</label><input id="iHeight" type="number" min="0.5" max="2.5" step="0.01" value="1.75"></div>
+      <div id="slots"></div>
+      <p class="help" style="margin-top:12px">Below about 10 nm nothing can be photographed with light or electrons in a way that looks like a picture; the DNA, atom, nucleus and proton rungs stay computed from their physics.</p>
     </div>
     <div class="pane" id="pane-scan">
       <h3>Your own capture</h3>
@@ -447,6 +473,19 @@ function mix(a, b, t){ return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2
 const LEVELS = [];
 
 // ---------------------------------------------------------------- BODY
+// Default proportions (metres, y up, facing +z). A silhouette fit overrides these.
+function defaultBodyParams(){
+  return {
+    H:1.75,
+    head:{ c:[0,1.635,0], r:[0.083,0.108,0.094] }, jaw:{ c:[0,1.565,0.022], r:[0.062,0.05,0.068] }, neck:{ a:[0,1.49,-0.012], b:[0,1.57,-0.012], r:[0.056,0.05] },
+    torso:[ {y:0.80,rx:0.135,rz:0.10,cz:0.0},{y:0.86,rx:0.17,rz:0.12},{y:0.97,rx:0.18,rz:0.125},{y:1.10,rx:0.152,rz:0.108},{y:1.24,rx:0.168,rz:0.12},{y:1.36,rx:0.19,rz:0.125},{y:1.45,rx:0.205,rz:0.105},{y:1.50,rx:0.075,rz:0.06,cz:-0.01} ],
+    arm:{ pts:[[0.205,1.44,0],[0.265,1.16,-0.02],[0.29,0.905,0.03]], r:[0.058,0.047,0.033] },
+    hand:{ c:[0.298,0.80,0.045], r:[0.042,0.075,0.02] },
+    leg:{ pts:[[0.095,0.90,0],[0.092,0.50,0.005],[0.088,0.09,-0.01]], r:[0.086,0.062,0.04] },
+    foot:{ c:[0.09,0.035,0.075], r:[0.048,0.033,0.13] },
+    fitted:false,
+  };
+}
 LEVELS.push({
   id:'body', eyebrow:'Level 0 · Organism', name:'The whole body', scale:'1.75 m', metersPerUnit:0.95, center:[0,0.88,0], radius:0.95,
   blurb:'A standing adult sampled as a cloud of oriented Gaussians. Fade the skin down to reveal all eleven organ systems, each its own layer.',
@@ -458,70 +497,75 @@ LEVELS.push({
     {name:'Urinary', color:'#C9A24C'}, {name:'Reproductive', color:'#D48BB0'} ],
   presets:{ 'Skin':[1,1,1,1,1,1,1,1,1,1,1], 'X-ray':[0.1,1,0.35,1,1,1,1,0.8,1,1,1], 'Skeleton':[0.06,1,0,0.5,0,0,0,0,0,0,0], 'Organs':[0.08,0.25,0,0,1,1,0.6,0.85,1,1,1], 'Vessels & nerves':[0.06,0.15,0,1,0,1,1,0,0,0,0], 'Muscle':[0.08,0.6,1,0,0,0,0,0,0,0,0] },
   pulseCenter:[0.02,1.28,0.04],
-  build(C){
+  slots:[
+    {key:'body_front', label:'Person, front view', kind:'project', prompt:'Photorealistic full-body studio photograph of an adult standing in a relaxed A-pose, arms slightly away from the body, facing the camera, head to toe fully in frame, plain uniform mid-grey background, soft even lighting, neutral expression, form-fitting clothing or swimwear, 85 mm lens, no shadows on the background, portrait orientation 2:5.'},
+    {key:'body_back', label:'Same person, back view', kind:'project', prompt:'The same person, same pose and lighting, photographed from directly behind.'},
+    {key:'body_side', label:'Same person, left side (optional)', kind:'depth', prompt:'The same person, same pose and lighting, photographed from their left side in profile.'} ],
+  build(C, P){
     seed(1701);
+    P = P || defaultBodyParams();
     const G = {skin:0,skel:1,musc:2,nerv:3,endo:4,card:5,lymph:6,resp:7,dig:8,urin:9,repro:10};
     const skinBase = [0.86,0.66,0.54];
+    const headC = P.head.c, headR = P.head.r, TORSO = P.torso;
     const warm = [[0.05,1.62,0.075,0.032,1],[-0.05,1.62,0.075,0.032,1],[0,1.605,0.105,0.02,1.2],[0.086,1.63,-0.008,0.02,0.8],[-0.086,1.63,-0.008,0.02,0.8],[0.29,0.735,0.05,0.035,0.8],[-0.29,0.735,0.05,0.035,0.8],[0.265,1.16,-0.07,0.045,0.6],[-0.265,1.16,-0.07,0.045,0.6],[0.09,0.5,0.065,0.05,0.5],[-0.09,0.5,0.065,0.05,0.5],[0.19,1.44,0.0,0.06,0.35],[-0.19,1.44,0.0,0.06,0.35],[0,1.55,0.05,0.04,0.4]];
     const zone = (x,y,z) => { let r = 0; for (const w of warm){ const d2 = (x-w[0])*(x-w[0]) + (y-w[1])*(y-w[1]) + (z-w[2])*(z-w[2]); r += w[4]*Math.exp(-d2/(w[3]*w[3])); } return Math.min(1, r); };
-    const skinCol = (x,y,z,nx,ny,nz) => { const k = (1 + 0.07*(fbm(x*14,y*14,z*14,3)-0.5)) * (1 + 0.05*(vnoise(x*420,y*420,z*420)-0.5)); const flush = 0.03*fbm(x*5,y*5,z*5,2), zn = zone(x,y,z); return [skinBase[0]*k + flush + 0.07*zn, skinBase[1]*k - 0.03*zn, skinBase[2]*k - 0.03*zn]; };
+    const skinCol = (x,y,z) => { const k = (1 + 0.07*(fbm(x*14,y*14,z*14,3)-0.5)) * (1 + 0.05*(vnoise(x*420,y*420,z*420)-0.5)); const flush = 0.03*fbm(x*5,y*5,z*5,2), zn = zone(x,y,z); return [skinBase[0]*k + flush + 0.07*zn, skinBase[1]*k - 0.03*zn, skinBase[2]*k - 0.03*zn]; };
     const skinTop = {size:0.0038, color:skinCol, group:G.skin, thick:0.18, jitter:0.5, density:1.25};
-    const headC = [0,1.635,0], headR = [0.083,0.108,0.094];
-    const TORSO = [ {y:0.80,rx:0.135,rz:0.10,cz:0.0},{y:0.86,rx:0.17,rz:0.12},{y:0.97,rx:0.18,rz:0.125},{y:1.10,rx:0.152,rz:0.108},{y:1.24,rx:0.168,rz:0.12},{y:1.36,rx:0.19,rz:0.125},{y:1.45,rx:0.205,rz:0.105},{y:1.50,rx:0.075,rz:0.06,cz:-0.01} ];
+    const A = P.arm, Lg = P.leg;
     const inCap = (p, a, b, r0, r1, m) => { const ab = V.sub(b, a), L2 = V.dot(ab, ab); let t = V.dot(V.sub(p, a), ab)/L2; t = Math.max(0, Math.min(1, t)); const q = V.add(a, V.mul(ab, t)); return V.len(V.sub(p, q)) < r0 + (r1-r0)*t - m; };
     const inEll = (p, c, r, m) => { const d = [(p[0]-c[0])/(r[0]-m), (p[1]-c[1])/(r[1]-m), (p[2]-c[2])/(r[2]-m)]; return V.dot(d, d) < 1; };
+    const mx = (p, s) => [s*p[0], p[1], p[2]];
+    const fingers = (s) => { const out = []; const hc = P.hand.c, hr = P.hand.r; for (let k = 0; k < 4; k++) out.push([[s*(hc[0]-0.026+k*0.018), hc[1]-hr[1]+0.01, hc[2]+0.005],[s*(hc[0]-0.03+k*0.02), hc[1]-hr[1]-0.07-Math.abs(k-1.3)*0.012, hc[2]+0.01], 0.0085, 0.007]); out.push([[s*(hc[0]-0.036), hc[1]-0.01, hc[2]+0.017],[s*(hc[0]-0.06), hc[1]-0.065, hc[2]+0.04], 0.01, 0.0075]); return out; };
     const bodyInside = (p, m) => {
       const [x,y,z] = p;
-      if (y > 0.80 && y < 1.50){ const sc = loftAt(TORSO, y); const dx = (x-sc.cx)/(sc.rx-m), dz = (z-sc.cz)/(sc.rz-m); if (dx*dx + dz*dz < 1) return true; }
-      if (inEll(p, headC, headR, m) || inEll(p, [0,1.565,0.022], [0.062,0.05,0.068], m) || inCap(p, [0,1.49,-0.012],[0,1.57,-0.012], 0.056, 0.05, m)) return true;
+      if (y > TORSO[0].y && y < TORSO[TORSO.length-1].y){ const sc = loftAt(TORSO, y); const dx = (x-sc.cx)/(sc.rx-m), dz = (z-sc.cz)/(sc.rz-m); if (dx*dx + dz*dz < 1) return true; }
+      if (inEll(p, headC, headR, m) || inEll(p, P.jaw.c, P.jaw.r, m) || inCap(p, P.neck.a, P.neck.b, P.neck.r[0], P.neck.r[1], m)) return true;
       for (const s of [-1,1]){
-        if (inCap(p, [s*0.205,1.44,0],[s*0.265,1.16,-0.02], 0.058, 0.047, m) || inCap(p, [s*0.265,1.16,-0.02],[s*0.29,0.905,0.03], 0.047, 0.033, m)) return true;
-        if (inEll(p, [s*0.298,0.80,0.045], [0.042,0.075,0.02], m*0.5)) return true;
-        if (inCap(p, [s*0.095,0.90,0],[s*0.092,0.50,0.005], 0.086, 0.062, m) || inCap(p, [s*0.092,0.50,0.005],[s*0.088,0.09,-0.01], 0.062, 0.04, m)) return true;
-        if (inEll(p, [s*0.09,0.035,0.075], [0.048,0.033,0.13], m*0.5)) return true;
-        for (let k = 0; k < 4; k++) if (inCap(p, [s*(0.272+k*0.018),0.735,0.05],[s*(0.268+k*0.02),0.655-Math.abs(k-1.3)*0.012,0.055], 0.0085, 0.007, m*0.3)) return true;
-        if (inCap(p, [s*0.262,0.79,0.062],[s*0.238,0.735,0.085], 0.01, 0.0075, m*0.3)) return true;
+        if (inCap(p, mx(A.pts[0],s), mx(A.pts[1],s), A.r[0], A.r[1], m) || inCap(p, mx(A.pts[1],s), mx(A.pts[2],s), A.r[1], A.r[2], m)) return true;
+        if (inEll(p, mx(P.hand.c,s), P.hand.r, m*0.5)) return true;
+        if (inCap(p, mx(Lg.pts[0],s), mx(Lg.pts[1],s), Lg.r[0], Lg.r[1], m) || inCap(p, mx(Lg.pts[1],s), mx(Lg.pts[2],s), Lg.r[1], Lg.r[2], m)) return true;
+        if (inEll(p, mx(P.foot.c,s), P.foot.r, m*0.5)) return true;
+        for (const f of fingers(s)) if (inCap(p, f[0], f[1], f[2], f[3], m*0.3)) return true;
       }
       return false;
     };
+    const textured = !!P.textured;
     const skinPass = (skin, inner) => {
-    // ---- head & face
-    ellipsoid(C, Object.assign({}, skin, {color:(x,y,z,nx,ny,nz)=>{
-      const dy = (y-headC[1])/headR[1], dz = (z-headC[2])/headR[2];
-      if (dy > 0.32 || (dz < -0.35 && dy > -0.55) || (dy > -0.05 && dz < 0.05 && Math.abs(x) > 0.07)) return null; // hair region drawn separately
-      const lips = Math.exp(-((x*x)/0.0007 + Math.pow(y-1.578,2)/0.00006 + Math.pow(z-0.088,2)/0.0002));
-      const c = skinCol(x,y,z); return [c[0]+0.05*lips, c[1]-0.15*lips, c[2]-0.12*lips]; }}), headC, headR);
-    if (!inner) ellipsoid(C, Object.assign({}, skin, {size:0.0045, aspect:3.2, thick:0.15, tangent:(x,y,z,nx,ny,nz)=>[ -nx*ny*0.2, -1, -nz*ny*0.2 ], color:(x,y,z)=>{
-      const dy = (y-headC[1])/headR[1], dz = (z-headC[2])/headR[2];
-      if (!(dy > 0.30 || (dz < -0.33 && dy > -0.58) || (dy > -0.07 && dz < 0.07 && Math.abs(x) > 0.068))) return null;
-      const k = 0.7 + 0.6*fbm(x*90,y*90,z*90,2); return [0.17*k, 0.11*k, 0.07*k]; }}), headC, [0.087,0.113,0.099]);
-    if (!inner){ ellipsoid(C, Object.assign({}, skin, {size:0.003}), [0,1.616,0.092], [0.015,0.026,0.018]);        // nose
-    ellipsoid(C, Object.assign({}, skin, {size:0.003}), [0.086,1.63,-0.008], [0.007,0.026,0.018]);     // ears
-    ellipsoid(C, Object.assign({}, skin, {size:0.003}), [-0.086,1.63,-0.008], [0.007,0.026,0.018]); }
-    if (!inner) for (const sx of [-1,1]){
-      ellipsoid(C, {size:0.002, color:flat([0.93,0.92,0.9]), group:G.skin}, [sx*0.031,1.647,0.083], [0.014,0.0075,0.006]);
-      ellipsoid(C, {size:0.0016, color:flat([0.22,0.14,0.09]), group:G.skin}, [sx*0.031,1.647,0.0885], [0.0058,0.0058,0.0025]);
-      ellipsoid(C, {size:0.0012, color:flat([0.02,0.02,0.02]), group:G.skin}, [sx*0.031,1.647,0.0905], [0.0026,0.0026,0.0015]);
-      capsule(C, {size:0.0025, aspect:2.5, color:flat([0.2,0.13,0.09]), group:G.skin}, [sx*0.016,1.667,0.089],[sx*0.047,1.664,0.081], 0.003, 0.002);
-    }
-    ellipsoid(C, Object.assign({}, skin, {size:0.0035, color:(x,y,z)=>{ const lips = Math.exp(-((x*x)/0.0006 + Math.pow(y-1.585,2)/0.00004 + Math.pow(z-0.088,2)/0.0002)); const c = skinCol(x,y,z); return [c[0]+0.06*lips, c[1]-0.16*lips, c[2]-0.12*lips]; }}), [0,1.565,0.022], [0.062,0.05,0.068]);         // jaw
-    capsule(C, skin, [0,1.49,-0.012],[0,1.57,-0.012], 0.056, 0.05);                                    // neck
-    // ---- torso
-    loft(C, skin, TORSO);
-    // ---- limbs
-    for (const s of [-1,1]){
-      limb(C, skin, [[s*0.205,1.44,0],[s*0.265,1.16,-0.02],[s*0.29,0.905,0.03]], [0.058,0.047,0.033]);
-      ellipsoid(C, Object.assign({}, skin, {size:0.0035}), [s*0.298,0.80,0.045], [0.042,0.075,0.02]);
-      for (let k = 0; k < 4; k++) capsule(C, Object.assign({}, skin, {size:0.0028}), [s*(0.272+k*0.018),0.735,0.05],[s*(0.268+k*0.02),0.655-Math.abs(k-1.3)*0.012,0.055], 0.0085, 0.007);
-      capsule(C, Object.assign({}, skin, {size:0.0028}), [s*0.262,0.79,0.062],[s*0.238,0.735,0.085], 0.01, 0.0075);
-      limb(C, skin, [[s*0.095,0.90,0],[s*0.092,0.50,0.005],[s*0.088,0.09,-0.01]], [0.086,0.062,0.04]);
-      ellipsoid(C, Object.assign({}, skin, {size:0.004}), [s*0.09,0.035,0.075], [0.048,0.033,0.13]);
-    }
+      ellipsoid(C, Object.assign({}, skin, {color:(x,y,z)=>{
+        const dy = (y-headC[1])/headR[1], dz = (z-headC[2])/headR[2];
+        if (!textured && (dy > 0.32 || (dz < -0.35 && dy > -0.55) || (dy > -0.05 && dz < 0.05 && Math.abs(x) > 0.07))) return null;
+        return skin.color(x,y,z); }}), headC, headR);
+      if (!inner && !textured) ellipsoid(C, Object.assign({}, skin, {size:0.0045, aspect:3.2, thick:0.15, tangent:(x,y,z,nx,ny,nz)=>[ -nx*ny*0.2, -1, -nz*ny*0.2 ], color:(x,y,z)=>{
+        const dy = (y-headC[1])/headR[1], dz = (z-headC[2])/headR[2];
+        if (!(dy > 0.30 || (dz < -0.33 && dy > -0.58) || (dy > -0.07 && dz < 0.07 && Math.abs(x) > 0.068))) return null;
+        const k = 0.7 + 0.6*fbm(x*90,y*90,z*90,2); return [0.17*k, 0.11*k, 0.07*k]; }}), headC, [headR[0]+0.004, headR[1]+0.005, headR[2]+0.005]);
+      if (!inner && !textured){
+        ellipsoid(C, Object.assign({}, skin, {size:0.003}), [0,headC[1]-0.019,headR[2]-0.002], [0.015,0.026,0.018]);
+        for (const sx of [-1,1]){
+          ellipsoid(C, Object.assign({}, skin, {size:0.003}), [sx*(headR[0]+0.003),headC[1]-0.005,-0.008], [0.007,0.026,0.018]);
+          const ez = headR[2]*Math.sqrt(Math.max(0, 1 - Math.pow(0.031/headR[0],2) - Math.pow(0.012/headR[1],2)));
+          ellipsoid(C, {size:0.002, color:flat([0.93,0.92,0.9]), group:G.skin}, [sx*0.031,headC[1]+0.012,ez-0.0035], [0.014,0.0075,0.006]);
+          ellipsoid(C, {size:0.0016, color:flat([0.22,0.14,0.09]), group:G.skin}, [sx*0.031,headC[1]+0.012,ez+0.002], [0.0058,0.0058,0.0025]);
+          ellipsoid(C, {size:0.0012, color:flat([0.02,0.02,0.02]), group:G.skin}, [sx*0.031,headC[1]+0.012,ez+0.004], [0.0026,0.0026,0.0015]);
+          capsule(C, {size:0.0025, aspect:2.5, color:flat([0.2,0.13,0.09]), group:G.skin}, [sx*0.016,headC[1]+0.032,ez+0.002],[sx*0.047,headC[1]+0.029,ez-0.006], 0.003, 0.002);
+        }
+      }
+      ellipsoid(C, Object.assign({}, skin, {size:0.0035, color:(x,y,z)=>{ if (textured) return skin.color(x,y,z); const lips = Math.exp(-((x*x)/0.0006 + Math.pow(y-(P.jaw.c[1]+0.02),2)/0.00004 + Math.pow(z-(P.jaw.c[2]+0.066),2)/0.0002)); const c = skin.color(x,y,z); return [c[0]+0.06*lips, c[1]-0.16*lips, c[2]-0.12*lips]; }}), P.jaw.c, P.jaw.r);
+      capsule(C, skin, P.neck.a, P.neck.b, P.neck.r[0], P.neck.r[1]);
+      loft(C, skin, TORSO);
+      for (const s of [-1,1]){
+        limb(C, skin, [mx(A.pts[0],s), mx(A.pts[1],s), mx(A.pts[2],s)], A.r);
+        ellipsoid(C, Object.assign({}, skin, {size:0.0035}), mx(P.hand.c,s), P.hand.r);
+        for (const f of fingers(s)) capsule(C, Object.assign({}, skin, {size:0.0028}), f[0], f[1], f[2], f[3]);
+        limb(C, skin, [mx(Lg.pts[0],s), mx(Lg.pts[1],s), mx(Lg.pts[2],s)], Lg.r);
+        ellipsoid(C, Object.assign({}, skin, {size:0.004}), mx(P.foot.c,s), P.foot.r);
+      }
     };
     skinPass(skinTop, false);
     skinPass({size:0.008, inset:0.0055, thick:0.35, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const k = 0.86 + 0.1*(fbm(x*10,y*10,z*10,2)-0.5); return [skinBase[0]*k, skinBase[1]*k*0.96, skinBase[2]*k*0.95]; }}, true);
     skinPass({size:0.013, inset:0.011, thick:0.4, jitter:0.25, group:G.skin, color:()=>[skinBase[0]*0.7, skinBase[1]*0.62, skinBase[2]*0.6]}, true);
-    // ================= SKELETAL
+    const nSkin = C.n;
+    // ================= internal anatomy, built at default proportions then scaled to the fitted body
     const bone = {size:0.0035, color:mottle([0.92,0.88,0.78], 60, 0.18), group:G.skel, thick:0.25};
     ellipsoid(C, bone, [0,1.64,-0.004], [0.073,0.092,0.084]);
     tube(C, bone, catmull([[0.045,1.60,0.015],[0.05,1.555,0.03],[0.028,1.545,0.06],[0,1.54,0.068],[-0.028,1.545,0.06],[-0.05,1.555,0.03],[-0.045,1.60,0.015]]), 0.007);
@@ -546,7 +590,6 @@ LEVELS.push({
       ellipsoid(C, bone, [s*0.088,0.08,-0.01],[0.03,0.028,0.035]);
       for (let k = 0; k < 5; k++) capsule(C, Object.assign({}, bone,{size:0.0025}), [s*(0.06+k*0.016),0.045,0.03],[s*(0.055+k*0.018),0.028,0.18-Math.abs(k-1)*0.012], 0.0065, 0.0045);
     }
-    // ================= MUSCULAR
     const muscCol = (x,y,z,nx,ny,nz,u,v) => { const k = 0.85 + 0.3*fbm(x*80,y*80,z*80,2) + 0.1*Math.sin(v*40); return [0.62*k, 0.19*k, 0.17*k]; };
     const musc = {size:0.0042, aspect:3, thick:0.2, color:muscCol, group:G.musc};
     loft(C, Object.assign({}, musc, {tangent:()=>[0,1,0]}), [ {y:0.82,rx:0.11,rz:0.08},{y:0.97,rx:0.154,rz:0.1},{y:1.10,rx:0.128,rz:0.085},{y:1.24,rx:0.142,rz:0.095},{y:1.36,rx:0.162,rz:0.1},{y:1.45,rx:0.174,rz:0.083},{y:1.49,rx:0.06,rz:0.046,cz:-0.01} ]);
@@ -557,9 +600,8 @@ LEVELS.push({
       for (let k = 0; k < 4; k++) ellipsoid(C, musc, [s*0.035,1.22-k*0.065,0.076], [0.03,0.028,0.012]);
       limb(C, musc, [[s*0.205,1.42,0],[s*0.262,1.16,-0.02],[s*0.288,0.92,0.03]], [0.046,0.037,0.024]);
       limb(C, musc, [[s*0.095,0.88,0],[s*0.092,0.50,0.005],[s*0.088,0.12,-0.01]], [0.072,0.05,0.03]);
-      capsule(C, musc, [s*0.09,0.50,-0.02],[s*0.09,0.15,-0.025], 0.036, 0.016); // calf
+      capsule(C, musc, [s*0.09,0.50,-0.02],[s*0.09,0.15,-0.025], 0.036, 0.016);
     }
-    // ================= NERVOUS
     const brainCol = (x,y,z) => { const s = fbm(x*140,y*140,z*140,3); const k = 0.7 + 0.5*Math.pow(s,1.5); return [0.86*k, 0.7*k, 0.68*k]; };
     for (const s of [-1,1]) ellipsoid(C, {size:0.0025, color:brainCol, group:G.nerv}, [s*0.034,1.652,-0.006], [0.056,0.062,0.078]);
     ellipsoid(C, {size:0.0025, color:brainCol, group:G.nerv}, [0,1.598,-0.055], [0.046,0.03,0.036]);
@@ -571,11 +613,10 @@ LEVELS.push({
       tube(C, nerve, catmull([[s*0.02,0.98,-0.05],[s*0.08,0.93,-0.05],[s*0.105,0.88,-0.03],[s*0.10,0.5,-0.02],[s*0.09,0.12,-0.02],[s*0.08,0.03,0.08]]), (t)=>0.006-0.0035*t);
       tube(C, nerve, catmull([[s*0.02,1.02,-0.05],[s*0.08,0.95,0.02],[s*0.09,0.7,0.04],[s*0.09,0.45,0.03]]), 0.002);
       for (let i = 0; i < 10; i++){ const y = 1.40 - i*0.03, w = 0.112 + 0.05*Math.sin((i+1)/13*Math.PI); tube(C, Object.assign({}, nerve, {size:0.0016}), (t)=>{ const ph = Math.PI*(1-t*0.85); return [s*w*Math.sin(ph), y-0.03*t, -0.055+0.16*(1-Math.cos(ph))/2]; }, 0.0012); }
-      for (let k = 0; k < 4; k++) tree(C, Object.assign({}, nerve, {size:0.0015}), [s*0.2,1.40-k*0.0,0.0], V.norm([s*0.3,-1,0.3*(k-1.5)]), 0.05, 0.0012, 3, {spread:0.6, bias:[0,-0.4,0]});
+      for (let k = 0; k < 4; k++) tree(C, Object.assign({}, nerve, {size:0.0015}), [s*0.2,1.40,0.0], V.norm([s*0.3,-1,0.3*(k-1.5)]), 0.05, 0.0012, 3, {spread:0.6, bias:[0,-0.4,0]});
       for (let k = 0; k < 4; k++) tree(C, Object.assign({}, nerve, {size:0.0015}), [s*0.09,0.85,0.02], V.norm([s*0.2,-1,0.4*(k-1.5)]), 0.08, 0.0014, 3, {spread:0.5, bias:[0,-0.4,0]});
       tree(C, Object.assign({}, nerve, {size:0.0014}), [s*0.05,1.58,0.03], V.norm([s*0.5,-0.2,1]), 0.04, 0.0012, 3, {spread:0.7});
     }
-    // ================= ENDOCRINE
     const endo = {size:0.0025, color:mottle([0.74,0.55,0.86], 80, 0.25), group:G.endo};
     ellipsoid(C, endo, [0,1.615,0.005], [0.006,0.005,0.006]);
     for (const s of [-1,1]) ellipsoid(C, endo, [s*0.017,1.49,0.038], [0.012,0.022,0.01]);
@@ -583,7 +624,6 @@ LEVELS.push({
     for (const s of [-1,1]) ellipsoid(C, endo, [s*0.055,1.135,-0.065], [0.015,0.012,0.008], rotXYZ(0,0,s*0.6));
     tube(C, Object.assign({}, endo, {size:0.003}), catmull([[0.02,1.09,0.0],[-0.03,1.10,0.01],[-0.08,1.115,-0.01]]), (t)=>0.014-0.006*t);
     for (const s of [-1,1]) ellipsoid(C, endo, [s*0.05,0.895,0.03], [0.012,0.009,0.01]);
-    // ================= CARDIOVASCULAR
     const heartCol = (x,y,z) => { const k = 0.8 + 0.4*fbm(x*120,y*120,z*120,3); return [0.66*k, 0.2*k, 0.22*k]; };
     ellipsoid(C, {size:0.0028, color:heartCol, group:G.card}, [0.015,1.275,0.04], [0.055,0.07,0.05], rotXYZ(0.2,0,-0.5));
     ellipsoid(C, {size:0.0028, color:(x,y,z)=>{const c=heartCol(x,y,z);return [c[0]+0.1,c[1]+0.1,c[2]+0.08];}, group:G.card}, [0.03,1.33,0.02], [0.04,0.03,0.035]);
@@ -598,9 +638,9 @@ LEVELS.push({
         tube(C, o, catmull([[off[0],0.96,-0.035+off[2]],[s*0.05+off[0],0.92,-0.02+off[2]],[s*0.09+off[0],0.88,0.01+off[2]],[s*0.088+off[0],0.5,-0.01+off[2]],[s*0.086+off[0],0.09,-0.01+off[2]],[s*0.08+off[0],0.03,0.1+off[2]]]), (t)=>r0*(1-0.55*t));
         tube(C, o, catmull([[off[0],1.40,-0.02+off[2]],[s*0.1+off[0],1.42,0.0+off[2]],[s*0.2+off[0],1.41,0.01+off[2]],[s*0.262+off[0],1.16,0.0+off[2]],[s*0.29+off[0],0.90,0.04+off[2]],[s*0.29+off[0],0.75,0.05+off[2]]]), (t)=>r0*0.65*(1-0.55*t));
         tube(C, o, catmull([[s*0.01+off[0],1.40,-0.02+off[2]],[s*0.025+off[0],1.5,-0.01+off[2]],[s*0.035+off[0],1.58,0.0+off[2]],[s*0.03+off[0],1.64,0.02+off[2]]]), (t)=>r0*0.55*(1-0.5*t));
-        tube(C, o, catmull([[s*0.005+off[0],1.35,-0.045+off[2]],[s*0.03+off[0],1.28,-0.03+off[2]],[s*0.06+off[0],1.2,0.0+off[2]]]), r0*0.4);   // to lungs
-        tube(C, o, catmull([[off[0],1.14,-0.045+off[2]],[s*0.05+off[0],1.13,0.0+off[2]],[s*0.09+off[0],1.12,0.03+off[2]]]), r0*0.4);         // to liver/stomach
-        tube(C, o, catmull([[off[0],1.08,-0.04+off[2]],[s*0.05+off[0],1.08,-0.06+off[2]]]), r0*0.35);                                          // renal
+        tube(C, o, catmull([[s*0.005+off[0],1.35,-0.045+off[2]],[s*0.03+off[0],1.28,-0.03+off[2]],[s*0.06+off[0],1.2,0.0+off[2]]]), r0*0.4);
+        tube(C, o, catmull([[off[0],1.14,-0.045+off[2]],[s*0.05+off[0],1.13,0.0+off[2]],[s*0.09+off[0],1.12,0.03+off[2]]]), r0*0.4);
+        tube(C, o, catmull([[off[0],1.08,-0.04+off[2]],[s*0.05+off[0],1.08,-0.06+off[2]]]), r0*0.35);
       }
     };
     trunks(art, [0,0,0], 0.009); trunks(vein, [0.01,0,0.012], 0.0105);
@@ -613,7 +653,6 @@ LEVELS.push({
       for (let k = 0; k < 3; k++){ sprout(artTwig, [s*0.1, 1.24-k*0.06, -0.02], V.norm([s*0.8, rn(-0.5,0.5), rn(-0.5,0.5)])); sprout(veinTwig, [s*0.11, 1.22-k*0.06, -0.01], V.norm([s*0.8, rn(-0.5,0.5), rn(-0.5,0.5)])); }
     }
     for (let k = 0; k < 8; k++){ sprout(artTwig, [rn(-0.08,0.08), rn(0.92,1.12), rn(-0.02,0.06)], V.randDir()); sprout(veinTwig, [rn(-0.08,0.08), rn(0.92,1.12), rn(-0.02,0.06)], V.randDir()); }
-    // ================= LYMPHATIC
     const lym = {size:0.0022, color:mottle([0.5,0.75,0.45], 80, 0.25), group:G.lymph};
     ellipsoid(C, Object.assign({}, lym, {color:mottle([0.45,0.15,0.3], 90, 0.2)}), [-0.1,1.17,-0.045], [0.05,0.03,0.035], rotXYZ(0,0.4,0.3));
     const nodes = (c, n, r) => { for (let i = 0; i < n; i++) ellipsoid(C, lym, [c[0]+gauss()*r, c[1]+gauss()*r, c[2]+gauss()*r], [0.006,0.0045,0.005]); };
@@ -626,7 +665,6 @@ LEVELS.push({
       tube(C, lv, catmull([[s*0.185,1.36,0],[s*0.26,1.15,0.0],[s*0.29,0.9,0.045]]), 0.0014);
       tube(C, lv, catmull([[s*0.05,1.5,0.02],[s*0.05,1.58,0.01],[s*0.06,1.62,-0.02]]), 0.0012);
     }
-    // ================= RESPIRATORY
     const lungCol = (x,y,z) => { const k = 0.75 + 0.5*fbm(x*90,y*90,z*90,3); return [0.9*k, 0.6*k, 0.62*k, 0.55]; };
     ellipsoid(C, {size:0.004, color:lungCol, group:G.resp}, [0.095,1.28,-0.01], [0.075,0.135,0.088]);
     ellipsoid(C, {size:0.004, color:lungCol, group:G.resp}, [-0.10,1.26,-0.012], [0.068,0.125,0.086]);
@@ -634,7 +672,6 @@ LEVELS.push({
     tube(C, airway, catmull([[0,1.51,0.02],[0,1.45,0.005],[0,1.38,-0.01]]), 0.0095);
     for (const s of [-1,1]) tree(C, Object.assign({}, airway, {size:0.002, sizeR:0.5}), [0,1.38,-0.01], V.norm([s*0.7,-1,-0.1]), 0.055, 0.007, 5, {spread:0.62, decay:0.72, rdec:0.7, bend:0.15});
     ellipsoid(C, {size:0.004, color:flat([0.78,0.45,0.45], 0.4), group:G.resp}, [0,1.155,0.0], [0.18,0.03,0.12]);
-    // ================= DIGESTIVE
     const dig = {size:0.0035, color:mottle([0.88,0.64,0.6], 70, 0.2), group:G.dig};
     tube(C, Object.assign({}, dig, {size:0.0025}), catmull([[0,1.5,-0.03],[0,1.35,-0.05],[-0.02,1.2,-0.03],[-0.04,1.15,0.0]]), 0.0075);
     ellipsoid(C, dig, [-0.055,1.115,0.03], [0.062,0.045,0.04], rotXYZ(0.2,0.3,0.5));
@@ -643,17 +680,17 @@ LEVELS.push({
     const gutPts = []; for (let i = 0; i < 70; i++){ const t = i/69; gutPts.push([0.085*Math.sin(t*44+1)*(1-0.3*Math.abs(Math.sin(t*9))), 1.06-0.15*t+0.015*Math.sin(t*23), 0.035+0.04*Math.cos(t*44+1)]); }
     tube(C, Object.assign({}, dig, {size:0.003, color:mottle([0.9,0.66,0.6], 100, 0.2)}), catmull(gutPts), 0.0115);
     tube(C, Object.assign({}, dig, {size:0.0035, color:(x,y,z,nx,ny,nz,u)=>{ const k = 0.85+0.25*Math.pow(Math.sin(u*70),2)+0.1*fbm(x*100,y*100,z*100,2); return [0.8*k,0.56*k,0.5*k]; }}), catmull([[0.11,0.9,0.03],[0.12,1.0,0.02],[0.12,1.075,0.02],[0.05,1.07,0.045],[-0.03,1.065,0.05],[-0.115,1.085,0.03],[-0.12,1.0,0.02],[-0.115,0.91,0.02],[-0.06,0.87,0.0],[0,0.85,-0.02],[0,0.82,-0.04]]), (t)=>0.02*(1+0.12*Math.sin(t*160)));
-    // ================= URINARY
     const ur = {size:0.0028, color:mottle([0.56,0.22,0.22], 80, 0.2), group:G.urin};
     for (const s of [-1,1]){ ellipsoid(C, ur, [s*0.07,1.075,-0.07], [0.03,0.052,0.026], rotXYZ(0,0,s*0.15)); tube(C, Object.assign({}, ur, {size:0.0018, color:flat([0.85,0.75,0.55])}), catmull([[s*0.055,1.05,-0.06],[s*0.05,0.95,-0.04],[s*0.03,0.88,0.02],[s*0.015,0.865,0.04]]), 0.0022); }
     ellipsoid(C, Object.assign({}, ur, {color:mottle([0.85,0.75,0.55], 60, 0.15, 0.85)}), [0,0.865,0.045], [0.04,0.03,0.035]);
-    // ================= REPRODUCTIVE
     const rp = {size:0.0025, color:mottle([0.8,0.5,0.65], 80, 0.2), group:G.repro};
     ellipsoid(C, rp, [0,0.885,0.02], [0.03,0.036,0.02]);
     for (const s of [-1,1]){ ellipsoid(C, rp, [s*0.05,0.9,0.02], [0.016,0.01,0.012]); tube(C, Object.assign({}, rp, {size:0.0018}), catmull([[s*0.028,0.9,0.02],[s*0.04,0.905,0.03],[s*0.05,0.9,0.02]]), 0.003); }
-    // keep every internal splat inside the skin envelope
+    // scale the internal anatomy to the fitted body, then keep it inside the skin envelope
+    if (P.fitted){ const sx = P.scaleX || 1, sy = P.H/1.75, sz = P.scaleZ || 1; for (let i = nSkin; i < C.n; i++){ C.pos[i*3] *= sx; C.pos[i*3+1] *= sy; C.pos[i*3+2] *= sz; } }
     const deep = new Set([G.nerv, G.card, G.lymph, G.endo]);
-    C.filter((x,y,z,g) => g === G.skin || bodyInside([x,y,z], deep.has(g) ? 0.016 : 0.007));
+    C.filter((x,y,z,g) => g === G.skin || bodyInside([x,y,z], deep.has(g) ? 0.016 : (g === G.musc ? 0.0105 : 0.007)));
+    C.skinCount = nSkin;
   }
 });
 
@@ -665,6 +702,7 @@ LEVELS.push({
   groups:[ {name:'Ventricles (myocardium)', color:'#9E3A3C', pulse:0.045}, {name:'Atria', color:'#C56A6A', pulse:-0.02}, {name:'Aorta & arteries', color:'#D9A08E', pulse:0.01}, {name:'Veins & pulmonary trunk', color:'#8A7BA8', pulse:0.01}, {name:'Coronary arteries', color:'#E24C4C', pulse:0.045}, {name:'Coronary veins', color:'#6C6FD1', pulse:0.045}, {name:'Epicardial fat', color:'#E9D08A', pulse:0.045} ],
   presets:{ 'Whole heart':[1,1,1,1,1,1,1], 'Coronaries':[0.12,0.12,0.3,0.3,1,1,0], 'Chambers':[1,1,0.2,0.2,0,0,0] },
   pulseCenter:[0,-1,0],
+  slots:[ {key:'heart_photo', label:'Heart, anterior view', kind:'project', prompt:'Photorealistic medical specimen photograph of an isolated healthy human heart, anterior view, apex pointing down and to the left, aorta and pulmonary trunk at the top, coronary arteries and yellow epicardial fat visible on the surface, plain black background, soft even studio light, sharp focus.'} ],
   build(C){
     seed(4242);
     const tilt = rotXYZ(0.15, 0.1, -0.42);
@@ -725,6 +763,7 @@ LEVELS.push({
   divePoint:[-38,8,38], diveLabel:'into one cardiomyocyte',
   groups:[ {name:'Cardiomyocytes', color:'#B85B50'}, {name:'Nuclei', color:'#6B5A9E'}, {name:'Capillaries', color:'#D97070'}, {name:'Red blood cells', color:'#C41E1A'}, {name:'Collagen (endomysium)', color:'#E7E2D0'} ],
   presets:{ 'All':[1,1,1,1,1], 'Vasculature':[0.1,0.2,1,1,0], 'Fibers':[1,1,0,0,0] },
+  slots:[ {key:'tissue_micrograph', label:'Cardiac muscle micrograph', kind:'planar', prompt:'Photorealistic light micrograph of human cardiac muscle in longitudinal section, H&E stain, 400× magnification: pink striated branching cardiomyocytes, single central purple nuclei, dark intercalated discs, thin capillaries between fibers, fills the frame edge to edge, no labels.'} ],
   build(C){
     seed(777);
     const fibers = [];
@@ -764,6 +803,7 @@ LEVELS.push({
   divePoint:[6,4.5,3.5], diveLabel:'into a mitochondrion',
   groups:[ {name:'Sarcolemma (membrane)', color:'#E0BA92'}, {name:'T-tubules', color:'#D8A878'}, {name:'Myofibrils', color:'#9E5A5A'}, {name:'Mitochondria', color:'#F08A3E'}, {name:'Nucleus', color:'#7D6AA6'}, {name:'Sarcoplasmic reticulum', color:'#B5C36A'}, {name:'Glycogen & lipid', color:'#E6C766'} ],
   presets:{ 'All':[1,1,1,1,1,1,1], 'Inside':[0.06,0.3,1,1,1,1,1], 'Mitochondria':[0.05,0,0.15,1,0.3,0,0], 'Contractile':[0.05,0.5,1,0,0.3,1,0] },
+  slots:[ {key:'cell_micrograph', label:'Cardiomyocyte electron micrograph', kind:'planar', prompt:'Photorealistic transmission electron micrograph of a cardiomyocyte in longitudinal section, 10,000×: parallel myofibrils with sarcomere banding and dark Z-lines, rows of mitochondria with dense cristae packed between them, an elongated nucleus, glycogen granules; greyscale, fills the frame, no labels.'} ],
   build(C){
     seed(31337);
     const R = 10, L = 20;
@@ -797,6 +837,7 @@ LEVELS.push({
   divePoint:[-120,60,90], diveLabel:'into the DNA',
   groups:[ {name:'Outer membrane', color:'#E9A96C'}, {name:'Inner boundary membrane', color:'#D98A4A'}, {name:'Cristae', color:'#F0955C'}, {name:'ATP synthase', color:'#F3E39B'}, {name:'Matrix granules', color:'#A8663C'}, {name:'mtDNA nucleoids', color:'#8290E6'}, {name:'Mitoribosomes', color:'#9C7F8F'} ],
   presets:{ 'All':[1,1,1,1,1,1,1], 'Cristae':[0.06,0.15,1,1,0,0,0], 'Genome':[0.06,0.1,0.15,0,0,1,1] },
+  slots:[ {key:'mito_micrograph', label:'Mitochondrion electron micrograph', kind:'planar', prompt:'Photorealistic transmission electron micrograph of a single mitochondrion in longitudinal section, 100,000×: smooth outer membrane, inner membrane folded into dense lamellar cristae, dark matrix granules, fine grain; greyscale, fills the frame, no labels.'} ],
   build(C){
     seed(9001);
     const H = 700, R = 250;
@@ -952,7 +993,7 @@ if (!gl){ $('loading').innerHTML = '<h1>Corpus <em>Descent</em></h1><p class="fa
 const VS = `#version 300 es
 precision highp float; precision highp int; precision highp usampler2D;
 uniform usampler2D uTex; uniform mat4 uView; uniform mat4 uProj; uniform vec2 uFocal; uniform vec2 uViewport;
-uniform float uSplatScale; uniform float uAlpha; uniform float uGroupAlpha[32]; uniform float uGroupPulse[32]; uniform float uGroupWobble[32];
+uniform float uSplatScale; uniform float uAlpha; uniform float uGroupAlpha[32]; uniform float uGroupPulse[32]; uniform float uGroupWobble[32]; uniform float uGroupShade[32];
 uniform vec3 uCenter; uniform float uPulse; uniform float uTime; uniform float uShade;
 in vec2 aPos; in uint aIndex;
 out vec4 vColor; out vec2 vPos;
@@ -994,7 +1035,7 @@ void main(){
   vec2 minor = min(sqrt(2.0*l2), 1024.0) * vec2(dv.y, -dv.x);
   uint c = t0.w;
   vec4 col = vec4(float(c & 255u), float((c >> 8u) & 255u), float((c >> 16u) & 255u), float(c >> 24u)) / 255.0;
-  float flatness = clamp(1.0 - s.z / max(1e-9, min(s.x, s.y)), 0.0, 1.0) * uShade;
+  float flatness = clamp(1.0 - s.z / max(1e-9, min(s.x, s.y)), 0.0, 1.0) * uShade * uGroupShade[g];
   if (flatness > 0.0){
     vec3 nv = normalize(mat3(uView) * R[2]);
     vec3 vd = normalize(-cam.xyz);
@@ -1022,7 +1063,7 @@ function compile(type, src){ const sh = gl.createShader(type); gl.shaderSource(s
 const prog = gl.createProgram(); gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog);
 if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
 gl.useProgram(prog);
-const U = {}; for (const n of ['uTex','uView','uProj','uFocal','uViewport','uSplatScale','uAlpha','uGroupAlpha','uGroupPulse','uGroupWobble','uCenter','uPulse','uTime','uShade']) U[n] = gl.getUniformLocation(prog, n);
+const U = {}; for (const n of ['uTex','uView','uProj','uFocal','uViewport','uSplatScale','uAlpha','uGroupAlpha','uGroupPulse','uGroupWobble','uCenter','uPulse','uTime','uShade','uGroupShade']) U[n] = gl.getUniformLocation(prog, n);
 const A_POS = gl.getAttribLocation(prog, 'aPos'), A_IDX = gl.getAttribLocation(prog, 'aIndex');
 const quadBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-2,-2, 2,-2, -2,2, 2,2]), gl.STATIC_DRAW);
 gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFuncSeparate(gl.ONE_MINUS_DST_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
@@ -1066,15 +1107,19 @@ function uploadLevel(lv, cloud){
   lv.model = new Float32Array([s,0,0,0, 0,s*fy,0,0, 0,0,s*fy,0, -c[0]*s, -c[1]*s*fy, -c[2]*s*fy, 1]);
   lv.sortKey = null;
   if (!lv.alphas) lv.alphas = new Float32Array(32).fill(1);
-  lv.pulseArr = new Float32Array(32); lv.wobbleArr = new Float32Array(32);
+  lv.pulseArr = new Float32Array(32); lv.wobbleArr = new Float32Array(32); if (!lv.shadeArr) lv.shadeArr = new Float32Array(32).fill(1);
   lv.groups.forEach((g, i) => { lv.pulseArr[i] = g.pulse || 0; lv.wobbleArr[i] = (lv.groupWobble && lv.groupWobble[i]) || 0; });
   lv.ready = true;
 }
 function buildLevel(lv){
   if (lv.ready) return;
-  const t = performance.now(); const C = new Cloud(1<<17); lv.build(C); lv.buildMs = performance.now()-t;
+  const t = performance.now(); const C = new Cloud(1<<17);
+  const P = lv.id === 'body' ? bodyParamsFromImagery() : undefined;
+  lv.build(C, P); applyImagery(lv, C); lv.buildMs = performance.now()-t;
   uploadLevel(lv, C);
 }
+function disposeLevel(lv){ if (!lv.gpu) return; gl.deleteTexture(lv.gpu.tex); gl.deleteBuffer(lv.gpu.idx); gl.deleteVertexArray(lv.gpu.vao); lv.gpu = null; lv.ready = false; lv._d = lv._k = lv._o = null; }
+function rebuildLevel(lv){ if (lv.isScan) return; const alphas = lv.alphas; disposeLevel(lv); buildLevel(lv); if (alphas) lv.alphas = alphas; lv.sortKey = null; if (LEVELS[state.cur] === lv) refreshUI(); }
 
 // ---- depth sort (counting sort, nearest first)
 const BUCKETS = 65536, counts = new Uint32Array(BUCKETS);
@@ -1126,14 +1171,14 @@ function drawLevel(lv, alphaMul, cam, proj, focal){
   gl.uniformMatrix4fv(U.uView, false, M); gl.uniformMatrix4fv(U.uProj, false, proj);
   gl.uniform2f(U.uFocal, focal[0], focal[1]); gl.uniform2f(U.uViewport, W, H);
   gl.uniform1f(U.uSplatScale, state.splatScale); gl.uniform1f(U.uAlpha, alphaMul * state.alpha);
-  gl.uniform1fv(U.uGroupAlpha, lv.alphas); gl.uniform1fv(U.uGroupPulse, lv.pulseArr); gl.uniform1fv(U.uGroupWobble, state.live ? lv.wobbleArr : ZERO32);
+  gl.uniform1fv(U.uGroupAlpha, lv.alphas); gl.uniform1fv(U.uGroupPulse, lv.pulseArr); gl.uniform1fv(U.uGroupWobble, state.live ? lv.wobbleArr : ZERO32); gl.uniform1fv(U.uGroupShade, lv.shadeArr || ONE32);
   const pc = lv.pulseCenter || [0,0,0]; gl.uniform3f(U.uCenter, pc[0], pc[1], pc[2]);
   const ph = (state.time * 1.15) % 1; const pulse = state.live ? -Math.exp(-Math.pow((ph-0.22)/0.11, 2)) : 0;
   gl.uniform1f(U.uPulse, pulse); gl.uniform1f(U.uTime, state.time); gl.uniform1f(U.uShade, lv.isScan ? 0 : state.shade);
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, lv.gpu.tex);
   gl.bindVertexArray(lv.gpu.vao); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, lv.count); gl.bindVertexArray(null);
 }
-const ZERO32 = new Float32Array(32);
+const ZERO32 = new Float32Array(32), ONE32 = new Float32Array(32).fill(1);
 
 let lastT = performance.now(), fpsEma = 60, frames = 0;
 function frame(now){
@@ -1244,7 +1289,10 @@ function refreshUI(pendingIdx){
   $('btnDown').textContent = lv.diveLabel ? 'Dive ' + lv.diveLabel + ' ↓' : 'Dive deeper ↓';
   $('stSplats').textContent = (lv.count||0).toLocaleString(); updateScaleBar();
   $('cNote').textContent = lv.isScan ? 'Your capture, rendered as loaded. Photoreal detail comes from the scan itself.' : (idx === LEVELS.length-1 ? 'End of the ladder. Scroll out to surface.' : 'Procedural anatomy under studio lighting: shapes and colors are illustrative. Photoreal detail comes only from a real capture, see Load scan.');
+  const ci = $('cImgs'); ci.innerHTML = ''; if (lv.imageryUsed && lv.imageryUsed.length){ const lb = document.createElement('span'); lb.className = 'lb'; lb.textContent = 'rendered from'; ci.appendChild(lb); for (const k of lv.imageryUsed) if (IMG[k]){ const im = document.createElement('img'); im.src = IMG[k].url; im.alt = k; ci.appendChild(im); } }
+  if (lv.fitNote) $('cNote').textContent = lv.fitNote;
   buildLayers(lv);
+  renderSlots();
 }
 function buildLayers(lv){
   const pr = $('presets'); pr.innerHTML = '';
@@ -1348,9 +1396,248 @@ $('file').addEventListener('change', (e) => { if (e.target.files[0]) loadScanFil
 const fb = $('filebox');
 ['dragenter','dragover'].forEach(ev => document.addEventListener(ev, (e) => { e.preventDefault(); fb.classList.add('over'); }));
 ['dragleave','drop'].forEach(ev => document.addEventListener(ev, (e) => { e.preventDefault(); fb.classList.remove('over'); }));
-document.addEventListener('drop', (e) => { const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f && /\.(splat|ply)$/i.test(f.name)){ document.querySelector('.drawer .tabs button[data-pane=scan]').click(); if (!state.drawer) toggleDrawer(); loadScanFile(f); } });
+document.addEventListener('drop', (e) => { const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f && /^image\//.test(f.type)){ const lv = LEVELS[state.cur]; const sl = lv.slots ? (lv.slots.find(s => !IMG[s.key]) || lv.slots[0]) : null; if (!sl){ setHint('This level has no imagery slot; drop it on a slot in the Imagery tab.'); return; } document.querySelector('.drawer .tabs button[data-pane=imagery]').click(); if (!state.drawer) toggleDrawer(); fileToSlot(f, sl.key); return; } if (f && /\.(splat|ply)$/i.test(f.name)){ document.querySelector('.drawer .tabs button[data-pane=scan]').click(); if (!state.drawer) toggleDrawer(); loadScanFile(f); } });
+$('iHeight').addEventListener('change', () => { if (IMG.body_front && LEVELS.some(l => l.id === 'body' && l.ready)) rebuildLevel(LEVELS.find(l => l.id === 'body')); });
 $('sFlip').addEventListener('change', () => { const lv = LEVELS.find(L => L.isScan); if (lv){ lv.flipY = $('sFlip').checked; const s = 1/lv.radius, c = lv.center, fy = lv.flipY ? -1 : 1; lv.model = new Float32Array([s,0,0,0, 0,s*fy,0,0, 0,0,s*fy,0, -c[0]*s, -c[1]*s*fy, -c[2]*s*fy, 1]); lv.sortKey = null; } });
 $('sHeight').addEventListener('change', () => { const lv = LEVELS.find(L => L.isScan); if (lv){ const h = Math.max(0.05, +$('sHeight').value || 1.75); lv.metersPerUnit = lv.metersPerUnit * h / (parseFloat(lv.scale) || h); lv.scale = formatLen(h); refreshUI(); } });
+
+
+// =====================================================================
+//  Imagery: photos and micrographs that shape and color the levels
+// =====================================================================
+/*EMBEDDED_IMAGERY_START*/
+const EMBEDDED_IMAGERY = {};
+/*EMBEDDED_IMAGERY_END*/
+const IMG = {};                       // slot key -> decoded image {w,h,data,mask,segs,top,bottom,url}
+const IMG_MAX = 1024, IMG_STORE = 'cd.imagery.v1';
+function slotDefs(){ const out = []; for (const lv of LEVELS) if (lv.slots) for (const sl of lv.slots) out.push(Object.assign({ level: lv }, sl)); return out; }
+function decodeImage(url){
+  return new Promise((res, rej) => { const img = new Image(); img.onload = () => {
+    const sc = Math.min(1, IMG_MAX/Math.max(img.width, img.height)); const w = Math.max(2, Math.round(img.width*sc)), h = Math.max(2, Math.round(img.height*sc));
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const ctx = cv.getContext('2d', { willReadFrequently:true }); ctx.drawImage(img, 0, 0, w, h);
+    const im = { w, h, data: ctx.getImageData(0, 0, w, h).data, url }; analyzeSilhouette(im); res(im); };
+    img.onerror = () => rej(new Error('That file is not an image the browser can decode.')); img.src = url; });
+}
+function analyzeSilhouette(im){
+  const { w, h, data } = im; let hasAlpha = false; for (let i = 3; i < data.length; i += 4*97) if (data[i] < 250){ hasAlpha = true; break; }
+  let br = 0, bg = 0, bb = 0, bn = 0; const border = (i) => { br += data[i]; bg += data[i+1]; bb += data[i+2]; bn++; };
+  for (let x = 0; x < w; x++){ border(x*4); border(((h-1)*w + x)*4); } for (let y = 0; y < h; y++){ border((y*w)*4); border((y*w + w-1)*4); }
+  br /= bn; bg /= bn; bb /= bn;
+  let r2 = 0, g2 = 0, b2 = 0, n2 = 0; const border2 = (i) => { const d = Math.abs(data[i]-br) + Math.abs(data[i+1]-bg) + Math.abs(data[i+2]-bb); if (d < 60){ r2 += data[i]; g2 += data[i+1]; b2 += data[i+2]; n2++; } };
+  for (let x = 0; x < w; x++){ border2(x*4); border2(((h-1)*w + x)*4); } for (let y = 0; y < h; y++){ border2((y*w)*4); border2((y*w + w-1)*4); }
+  if (n2 > 0){ br = r2/n2; bg = g2/n2; bb = b2/n2; }
+  const mask = new Uint8Array(w*h), thr = 42;
+  for (let i = 0, j = 0; i < w*h; i++, j += 4){ mask[i] = hasAlpha ? (data[j+3] >= 128 ? 1 : 0) : ((Math.abs(data[j]-br) + Math.abs(data[j+1]-bg) + Math.abs(data[j+2]-bb)) > thr ? 1 : 0); }
+  const minRun = Math.max(2, Math.round(w*0.012)), maxGap = Math.max(1, Math.round(w*0.008)), segs = new Array(h);
+  for (let y = 0; y < h; y++){
+    const runs = []; let x = 0; while (x < w){ if (mask[y*w + x]){ let x0 = x; while (x < w && mask[y*w + x]) x++; runs.push([x0, x]); } else x++; }
+    const merged = []; for (const r of runs){ if (merged.length && r[0] - merged[merged.length-1][1] <= maxGap) merged[merged.length-1][1] = r[1]; else merged.push(r.slice()); }
+    segs[y] = merged.filter(r => r[1]-r[0] >= minRun);
+  }
+  let top = -1, bottom = -1; for (let y = 0; y < h-2; y++) if (segs[y].length && segs[y+1].length && segs[y+2].length){ top = y; break; } for (let y = h-1; y >= 2; y--) if (segs[y].length && segs[y-1].length && segs[y-2].length){ bottom = y; break; }
+  im.mask = mask; im.segs = segs; im.top = top; im.bottom = bottom; im.hasAlpha = hasAlpha;
+  let minx = w, maxx = 0; for (let y = Math.max(0, top); y <= bottom; y++) for (const r of segs[y]){ minx = Math.min(minx, r[0]); maxx = Math.max(maxx, r[1]); }
+  im.minx = minx; im.maxx = maxx; im.valid = top >= 0 && bottom - top > h*0.2;
+}
+function sampleImg(im, u, v){
+  const x = Math.max(0, Math.min(im.w-1.001, u)), y = Math.max(0, Math.min(im.h-1.001, v)); const x0 = x|0, y0 = y|0, fx = x-x0, fy = y-y0, d = im.data;
+  const i00 = (y0*im.w + x0)*4, i10 = i00 + 4, i01 = i00 + im.w*4, i11 = i01 + 4, out = [0,0,0];
+  for (let k = 0; k < 3; k++) out[k] = ((d[i00+k]*(1-fx) + d[i10+k]*fx)*(1-fy) + (d[i01+k]*(1-fx) + d[i11+k]*fx)*fy)/255;
+  return out;
+}
+function sampleFg(im, u, v){ // like sampleImg but snaps to the nearest foreground pixel on the row
+  const y = Math.max(0, Math.min(im.h-1, Math.round(v))), x = Math.max(0, Math.min(im.w-1, Math.round(u)));
+  if (im.mask[y*im.w + x]) return sampleImg(im, u, v);
+  for (let d = 1; d < 48; d++){ if (x-d >= 0 && im.mask[y*im.w + x-d]) return sampleImg(im, x-d-1, v); if (x+d < im.w && im.mask[y*im.w + x+d]) return sampleImg(im, x+d+1, v); }
+  return sampleImg(im, u, v);
+}
+function extent(im, y){ const s = im.segs[y]; return s.length ? [s[0][0], s[s.length-1][1]] : null; }
+// ---- body proportions from a front (and optional side) silhouette
+function fitBody(front, side, H){
+  const P = defaultBodyParams(); P.H = H; P.textured = true;
+  if (!front || !front.valid) return P;
+  const top = front.top, rowsN = front.bottom - front.top, pxPerM = rowsN/H; P.pxPerM = pxPerM; P.top = top;
+  const rowAt = (f) => Math.round(top + f*rowsN), fOf = (row) => (row-top)/rowsN, yOf = (row) => H*(1 - fOf(row)), mm = (px) => px/pxPerM;
+  let cxs = 0, cxn = 0; for (let f = 0.2; f < 0.5; f += 0.01){ const e = extent(front, rowAt(f)); if (e){ cxs += (e[0]+e[1])/2; cxn++; } }
+  const cx0 = cxn ? cxs/cxn : (front.minx+front.maxx)/2; P.cx0 = cx0;
+  const widthAt = (f) => { const e = extent(front, rowAt(f)); return e ? e[1]-e[0] : 0; };
+  const maxIn = (f0, f1) => { let best = 0, bf = f0; for (let f = f0; f <= f1; f += 0.004){ const wd = widthAt(f); if (wd > best){ best = wd; bf = f; } } return { w:best, f:bf }; };
+  const minIn = (f0, f1) => { let best = 1e9, bf = f0; for (let f = f0; f <= f1; f += 0.004){ const wd = widthAt(f); if (wd > 0 && wd < best){ best = wd; bf = f; } } return { w:best, f:bf }; };
+  const ok = (v, lo, hi) => Number.isFinite(v) && v >= lo && v <= hi;
+  const scale = H/1.75;
+  // depth helper from the side view (width of the side silhouette at the same height fraction)
+  let depthAt = null;
+  if (side && side.valid){ const sRows = side.bottom - side.top; depthAt = (f) => { const e = extent(side, Math.round(side.top + f*sRows)); return e ? (e[1]-e[0])/(sRows/H) : null; }; }
+  // head & neck
+  const head = maxIn(0.0, 0.12), neck = minIn(head.f + 0.03, 0.22);
+  const headRx = mm(head.w)/2, neckY = yOf(rowAt(neck.f)), headH = H - neckY + 0.02, headRy = headH/2;
+  if (ok(headRx, 0.05, 0.16) && ok(headRy, 0.06, 0.18)){
+    const dh = depthAt ? depthAt(head.f) : null; const headRz = dh && ok(dh/2, 0.06, 0.16) ? dh/2 : headRx*1.13;
+    P.head = { c:[0, H - headRy, 0], r:[headRx, headRy, headRz] };
+    P.jaw = { c:[0, H - headRy - headRy*0.62, headRz*0.2], r:[headRx*0.75, headRy*0.46, headRz*0.72] };
+    const nr = mm(neck.w)/2; const nR = ok(nr, 0.03, 0.09) ? nr : 0.056*scale;
+    P.neck = { a:[0, neckY - 0.045*scale, -0.012], b:[0, neckY + 0.02, -0.012], r:[nR, nR*0.9] };
+  }
+  // shoulders
+  let sh = { w:0, f:neck.f + 0.03 }; for (let f = neck.f + 0.01; f <= neck.f + 0.13; f += 0.004){ const sg = front.segs[rowAt(f)]; if (sg && sg.length === 1){ const wd = sg[0][1]-sg[0][0]; if (wd > sh.w) sh = { w:wd, f }; } }
+  let shoulderHalf = mm(sh.w)/2; const shoulderY = yOf(rowAt(sh.f));
+  // torso / arms samples
+  const torso = [], arms = [];
+  for (let f = neck.f + 0.02; f < 0.66; f += 0.005){
+    const row = rowAt(f), sg = front.segs[row]; if (!sg || !sg.length) continue; const y = yOf(row);
+    const inner = sg.length >= 3 ? sg.slice(1, -1) : sg;
+    if (inner.length === 2) break;   // legs: the torso has ended
+    if (sg.length >= 3){ const mid = inner[0];
+      torso.push({ y, rx: mm(mid[1]-mid[0])/2, cx: mm((mid[0]+mid[1])/2 - cx0) });
+      for (const r of [sg[0], sg[sg.length-1]]){ const c = mm((r[0]+r[1])/2 - cx0); arms.push({ y, x: Math.abs(c), r: mm(r[1]-r[0])/2 }); }
+    } else if (sg.length === 1 && f < 0.5){ const wd = mm(sg[0][1]-sg[0][0]); torso.push({ y, rx: wd*0.36, cx: mm((sg[0][0]+sg[0][1])/2 - cx0), armsIn:true }); }
+  }
+  const nearest = (arr, y, key) => { let best = null, bd = 1e9; for (const s of arr){ const d = Math.abs(s.y - y); if (d < bd){ bd = d; best = s; } } return best && bd < 0.12 ? best[key] : null; };
+  // crotch
+  let crotchY = 0.80*scale; for (let f = 0.36; f < 0.72; f += 0.004){ const row = rowAt(f), sg = front.segs[row]; if (!sg) continue; const inner = sg.length >= 3 ? sg.slice(1, -1) : sg; if (inner.length === 2 && (inner[0][1]-inner[0][0]) > front.w*0.03 && (inner[1][1]-inner[1][0]) > front.w*0.03 && (inner[1][0]-inner[0][1]) < 0.16*pxPerM){ crotchY = yOf(row); break; } }
+  if (!ok(shoulderHalf, 0.1, 0.35) && torso.length && arms.length){ const t0 = torso.slice().sort((a,b)=>b.y-a.y)[0], a0 = arms.slice().sort((a,b)=>b.y-a.y)[0]; shoulderHalf = t0.rx + 2*a0.r; }
+  if (torso.length > 8 && ok(shoulderHalf, 0.1, 0.35)){
+    const rzRatio = (rx, f, def) => { const d = depthAt ? depthAt(f) : null; return d && ok(d/2, 0.05, 0.25) ? d/2 : rx*def; };
+    const fr = (y) => 1 - y/H;
+    const secs = [];
+    const hipRx = nearest(torso, crotchY + 0.08*scale, 'rx') || 0.18*scale, waistRx = nearest(torso, crotchY + 0.28*scale, 'rx') || 0.152*scale, chestRx = nearest(torso, shoulderY - 0.12*scale, 'rx') || 0.19*scale, ribRx = nearest(torso, shoulderY - 0.22*scale, 'rx') || 0.168*scale;
+    secs.push({ y: crotchY - 0.02*scale, rx: hipRx*0.75, rz: rzRatio(hipRx, fr(crotchY), 0.74)*0.85 });
+    secs.push({ y: crotchY + 0.05*scale, rx: hipRx*0.95, rz: rzRatio(hipRx, fr(crotchY + 0.05*scale), 0.7) });
+    secs.push({ y: crotchY + 0.15*scale, rx: hipRx, rz: rzRatio(hipRx, fr(crotchY + 0.15*scale), 0.69) });
+    secs.push({ y: crotchY + 0.28*scale, rx: waistRx, rz: rzRatio(waistRx, fr(crotchY + 0.28*scale), 0.71) });
+    secs.push({ y: shoulderY - 0.22*scale, rx: ribRx, rz: rzRatio(ribRx, fr(shoulderY - 0.22*scale), 0.71) });
+    secs.push({ y: shoulderY - 0.1*scale, rx: chestRx, rz: rzRatio(chestRx, fr(shoulderY - 0.1*scale), 0.66) });
+    secs.push({ y: shoulderY - 0.01, rx: shoulderHalf*0.98, rz: rzRatio(shoulderHalf, fr(shoulderY), 0.51) });
+    secs.push({ y: Math.max(shoulderY + 0.03, P.neck.b[1] - 0.01), rx: P.neck.r[0]*1.3, rz: P.neck.r[0]*1.1, cz:-0.01 });
+    secs.sort((a, b) => a.y - b.y);
+    let good = true; for (let i = 0; i < secs.length; i++){ if (!ok(secs[i].rx, 0.03, 0.4) || !ok(secs[i].rz, 0.02, 0.35)) good = false; if (i && secs[i].y <= secs[i-1].y + 0.005) good = false; }
+    if (good){ P.torso = secs; P.scaleX = chestRx/0.19; P.scaleZ = secs[5].rz/0.125; P.fitted = true; }
+  }
+  // arms
+  if (arms.length > 10 && P.fitted){
+    arms.sort((a, b) => b.y - a.y); const y0 = arms[0].y, y2 = arms[arms.length-1].y, y1 = (y0+y2)/2;
+    const band = (yc) => { const sel = arms.filter(a => Math.abs(a.y - yc) < 0.06*scale); if (sel.length < 2) return null; sel.sort((a,b)=>a.x-b.x); return { x: sel[Math.floor(sel.length/2)].x, r: sel.map(a=>a.r).sort((a,b)=>a-b)[Math.floor(sel.length/2)] }; };
+    const a0 = band(y0 - 0.03*scale), a1 = band(y1), a2 = band(y2 + 0.03*scale);
+    if (a0 && a1 && a2 && ok(a0.r, 0.02, 0.1) && ok(a2.r, 0.015, 0.08)){
+      P.arm = { pts:[[Math.max(shoulderHalf - a0.r*1.05, a0.x), shoulderY - 0.01, 0],[a1.x, y1, -0.02*scale],[a2.x, y2 + 0.02*scale, 0.03*scale]], r:[a0.r, a1.r, a2.r] };
+      P.hand = { c:[a2.x + 0.008, y2 - 0.085*scale, 0.045*scale], r:[Math.max(0.035, a2.r*1.3), 0.075*scale, 0.02*scale] };
+    }
+  } else if (P.fitted){ const k = shoulderHalf/0.205; P.arm = { pts: P.arm.pts.map(p => [p[0]*k, p[1]*scale, p[2]*scale]), r: P.arm.r.map(r => r*scale) }; P.hand = { c:[P.hand.c[0]*k, P.hand.c[1]*scale, P.hand.c[2]*scale], r: P.hand.r.map(r => r*scale) }; }
+  // legs
+  const legs = [];
+  for (let f = fr(crotchY) + 0.02; f < 0.96; f += 0.005){ const row = rowAt(f), sg0 = front.segs[row]; if (!sg0) continue; const sg = sg0.length >= 3 ? sg0.slice(1, -1) : sg0; if (sg.length !== 2) continue; const y = yOf(row); for (const r of sg) legs.push({ y, x: Math.abs(mm((r[0]+r[1])/2 - cx0)), r: mm(r[1]-r[0])/2 }); }
+  function fr(y){ return 1 - y/H; }
+  if (legs.length > 10 && P.fitted){
+    const band = (yc) => { const sel = legs.filter(a => Math.abs(a.y - yc) < 0.05*scale); if (sel.length < 2) return null; sel.sort((a,b)=>a.x-b.x); return { x: sel[Math.floor(sel.length/2)].x, r: sel.map(a=>a.r).sort((a,b)=>a-b)[Math.floor(sel.length/2)] }; };
+    const ankleY = 0.09*scale, kneeY = crotchY*0.55 + ankleY*0.45;
+    const l0 = band(crotchY - 0.03*scale), l1 = band(kneeY), l2 = band(ankleY + 0.03*scale);
+    if (l0 && l1 && l2 && ok(l0.r, 0.04, 0.16) && ok(l2.r, 0.02, 0.09)){
+      P.leg = { pts:[[l0.x, crotchY + 0.06*scale, 0],[l1.x, kneeY, 0.005],[l2.x, ankleY, -0.01]], r:[l0.r*1.05, l1.r, l2.r] };
+      P.foot = { c:[l2.x, 0.035*scale, 0.075*scale], r:[Math.max(0.04, l2.r*1.15), 0.033*scale, 0.13*scale] };
+    }
+  } else if (P.fitted){ P.leg = { pts: P.leg.pts.map(p => [p[0]*P.scaleX, p[1]*scale, p[2]*scale]), r: P.leg.r.map(r => r*scale) }; P.foot = { c:[P.foot.c[0]*P.scaleX, P.foot.c[1]*scale, P.foot.c[2]*scale], r: P.foot.r.map(r => r*scale) }; }
+  if (!P.fitted){ // nothing usable: scale the default body to the height only, still texture it
+    const k = scale; const sc3 = (p) => [p[0]*k, p[1]*k, p[2]*k];
+    P.head = { c: sc3(P.head.c), r: sc3(P.head.r) }; P.jaw = { c: sc3(P.jaw.c), r: sc3(P.jaw.r) }; P.neck = { a: sc3(P.neck.a), b: sc3(P.neck.b), r: P.neck.r.map(r => r*k) };
+    P.torso = P.torso.map(t => ({ y:t.y*k, rx:t.rx*k, rz:t.rz*k, cz:(t.cz||0)*k })); P.arm = { pts: P.arm.pts.map(sc3), r: P.arm.r.map(r => r*k) }; P.hand = { c: sc3(P.hand.c), r: sc3(P.hand.r) }; P.leg = { pts: P.leg.pts.map(sc3), r: P.leg.r.map(r => r*k) }; P.foot = { c: sc3(P.foot.c), r: sc3(P.foot.r) };
+    P.scaleX = k; P.scaleZ = k; P.fitted = true; P.roughFit = true;
+  }
+  return P;
+}
+function bodyParamsFromImagery(){
+  const front = IMG.body_front; if (!front) return undefined;
+  const H = Math.max(0.5, Math.min(2.5, +($('iHeight') && $('iHeight').value) || 1.75));
+  return fitBody(front, IMG.body_side, H);
+}
+function splatNormal(C, i){ const x = C.rot[i*4], y = C.rot[i*4+1], z = C.rot[i*4+2], w = C.rot[i*4+3]; return [2*(x*z + w*y), 2*(y*z - w*x), 1 - 2*(x*x + y*y)]; }
+function cloudBBox(C, from, to){ let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (let i = from; i < to; i++){ const x = C.pos[i*3], y = C.pos[i*3+1]; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; } return { x0, x1, y0, y1 }; }
+function paint(C, i, c){ C.col[i*4] = Math.max(0, Math.min(255, c[0]*255+0.5))|0; C.col[i*4+1] = Math.max(0, Math.min(255, c[1]*255+0.5))|0; C.col[i*4+2] = Math.max(0, Math.min(255, c[2]*255+0.5))|0; }
+function applyImagery(lv, C){
+  lv.shadeArr = new Float32Array(32).fill(1); lv.imageryUsed = [];
+  if (!lv.slots) return;
+  const P = lv.id === 'body' ? bodyParamsFromImagery() : null;
+  if (lv.id === 'body' && P && IMG.body_front){
+    const F = IMG.body_front, B = IMG.body_back, n = C.skinCount || C.n;
+    const pxF = P.pxPerM || ((F.bottom-F.top)/P.H), cxF = P.cx0 != null ? P.cx0 : (F.minx+F.maxx)/2, topF = F.top;
+    let pxB = pxF, cxB = cxF, topB = topF; if (B && B.valid){ pxB = (B.bottom-B.top)/P.H; cxB = (B.minx+B.maxx)/2; topB = B.top; }
+    for (let i = 0; i < n; i++){
+      const x = C.pos[i*3], y = C.pos[i*3+1]; const nz = splatNormal(C, i)[2];
+      const w = Math.max(0, Math.min(1, nz*1.6 + 0.5));
+      const cf = sampleFg(F, cxF + x*pxF, topF + (P.H - y)*pxF);
+      let cb; if (B && B.valid) cb = sampleFg(B, cxB - x*pxB, topB + (P.H - y)*pxB); else { cb = sampleFg(F, cxF - x*pxF, topF + (P.H - y)*pxF); cb = [cb[0]*0.78, cb[1]*0.76, cb[2]*0.76]; }
+      paint(C, i, [cb[0] + (cf[0]-cb[0])*w, cb[1] + (cf[1]-cb[1])*w, cb[2] + (cf[2]-cb[2])*w]);
+    }
+    lv.shadeArr[0] = 0.32; lv.imageryUsed.push('body_front'); if (B) lv.imageryUsed.push('body_back'); if (IMG.body_side) lv.imageryUsed.push('body_side');
+    lv.fitNote = P.roughFit ? 'Silhouette could not be read (use a plain background); body scaled to height only.' : 'Body proportions fitted to the silhouette.';
+    return;
+  }
+  for (const sl of lv.slots){
+    const im = IMG[sl.key]; if (!im) continue;
+    const bb = cloudBBox(C, 0, C.n), gw = bb.x1-bb.x0, gh = bb.y1-bb.y0;
+    if (sl.kind === 'project'){
+      const fx0 = im.valid ? im.minx : 0, fx1 = im.valid ? im.maxx : im.w, fy0 = im.valid ? im.top : 0, fy1 = im.valid ? im.bottom : im.h;
+      for (let i = 0; i < C.n; i++){
+        const x = C.pos[i*3], y = C.pos[i*3+1], nz = splatNormal(C, i)[2], w = Math.max(0, Math.min(1, nz*1.6 + 0.5));
+        const u = fx0 + (x-bb.x0)/gw*(fx1-fx0), v = fy0 + (bb.y1-y)/gh*(fy1-fy0);
+        const cf = sampleFg(im, u, v), cb = sampleFg(im, fx1 - (u-fx0), v);
+        paint(C, i, [cb[0]*0.7 + (cf[0]-cb[0]*0.7)*w, cb[1]*0.7 + (cf[1]-cb[1]*0.7)*w, cb[2]*0.7 + (cf[2]-cb[2]*0.7)*w]);
+      }
+      lv.shadeArr.fill(0.4);
+    } else if (sl.kind === 'planar'){
+      const sc = Math.max(im.w/gw, im.h/gh), cx = (bb.x0+bb.x1)/2, cy = (bb.y0+bb.y1)/2;
+      for (let i = 0; i < C.n; i++){ const x = C.pos[i*3], y = C.pos[i*3+1]; const c = sampleImg(im, im.w/2 + (x-cx)*sc, im.h/2 - (y-cy)*sc); const z = C.pos[i*3+2]; const k = 0.9 + 0.2*vnoise(x*0.7, y*0.7, z*0.7); paint(C, i, [c[0]*k, c[1]*k, c[2]*k]); }
+      lv.shadeArr.fill(0.55);
+    }
+    lv.imageryUsed.push(sl.key);
+  }
+}
+// ---- storage and UI
+function downscaleDataURL(url, max, q){ return new Promise((res) => { const img = new Image(); img.onload = () => { const sc = Math.min(1, max/Math.max(img.width, img.height)); const cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(img.width*sc)); cv.height = Math.max(1, Math.round(img.height*sc)); cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); res(cv.toDataURL('image/jpeg', q)); }; img.onerror = () => res(url); img.src = url; }); }
+function saveImageryStore(){ try { const o = {}; for (const k of Object.keys(IMG)) if (IMG[k].stored) o[k] = IMG[k].stored; localStorage.setItem(IMG_STORE, JSON.stringify(o)); } catch (e){ setHint('Browser storage is full: this image will not survive a reload. Commit it to the repo instead.'); } }
+async function setSlot(key, url, opts){
+  opts = opts || {};
+  const im = await decodeImage(url); im.stored = opts.persist === false ? null : await downscaleDataURL(url, 900, 0.86); IMG[key] = im;
+  if (opts.persist !== false) saveImageryStore();
+  for (const lv of LEVELS) if (lv.slots && lv.slots.some(s => s.key === key) && lv.ready) rebuildLevel(lv);
+  renderSlots();
+}
+function clearSlot(key){ delete IMG[key]; saveImageryStore(); for (const lv of LEVELS) if (lv.slots && lv.slots.some(s => s.key === key) && lv.ready) rebuildLevel(lv); renderSlots(); }
+async function loadImageryStore(){
+  let stored = {}; try { stored = JSON.parse(localStorage.getItem(IMG_STORE) || '{}') || {}; } catch (e){}
+  for (const [k, url] of Object.entries(EMBEDDED_IMAGERY)) if (!stored[k]) { try { IMG[k] = await decodeImage(url); IMG[k].embedded = true; } catch (e){ console.warn('embedded imagery', k, e); } }
+  for (const [k, url] of Object.entries(stored)) { try { IMG[k] = await decodeImage(url); IMG[k].stored = url; } catch (e){} }
+}
+function renderSlots(){
+  const box = $('slots'); if (!box) return; box.innerHTML = '';
+  for (const lv of LEVELS){ if (!lv.slots) continue;
+    const h = document.createElement('div'); h.className = 'slotlv' + (LEVELS[state.cur] === lv ? ' cur' : ''); h.textContent = lv.name; box.appendChild(h);
+    for (const sl of lv.slots){
+      const im = IMG[sl.key], row = document.createElement('div'); row.className = 'slot';
+      const th = document.createElement('div'); th.className = 'th'; th.title = 'Drop an image here or click to choose'; th.tabIndex = 0;
+      if (im) { const img = document.createElement('img'); img.src = im.url; img.alt = sl.label; th.appendChild(img); } else th.textContent = 'drop';
+      const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.style.display = 'none';
+      inp.addEventListener('change', () => { const f = inp.files[0]; if (f) fileToSlot(f, sl.key); inp.value = ''; });
+      th.addEventListener('click', () => inp.click()); th.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inp.click(); } });
+      th.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); th.classList.add('over'); }); th.addEventListener('dragleave', () => th.classList.remove('over'));
+      th.addEventListener('drop', (e) => { e.preventDefault(); e.stopPropagation(); th.classList.remove('over'); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if (f) fileToSlot(f, sl.key); });
+      const body = document.createElement('div');
+      const st = im ? (im.embedded ? 'baked into the page' : 'saved in this browser') + ' · ' + im.w + '×' + im.h + (sl.kind === 'project' && sl.key === 'body_front' ? (im.valid ? ' · silhouette read' : ' · no silhouette found (use a plain background)') : '') : 'empty · rendering procedurally';
+      body.innerHTML = '<div class="lb">' + sl.label + '</div><div class="st' + (im ? ' ok' : '') + '">' + st + '</div>';
+      const act = document.createElement('div'); act.className = 'act';
+      const b1 = document.createElement('button'); b1.textContent = im ? 'Replace' : 'Choose image'; b1.addEventListener('click', () => inp.click());
+      act.appendChild(b1);
+      if (im){ const b2 = document.createElement('button'); b2.textContent = 'Clear'; b2.addEventListener('click', () => clearSlot(sl.key)); act.appendChild(b2); }
+      const b3 = document.createElement('button'); b3.textContent = 'Copy prompt'; b3.addEventListener('click', async () => { try { await navigator.clipboard.writeText(sl.prompt); b3.textContent = 'Copied'; setTimeout(() => b3.textContent = 'Copy prompt', 1200); } catch (e){ b3.textContent = 'Select below'; } });
+      act.appendChild(b3); body.appendChild(act);
+      const det = document.createElement('details'); det.innerHTML = '<summary>Generation prompt</summary><div class="pr">' + sl.prompt + '</div><div class="st">Repo file: <code>viewer/imagery/' + sl.key + '.jpg</code></div>'; body.appendChild(det);
+      row.append(th, inp, body); box.appendChild(row);
+    }
+  }
+}
+function fileToSlot(file, key){
+  if (!/^image\//.test(file.type)){ setHint('That is not an image file.'); return; }
+  const rd = new FileReader(); rd.onload = () => { setHint('Reading ' + file.name + '…', true); setSlot(key, rd.result).then(() => setHint('Rendered from ' + file.name)).catch(err => setHint('Could not use ' + file.name + ': ' + err.message)); }; rd.readAsDataURL(file);
+}
 
 // =====================================================================
 //  Boot: build the body first, the deeper levels in the background
@@ -1359,7 +1646,7 @@ $('sHeight').addEventListener('change', () => { const lv = LEVELS.find(L => L.is
   const prog = $('progBar'), st = $('progSt');
   const steps = ['Sampling skin…','Laying down bone…','Threading vessels and nerves…','Placing organs…'];
   let si = 0; const tick = setInterval(() => { st.textContent = steps[Math.min(steps.length-1, ++si)]; prog.style.width = Math.min(90, 25*si) + '%'; }, 120);
-  setTimeout(() => {
+  loadImageryStore().catch(()=>{}).then(() => {
     try { buildLevel(LEVELS[0]); } catch (err){ clearInterval(tick); $('loading').innerHTML = '<h1>Corpus <em>Descent</em></h1><p class="fatal">The body could not be generated: <code>' + String(err.message) + '</code></p>'; console.error(err); return; }
     clearInterval(tick); prog.style.width = '100%';
     resize(); refreshUI(); requestAnimationFrame(frame);
@@ -1368,6 +1655,7 @@ $('sHeight').addEventListener('change', () => { const lv = LEVELS.find(L => L.is
     let i = 1;
     const next = () => { if (i >= LEVELS.length) { setHint('All ' + LEVELS.length + ' levels ready · <b>scroll in</b> to dive'); return; } const lv = LEVELS[i++]; if (!lv.ready){ try { buildLevel(lv); } catch (err){ console.error('level ' + lv.id, err); lv.ready = false; } } setTimeout(next, 30); };
     setTimeout(next, 400);
-  }, 60);
+    renderSlots();
+  });
 })();
 </script>
