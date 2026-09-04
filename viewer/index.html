@@ -1,0 +1,1328 @@
+<title>Corpus Descent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0D13; --ink2:#141A25; --panel:rgba(17,22,32,.86); --line:#26303F; --line2:#37435A;
+  --text:#E6E1D6; --muted:#8A93A3; --dim:#5B6577;
+  --eosin:#E27A93; --eosin2:#F3A9BB; --hema:#7B86E0; --hema2:#AEB5F0;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --serif:"Instrument Serif","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--ink);color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.45;overflow:hidden;-webkit-font-smoothing:antialiased}
+#app{position:fixed;inset:0;background:radial-gradient(120% 90% at 50% 40%,#151B27 0%,#0B0E15 55%,#06080C 100%)}
+canvas#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+canvas#gl.dragging{cursor:grabbing}
+button,input,select{font:inherit;color:inherit}
+button{background:none;border:1px solid var(--line2);border-radius:4px;padding:5px 10px;cursor:pointer;color:var(--text);transition:border-color .15s,background .15s}
+button:hover{border-color:var(--hema2);background:rgba(123,134,224,.08)}
+button:focus-visible,input:focus-visible,label:focus-visible{outline:2px solid var(--hema2);outline-offset:2px}
+button.primary{border-color:var(--eosin);color:var(--eosin2)}
+button.primary:hover{background:rgba(226,122,147,.12)}
+button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* top bar */
+.top{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;pointer-events:none;z-index:5}
+.top>*{pointer-events:auto}
+.brand{display:flex;align-items:baseline;gap:12px}
+.brand h1{margin:0;font-family:var(--serif);font-weight:400;font-size:26px;letter-spacing:.005em;line-height:1}
+.brand h1 em{color:var(--eosin2);font-style:italic}
+.brand .sub{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.02em}
+.topright{display:flex;align-items:center;gap:10px}
+.stats{font-family:var(--mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;display:flex;gap:14px}
+.stats b{color:var(--text);font-weight:500}
+
+/* ladder */
+.ladder{position:absolute;left:18px;top:40%;transform:translateY(-50%);display:flex;flex-direction:column;gap:0;z-index:4;padding-left:14px;border-left:1px solid var(--line2)}
+.ladder button{all:unset;cursor:pointer;display:grid;grid-template-columns:64px 1fr;align-items:baseline;gap:10px;padding:5px 8px 5px 0;position:relative;color:var(--muted);border-radius:3px}
+.ladder button::before{content:"";position:absolute;left:-18px;top:50%;width:7px;height:1px;background:var(--line2);transform:translateY(-50%)}
+.ladder button .sc{font-family:var(--mono);font-size:11px;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.ladder button .nm{font-size:12.5px;white-space:nowrap}
+.ladder button:hover{color:var(--text)}
+.ladder button:focus-visible{outline:2px solid var(--hema2)}
+.ladder button.cur{color:var(--text)}
+.ladder button.cur .sc{color:var(--eosin2)}
+.ladder button.cur::before{width:14px;left:-18px;background:var(--eosin);height:2px;box-shadow:0 0 8px var(--eosin)}
+.ladder button.cur .nm{font-family:var(--serif);font-style:italic;font-size:16px}
+.ladder button.scan .nm{color:var(--hema2)}
+
+/* level card */
+.card{position:absolute;left:18px;bottom:18px;width:min(380px,calc(100vw - 36px));z-index:4;padding:16px 18px 14px;background:var(--panel);border:1px solid var(--line);border-radius:6px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.card h2{margin:4px 0 2px;font-family:var(--serif);font-weight:400;font-style:italic;font-size:30px;line-height:1.05;text-wrap:balance}
+.card .scale{font-family:var(--mono);font-size:11.5px;color:var(--hema2);margin-bottom:8px;font-variant-numeric:tabular-nums}
+.card p{margin:0 0 12px;color:#C9C4B8;max-width:60ch}
+.card .row{display:flex;gap:8px;align-items:center}
+.card .row .sp{flex:1}
+.card .note{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:10px}
+
+/* drawer */
+.drawer{position:absolute;right:18px;top:64px;bottom:18px;width:min(300px,calc(100vw - 36px));z-index:4;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:6px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);overflow:hidden;transition:transform .25s ease,opacity .25s ease}
+.drawer.hidden{transform:translateX(24px);opacity:0;pointer-events:none}
+.drawer .tabs{display:flex;border-bottom:1px solid var(--line)}
+.drawer .tabs button{all:unset;cursor:pointer;flex:1;text-align:center;padding:10px 0;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid transparent}
+.drawer .tabs button.on{color:var(--text);border-bottom-color:var(--eosin)}
+.drawer .tabs button:focus-visible{outline:2px solid var(--hema2);outline-offset:-2px}
+.pane{display:none;flex:1;overflow-y:auto;padding:12px 14px 16px;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.pane.on{display:block}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.presets button{padding:4px 9px;font-size:12px;border-radius:999px}
+.presets button.on{border-color:var(--eosin);color:var(--eosin2)}
+.layer{display:grid;grid-template-columns:14px 1fr 44px 26px;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(38,48,63,.6)}
+.layer:last-child{border-bottom:0}
+.layer .sw{width:12px;height:12px;border-radius:3px;border:1px solid rgba(255,255,255,.18)}
+.layer .nm{display:flex;flex-direction:column;min-width:0}
+.layer .nm span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.layer .nm small{font-family:var(--mono);font-size:10px;color:var(--dim);font-variant-numeric:tabular-nums}
+.layer.off .nm span{color:var(--dim);text-decoration:line-through;text-decoration-color:var(--line2)}
+.layer input[type=range]{width:100%;margin:0;accent-color:var(--eosin)}
+.layer button{all:unset;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--dim);text-align:center;border:1px solid var(--line);border-radius:3px;padding:2px 0}
+.layer button:hover,.layer button.on{color:var(--eosin2);border-color:var(--eosin)}
+.layer button:focus-visible{outline:2px solid var(--hema2)}
+.ctl{display:grid;grid-template-columns:1fr 110px;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(38,48,63,.6)}
+.ctl:last-child{border-bottom:0}
+.ctl label{color:#C9C4B8}
+.ctl input[type=range]{width:100%;margin:0;accent-color:var(--hema)}
+.ctl input[type=checkbox]{accent-color:var(--eosin);justify-self:end;width:15px;height:15px}
+.ctl select,.ctl input[type=number],.ctl input[type=text]{width:100%;background:var(--ink);border:1px solid var(--line2);border-radius:4px;padding:4px 6px;font-family:var(--mono);font-size:12px}
+.pane h3{margin:14px 0 6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.pane h3:first-child{margin-top:0}
+.pane p.help{margin:6px 0 10px;color:var(--muted);font-size:12px}
+.pane p.help code{font-family:var(--mono);font-size:11px;color:var(--hema2)}
+.filebox{border:1px dashed var(--line2);border-radius:5px;padding:12px;text-align:center;color:var(--muted);cursor:pointer;transition:border-color .15s}
+.filebox:hover,.filebox.over{border-color:var(--hema2);color:var(--text)}
+.filebox input{display:none}
+.filebox b{color:var(--text);font-weight:500}
+.msg{font-family:var(--mono);font-size:11px;margin-top:8px;color:var(--hema2);min-height:1.2em}
+.msg.err{color:var(--eosin2)}
+
+/* scale bar */
+.scalebar{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:3;text-align:center;pointer-events:none;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.scalebar .bar{height:8px;border-left:1px solid var(--text);border-right:1px solid var(--text);border-bottom:1px solid var(--text);margin:0 auto 4px;transition:width .15s}
+.scalebar .lbl{font-size:11.5px;color:var(--text)}
+.scalebar .fov{font-size:10.5px;color:var(--muted)}
+
+/* hint + loading */
+.hint{position:absolute;left:50%;top:64px;transform:translateX(-50%);z-index:3;font-family:var(--mono);font-size:11px;color:var(--muted);background:rgba(10,13,19,.6);padding:6px 12px;border-radius:999px;border:1px solid var(--line);pointer-events:none;transition:opacity .6s;white-space:nowrap}
+.hint.gone{opacity:0}
+.hint b{color:var(--text);font-weight:500}
+.toast{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;font-family:var(--serif);font-style:italic;font-size:34px;color:var(--text);pointer-events:none;opacity:0;transition:opacity .3s;text-shadow:0 2px 24px rgba(0,0,0,.8)}
+.toast.show{opacity:1}
+.loading{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:var(--ink);transition:opacity .5s}
+.loading.gone{opacity:0;pointer-events:none}
+.loading h1{font-family:var(--serif);font-weight:400;font-size:40px;margin:0;letter-spacing:.005em}
+.loading h1 em{color:var(--eosin2)}
+.loading .prog{width:260px;height:2px;background:var(--line);overflow:hidden}
+.loading .prog i{display:block;height:100%;width:0;background:var(--eosin);transition:width .2s}
+.loading .st{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.fatal{max-width:52ch;text-align:center;color:#C9C4B8;padding:0 20px}
+.fatal code{font-family:var(--mono);color:var(--eosin2)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+@media (max-width:820px){
+  .brand .sub{display:none}
+  .stats{display:none}
+  .ladder{left:auto;right:auto;top:auto;bottom:0;transform:none;flex-direction:row;padding:6px 10px 8px;border-left:0;border-top:1px solid var(--line2);width:100vw;overflow-x:auto;background:rgba(10,13,19,.85);gap:2px;scrollbar-width:none}
+  .ladder button{grid-template-columns:1fr;gap:0;padding:4px 8px;text-align:center}
+  .ladder button::before{display:none}
+  .ladder button .nm{font-size:11px}
+  .ladder button.cur .nm{font-size:13px}
+  .ladder button .sc{font-size:10px}
+  .card{bottom:64px;left:10px;width:calc(100vw - 20px);padding:12px 14px}
+  .card h2{font-size:24px}
+  .card p{font-size:12px}
+  .drawer{right:10px;top:56px;bottom:64px;width:calc(100vw - 20px)}
+  .scalebar{bottom:auto;top:96px}
+  .hint{top:52px;font-size:10px}
+}
+@media (max-height:760px) and (min-width:821px){
+  .ladder{top:36%}
+  .card p{display:none}
+  .card h2{font-size:26px}
+}
+@media (prefers-reduced-motion:reduce){
+  .drawer,.hint,.toast,.loading{transition:none}
+}
+</style>
+
+<div id="app">
+  <canvas id="gl" aria-label="Gaussian splat viewport"></canvas>
+
+  <header class="top">
+    <div class="brand">
+      <h1>Corpus <em>Descent</em></h1>
+      <span class="sub">Gaussian-splat body atlas · 1.7 m → 10⁻³⁵ m</span>
+    </div>
+    <div class="topright">
+      <div class="stats"><span><b id="stSplats">0</b> splats</span><span><b id="stFps">0</b> fps</span><span><b id="stSort">0</b> ms sort</span></div>
+      <button id="btnDrawer" aria-pressed="true">Panel</button>
+    </div>
+  </header>
+
+  <nav class="ladder" id="ladder" aria-label="Scale ladder"></nav>
+
+  <aside class="card" id="card">
+    <div class="eyebrow" id="cEyebrow">Level 0 · Organism</div>
+    <h2 id="cTitle">The whole body</h2>
+    <div class="scale" id="cScale"></div>
+    <p id="cBlurb"></p>
+    <div class="row">
+      <button id="btnUp">↑ Surface</button>
+      <button id="btnDown" class="primary">Dive deeper ↓</button>
+      <span class="sp"></span>
+      <button id="btnReset" title="Reset view (R)">Reset view</button>
+    </div>
+    <div class="note" id="cNote"></div>
+  </aside>
+
+  <aside class="drawer" id="drawer">
+    <div class="tabs" role="tablist">
+      <button class="on" data-pane="layers" role="tab">Layers</button>
+      <button data-pane="render" role="tab">Render</button>
+      <button data-pane="scan" role="tab">Load scan</button>
+    </div>
+    <div class="pane on" id="pane-layers">
+      <div class="presets" id="presets"></div>
+      <div id="layers"></div>
+    </div>
+    <div class="pane" id="pane-render">
+      <h3>Splats</h3>
+      <div class="ctl"><label for="rSize">Splat size</label><input id="rSize" type="range" min="0.4" max="2.5" step="0.05" value="1"></div>
+      <div class="ctl"><label for="rAlpha">Opacity</label><input id="rAlpha" type="range" min="0.1" max="1" step="0.02" value="1"></div>
+      <div class="ctl"><label for="rDpr">Resolution</label><select id="rDpr"><option value="1">1×</option><option value="1.5">1.5×</option><option value="2" selected>Native</option></select></div>
+      <h3>Motion</h3>
+      <div class="ctl"><label for="rRotate">Auto-orbit</label><input id="rRotate" type="checkbox" checked></div>
+      <div class="ctl"><label for="rLive">Heartbeat &amp; thermal motion</label><input id="rLive" type="checkbox" checked></div>
+      <h3>View</h3>
+      <div class="ctl"><label for="rFov">Field of view</label><input id="rFov" type="range" min="20" max="80" step="1" value="42"></div>
+      <div class="ctl"><label for="rBg">Ground</label><select id="rBg"><option value="studio" selected>Studio</option><option value="black">Black</option><option value="slate">Slate</option></select></div>
+      <div class="ctl"><label for="rBar">Scale bar</label><input id="rBar" type="checkbox" checked></div>
+      <p class="help" style="margin-top:14px">Keys: <code>↓</code>/<code>↑</code> dive and surface, <code>R</code> reset, <code>Space</code> pause orbit, <code>1–9</code> jump to a level, <code>H</code> hide this panel.</p>
+    </div>
+    <div class="pane" id="pane-scan">
+      <h3>Your own capture</h3>
+      <p class="help">The built-in levels are procedural Gaussian clouds. For a photoreal body, load a real 3D Gaussian Splatting capture of a person: a <code>.splat</code> file or a 3DGS <code>.ply</code> (point_cloud.ply). It becomes the top rung of the ladder and shares every render control.</p>
+      <label class="filebox" id="filebox"><input type="file" id="file" accept=".splat,.ply"><b>Drop a .splat / .ply here</b><br>or click to choose · nothing is uploaded, it stays in your browser</label>
+      <div class="msg" id="fileMsg"></div>
+      <h3>Scan settings</h3>
+      <div class="ctl"><label for="sFlip">Flip Y (COLMAP up)</label><input id="sFlip" type="checkbox" checked></div>
+      <div class="ctl"><label for="sHeight">Subject height (m)</label><input id="sHeight" type="number" min="0.1" step="0.05" value="1.75"></div>
+      <div class="ctl"><label for="sMax">Max splats kept</label><select id="sMax"><option value="500000">500 k</option><option value="1000000" selected>1 M</option><option value="2000000">2 M</option></select></div>
+      <p class="help">Scans are sorted per frame on the CPU. Above ~1 M splats, lower the resolution setting if the frame rate drops.</p>
+    </div>
+  </aside>
+
+  <div class="scalebar" id="scalebar"><div class="bar" id="sbBar"></div><div class="lbl" id="sbLbl">10 cm</div><div class="fov" id="sbFov"></div></div>
+  <div class="hint" id="hint"><b>Drag</b> to orbit · <b>scroll</b> to zoom · keep zooming past the edge to <b>dive deeper</b></div>
+  <div class="toast" id="toast"></div>
+  <div class="sr" id="live" aria-live="polite"></div>
+
+  <div class="loading" id="loading">
+    <h1>Corpus <em>Descent</em></h1>
+    <div class="prog"><i id="progBar"></i></div>
+    <div class="st" id="progSt">Sampling skin…</div>
+  </div>
+</div>
+
+<script>
+'use strict';
+// =====================================================================
+//  Procedural Gaussian cloud library
+// =====================================================================
+let _s = 88172645;
+function seed(s){ _s = (s >>> 0) || 1; }
+function rnd(){ _s += 0x6D2B79F5; let t = _s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }
+function rn(a, b){ return a + (b - a) * rnd(); }
+function gauss(){ const u = 1 - rnd(), v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(6.283185307 * v); }
+function hash3(x, y, z){ let h = (Math.imul(x, 1597334677) ^ Math.imul(y, 3812015801) ^ Math.imul(z, 2798796415)) | 0; h = Math.imul(h ^ (h >>> 16), 2246822519); h = Math.imul(h ^ (h >>> 13), 3266489917); h ^= h >>> 16; return (h >>> 0) / 4294967296; }
+function vnoise(x, y, z){
+  const ix = Math.floor(x), iy = Math.floor(y), iz = Math.floor(z);
+  let fx = x - ix, fy = y - iy, fz = z - iz;
+  fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy); fz = fz * fz * (3 - 2 * fz);
+  const c000 = hash3(ix, iy, iz), c100 = hash3(ix + 1, iy, iz), c010 = hash3(ix, iy + 1, iz), c110 = hash3(ix + 1, iy + 1, iz);
+  const c001 = hash3(ix, iy, iz + 1), c101 = hash3(ix + 1, iy, iz + 1), c011 = hash3(ix, iy + 1, iz + 1), c111 = hash3(ix + 1, iy + 1, iz + 1);
+  const x00 = c000 + (c100 - c000) * fx, x10 = c010 + (c110 - c010) * fx, x01 = c001 + (c101 - c001) * fx, x11 = c011 + (c111 - c011) * fx;
+  const y0 = x00 + (x10 - x00) * fy, y1 = x01 + (x11 - x01) * fy;
+  return y0 + (y1 - y0) * fz;
+}
+function fbm(x, y, z, oct){ let a = 0.5, s = 0, f = 1, n = 0; for (let o = 0; o < (oct || 3); o++){ s += a * vnoise(x * f + 17.3 * o, y * f + 9.1 * o, z * f + 4.7 * o); n += a; f *= 2.13; a *= 0.5; } return s / n; }
+
+const V = {
+  add:(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]], sub:(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]], mul:(a,s)=>[a[0]*s,a[1]*s,a[2]*s],
+  dot:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2], cross:(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],
+  len:a=>Math.hypot(a[0],a[1],a[2]), norm:a=>{const l=Math.hypot(a[0],a[1],a[2])||1;return [a[0]/l,a[1]/l,a[2]/l];},
+  lerp:(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t],
+  perp:a=>{ const h = Math.abs(a[0]) < 0.9 ? [1,0,0] : [0,1,0]; return V.norm(V.cross(a, h)); },
+  randDir:()=>{ const z = rn(-1,1), t = rn(0, 6.283185307), r = Math.sqrt(1 - z*z); return [r*Math.cos(t), r*Math.sin(t), z]; },
+  m3v:(m,v)=>[m[0]*v[0]+m[1]*v[1]+m[2]*v[2], m[3]*v[0]+m[4]*v[1]+m[5]*v[2], m[6]*v[0]+m[7]*v[1]+m[8]*v[2]],
+};
+function rotXYZ(ax, ay, az){
+  const cx=Math.cos(ax),sx=Math.sin(ax),cy=Math.cos(ay),sy=Math.sin(ay),cz=Math.cos(az),sz=Math.sin(az);
+  // Rz * Ry * Rx  (row-major 3x3)
+  return [cz*cy, cz*sy*sx - sz*cx, cz*sy*cx + sz*sx,
+          sz*cy, sz*sy*sx + cz*cx, sz*sy*cx - cz*sx,
+          -sy,   cy*sx,            cy*cx];
+}
+function quatFromBasis(t, b, n){
+  const m00=t[0],m10=t[1],m20=t[2], m01=b[0],m11=b[1],m21=b[2], m02=n[0],m12=n[1],m22=n[2];
+  const tr = m00 + m11 + m22; let x,y,z,w,S;
+  if (tr > 0){ S = Math.sqrt(tr + 1) * 2; w = 0.25*S; x = (m21-m12)/S; y = (m02-m20)/S; z = (m10-m01)/S; }
+  else if (m00 > m11 && m00 > m22){ S = Math.sqrt(1 + m00 - m11 - m22) * 2; w = (m21-m12)/S; x = 0.25*S; y = (m01+m10)/S; z = (m02+m20)/S; }
+  else if (m11 > m22){ S = Math.sqrt(1 + m11 - m00 - m22) * 2; w = (m02-m20)/S; x = (m01+m10)/S; y = 0.25*S; z = (m12+m21)/S; }
+  else { S = Math.sqrt(1 + m22 - m00 - m11) * 2; w = (m10-m01)/S; x = (m02+m20)/S; y = (m12+m21)/S; z = 0.25*S; }
+  if (w < 0){ x=-x; y=-y; z=-z; w=-w; }
+  return [x,y,z,w];
+}
+function randQuat(){ const u1=rnd(),u2=rnd()*6.2831853,u3=rnd()*6.2831853; const a=Math.sqrt(1-u1),b=Math.sqrt(u1); let q=[a*Math.sin(u2),a*Math.cos(u2),b*Math.sin(u3),b*Math.cos(u3)]; if(q[3]<0) q=q.map(v=>-v); return q; }
+
+const COVER = 0.42;   // splats per (size^2) of surface area
+
+class Cloud {
+  constructor(cap){ this.n = 0; this.cap = cap || 65536; this.pos = new Float32Array(this.cap*3); this.scl = new Float32Array(this.cap*3); this.rot = new Float32Array(this.cap*4); this.col = new Uint8Array(this.cap*4); this.grp = new Uint8Array(this.cap); }
+  grow(){ const c = this.cap * 2; const g = (old, k, T) => { const a = new T(c*k); a.set(old); return a; }; this.pos = g(this.pos,3,Float32Array); this.scl = g(this.scl,3,Float32Array); this.rot = g(this.rot,4,Float32Array); this.col = g(this.col,4,Uint8Array); this.grp = g(this.grp,1,Uint8Array); this.cap = c; }
+  add(x,y,z, sx,sy,sz, q, r,g,b,a, group){
+    if (this.n >= this.cap) this.grow();
+    const i = this.n++, i3 = i*3, i4 = i*4;
+    this.pos[i3]=x; this.pos[i3+1]=y; this.pos[i3+2]=z;
+    this.scl[i3]=sx; this.scl[i3+1]=sy; this.scl[i3+2]=sz;
+    this.rot[i4]=q[0]; this.rot[i4+1]=q[1]; this.rot[i4+2]=q[2]; this.rot[i4+3]=q[3];
+    this.col[i4]=Math.max(0,Math.min(255,r*255+0.5))|0; this.col[i4+1]=Math.max(0,Math.min(255,g*255+0.5))|0; this.col[i4+2]=Math.max(0,Math.min(255,b*255+0.5))|0; this.col[i4+3]=Math.max(0,Math.min(255,a*255+0.5))|0;
+    this.grp[i]=group|0;
+  }
+}
+
+// Emit one surface/volume splat. o: {size, aspect, thick, alpha, color(x,y,z,nx,ny,nz,u,v), group, jitter, tangent(), xform:{m,t}, count}
+function emit(C, o, p, n, t, u, v){
+  if (o.xform){ const X = o.xform; p = V.add(V.m3v(X.m, p), X.t || [0,0,0]); n = V.m3v(X.m, n); if (t) t = V.m3v(X.m, t); }
+  if (o.inset) p = [p[0]-n[0]*o.inset, p[1]-n[1]*o.inset, p[2]-n[2]*o.inset];
+  const col = o.color(p[0],p[1],p[2], n[0],n[1],n[2], u, v);
+  if (!col) return;
+  const a = (col.length > 3 ? col[3] : 1) * (o.alpha == null ? 1 : o.alpha);
+  if (a <= 0.004) return;
+  const size = o.size * (1 + (o.jitter == null ? 0.35 : o.jitter) * (rnd() - 0.5));
+  if (o.tangent) t = o.tangent(p[0],p[1],p[2], n[0],n[1],n[2]);
+  if (!t){ const h = V.randDir(); t = V.cross(n, h); }
+  else { const d = V.dot(t, n); t = [t[0]-n[0]*d, t[1]-n[1]*d, t[2]-n[2]*d]; }
+  const tl = V.len(t); if (tl < 1e-6) { t = V.perp(n); } else t = V.mul(t, 1/tl);
+  const b = V.cross(n, t);
+  const q = quatFromBasis(t, b, n);
+  C.add(p[0],p[1],p[2], size*(o.aspect||1), size, size*(o.thick == null ? 0.22 : o.thick), q, col[0],col[1],col[2], a, o.group||0);
+}
+function countFor(o, area){ return o.count != null ? o.count : Math.ceil(area * (o.density || 1) * COVER / (o.size*o.size)); }
+
+// ---- tapered capsule from p0 (r0) to p1 (r1)
+function capsule(C, o, p0, p1, r0, r1){
+  const ax = V.sub(p1, p0), L = V.len(ax); if (L < 1e-9) return ellipsoid(C, o, p0, [r0,r0,r0]);
+  const a = V.mul(ax, 1/L), u = V.perp(a), w = V.cross(a, u);
+  const aCyl = Math.PI*(r0+r1)*L, aCap0 = 2*Math.PI*r0*r0, aCap1 = 2*Math.PI*r1*r1;
+  const n = countFor(o, aCyl + aCap0 + aCap1);
+  const pc = aCyl/(aCyl+aCap0+aCap1), p0c = aCap0/(aCyl+aCap0+aCap1);
+  for (let i = 0; i < n; i++){
+    const s = rnd();
+    if (s < pc){
+      const t = rnd(), th = rnd()*6.2831853, r = r0 + (r1-r0)*t;
+      const rad = [u[0]*Math.cos(th)+w[0]*Math.sin(th), u[1]*Math.cos(th)+w[1]*Math.sin(th), u[2]*Math.cos(th)+w[2]*Math.sin(th)];
+      const p = [p0[0]+a[0]*t*L+rad[0]*r, p0[1]+a[1]*t*L+rad[1]*r, p0[2]+a[2]*t*L+rad[2]*r];
+      emit(C, o, p, rad, a, t, th);
+    } else {
+      const end = s < pc + p0c ? 0 : 1, c = end ? p1 : p0, r = end ? r1 : r0;
+      let d = V.randDir(); const dd = V.dot(d, a); if ((end && dd < 0) || (!end && dd > 0)) d = V.mul(d, -1);
+      emit(C, o, V.add(c, V.mul(d, r)), d, a, end ? 1 : 0, 0);
+    }
+  }
+}
+function limb(C, o, pts, radii){ for (let i = 0; i + 1 < pts.length; i++) capsule(C, o, pts[i], pts[i+1], radii[i], radii[i+1]); }
+
+// ---- ellipsoid, optional row-major rotation matrix rm
+function ellipsoid(C, o, c, r, rm){
+  const area = 4*Math.PI*Math.pow((Math.pow(r[0]*r[1],1.6)+Math.pow(r[0]*r[2],1.6)+Math.pow(r[1]*r[2],1.6))/3, 1/1.6);
+  const n = countFor(o, area);
+  for (let i = 0; i < n; i++){
+    const d = V.randDir();
+    let p = [d[0]*r[0], d[1]*r[1], d[2]*r[2]];
+    let nn = V.norm([d[0]/r[0], d[1]/r[1], d[2]/r[2]]);
+    if (rm){ p = V.m3v(rm, p); nn = V.m3v(rm, nn); }
+    emit(C, o, V.add(c, p), nn, null, Math.acos(d[1]), Math.atan2(d[2], d[0]));
+  }
+}
+// ---- solid gaussian blob (volume) ; r = radii, spherical soft splats
+function blob(C, o, c, r, count){
+  const oo = Object.assign({}, o, { aspect:1, thick:1 });
+  for (let i = 0; i < count; i++){
+    const p = [c[0]+gauss()*r[0], c[1]+gauss()*r[1], c[2]+gauss()*r[2]];
+    emit(C, oo, p, V.randDir(), null, 0, 0);
+  }
+}
+function ball(C, o, c, r, count){ // uniform solid ball
+  const oo = Object.assign({}, o, { aspect:1, thick:1 });
+  for (let i = 0; i < count; i++){ const d = V.randDir(), k = Math.cbrt(rnd()); emit(C, oo, [c[0]+d[0]*r[0]*k, c[1]+d[1]*r[1]*k, c[2]+d[2]*r[2]*k], V.randDir(), null, k, 0); }
+}
+// ---- loft: closed surface of revolution-like sections [{y,rx,rz,cx,cz}] sorted by y
+function loft(C, o, secs){
+  const y0 = secs[0].y, y1 = secs[secs.length-1].y;
+  const at = (y) => { let i = 0; while (i < secs.length-2 && y > secs[i+1].y) i++; const a = secs[i], b = secs[i+1]; let t = (y-a.y)/(b.y-a.y); t = Math.max(0, Math.min(1, t)); t = t*t*(3-2*t); return { rx:a.rx+(b.rx-a.rx)*t, rz:a.rz+(b.rz-a.rz)*t, cx:(a.cx||0)+((b.cx||0)-(a.cx||0))*t, cz:(a.cz||0)+((b.cz||0)-(a.cz||0))*t }; };
+  const P = (y, th) => { const s = at(y); return [s.cx + s.rx*Math.cos(th), y, s.cz + s.rz*Math.sin(th)]; };
+  let area = 0; for (let k = 0; k < 40; k++){ const s = at(y0 + (y1-y0)*(k+0.5)/40); area += Math.PI*(s.rx+s.rz)*(y1-y0)/40; }
+  const n = countFor(o, area), eps = (y1-y0)*0.002;
+  for (let i = 0; i < n; i++){
+    const y = rn(y0, y1), th = rnd()*6.2831853, s = at(y);
+    const p = P(y, th);
+    const dth = [-s.rx*Math.sin(th), 0, s.rz*Math.cos(th)];
+    const dy = V.mul(V.sub(P(y+eps, th), P(y-eps, th)), 1/(2*eps));
+    let nn = V.norm(V.cross(dth, dy)); if (nn[0]*Math.cos(th) + nn[2]*Math.sin(th) < 0) nn = V.mul(nn, -1);
+    emit(C, o, p, nn, dy, (y-y0)/(y1-y0), th);
+  }
+}
+// ---- tube along curve(t)->[x,y,z], rad(t) or number
+function tube(C, o, curve, rad, t0, t1){
+  t0 = t0 || 0; t1 = t1 == null ? 1 : t1;
+  const R = typeof rad === 'number' ? () => rad : rad;
+  let L = 0, prev = curve(t0), rs = 0; const K = 48;
+  for (let k = 1; k <= K; k++){ const t = t0 + (t1-t0)*k/K, p = curve(t); L += V.len(V.sub(p, prev)); prev = p; rs += R(t); }
+  const n = countFor(o, L * 6.2831853 * (rs/K));
+  const eps = (t1-t0)*1e-3;
+  for (let i = 0; i < n; i++){
+    const t = rn(t0, t1), c = curve(t);
+    const tg = V.norm(V.sub(curve(Math.min(t1, t+eps)), curve(Math.max(t0, t-eps))));
+    const u = V.perp(tg), w = V.cross(tg, u), th = rnd()*6.2831853, r = R(t);
+    const rad_ = [u[0]*Math.cos(th)+w[0]*Math.sin(th), u[1]*Math.cos(th)+w[1]*Math.sin(th), u[2]*Math.cos(th)+w[2]*Math.sin(th)];
+    emit(C, o, [c[0]+rad_[0]*r, c[1]+rad_[1]*r, c[2]+rad_[2]*r], rad_, tg, t, th);
+  }
+}
+function catmull(pts){
+  const n = pts.length;
+  return (t) => {
+    t = Math.max(0, Math.min(0.999999, t)) * (n-1); const i = Math.floor(t), f = t - i;
+    const p0 = pts[Math.max(0,i-1)], p1 = pts[i], p2 = pts[Math.min(n-1,i+1)], p3 = pts[Math.min(n-1,i+2)];
+    const f2 = f*f, f3 = f2*f, out = [0,0,0];
+    for (let k = 0; k < 3; k++) out[k] = 0.5*((2*p1[k]) + (-p0[k]+p2[k])*f + (2*p0[k]-5*p1[k]+4*p2[k]-p3[k])*f2 + (-p0[k]+3*p1[k]-3*p2[k]+p3[k])*f3);
+    return out;
+  };
+}
+function circleCurve(c, R, ax){ // closed circle in plane normal to ax
+  const a = V.norm(ax), u = V.perp(a), w = V.cross(a, u);
+  return (t) => { const th = t*6.2831853; return [c[0]+(u[0]*Math.cos(th)+w[0]*Math.sin(th))*R, c[1]+(u[1]*Math.cos(th)+w[1]*Math.sin(th))*R, c[2]+(u[2]*Math.cos(th)+w[2]*Math.sin(th))*R]; };
+}
+// ---- branching tree
+function tree(C, o, p, dir, len, rad, depth, cfg){
+  cfg = cfg || {};
+  const spread = cfg.spread == null ? 0.55 : cfg.spread, decay = cfg.decay || 0.72, rdec = cfg.rdec || 0.68, kids = cfg.kids || 2, bend = cfg.bend == null ? 0.25 : cfg.bend;
+  const d = V.norm(cfg.bias ? V.add(dir, V.mul(cfg.bias, 1)) : dir);
+  const end = V.add(p, V.mul(d, len));
+  const pp = V.perp(d), pq = V.cross(d, pp), a1 = rnd()*6.2831853;
+  const mid = V.add(V.lerp(p, end, 0.5), V.mul([pp[0]*Math.cos(a1)+pq[0]*Math.sin(a1), pp[1]*Math.cos(a1)+pq[1]*Math.sin(a1), pp[2]*Math.cos(a1)+pq[2]*Math.sin(a1)], len*bend*rnd()));
+  const curve = (t) => { const s = 1-t; return [s*s*p[0]+2*s*t*mid[0]+t*t*end[0], s*s*p[1]+2*s*t*mid[1]+t*t*end[1], s*s*p[2]+2*s*t*mid[2]+t*t*end[2]]; };
+  const oo = Object.assign({}, o, { size: Math.max(o.size, rad*(o.sizeR || 0)) });
+  tube(C, oo, curve, (t) => rad*(1 - 0.25*t));
+  if (cfg.leaf) cfg.leaf(C, end, rad);
+  if (depth <= 0 || rad < (cfg.minRad || 0)) return;
+  const tg = V.norm(V.sub(end, mid));
+  const base = rnd()*6.2831853;
+  for (let k = 0; k < kids; k++){
+    const ang = base + k*6.2831853/kids + rn(-0.5,0.5), sp = spread*rn(0.6,1.3);
+    const side = [pp[0]*Math.cos(ang)+pq[0]*Math.sin(ang), pp[1]*Math.cos(ang)+pq[1]*Math.sin(ang), pp[2]*Math.cos(ang)+pq[2]*Math.sin(ang)];
+    const nd = V.norm(V.add(V.mul(tg, Math.cos(sp)), V.mul(side, Math.sin(sp))));
+    tree(C, o, end, nd, len*decay*rn(0.8,1.15), rad*rdec*rn(0.85,1.1), depth-1, cfg);
+  }
+}
+// ---- color helpers
+function mottle(base, freq, amt, alpha){ return (x,y,z) => { const k = 1 + amt*(fbm(x*freq, y*freq, z*freq, 3) - 0.5)*2; return alpha == null ? [base[0]*k, base[1]*k, base[2]*k] : [base[0]*k, base[1]*k, base[2]*k, alpha]; }; }
+function flat(base, alpha){ return () => alpha == null ? base : [base[0],base[1],base[2],alpha]; }
+function mix(a, b, t){ return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t]; }
+
+// =====================================================================
+//  Level definitions
+// =====================================================================
+const LEVELS = [];
+
+// ---------------------------------------------------------------- BODY
+LEVELS.push({
+  id:'body', eyebrow:'Level 0 · Organism', name:'The whole body', scale:'1.75 m', metersPerUnit:0.95, center:[0,0.88,0], radius:0.95,
+  blurb:'A standing adult sampled as a cloud of oriented Gaussians. Fade the skin down to reveal all eleven organ systems, each its own layer.',
+  divePoint:[0.02,1.28,0.04], diveLabel:'into the heart',
+  groups:[
+    {name:'Integumentary (skin)', color:'#DDAE8F'}, {name:'Skeletal', color:'#E9E1CB'}, {name:'Muscular', color:'#A5342E'},
+    {name:'Nervous', color:'#F1D86B'}, {name:'Endocrine', color:'#B98BD9'}, {name:'Cardiovascular', color:'#D1332F'},
+    {name:'Lymphatic', color:'#8FC77A'}, {name:'Respiratory', color:'#E9A0A6'}, {name:'Digestive', color:'#E3A48F'},
+    {name:'Urinary', color:'#C9A24C'}, {name:'Reproductive', color:'#D48BB0'} ],
+  presets:{ 'Skin':[1,1,1,1,1,1,1,1,1,1,1], 'X-ray':[0.1,1,0.35,1,1,1,1,0.8,1,1,1], 'Skeleton':[0.06,1,0,0.5,0,0,0,0,0,0,0], 'Organs':[0.08,0.25,0,0,1,1,0.6,0.85,1,1,1], 'Vessels & nerves':[0.06,0.15,0,1,0,1,1,0,0,0,0], 'Muscle':[0.08,0.6,1,0,0,0,0,0,0,0,0] },
+  pulseCenter:[0.02,1.28,0.04],
+  build(C){
+    seed(1701);
+    const G = {skin:0,skel:1,musc:2,nerv:3,endo:4,card:5,lymph:6,resp:7,dig:8,urin:9,repro:10};
+    const skinBase = [0.86,0.66,0.54];
+    const skinCol = (x,y,z,nx,ny,nz) => { const k = 1 + 0.08*(fbm(x*14,y*14,z*14,3)-0.5); const flush = 0.03*fbm(x*5,y*5,z*5,2); return [skinBase[0]*k+flush, skinBase[1]*k, skinBase[2]*k]; };
+    const skinTop = {size:0.0049, color:skinCol, group:G.skin, thick:0.2};
+    const skinPass = (skin, inner) => {
+    // ---- head & face
+    const headC = [0,1.635,0], headR = [0.083,0.108,0.094];
+    ellipsoid(C, Object.assign({}, skin, {color:(x,y,z,nx,ny,nz)=>{
+      const dy = (y-headC[1])/headR[1], dz = (z-headC[2])/headR[2];
+      if (dy > 0.32 || (dz < -0.35 && dy > -0.55) || (dy > -0.05 && dz < 0.05 && Math.abs(x) > 0.07)) return null; // hair region drawn separately
+      const lips = Math.exp(-((x*x)/0.0007 + Math.pow(y-1.578,2)/0.00006 + Math.pow(z-0.088,2)/0.0002));
+      const c = skinCol(x,y,z); return [c[0]+0.05*lips, c[1]-0.15*lips, c[2]-0.12*lips]; }}), headC, headR);
+    if (!inner) ellipsoid(C, Object.assign({}, skin, {size:0.0045, aspect:3.2, thick:0.15, tangent:(x,y,z,nx,ny,nz)=>[ -nx*ny*0.2, -1, -nz*ny*0.2 ], color:(x,y,z)=>{
+      const dy = (y-headC[1])/headR[1], dz = (z-headC[2])/headR[2];
+      if (!(dy > 0.30 || (dz < -0.33 && dy > -0.58) || (dy > -0.07 && dz < 0.07 && Math.abs(x) > 0.068))) return null;
+      const k = 0.7 + 0.6*fbm(x*90,y*90,z*90,2); return [0.17*k, 0.11*k, 0.07*k]; }}), headC, [0.087,0.113,0.099]);
+    if (!inner){ ellipsoid(C, Object.assign({}, skin, {size:0.003}), [0,1.616,0.092], [0.015,0.026,0.018]);        // nose
+    ellipsoid(C, Object.assign({}, skin, {size:0.003}), [0.086,1.63,-0.008], [0.007,0.026,0.018]);     // ears
+    ellipsoid(C, Object.assign({}, skin, {size:0.003}), [-0.086,1.63,-0.008], [0.007,0.026,0.018]); }
+    if (!inner) for (const sx of [-1,1]){
+      ellipsoid(C, {size:0.0022, color:flat([0.93,0.92,0.9]), group:G.skin}, [sx*0.031,1.648,0.076], [0.013,0.007,0.006]);
+      ellipsoid(C, {size:0.0018, color:flat([0.16,0.10,0.07]), group:G.skin}, [sx*0.031,1.648,0.081], [0.0058,0.0058,0.003]);
+      capsule(C, {size:0.0025, aspect:2.5, color:flat([0.2,0.13,0.09]), group:G.skin}, [sx*0.018,1.667,0.082],[sx*0.046,1.664,0.074], 0.003, 0.002);
+    }
+    ellipsoid(C, Object.assign({}, skin, {size:0.004}), [0,1.565,0.022], [0.062,0.05,0.068]);         // jaw
+    capsule(C, skin, [0,1.49,-0.012],[0,1.57,-0.012], 0.056, 0.05);                                    // neck
+    // ---- torso
+    loft(C, skin, [ {y:0.80,rx:0.135,rz:0.10,cz:0.0},{y:0.86,rx:0.17,rz:0.12},{y:0.97,rx:0.18,rz:0.125},{y:1.10,rx:0.152,rz:0.108},{y:1.24,rx:0.168,rz:0.12},{y:1.36,rx:0.19,rz:0.125},{y:1.45,rx:0.205,rz:0.105},{y:1.50,rx:0.075,rz:0.06,cz:-0.01} ]);
+    // ---- limbs
+    for (const s of [-1,1]){
+      limb(C, skin, [[s*0.205,1.44,0],[s*0.265,1.16,-0.02],[s*0.29,0.905,0.03]], [0.058,0.047,0.033]);
+      ellipsoid(C, Object.assign({}, skin, {size:0.0035}), [s*0.298,0.80,0.045], [0.042,0.075,0.02]);
+      for (let k = 0; k < 4; k++) capsule(C, Object.assign({}, skin, {size:0.0028}), [s*(0.272+k*0.018),0.735,0.05],[s*(0.268+k*0.02),0.655-Math.abs(k-1.3)*0.012,0.055], 0.0085, 0.007);
+      capsule(C, Object.assign({}, skin, {size:0.0028}), [s*0.262,0.79,0.062],[s*0.238,0.735,0.085], 0.01, 0.0075);
+      limb(C, skin, [[s*0.095,0.90,0],[s*0.092,0.50,0.005],[s*0.088,0.09,-0.01]], [0.086,0.062,0.04]);
+      ellipsoid(C, Object.assign({}, skin, {size:0.004}), [s*0.09,0.035,0.075], [0.048,0.033,0.13]);
+    }
+    };
+    skinPass(skinTop, false);
+    skinPass({size:0.0105, inset:0.0075, thick:0.35, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const k = 0.86 + 0.1*(fbm(x*10,y*10,z*10,2)-0.5); return [skinBase[0]*k, skinBase[1]*k*0.96, skinBase[2]*k*0.95]; }}, true);
+    // ================= SKELETAL
+    const bone = {size:0.0035, color:mottle([0.92,0.88,0.78], 60, 0.18), group:G.skel, thick:0.25};
+    ellipsoid(C, bone, [0,1.64,-0.004], [0.073,0.092,0.084]);
+    tube(C, bone, catmull([[0.05,1.60,0.02],[0.055,1.555,0.04],[0.03,1.54,0.075],[0,1.535,0.085],[-0.03,1.54,0.075],[-0.055,1.555,0.04],[-0.05,1.60,0.02]]), 0.008);
+    const spine = (t) => [0, 0.94 + 0.59*t, -0.055 + 0.028*Math.sin(t*6.2) - 0.02*t];
+    for (let i = 0; i < 24; i++){ const t = (i+0.5)/24, p = spine(t); const r = 0.021 - 0.008*t; ellipsoid(C, bone, p, [r, 0.011, r*0.9]); capsule(C, Object.assign({}, bone, {size:0.003}), [p[0],p[1],p[2]-r*0.6],[p[0],p[1]-0.006,p[2]-r*0.6-0.03], 0.006, 0.003); }
+    ellipsoid(C, bone, [0,0.905,-0.06], [0.045,0.05,0.02]);
+    for (let i = 0; i < 12; i++){
+      const y = 1.415 - i*0.027, w = 0.135 + 0.06*Math.sin((i+1)/13*Math.PI), open = i >= 10 ? 0.45 : 0.08;
+      for (const s of [-1,1]) tube(C, Object.assign({}, bone, {size:0.0032, aspect:2}), (t)=>{ const ph = Math.PI*(1-t*(1-open)); return [s*w*Math.sin(ph)*1.05, y - 0.035*t - 0.01*Math.sin(ph), -0.065 + (0.10+0.065)*(1-Math.cos(ph))/2 - 0.02*Math.sin(ph)*Math.sin(ph)]; }, 0.0058);
+    }
+    capsule(C, bone, [0,1.43,0.108],[0,1.26,0.115], 0.013, 0.01);
+    for (const s of [-1,1]){
+      tube(C, Object.assign({}, bone, {aspect:2}), catmull([[0,1.455,0.06],[s*0.09,1.462,0.045],[s*0.18,1.46,0.0]]), 0.0065);
+      ellipsoid(C, bone, [s*0.10,1.365,-0.095], [0.06,0.072,0.01], rotXYZ(0.2, s*0.5, 0));
+      ellipsoid(C, bone, [s*0.105,0.965,-0.03], [0.045,0.075,0.022], rotXYZ(0.35, s*0.6, s*0.2));
+      capsule(C, bone, [s*0.19,1.43,0],[s*0.255,1.165,-0.02], 0.015, 0.013); ellipsoid(C, bone, [s*0.19,1.43,0],[0.024,0.024,0.024]); ellipsoid(C, bone, [s*0.255,1.165,-0.02],[0.022,0.016,0.02]);
+      capsule(C, bone, [s*0.25,1.16,-0.015],[s*0.283,0.91,0.03], 0.0085, 0.008); capsule(C, bone, [s*0.264,1.16,-0.03],[s*0.297,0.905,0.02], 0.0075, 0.006);
+      for (let k = 0; k < 5; k++){ const x0 = s*(0.27+k*0.016), top = k===4 ? [s*0.262,0.79,0.062] : [x0,0.80,0.045]; capsule(C, Object.assign({}, bone,{size:0.0025}), top, k===4 ? [s*0.238,0.735,0.085] : [x0+s*0.004,0.66-Math.abs(k-1.3)*0.012,0.055], 0.005, 0.0035); }
+      capsule(C, bone, [s*0.09,0.905,-0.01],[s*0.09,0.515,0.0], 0.019, 0.017); ellipsoid(C, bone, [s*0.10,0.905,-0.01],[0.03,0.03,0.03]); ellipsoid(C, bone, [s*0.09,0.51,0.0],[0.036,0.025,0.03]);
+      ellipsoid(C, bone, [s*0.09,0.505,0.05],[0.02,0.024,0.01]);
+      capsule(C, bone, [s*0.09,0.495,-0.005],[s*0.088,0.10,-0.015], 0.016, 0.013); capsule(C, bone, [s*0.115,0.49,-0.02],[s*0.11,0.10,-0.02], 0.007, 0.006);
+      ellipsoid(C, bone, [s*0.088,0.08,-0.01],[0.03,0.028,0.035]);
+      for (let k = 0; k < 5; k++) capsule(C, Object.assign({}, bone,{size:0.0025}), [s*(0.06+k*0.016),0.045,0.03],[s*(0.055+k*0.018),0.028,0.18-Math.abs(k-1)*0.012], 0.0065, 0.0045);
+    }
+    // ================= MUSCULAR
+    const muscCol = (x,y,z,nx,ny,nz,u,v) => { const k = 0.85 + 0.3*fbm(x*80,y*80,z*80,2) + 0.1*Math.sin(v*40); return [0.62*k, 0.19*k, 0.17*k]; };
+    const musc = {size:0.0042, aspect:3, thick:0.2, color:muscCol, group:G.musc};
+    loft(C, Object.assign({}, musc, {tangent:()=>[0,1,0]}), [ {y:0.82,rx:0.12,rz:0.09},{y:0.97,rx:0.165,rz:0.112},{y:1.10,rx:0.138,rz:0.096},{y:1.24,rx:0.152,rz:0.108},{y:1.36,rx:0.172,rz:0.112},{y:1.45,rx:0.185,rz:0.095},{y:1.49,rx:0.07,rz:0.055,cz:-0.01} ]);
+    for (const s of [-1,1]){
+      ellipsoid(C, musc, [s*0.085,1.36,0.10], [0.085,0.06,0.03], rotXYZ(0,0,s*0.2));
+      ellipsoid(C, musc, [s*0.2,1.415,0.0], [0.06,0.07,0.06]);
+      ellipsoid(C, musc, [s*0.1,0.94,-0.1], [0.085,0.09,0.045]);
+      for (let k = 0; k < 4; k++) ellipsoid(C, musc, [s*0.035,1.22-k*0.065,0.108], [0.03,0.028,0.018]);
+      limb(C, musc, [[s*0.205,1.42,0],[s*0.262,1.16,-0.02],[s*0.288,0.92,0.03]], [0.05,0.04,0.026]);
+      limb(C, musc, [[s*0.095,0.88,0],[s*0.092,0.50,0.005],[s*0.088,0.12,-0.01]], [0.077,0.055,0.034]);
+      capsule(C, musc, [s*0.09,0.50,-0.03],[s*0.09,0.15,-0.04], 0.05, 0.02); // calf
+    }
+    // ================= NERVOUS
+    const brainCol = (x,y,z) => { const s = fbm(x*140,y*140,z*140,3); const k = 0.7 + 0.5*Math.pow(s,1.5); return [0.86*k, 0.7*k, 0.68*k]; };
+    for (const s of [-1,1]) ellipsoid(C, {size:0.0025, color:brainCol, group:G.nerv}, [s*0.034,1.652,-0.006], [0.056,0.062,0.078]);
+    ellipsoid(C, {size:0.0025, color:brainCol, group:G.nerv}, [0,1.598,-0.055], [0.046,0.03,0.036]);
+    const nerve = {size:0.002, aspect:2.5, color:mottle([0.96,0.86,0.45], 40, 0.2), group:G.nerv};
+    tube(C, Object.assign({}, nerve, {size:0.0028}), (t)=>{ const p = spine(1-t); return [p[0], p[1]+0.03, p[2]+0.012]; }, (t)=>0.007-0.003*t, 0, 0.9);
+    tube(C, Object.assign({}, nerve, {size:0.0028}), catmull([[0,1.535,-0.03],[0,1.565,-0.02],[0,1.59,-0.01]]), 0.008);
+    for (const s of [-1,1]){
+      tube(C, nerve, catmull([[s*0.02,1.45,-0.03],[s*0.12,1.43,-0.01],[s*0.21,1.40,0.0],[s*0.262,1.16,-0.01],[s*0.288,0.91,0.03],[s*0.29,0.80,0.045],[s*0.285,0.7,0.05]]), (t)=>0.0045-0.0025*t);
+      tube(C, nerve, catmull([[s*0.02,0.98,-0.05],[s*0.08,0.93,-0.05],[s*0.105,0.88,-0.03],[s*0.10,0.5,-0.02],[s*0.09,0.12,-0.02],[s*0.08,0.03,0.08]]), (t)=>0.006-0.0035*t);
+      tube(C, nerve, catmull([[s*0.02,1.02,-0.05],[s*0.08,0.95,0.02],[s*0.09,0.7,0.04],[s*0.09,0.45,0.03]]), 0.002);
+      for (let i = 0; i < 10; i++){ const y = 1.40 - i*0.03, w = 0.13 + 0.06*Math.sin((i+1)/13*Math.PI); tube(C, Object.assign({}, nerve, {size:0.0016}), (t)=>{ const ph = Math.PI*(1-t*0.85); return [s*w*Math.sin(ph), y-0.03*t, -0.055+0.16*(1-Math.cos(ph))/2]; }, 0.0012); }
+      for (let k = 0; k < 4; k++) tree(C, Object.assign({}, nerve, {size:0.0015}), [s*0.2,1.40-k*0.0,0.0], V.norm([s*0.3,-1,0.3*(k-1.5)]), 0.05, 0.0012, 3, {spread:0.6, bias:[0,-0.4,0]});
+      for (let k = 0; k < 4; k++) tree(C, Object.assign({}, nerve, {size:0.0015}), [s*0.09,0.85,0.02], V.norm([s*0.2,-1,0.4*(k-1.5)]), 0.08, 0.0014, 3, {spread:0.5, bias:[0,-0.4,0]});
+      tree(C, Object.assign({}, nerve, {size:0.0014}), [s*0.05,1.58,0.03], V.norm([s*0.5,-0.2,1]), 0.04, 0.0012, 3, {spread:0.7});
+    }
+    // ================= ENDOCRINE
+    const endo = {size:0.0025, color:mottle([0.74,0.55,0.86], 80, 0.25), group:G.endo};
+    ellipsoid(C, endo, [0,1.615,0.005], [0.006,0.005,0.006]);
+    for (const s of [-1,1]) ellipsoid(C, endo, [s*0.017,1.49,0.038], [0.012,0.022,0.01]);
+    ellipsoid(C, endo, [0,1.41,0.085], [0.025,0.03,0.012]);
+    for (const s of [-1,1]) ellipsoid(C, endo, [s*0.055,1.135,-0.065], [0.015,0.012,0.008], rotXYZ(0,0,s*0.6));
+    tube(C, Object.assign({}, endo, {size:0.003}), catmull([[0.02,1.09,0.0],[-0.03,1.10,0.01],[-0.08,1.115,-0.01]]), (t)=>0.014-0.006*t);
+    for (const s of [-1,1]) ellipsoid(C, endo, [s*0.05,0.895,0.03], [0.012,0.009,0.01]);
+    // ================= CARDIOVASCULAR
+    const heartCol = (x,y,z) => { const k = 0.8 + 0.4*fbm(x*120,y*120,z*120,3); return [0.66*k, 0.2*k, 0.22*k]; };
+    ellipsoid(C, {size:0.0028, color:heartCol, group:G.card}, [0.015,1.275,0.04], [0.055,0.07,0.05], rotXYZ(0.2,0,-0.5));
+    ellipsoid(C, {size:0.0028, color:(x,y,z)=>{const c=heartCol(x,y,z);return [c[0]+0.1,c[1]+0.1,c[2]+0.08];}, group:G.card}, [0.03,1.33,0.02], [0.04,0.03,0.035]);
+    const art = {size:0.0025, aspect:2.2, thick:0.2, color:mottle([0.80,0.16,0.15], 50, 0.2), group:G.card, sizeR:0.7};
+    const vein = {size:0.0025, aspect:2.2, thick:0.2, color:mottle([0.28,0.32,0.72], 50, 0.2), group:G.card, sizeR:0.7};
+    const aorta = [[0.0,1.32,0.03],[-0.005,1.39,0.005],[-0.02,1.405,-0.03],[-0.01,1.36,-0.05],[0,1.2,-0.045],[0,1.0,-0.04],[0.0,0.96,-0.035]];
+    tube(C, Object.assign({}, art, {size:0.0035}), catmull(aorta), (t)=>0.014-0.006*t);
+    tube(C, Object.assign({}, vein, {size:0.0035}), catmull([[0.03,1.3,0.0],[0.025,1.2,-0.03],[0.02,1.0,-0.03],[0.02,0.96,-0.025]]), 0.013);
+    tube(C, Object.assign({}, vein, {size:0.0035}), catmull([[0.03,1.32,0.0],[0.03,1.40,-0.01],[0.02,1.46,-0.02]]), 0.011);
+    const trunks = (o, off, r0) => {
+      for (const s of [-1,1]){
+        tube(C, o, catmull([[off[0],0.96,-0.035+off[2]],[s*0.05+off[0],0.92,-0.02+off[2]],[s*0.09+off[0],0.88,0.01+off[2]],[s*0.088+off[0],0.5,-0.01+off[2]],[s*0.086+off[0],0.09,-0.01+off[2]],[s*0.08+off[0],0.03,0.1+off[2]]]), (t)=>r0*(1-0.55*t));
+        tube(C, o, catmull([[off[0],1.40,-0.02+off[2]],[s*0.1+off[0],1.42,0.0+off[2]],[s*0.2+off[0],1.41,0.01+off[2]],[s*0.262+off[0],1.16,0.0+off[2]],[s*0.29+off[0],0.90,0.04+off[2]],[s*0.29+off[0],0.75,0.05+off[2]]]), (t)=>r0*0.65*(1-0.55*t));
+        tube(C, o, catmull([[s*0.01+off[0],1.40,-0.02+off[2]],[s*0.025+off[0],1.5,-0.01+off[2]],[s*0.035+off[0],1.58,0.0+off[2]],[s*0.03+off[0],1.64,0.02+off[2]]]), (t)=>r0*0.55*(1-0.5*t));
+        tube(C, o, catmull([[s*0.005+off[0],1.35,-0.045+off[2]],[s*0.03+off[0],1.28,-0.03+off[2]],[s*0.06+off[0],1.2,0.0+off[2]]]), r0*0.4);   // to lungs
+        tube(C, o, catmull([[off[0],1.14,-0.045+off[2]],[s*0.05+off[0],1.13,0.0+off[2]],[s*0.09+off[0],1.12,0.03+off[2]]]), r0*0.4);         // to liver/stomach
+        tube(C, o, catmull([[off[0],1.08,-0.04+off[2]],[s*0.05+off[0],1.08,-0.06+off[2]]]), r0*0.35);                                          // renal
+      }
+    };
+    trunks(art, [0,0,0], 0.009); trunks(vein, [0.01,0,0.012], 0.0105);
+    const artTwig = Object.assign({}, art, {size:0.0016}), veinTwig = Object.assign({}, vein, {size:0.0016});
+    const sprout = (o, p, d) => tree(C, o, p, d, rn(0.035,0.06), 0.0022, 4, {spread:0.7, rdec:0.66, decay:0.7, bend:0.3});
+    for (const s of [-1,1]){
+      for (let k = 0; k < 6; k++){ sprout(artTwig, [s*0.09, 0.85-k*0.13, 0.0], V.norm([s*0.4*(rnd()-0.5), -0.5, rn(-1,1)])); sprout(veinTwig, [s*0.1, 0.8-k*0.13, 0.01], V.norm([s*0.4*(rnd()-0.5), -0.5, rn(-1,1)])); }
+      for (let k = 0; k < 4; k++){ sprout(artTwig, [s*(0.21+k*0.02), 1.38-k*0.14, 0.0], V.norm([s*0.3, -0.6, rn(-1,1)])); sprout(veinTwig, [s*(0.22+k*0.02), 1.33-k*0.14, 0.012], V.norm([s*0.3,-0.6,rn(-1,1)])); }
+      sprout(artTwig, [s*0.03,1.64,0.02], V.norm([s*0.6,0.5,rn(-0.5,0.5)])); sprout(veinTwig, [s*0.04,1.63,0.03], V.norm([s*0.6,0.4,rn(-0.5,0.5)]));
+      for (let k = 0; k < 3; k++){ sprout(artTwig, [s*0.1, 1.24-k*0.06, -0.02], V.norm([s*0.8, rn(-0.5,0.5), rn(-0.5,0.5)])); sprout(veinTwig, [s*0.11, 1.22-k*0.06, -0.01], V.norm([s*0.8, rn(-0.5,0.5), rn(-0.5,0.5)])); }
+    }
+    for (let k = 0; k < 8; k++){ sprout(artTwig, [rn(-0.08,0.08), rn(0.92,1.12), rn(-0.02,0.06)], V.randDir()); sprout(veinTwig, [rn(-0.08,0.08), rn(0.92,1.12), rn(-0.02,0.06)], V.randDir()); }
+    // ================= LYMPHATIC
+    const lym = {size:0.0022, color:mottle([0.5,0.75,0.45], 80, 0.25), group:G.lymph};
+    ellipsoid(C, Object.assign({}, lym, {color:mottle([0.45,0.15,0.3], 90, 0.2)}), [-0.1,1.17,-0.045], [0.05,0.03,0.035], rotXYZ(0,0.4,0.3));
+    const nodes = (c, n, r) => { for (let i = 0; i < n; i++) ellipsoid(C, lym, [c[0]+gauss()*r, c[1]+gauss()*r, c[2]+gauss()*r], [0.006,0.0045,0.005]); };
+    for (const s of [-1,1]){ nodes([s*0.05,1.5,0.02], 10, 0.025); nodes([s*0.185,1.36,0.0], 12, 0.022); nodes([s*0.1,0.87,0.06], 10, 0.025); nodes([s*0.09,0.52,-0.03], 5, 0.02); }
+    nodes([0,1.02,0.0], 16, 0.04);
+    const lv = Object.assign({}, lym, {size:0.0018, aspect:2.5, alpha:0.8});
+    tube(C, lv, (t)=>{ const p = spine(t*0.9); return [p[0]+0.012, p[1], p[2]+0.03]; }, 0.0025);
+    for (const s of [-1,1]){
+      tube(C, lv, catmull([[s*0.1,0.87,0.06],[s*0.11,0.7,0.06],[s*0.1,0.5,0.03],[s*0.09,0.3,0.02],[s*0.085,0.1,0.02]]), 0.0016);
+      tube(C, lv, catmull([[s*0.185,1.36,0],[s*0.26,1.15,0.0],[s*0.29,0.9,0.045]]), 0.0014);
+      tube(C, lv, catmull([[s*0.05,1.5,0.02],[s*0.05,1.58,0.01],[s*0.06,1.62,-0.02]]), 0.0012);
+    }
+    // ================= RESPIRATORY
+    const lungCol = (x,y,z) => { const k = 0.75 + 0.5*fbm(x*90,y*90,z*90,3); return [0.9*k, 0.6*k, 0.62*k, 0.55]; };
+    ellipsoid(C, {size:0.004, color:lungCol, group:G.resp}, [0.095,1.28,-0.01], [0.075,0.135,0.088]);
+    ellipsoid(C, {size:0.004, color:lungCol, group:G.resp}, [-0.10,1.26,-0.012], [0.068,0.125,0.086]);
+    const airway = {size:0.0025, color:(x,y,z,nx,ny,nz,u)=>{ const ring = 0.8 + 0.25*Math.pow(Math.sin(u*90),2); return [0.86*ring, 0.76*ring, 0.66*ring]; }, group:G.resp};
+    tube(C, airway, catmull([[0,1.51,0.02],[0,1.45,0.005],[0,1.38,-0.01]]), 0.0095);
+    for (const s of [-1,1]) tree(C, Object.assign({}, airway, {size:0.002, sizeR:0.5}), [0,1.38,-0.01], V.norm([s*0.7,-1,-0.1]), 0.055, 0.007, 5, {spread:0.62, decay:0.72, rdec:0.7, bend:0.15});
+    ellipsoid(C, {size:0.004, color:flat([0.78,0.45,0.45], 0.4), group:G.resp}, [0,1.155,0.0], [0.18,0.03,0.12]);
+    // ================= DIGESTIVE
+    const dig = {size:0.0035, color:mottle([0.88,0.64,0.6], 70, 0.2), group:G.dig};
+    tube(C, Object.assign({}, dig, {size:0.0025}), catmull([[0,1.5,-0.03],[0,1.35,-0.05],[-0.02,1.2,-0.03],[-0.04,1.15,0.0]]), 0.0075);
+    ellipsoid(C, dig, [-0.055,1.115,0.03], [0.062,0.045,0.04], rotXYZ(0.2,0.3,0.5));
+    ellipsoid(C, Object.assign({}, dig, {color:mottle([0.5,0.19,0.16], 60, 0.15)}), [0.07,1.15,0.035], [0.11,0.05,0.07], rotXYZ(0,0,-0.15));
+    ellipsoid(C, Object.assign({}, dig, {size:0.0025, color:flat([0.35,0.55,0.3])}), [0.05,1.10,0.075], [0.012,0.022,0.012]);
+    const gutPts = []; for (let i = 0; i < 70; i++){ const t = i/69; gutPts.push([0.085*Math.sin(t*44+1)*(1-0.3*Math.abs(Math.sin(t*9))), 1.06-0.15*t+0.015*Math.sin(t*23), 0.035+0.04*Math.cos(t*44+1)]); }
+    tube(C, Object.assign({}, dig, {size:0.003, color:mottle([0.9,0.66,0.6], 100, 0.2)}), catmull(gutPts), 0.0115);
+    tube(C, Object.assign({}, dig, {size:0.0035, color:(x,y,z,nx,ny,nz,u)=>{ const k = 0.85+0.25*Math.pow(Math.sin(u*70),2)+0.1*fbm(x*100,y*100,z*100,2); return [0.8*k,0.56*k,0.5*k]; }}), catmull([[0.11,0.9,0.03],[0.12,1.0,0.02],[0.12,1.075,0.02],[0.05,1.07,0.045],[-0.03,1.065,0.05],[-0.115,1.085,0.03],[-0.12,1.0,0.02],[-0.115,0.91,0.02],[-0.06,0.87,0.0],[0,0.85,-0.02],[0,0.82,-0.04]]), (t)=>0.02*(1+0.12*Math.sin(t*160)));
+    // ================= URINARY
+    const ur = {size:0.0028, color:mottle([0.56,0.22,0.22], 80, 0.2), group:G.urin};
+    for (const s of [-1,1]){ ellipsoid(C, ur, [s*0.07,1.075,-0.07], [0.03,0.052,0.026], rotXYZ(0,0,s*0.15)); tube(C, Object.assign({}, ur, {size:0.0018, color:flat([0.85,0.75,0.55])}), catmull([[s*0.055,1.05,-0.06],[s*0.05,0.95,-0.04],[s*0.03,0.88,0.02],[s*0.015,0.865,0.04]]), 0.0022); }
+    ellipsoid(C, Object.assign({}, ur, {color:mottle([0.85,0.75,0.55], 60, 0.15, 0.85)}), [0,0.865,0.045], [0.04,0.03,0.035]);
+    // ================= REPRODUCTIVE
+    const rp = {size:0.0025, color:mottle([0.8,0.5,0.65], 80, 0.2), group:G.repro};
+    ellipsoid(C, rp, [0,0.885,0.02], [0.03,0.036,0.02]);
+    for (const s of [-1,1]){ ellipsoid(C, rp, [s*0.05,0.9,0.02], [0.016,0.01,0.012]); tube(C, Object.assign({}, rp, {size:0.0018}), catmull([[s*0.028,0.9,0.02],[s*0.04,0.905,0.03],[s*0.05,0.9,0.02]]), 0.003); }
+  }
+});
+
+// ---------------------------------------------------------------- HEART
+LEVELS.push({
+  id:'heart', eyebrow:'Level 1 · Organ', name:'The heart', scale:'12 cm', metersPerUnit:0.085, center:[0,0.5,0], radius:8.5,
+  blurb:'Four chambers, the great vessels and the coronary arteries that feed the muscle itself. It beats about 100,000 times a day; the pulse here is a shader scaling the ventricles.',
+  divePoint:[-2.5,-2.5,3.2], diveLabel:'into the ventricle wall',
+  groups:[ {name:'Ventricles (myocardium)', color:'#9E3A3C', pulse:0.045}, {name:'Atria', color:'#C56A6A', pulse:-0.02}, {name:'Aorta & arteries', color:'#D9A08E', pulse:0.01}, {name:'Veins & pulmonary trunk', color:'#8A7BA8', pulse:0.01}, {name:'Coronary arteries', color:'#E24C4C', pulse:0.045}, {name:'Coronary veins', color:'#6C6FD1', pulse:0.045}, {name:'Epicardial fat', color:'#E9D08A', pulse:0.045} ],
+  presets:{ 'Whole heart':[1,1,1,1,1,1,1], 'Coronaries':[0.12,0.12,0.3,0.3,1,1,0], 'Chambers':[1,1,0.2,0.2,0,0,0] },
+  pulseCenter:[0,-1,0],
+  build(C){
+    seed(4242);
+    const tilt = rotXYZ(0.15, 0.1, -0.42);
+    const X = {m:tilt, t:[0,0,0]};
+    const myo = (x,y,z) => { const k = 0.78 + 0.45*fbm(x*0.9,y*0.9,z*0.9,3); const streak = 0.06*Math.sin(y*3 + x*2); return [0.64*k+streak, 0.22*k, 0.24*k]; };
+    const LV = {c:[-0.3,-1.4,0.2], r:[3.9,5.2,3.6]}, RV = {c:[2.6,-0.6,1.2], r:[2.7,4.1,2.4]};
+    ellipsoid(C, {size:0.12, color:myo, group:0, xform:X}, LV.c, LV.r);
+    ellipsoid(C, {size:0.12, color:myo, group:0, xform:X}, RV.c, RV.r);
+    ellipsoid(C, {size:0.12, color:(x,y,z)=>{const c=myo(x,y,z);return [c[0]+0.08,c[1]+0.1,c[2]+0.08];}, group:1, xform:X}, [-1.6,3.4,-2.0], [2.7,2.3,2.4]);
+    ellipsoid(C, {size:0.12, color:(x,y,z)=>{const c=myo(x,y,z);return [c[0]+0.08,c[1]+0.1,c[2]+0.08];}, group:1, xform:X}, [2.9,3.1,0.4], [2.5,2.5,2.3]);
+    for (const s of [-1,1]) ellipsoid(C, {size:0.1, color:myo, group:1, xform:X}, [s>0?4.4:-3.9, 4.4, s>0?1.4:-1.2], [1.0,0.8,1.2]); // auricles
+    const artCol = mottle([0.86,0.58,0.52], 0.8, 0.2), venCol = mottle([0.55,0.48,0.66], 0.8, 0.2);
+    const gv = {size:0.11, aspect:1.8, group:2, xform:X, color:artCol};
+    tube(C, gv, catmull([[-0.6,4.2,-0.4],[-0.6,6.8,-0.6],[-1.6,8.6,-1.4],[-3.2,8.2,-2.6],[-3.4,5.5,-3.6]]), (t)=>1.45-0.25*t);
+    for (let k = 0; k < 3; k++) tube(C, Object.assign({}, gv, {size:0.08}), catmull([[-1.2-k*0.9,8.3-k*0.3,-1.6-k*0.4],[-1.3-k*1.0,10.5,-2.0-k*0.4]]), 0.4);
+    tube(C, Object.assign({}, gv, {group:3, color:venCol}), catmull([[1.6,4.1,1.3],[1.0,6.5,1.6],[-1.2,7.8,1.4],[-3.5,7.4,0.4]]), (t)=>1.35-0.3*t);
+    tube(C, Object.assign({}, gv, {group:3, color:venCol}), catmull([[0.2,7.2,1.6],[2.2,8.0,1.0],[4.0,7.6,-0.4]]), 0.75);
+    tube(C, Object.assign({}, gv, {group:3, color:venCol}), catmull([[3.6,4.6,-0.4],[3.7,7.0,-0.8],[3.6,9.5,-1.2]]), 1.0);
+    tube(C, Object.assign({}, gv, {group:3, color:venCol}), catmull([[3.2,1.6,-1.6],[3.3,-1.5,-1.6],[3.2,-4.5,-1.4]]), 1.15);
+    for (let k = 0; k < 4; k++) tube(C, Object.assign({}, gv, {size:0.08, group:3, color:venCol}), catmull([[-2.5+(k%2)*1.6, 3.4+0.8*(k>>1), -3.6],[-3.5+(k%2)*2.4, 3.6+1.4*(k>>1), -6.2]]), 0.55);
+    // coronary arteries on the ventricle surfaces
+    const onSurf = (E, p, k) => { const d = [(p[0]-E.c[0])/E.r[0], (p[1]-E.c[1])/E.r[1], (p[2]-E.c[2])/E.r[2]]; const l = V.len(d) || 1; return [E.c[0]+d[0]/l*E.r[0]*k, E.c[1]+d[1]/l*E.r[1]*k, E.c[2]+d[2]/l*E.r[2]*k]; };
+    const cor = {size:0.07, aspect:2, color:mottle([0.9,0.28,0.26], 1.5, 0.2), group:4, xform:X, sizeR:0.6};
+    const corV = {size:0.07, aspect:2, color:mottle([0.38,0.36,0.78], 1.5, 0.2), group:5, xform:X, sizeR:0.6};
+    const surfTree = (o, E, p, dir, len, rad, depth) => tree(C, o, p, dir, len, rad, depth, {spread:0.8, decay:0.75, rdec:0.7, bend:0.4, minRad:0.05, leaf:null}) ;
+    const project = (E, k) => (o) => Object.assign({}, o, {xform:null, color:o.color, post:null});
+    // LAD: front groove; use tube with projection
+    const lad = catmull([[-0.6,3.6,2.4],[0.2,1.5,3.6],[0.4,-1.2,3.9],[0.0,-3.6,3.6],[-0.8,-5.6,2.6],[-1.4,-6.6,1.2]]);
+    tube(C, Object.assign({}, cor, {size:0.09}), (t)=>onSurf(LV, lad(t), 1.03), (t)=>0.32-0.18*t);
+    const cx = catmull([[-0.8,3.6,2.0],[-3.0,3.0,1.6],[-4.4,1.6,0.0],[-4.2,-0.4,-2.2],[-3.0,-2.6,-3.2]]);
+    tube(C, Object.assign({}, cor, {size:0.09}), (t)=>onSurf(LV, cx(t), 1.03), (t)=>0.3-0.16*t);
+    const rca = catmull([[1.2,3.4,2.4],[3.4,2.8,2.6],[5.0,1.2,1.4],[5.2,-1.2,-0.4],[4.0,-3.4,-1.2],[2.0,-4.6,-1.6]]);
+    tube(C, Object.assign({}, cor, {size:0.09}), (t)=>onSurf(RV, rca(t), 1.03), (t)=>0.3-0.16*t);
+    const gcv = catmull([[-1.2,3.2,2.6],[-2.2,1.2,3.4],[-2.4,-1.6,3.5],[-3.6,-3.4,2.0],[-4.6,-1.4,-1.6],[-3.4,1.2,-3.2],[-1.2,2.6,-3.6]]);
+    tube(C, Object.assign({}, corV, {size:0.09}), (t)=>onSurf(LV, gcv(t), 1.03), 0.24);
+    const branch = (o, E, path, n) => { for (let i = 0; i < n; i++){ const t = rn(0.1,0.9), p = onSurf(E, path(t), 1.02); const tg = V.norm(V.sub(path(t+0.01), path(t))); const side = V.cross(tg, V.norm(V.sub(p, E.c))); const oo = Object.assign({}, o, {size:0.06}); tree(C, Object.assign({}, oo, {color:oo.color}), p, V.norm(V.add(V.mul(side, rnd()<0.5?1:-1), V.mul(tg, rn(-0.3,0.3)))), rn(1.2,2.2), 0.13, 3, {spread:0.8, decay:0.75, rdec:0.72, bend:0.5, minRad:0.04}); } };
+    // constrain branch splats to the surface by re-projecting after generation of this block
+    const n0 = C.n;
+    branch(cor, LV, lad, 7); branch(cor, LV, cx, 5); branch(cor, RV, rca, 6); branch(corV, LV, gcv, 6);
+    for (let i = n0; i < C.n; i++){ // project onto the nearer ventricle surface (in tilted frame -> untilt, project, retilt)
+      const inv = [tilt[0],tilt[3],tilt[6], tilt[1],tilt[4],tilt[7], tilt[2],tilt[5],tilt[8]];
+      const p = V.m3v(inv, [C.pos[i*3],C.pos[i*3+1],C.pos[i*3+2]]);
+      const dL = V.len([(p[0]-LV.c[0])/LV.r[0],(p[1]-LV.c[1])/LV.r[1],(p[2]-LV.c[2])/LV.r[2]]), dR = V.len([(p[0]-RV.c[0])/RV.r[0],(p[1]-RV.c[1])/RV.r[1],(p[2]-RV.c[2])/RV.r[2]]);
+      const q = V.m3v(tilt, onSurf(Math.abs(dL-1) < Math.abs(dR-1) ? LV : RV, p, 1.025));
+      C.pos[i*3]=q[0]; C.pos[i*3+1]=q[1]; C.pos[i*3+2]=q[2];
+    }
+    // fat in the grooves
+    const fat = {size:0.1, color:mottle([0.95,0.85,0.5], 1.2, 0.25, 0.85), group:6, xform:X};
+    for (let i = 0; i < 16; i++){ const t = rnd(); const p = onSurf(LV, cx(t), 1.0); blob(C, fat, [p[0]+gauss()*0.25, p[1]+gauss()*0.25, p[2]+gauss()*0.25], [0.35,0.28,0.28], 14); }
+    for (let i = 0; i < 16; i++){ const t = rnd(); const p = onSurf(RV, rca(t), 1.0); blob(C, fat, [p[0]+gauss()*0.25, p[1]+gauss()*0.25, p[2]+gauss()*0.25], [0.35,0.28,0.28], 14); }
+  }
+});
+
+// ---------------------------------------------------------------- TISSUE
+LEVELS.push({
+  id:'tissue', eyebrow:'Level 2 · Tissue', name:'Cardiac muscle', scale:'200 µm', metersPerUnit:105e-6, center:[0,0,0], radius:105,
+  blurb:'Branching cardiomyocytes striped by sarcomeres every 2.2 µm, joined end to end at intercalated discs. Capillaries thread the gaps with red cells in single file.',
+  divePoint:[-38,8,38], diveLabel:'into one cardiomyocyte',
+  groups:[ {name:'Cardiomyocytes', color:'#B85B50'}, {name:'Nuclei', color:'#6B5A9E'}, {name:'Capillaries', color:'#D97070'}, {name:'Red blood cells', color:'#C41E1A'}, {name:'Collagen (endomysium)', color:'#E7E2D0'} ],
+  presets:{ 'All':[1,1,1,1,1], 'Vasculature':[0.1,0.2,1,1,0], 'Fibers':[1,1,0,0,0] },
+  build(C){
+    seed(777);
+    const fibers = [];
+    for (let iy = -3; iy <= 3; iy++) for (let iz = -3; iz <= 3; iz++){ if (rnd() < 0.15) continue; fibers.push({y:iy*17+rn(-3,3), z:iz*17+rn(-3,3), ph:rnd()*6.28, disc:rnd()*110, r:rn(6.5,8.5)}); }
+    const fiberCol = (fb) => (x,y,z,nx,ny,nz,u,v) => {
+      let k = 0.82 + 0.18*Math.cos(x*6.2831853/2.2) + 0.1*(fbm(x*0.4,y*0.4,z*0.4,2)-0.5);
+      const dpos = ((x + fb.disc + 100) % 110 + 110) % 110; const zig = 1.2*Math.sin(v*4 + x*0.3);
+      if (Math.abs(dpos - 55 + zig) < 1.3) k *= 0.45;
+      return [0.74*k, 0.36*k, 0.31*k];
+    };
+    for (const fb of fibers){
+      const curve = (t) => [-105 + 210*t, fb.y + 3*Math.sin(t*4+fb.ph), fb.z + 3*Math.cos(t*3.3+fb.ph)];
+      tube(C, {size:1.05, aspect:3, thick:0.2, color:fiberCol(fb), group:0}, curve, (t)=>fb.r*(1+0.08*Math.sin(t*12+fb.ph)));
+      const nN = 1 + (rnd() < 0.4 ? 1 : 0);
+      for (let k = 0; k < nN; k++){ const t = rn(0.15,0.85), c = curve(t); ellipsoid(C, {size:0.45, color:mottle([0.42,0.3,0.6], 1.2, 0.35), group:1}, [c[0],c[1],c[2]], [7,2.6,2.6]); }
+      if (rnd() < 0.35){ const t = rn(0.3,0.7), c = curve(t), tgt = fibers[(fibers.indexOf(fb)+1)%fibers.length]; tube(C, {size:1.05, aspect:3, thick:0.2, color:fiberCol(fb), group:0}, catmull([c,[c[0]+30,(c[1]+tgt.y)/2,(c[2]+tgt.z)/2],[c[0]+60,tgt.y,tgt.z]]), (t)=>fb.r*0.7*(1-0.2*t)); }
+    }
+    for (let i = 0; i < 9; i++){
+      const y = (rnd()<0.5?-1:1)*rn(4,60), z = (rnd()<0.5?-1:1)*rn(4,60);
+      const pts = []; for (let k = 0; k < 8; k++) pts.push([-110 + k*32, y + 8.5*Math.sin(k*1.4+i) , z + 8.5*Math.cos(k*1.1+i)]);
+      const cv = catmull(pts);
+      tube(C, {size:0.6, aspect:2, color:mottle([0.88,0.42,0.42], 0.8, 0.2, 0.42), group:2}, cv, 3.8);
+      for (let t = 0.03; t < 0.97; t += rn(0.035,0.06)){ const c = cv(t), tg = V.norm(V.sub(cv(t+0.01), cv(t-0.01))); const b = V.perp(tg), n = V.cross(tg, b); const rm = [b[0],n[0],tg[0], b[1],n[1],tg[1], b[2],n[2],tg[2]]; ellipsoid(C, {size:0.35, color:mottle([0.8,0.12,0.1], 2, 0.2), group:3}, c, [3.4,3.4,1.0], rm); }
+    }
+    for (let i = 0; i < 60; i++){
+      const p0 = [rn(-100,100), rn(-60,60), rn(-60,60)];
+      const pts = [p0]; for (let k = 1; k < 5; k++) pts.push(V.add(pts[k-1], [rn(-14,14), rn(-14,14), rn(-14,14)]));
+      tube(C, {size:0.35, aspect:3, color:flat([0.92,0.9,0.84], 0.55), group:4}, catmull(pts), 0.45);
+    }
+  }
+});
+
+// ---------------------------------------------------------------- CELL
+LEVELS.push({
+  id:'cell', eyebrow:'Level 3 · Cell', name:'A cardiomyocyte', scale:'40 µm', metersPerUnit:21e-6, center:[0,0,0], radius:21,
+  blurb:'One muscle cell, cut to a 40 µm segment. Myofibrils run the length of it, mitochondria pack every gap (a third of the cell volume), and T-tubules ring the membrane at every Z-line.',
+  divePoint:[6,4.5,3.5], diveLabel:'into a mitochondrion',
+  groups:[ {name:'Sarcolemma (membrane)', color:'#E0BA92'}, {name:'T-tubules', color:'#D8A878'}, {name:'Myofibrils', color:'#9E5A5A'}, {name:'Mitochondria', color:'#F08A3E'}, {name:'Nucleus', color:'#7D6AA6'}, {name:'Sarcoplasmic reticulum', color:'#B5C36A'}, {name:'Glycogen & lipid', color:'#E6C766'} ],
+  presets:{ 'All':[1,1,1,1,1,1,1], 'Inside':[0.06,0.3,1,1,1,1,1], 'Mitochondria':[0.05,0,0.15,1,0.3,0,0], 'Contractile':[0.05,0.5,1,0,0.3,1,0] },
+  build(C){
+    seed(31337);
+    const R = 10, L = 20;
+    const prof = (x) => R*(1 + 0.06*Math.sin(x*0.5) + 0.05*fbm(x*0.3, 0, 0, 2));
+    tube(C, {size:0.36, color:mottle([0.92,0.76,0.6], 0.5, 0.15, 0.2), group:0}, (t)=>[-L+2*L*t,0,0], (t)=>prof(-L+2*L*t));
+    for (let x = -L+1.1; x < L; x += 2.2) tube(C, {size:0.17, color:flat([0.9,0.72,0.55], 0.6), group:1}, circleCurve([x,0,0], prof(x)*0.97, [1,0,0]), 0.22);
+    const band = (x,y,z,nx,ny,nz,u) => { const X = -L + 2*L*u; const ph = ((X % 2.2) + 2.2) % 2.2; let c; if (Math.abs(ph - 1.1) < 0.08) c = [0.35,0.2,0.22]; else if (Math.abs(ph-1.1) < 0.65) c = [0.9,0.66,0.6]; else c = [0.58,0.34,0.34]; const k = 1 + 0.12*(fbm(x*2,y*2,z*2,2)-0.5); return [c[0]*k,c[1]*k,c[2]*k]; };
+    const myo = []; for (let iy = -4; iy <= 4; iy++) for (let iz = -4; iz <= 4; iz++){ const y = iy*2.1 + (iz%2)*1.05, z = iz*1.82; if (Math.hypot(y,z) > 8.3 || Math.hypot(y/1.2,z/1.2) < 2.9) continue; myo.push([y,z]); }
+    for (const m of myo) tube(C, {size:0.19, aspect:2.5, color:band, group:2}, (t)=>[-L+2*L*t, m[0]+0.2*Math.sin(t*5), m[1]+0.2*Math.cos(t*4)], 0.85);
+    let placed = 0, tries = 0;
+    while (placed < 130 && tries++ < 5000){
+      const y = rn(-9,9), z = rn(-9,9); if (Math.hypot(y,z) > 9.0) continue;
+      if (Math.hypot(y/1.15,z/1.15) < 3.2 && Math.abs(rn(-1,1)) < 0.8) continue;
+      let ok = true; for (const m of myo) if (Math.hypot(m[0]-y, m[1]-z) < 1.35) { ok = false; break; } if (!ok) continue;
+      const x = rn(-L+2, L-2), len = rn(1.2,3.2);
+      capsule(C, {size:0.11, aspect:2, color:(px,py,pz,nx,ny,nz,u)=>{ const k = 0.85+0.3*Math.pow(Math.sin(u*34),2); return [0.95*k,0.55*k,0.25*k]; }, group:3}, [x-len/2,y,z],[x+len/2,y,z], 0.42, 0.42); placed++;
+    }
+    ellipsoid(C, {size:0.16, color:(x,y,z)=>{ const k = 0.7+0.6*fbm(x*1.5,y*1.5,z*1.5,3); return [0.5*k,0.4*k,0.66*k,0.85]; }, group:4}, [-3,0,0], [6.2,2.7,2.7]);
+    ellipsoid(C, {size:0.12, color:flat([0.32,0.24,0.45]), group:4}, [-2,0.6,0.4], [1.1,0.9,0.9]);
+    ellipsoid(C, {size:0.16, color:(x,y,z)=>{ const k = 0.7+0.6*fbm(x*1.5,y*1.5,z*1.5,3); return [0.5*k,0.4*k,0.66*k,0.85]; }, group:4}, [8,0.5,-0.3], [5,2.4,2.4]);
+    for (let i = 0; i < 8; i++){ const m = myo[(i*7)%myo.length]; tube(C, {size:0.15, aspect:2, color:flat([0.7,0.8,0.5], 0.8), group:5}, (t)=>{ const x = -L+2*L*t; const th = x/1.1*6.2831853; return [x, m[0]+1.15*Math.cos(th), m[1]+1.15*Math.sin(th)]; }, 0.09); }
+    for (let i = 0; i < 1800; i++){ const d = V.randDir(), k = 0.5+0.5*rnd(); const p = [rn(-L,L), d[1]*8.5*k, d[2]*8.5*k]; emit(C, {size:0.12, aspect:1, thick:1, color:flat([0.85,0.5,0.55]), group:6}, p, V.randDir(), null, 0, 0); }
+    for (let i = 0; i < 14; i++){ const d = V.randDir(); ellipsoid(C, {size:0.1, color:flat([0.93,0.8,0.42]), group:6}, [rn(-L+2,L-2), d[1]*6.5, d[2]*6.5], [0.5,0.5,0.5]); }
+  }
+});
+
+// ---------------------------------------------------------------- MITOCHONDRION
+LEVELS.push({
+  id:'mito', eyebrow:'Level 4 · Organelle', name:'A mitochondrion', scale:'1.5 µm', metersPerUnit:0.8e-6, center:[0,0,0], radius:800,
+  blurb:'Two membranes: the inner one folds into cristae studded with ATP synthase, the rotary motor that makes about 90% of the cell’s ATP. It keeps its own small circular genome.',
+  divePoint:[-120,60,90], diveLabel:'into the DNA',
+  groups:[ {name:'Outer membrane', color:'#E9A96C'}, {name:'Inner boundary membrane', color:'#D98A4A'}, {name:'Cristae', color:'#F0955C'}, {name:'ATP synthase', color:'#F3E39B'}, {name:'Matrix granules', color:'#A8663C'}, {name:'mtDNA nucleoids', color:'#8290E6'}, {name:'Mitoribosomes', color:'#9C7F8F'} ],
+  presets:{ 'All':[1,1,1,1,1,1,1], 'Cristae':[0.06,0.15,1,1,0,0,0], 'Genome':[0.06,0.1,0.15,0,0,1,1] },
+  build(C){
+    seed(9001);
+    const H = 700, R = 250;
+    const rad = (x) => { const a = Math.max(0, 1 - Math.pow(Math.max(0, Math.abs(x) - (H-R))/R, 2)); return R*Math.sqrt(a)*(1+0.04*fbm(x*0.01,0,0,2)); };
+    tube(C, {size:9, color:mottle([0.95,0.66,0.38], 0.01, 0.12, 0.16), group:0}, (t)=>[-H+2*H*t,0,0], (t)=>rad(-H+2*H*t)+8);
+    tube(C, {size:8, color:mottle([0.9,0.52,0.28], 0.01, 0.15, 0.28), group:1}, (t)=>[-H+2*H*t,0,0], (t)=>rad(-H+2*H*t)-12);
+    const crCol = (x,y,z,nx,ny,nz,u,v) => { const hole = fbm(x*0.02+3, y*0.02, z*0.02, 2); if (hole > 0.64) return null; const k = 0.85+0.3*fbm(x*0.03,y*0.03,z*0.03,2); return [0.95*k,0.56*k,0.32*k,0.6]; };
+    const crX = [];
+    for (let x = -H+140; x < H-140; x += rn(36,56)){ crX.push(x); const r = rad(x)-22; const rm = rotXYZ(rn(-0.15,0.15), rn(-0.12,0.12), 1.5708); ellipsoid(C, {size:6, thick:0.15, color:crCol, group:2}, [x, rn(-8,8), rn(-8,8)], [r*rn(0.75,0.95), r*rn(0.75,0.95), 6], rm); }
+    for (const x of crX) for (let i = 0; i < 160; i++){ const d = V.randDir(); const r = (rad(x)-22)*0.8*Math.sqrt(rnd()); const s = rnd()<0.5?-1:1; emit(C, {size:4, aspect:1, thick:1, color:flat([0.95,0.9,0.6]), group:3, jitter:0.2}, [x+s*10, d[1]*r, d[2]*r], [s,0,0], null, 0, 0); }
+    for (let i = 0; i < 2500; i++){ const x = rn(-H+40,H-40), d = V.randDir(), r = (rad(x)-30)*Math.sqrt(rnd()); emit(C, {size:6, aspect:1, thick:1, color:flat([0.7,0.42,0.26], 0.35), group:4}, [x, d[1]*r, d[2]*r], V.randDir(), null, 0, 0); }
+    for (let k = 0; k < 3; k++){ const cx = -350 + k*350, ax = V.randDir(); const cv = circleCurve([cx, rn(-40,40), rn(-40,40)], 62, ax); tube(C, {size:3.5, aspect:2, color:(x,y,z,nx,ny,nz,u,v)=>{ const k2 = 0.7+0.5*Math.pow(Math.sin(u*80+v),2); return [0.5*k2,0.55*k2,0.92*k2]; }, group:5}, cv, 4.5); }
+    for (let i = 0; i < 300; i++){ const x = rn(-H+40,H-40), d = V.randDir(), r = (rad(x)-30)*Math.sqrt(rnd()); ellipsoid(C, {size:4, color:mottle([0.58,0.46,0.54], 0.2, 0.2), group:6}, [x, d[1]*r, d[2]*r], [11,9,9]); }
+  }
+});
+
+// ---------------------------------------------------------------- NUCLEOSOME (DNA)
+LEVELS.push({
+  id:'dna', eyebrow:'Level 5 · Molecule', name:'DNA on a nucleosome', scale:'15 nm', metersPerUnit:8e-9, center:[0,0,0], radius:8,
+  blurb:'147 base pairs wrapped 1.65 turns around eight histone proteins. Rungs are colored by base: adenine green, thymine red, guanine blue, cytosine yellow. Every cell packs two metres of this.',
+  divePoint:[4.2,0.5,0.6], diveLabel:'into a carbon atom',
+  groups:[ {name:'Sugar-phosphate backbone', color:'#E0955A'}, {name:'Base pairs', color:'#7FBF6A'}, {name:'Histone core', color:'#8C9BD6'}, {name:'Histone tails', color:'#B8C4EE'}, {name:'Water & ions', color:'#7FA8D8'} ],
+  presets:{ 'All':[1,1,1,1,1], 'DNA only':[1,1,0.08,0,0], 'Histones':[0.1,0.1,1,1,0] },
+  build(C){
+    seed(1953);
+    const Rs = 4.19, P = 2.39, turns = 1.65, wrapLen = 147*0.34, link = 7.5;
+    const path = (s) => { // s in nm along path
+      if (s < link){ const p0 = [Rs, -turns*P/2, 0]; const tg = V.norm([0, P/(2*Math.PI), Rs]); return V.add(p0, V.mul(tg, s-link)); }
+      if (s < link + wrapLen){ const phi = (s-link)/wrapLen*turns*6.2831853; return [Rs*Math.cos(phi), -turns*P/2 + (s-link)/wrapLen*turns*P, Rs*Math.sin(phi)]; }
+      const phi1 = turns*6.2831853; const p1 = [Rs*Math.cos(phi1), turns*P/2, Rs*Math.sin(phi1)]; const tg = V.norm([-Rs*Math.sin(phi1), P/(2*Math.PI), Rs*Math.cos(phi1)]); return V.add(p1, V.mul(tg, s-link-wrapLen));
+    };
+    const total = wrapLen + 2*link, nbp = Math.round(total/0.34);
+    const bases = ['A','T','G','C'], bcol = {A:[0.45,0.8,0.35], T:[0.9,0.3,0.3], G:[0.35,0.5,0.95], C:[0.95,0.85,0.3]}, pair = {A:'T',T:'A',G:'C',C:'G'};
+    const ds = 0.02, NS = Math.ceil(total/ds)+1, FC = [], FN = [], FB = []; let nrm = null;
+    for (let i = 0; i < NS; i++){ const s = i*ds, c = path(s), tg = V.norm(V.sub(path(s+0.01), path(s-0.01))); nrm = nrm ? V.norm(V.sub(nrm, V.mul(tg, V.dot(nrm, tg)))) : V.perp(tg); FC.push(c); FN.push(nrm); FB.push(V.cross(tg, nrm)); }
+    const strand = (s, k) => { const i = Math.min(NS-1, Math.max(0, Math.round(s/ds))); const th = s/0.34*6.2831853/10.5 + (k ? 2.35 : 0); return V.add(FC[i], V.add(V.mul(FN[i], Math.cos(th)), V.mul(FB[i], Math.sin(th)))); };
+    for (const k of [0,1]) tube(C, {size:0.1, aspect:2, thick:0.3, color:mottle(k ? [0.84,0.54,0.32] : [0.93,0.63,0.36], 3, 0.15), group:0}, (t)=>strand(t*total, k), 0.3);
+    for (let k = 0; k < nbp; k++){
+      const s = k*0.34, i = Math.min(NS-1, Math.round(s/ds)), c = FC[i], p1 = strand(s,0), p2 = strand(s,1);
+      const B = bases[(k*7 + (k>>2)) % 4], B2 = pair[B];
+      capsule(C, {size:0.07, aspect:1.5, color:flat(bcol[B]), group:1}, p1, c, 0.13, 0.13);
+      capsule(C, {size:0.07, aspect:1.5, color:flat(bcol[B2]), group:1}, c, p2, 0.13, 0.13);
+    }
+    const hist = [ ['H3',[0.4,0.6,0.92]], ['H4',[0.5,0.8,0.55]], ['H2A',[0.95,0.8,0.42]], ['H2B',[0.9,0.5,0.42]] ];
+    for (let i = 0; i < 8; i++){ const layer = i < 4 ? -1 : 1, ang = (i%4)*1.5708 + (layer>0?0.785:0); const h = hist[i%4]; ellipsoid(C, {size:0.13, color:mottle(h[1], 1.5, 0.3), group:2}, [1.9*Math.cos(ang), layer*1.35, 1.9*Math.sin(ang)], [2.2,1.6,1.9], rotXYZ(0, -ang, 0.3*layer)); }
+    for (let i = 0; i < 8; i++){ const ang = i*0.785+0.3, p0 = [3.6*Math.cos(ang), (i%2?1:-1)*1.2, 3.6*Math.sin(ang)]; const pts = [p0]; for (let k = 1; k < 5; k++) pts.push(V.add(pts[k-1], [Math.cos(ang)*1.3+rn(-0.8,0.8), rn(-0.9,0.9), Math.sin(ang)*1.3+rn(-0.8,0.8)])); tube(C, {size:0.09, aspect:2, color:flat([0.75,0.8,0.95]), group:3}, catmull(pts), 0.22); }
+    for (let i = 0; i < 520; i++){ const d = V.randDir(), r = 7.6*Math.cbrt(rnd()); if (r < 5.4 && Math.abs(d[1]*r) < 3.6) continue; const p = V.mul(d, r); emit(C, {size:0.09, aspect:1, thick:1, color:flat([0.6,0.75,0.95], 0.16), group:4}, p, V.randDir(), null, 0, 0); }
+    for (let i = 0; i < 40; i++){ const d = V.randDir(), r = 7*Math.cbrt(rnd()); if (r < 5.4) continue; ellipsoid(C, {size:0.08, color:flat(rnd()<0.5?[0.6,0.4,0.9]:[0.3,0.85,0.5]), group:4}, V.mul(d, r), [0.18,0.18,0.18]); }
+  }
+});
+
+// ---------------------------------------------------------------- CARBON ATOM
+LEVELS.push({
+  id:'atom', eyebrow:'Level 6 · Atom', name:'A carbon atom', scale:'0.3 nm', metersPerUnit:1.5e-10, center:[0,0,0], radius:150,
+  blurb:'Not little balls in orbit: each cloud is sampled from the electron’s probability density |ψ|². 1s hugs the nucleus, 2s is a diffuse shell with a node, and the two 2p electrons form dumbbells. The nucleus is some 25,000 times smaller than the atom.',
+  divePoint:[0,0,0], diveLabel:'into the nucleus',
+  groups:[ {name:'Nucleus (marker)', color:'#FFFFFF'}, {name:'1s electrons', color:'#C0D8FF'}, {name:'2s electrons', color:'#8CF0DC'}, {name:'2pₓ electron', color:'#FF8CBE'}, {name:'2pᵧ electron', color:'#FFD07A'} ],
+  presets:{ 'All':[1,1,1,1,1], 'Core only':[1,1,0,0,0], 'Valence':[1,0,1,1,1] },
+  groupWobble:[0,0.6,1.2,1.2,1.2],
+  build(C){
+    seed(6);
+    const a0 = 52.9;
+    ball(C, {size:1.6, color:flat([1,1,1]), group:0, jitter:0.2}, [0,0,0], [1.2,1.2,1.2], 40);
+    const Z1 = 5.67, Z2 = 3.22;
+    for (let i = 0; i < 22000; i++){ const r = -(a0/(2*Z1))*(Math.log(rnd())+Math.log(rnd())+Math.log(rnd())); const d = V.randDir(); emit(C, {size:2.6, aspect:1, thick:1, color:flat([0.78,0.86,1.0], 0.09), group:1, jitter:0.5}, V.mul(d, r), d, null, 0, 0); }
+    const rej = (dens, rmax, dmax) => { for (let k = 0; k < 200; k++){ const r = rnd()*rmax; if (rnd()*dmax < dens(r)) return r; } return rmax*rnd(); };
+    const d2s = (r) => { const rho = Z2*r/a0; const R = (2-rho)*Math.exp(-rho/2); return r*r*R*R; };
+    let m2s = 0; for (let k = 0; k < 400; k++) m2s = Math.max(m2s, d2s(k*0.5));
+    for (let i = 0; i < 26000; i++){ const r = rej(d2s, 200, m2s); const d = V.randDir(); emit(C, {size:5, aspect:1, thick:1, color:flat([0.55,0.95,0.86], 0.05), group:2, jitter:0.5}, V.mul(d, r), d, null, 0, 0); }
+    const d2p = (r) => { const rho = Z2*r/a0; const R = rho*Math.exp(-rho/2); return r*r*R*R; };
+    let m2p = 0; for (let k = 0; k < 400; k++) m2p = Math.max(m2p, d2p(k*0.5));
+    for (const [g, axis, col] of [[3,0,[1.0,0.55,0.75]],[4,1,[1.0,0.82,0.45]]]){
+      let n = 0; while (n < 26000){ const r = rej(d2p, 200, m2p); const d = V.randDir(); if (rnd() > d[axis]*d[axis]) continue; n++; emit(C, {size:5, aspect:1, thick:1, color:flat(col, 0.05), group:g, jitter:0.5}, V.mul(d, r), d, null, 0, 0); }
+    }
+  }
+});
+
+// ---------------------------------------------------------------- NUCLEUS
+LEVELS.push({
+  id:'nucleus', eyebrow:'Level 7 · Nucleus', name:'The carbon-12 nucleus', scale:'6 fm', metersPerUnit:3.2e-15, center:[0,0,0], radius:3.2,
+  blurb:'Six protons and six neutrons, drawn in the alpha-cluster picture: three helium-4 knots bound by the strong force. The pion field between them is a faint haze; nucleons themselves are fuzzy, not hard.',
+  divePoint:[1.9,0,0], diveLabel:'into a proton',
+  groups:[ {name:'Protons', color:'#F25A4E'}, {name:'Neutrons', color:'#9AA4C9'}, {name:'Pion exchange field', color:'#C9B2F5'} ],
+  presets:{ 'All':[1,1,1], 'Nucleons':[1,1,0.05] },
+  groupWobble:[0.05,0.05,0.15],
+  build(C){
+    seed(12);
+    const tet = [[1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1]].map(v=>V.mul(V.norm(v), 0.95));
+    for (let a = 0; a < 3; a++){
+      const ang = a*2.0944, cc = [1.75*Math.cos(ang), rn(-0.2,0.2), 1.75*Math.sin(ang)];
+      const rm = rotXYZ(rn(0,6.28), rn(0,6.28), rn(0,6.28));
+      tet.forEach((v, k) => { const p = V.add(cc, V.m3v(rm, v)); const proton = k < 2; const col = proton ? [0.95,0.36,0.3] : [0.6,0.65,0.82];
+        ellipsoid(C, {size:0.08, color:mottle(col, 4, 0.25, 0.75), group:proton?0:1}, p, [0.86,0.86,0.86]);
+        blob(C, {size:0.12, color:flat(col, 0.12), group:proton?0:1}, p, [0.45,0.45,0.45], 500); });
+    }
+    blob(C, {size:0.5, color:flat([0.78,0.7,0.96], 0.05), group:2}, [0,0,0], [1.6,1.4,1.6], 2400);
+    for (let i = 0; i < 24; i++){ const a = V.mul(V.randDir(), rn(0.8,2.4)), b = V.mul(V.randDir(), rn(0.8,2.4)); const m = V.add(V.lerp(a,b,0.5), V.mul(V.randDir(), 0.6)); tube(C, {size:0.06, aspect:2, color:flat([0.85,0.78,1.0], 0.25), group:2}, (t)=>{ const s=1-t; return [s*s*a[0]+2*s*t*m[0]+t*t*b[0], s*s*a[1]+2*s*t*m[1]+t*t*b[1], s*s*a[2]+2*s*t*m[2]+t*t*b[2]]; }, 0.06); }
+  }
+});
+
+// ---------------------------------------------------------------- PROTON
+LEVELS.push({
+  id:'proton', eyebrow:'Level 8 · Hadron', name:'Inside a proton', scale:'1.7 fm', metersPerUnit:0.9e-15, center:[0,0,0], radius:0.9,
+  blurb:'Two up quarks and one down, carrying the three color charges, tied by gluon flux tubes that meet at a junction. Around them a churning sea of quark–antiquark pairs; the quarks account for only 1% of the mass.',
+  divePoint:[0,0,0], diveLabel:'toward the Planck scale',
+  groups:[ {name:'Valence quarks (u, u, d)', color:'#FF6B6B'}, {name:'Gluon flux tubes', color:'#FFE07A'}, {name:'Sea quarks', color:'#8CD9FF'}, {name:'Confinement boundary', color:'#5C6B8A'} ],
+  presets:{ 'All':[1,1,1,1], 'Valence':[1,1,0,0.3] },
+  groupWobble:[0.02,0.03,0.05,0],
+  build(C){
+    seed(3);
+    const qs = [ {p:[0.36,0.1,0.0], c:[1,0.25,0.25], r:0.19}, {p:[-0.2,0.05,0.32], c:[0.3,1,0.35], r:0.19}, {p:[-0.18,-0.12,-0.3], c:[0.35,0.45,1], r:0.23} ];
+    for (const q of qs){ blob(C, {size:0.035, color:flat(q.c, 0.22), group:0}, q.p, [q.r,q.r,q.r], 2600); ellipsoid(C, {size:0.02, color:flat(mix(q.c,[1,1,1],0.5), 0.5), group:0}, q.p, [0.07,0.07,0.07]); }
+    const J = [0,0,0.01];
+    for (const q of qs) tube(C, {size:0.03, aspect:2, color:(x,y,z,nx,ny,nz,u)=>{ const c = mix(q.c, [1,0.95,0.7], u); return [c[0],c[1],c[2],0.3+0.2*Math.sin(u*60)]; }, group:1}, (t)=>{ const m = V.add(V.lerp(q.p, J, 0.5), [0.06*Math.sin(t*9), 0.06*Math.cos(t*7), 0]); const s = 1-t; return [s*s*q.p[0]+2*s*t*m[0]+t*t*J[0], s*s*q.p[1]+2*s*t*m[1]+t*t*J[1], s*s*q.p[2]+2*s*t*m[2]+t*t*J[2]]; }, (t)=>0.07-0.02*t);
+    for (let i = 0; i < 6; i++){ const c = V.mul(V.randDir(), rn(0.2,0.5)); tube(C, {size:0.02, aspect:2, color:flat([1,0.9,0.6], 0.18), group:1}, circleCurve(c, rn(0.08,0.2), V.randDir()), 0.025); }
+    const cols = [[1,0.3,0.3],[0.3,1,0.35],[0.35,0.45,1]], anti = [[0.3,1,1],[1,0.3,1],[1,1,0.3]];
+    for (let i = 0; i < 2200; i++){ const d = V.randDir(), r = 0.82*Math.pow(rnd(), 0.6); const p = V.mul(d, r), k = (rnd()*3)|0, off = V.mul(V.randDir(), 0.02); emit(C, {size:0.012, aspect:1, thick:1, color:flat(cols[k], 0.55), group:2}, V.add(p, off), d, null, 0, 0); emit(C, {size:0.012, aspect:1, thick:1, color:flat(anti[k], 0.55), group:2}, V.sub(p, off), d, null, 0, 0); }
+    ellipsoid(C, {size:0.05, color:mottle([0.4,0.5,0.75], 6, 0.3, 0.06), group:3}, [0,0,0], [0.86,0.86,0.86]);
+  }
+});
+
+// ---------------------------------------------------------------- PLANCK
+LEVELS.push({
+  id:'planck', eyebrow:'Level 9 · Beyond', name:'Quantum foam', scale:'10⁻³⁴ m', metersPerUnit:1.616e-35*12, center:[0,0,0], radius:12,
+  blurb:'Twenty orders of magnitude below the proton, no instrument has ever looked. This rung is speculation rendered honestly as such: spacetime itself fluctuating at the Planck length, where geometry stops being smooth.',
+  divePoint:null, diveLabel:null,
+  groups:[ {name:'Metric fluctuations', color:'#B59CFF'}, {name:'Virtual pairs', color:'#FFFFFF'}, {name:'Topology (handles)', color:'#6FE3FF'} ],
+  presets:{ 'All':[1,1,1] },
+  groupWobble:[0.25,0.4,0.1],
+  build(C){
+    seed(42);
+    for (let i = 0; i < 26000; i++){
+      const p = [gauss()*4.5, gauss()*4.5, gauss()*4.5]; const f = fbm(p[0]*0.35+5, p[1]*0.35, p[2]*0.35, 3);
+      const size = 0.12 + 1.1*Math.pow(f, 2.5); const c = f < 0.45 ? mix([0.25,0.1,0.55],[0.55,0.35,1.0], f/0.45) : mix([0.55,0.35,1.0],[0.6,1,1], (f-0.45)/0.55);
+      emit(C, {size, aspect:1, thick:1, color:flat(c, 0.06+0.25*f), group:0, jitter:0.5}, p, V.randDir(), null, 0, 0);
+    }
+    for (let i = 0; i < 1600; i++){ const p = [gauss()*4, gauss()*4, gauss()*4], off = V.mul(V.randDir(), 0.12); emit(C, {size:0.06, aspect:1, thick:1, color:flat([1,1,1], 0.9), group:1}, V.add(p, off), V.randDir(), null, 0, 0); emit(C, {size:0.06, aspect:1, thick:1, color:flat([1,0.85,0.95], 0.9), group:1}, V.sub(p, off), V.randDir(), null, 0, 0); }
+    for (let i = 0; i < 14; i++){ const c = [gauss()*3, gauss()*3, gauss()*3]; tube(C, {size:0.09, aspect:2, color:(x,y,z,nx,ny,nz,u)=>[0.45+0.4*Math.sin(u*6.28), 0.85, 1.0, 0.35], group:2}, circleCurve(c, rn(0.6,1.8), V.randDir()), rn(0.12,0.25)); }
+  }
+});
+</script>
+
+<script>
+'use strict';
+// =====================================================================
+//  Renderer
+// =====================================================================
+const $ = (id) => document.getElementById(id);
+const canvas = $('gl');
+const gl = canvas.getContext('webgl2', { antialias:false, alpha:true, premultipliedAlpha:true, depth:false, stencil:false, powerPreference:'high-performance' });
+if (!gl){ $('loading').innerHTML = '<h1>Corpus <em>Descent</em></h1><p class="fatal">This viewer needs <code>WebGL2</code>, which this browser has disabled or does not offer. Try a current Chrome, Edge, Firefox or Safari.</p>'; throw new Error('no webgl2'); }
+
+const VS = `#version 300 es
+precision highp float; precision highp int; precision highp usampler2D;
+uniform usampler2D uTex; uniform mat4 uView; uniform mat4 uProj; uniform vec2 uFocal; uniform vec2 uViewport;
+uniform float uSplatScale; uniform float uAlpha; uniform float uGroupAlpha[32]; uniform float uGroupPulse[32]; uniform float uGroupWobble[32];
+uniform vec3 uCenter; uniform float uPulse; uniform float uTime;
+in vec2 aPos; in uint aIndex;
+out vec4 vColor; out vec2 vPos;
+void main(){
+  uint i = aIndex;
+  ivec2 tc = ivec2(int((i & 1023u) << 1u), int(i >> 10u));
+  uvec4 t0 = texelFetch(uTex, tc, 0);
+  uvec4 t1 = texelFetch(uTex, tc + ivec2(1,0), 0);
+  uint pk = t1.w; uint g = pk >> 24u;
+  float ga = uGroupAlpha[g];
+  vec3 p = uintBitsToFloat(t0.xyz);
+  float pw = uGroupPulse[g];
+  if (pw != 0.0) p += (p - uCenter) * (uPulse * pw);
+  float wb = uGroupWobble[g];
+  if (wb != 0.0){ float fi = float(i); p += wb * vec3(sin(uTime*1.7 + fi*0.731), sin(uTime*1.3 + fi*1.17), cos(uTime*1.1 + fi*0.39)); }
+  vec4 cam = uView * vec4(p, 1.0);
+  vec4 pos2d = uProj * cam;
+  float clip = 1.2 * pos2d.w;
+  if (ga <= 0.0 || pos2d.z < -clip || pos2d.x < -clip || pos2d.x > clip || pos2d.y < -clip || pos2d.y > clip){ gl_Position = vec4(0.0, 0.0, 2.0, 1.0); return; }
+  vec3 s = uintBitsToFloat(t1.xyz) * uSplatScale;
+  vec3 q = vec3(float(pk & 255u), float((pk >> 8u) & 255u), float((pk >> 16u) & 255u)) / 255.0 * 2.0 - 1.0;
+  float qw = sqrt(max(0.0, 1.0 - dot(q, q)));
+  float x = q.x, y = q.y, z = q.z, w = qw;
+  mat3 R = mat3(1.0-2.0*(y*y+z*z), 2.0*(x*y+w*z), 2.0*(x*z-w*y),
+                2.0*(x*y-w*z), 1.0-2.0*(x*x+z*z), 2.0*(y*z+w*x),
+                2.0*(x*z+w*y), 2.0*(y*z-w*x), 1.0-2.0*(x*x+y*y));
+  mat3 M = mat3(R[0]*s.x, R[1]*s.y, R[2]*s.z);
+  mat3 Vrk = M * transpose(M);
+  float cz = cam.z;
+  mat3 J = mat3(uFocal.x/cz, 0.0, 0.0,  0.0, uFocal.y/cz, 0.0,  -uFocal.x*cam.x/(cz*cz), -uFocal.y*cam.y/(cz*cz), 0.0);
+  mat3 T = J * mat3(uView);
+  mat3 cov = T * Vrk * transpose(T);
+  float a = cov[0][0] + 0.3, b = cov[0][1], d = cov[1][1] + 0.3;
+  float mid = 0.5*(a+d);
+  float rad = sqrt(max(0.1, mid*mid - (a*d - b*b)));
+  float l1 = mid + rad, l2 = max(mid - rad, 0.1);
+  vec2 dv = (abs(b) < 1e-7 && abs(l1 - a) < 1e-7) ? vec2(1.0, 0.0) : normalize(vec2(b, l1 - a));
+  vec2 major = min(sqrt(2.0*l1), 1024.0) * dv;
+  vec2 minor = min(sqrt(2.0*l2), 1024.0) * vec2(dv.y, -dv.x);
+  uint c = t0.w;
+  vec4 col = vec4(float(c & 255u), float((c >> 8u) & 255u), float((c >> 16u) & 255u), float(c >> 24u)) / 255.0;
+  vColor = vec4(col.rgb, col.a * ga * uAlpha);
+  vPos = aPos;
+  vec2 ndc = pos2d.xy / pos2d.w;
+  gl_Position = vec4(ndc + (aPos.x * major + aPos.y * minor) / uViewport * 2.0, 0.0, 1.0);
+}`;
+const FS = `#version 300 es
+precision highp float;
+in vec4 vColor; in vec2 vPos; out vec4 frag;
+void main(){ float A = -dot(vPos, vPos); if (A < -4.0) discard; float B = exp(A) * vColor.a; frag = vec4(B * vColor.rgb, B); }`;
+function compile(type, src){ const sh = gl.createShader(type); gl.shaderSource(sh, src); gl.compileShader(sh); if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh)); return sh; }
+const prog = gl.createProgram(); gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog);
+if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+gl.useProgram(prog);
+const U = {}; for (const n of ['uTex','uView','uProj','uFocal','uViewport','uSplatScale','uAlpha','uGroupAlpha','uGroupPulse','uGroupWobble','uCenter','uPulse','uTime']) U[n] = gl.getUniformLocation(prog, n);
+const A_POS = gl.getAttribLocation(prog, 'aPos'), A_IDX = gl.getAttribLocation(prog, 'aIndex');
+const quadBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-2,-2, 2,-2, -2,2, 2,2]), gl.STATIC_DRAW);
+gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFuncSeparate(gl.ONE_MINUS_DST_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
+gl.uniform1i(U.uTex, 0);
+
+// ---- matrices (column-major)
+function perspective(fovy, aspect, near, far){ const f = 1/Math.tan(fovy/2), nf = 1/(near-far); return new Float32Array([f/aspect,0,0,0, 0,f,0,0, 0,0,(far+near)*nf,-1, 0,0,2*far*near*nf,0]); }
+function lookAt(eye, tgt, up){
+  const z = V.norm(V.sub(eye, tgt)), x = V.norm(V.cross(up, z)), y = V.cross(z, x);
+  return new Float32Array([x[0],y[0],z[0],0, x[1],y[1],z[1],0, x[2],y[2],z[2],0, -V.dot(x,eye),-V.dot(y,eye),-V.dot(z,eye),1]);
+}
+function mul4(a, b){ const o = new Float32Array(16); for (let c = 0; c < 4; c++) for (let r = 0; r < 4; r++) o[c*4+r] = a[r]*b[c*4] + a[4+r]*b[c*4+1] + a[8+r]*b[c*4+2] + a[12+r]*b[c*4+3]; return o; }
+
+// ---- level GPU upload
+function uploadLevel(lv, cloud){
+  const n = cloud.n, rows = Math.max(1, Math.ceil(n/1024));
+  const data = new Uint32Array(2048*4*rows), f32 = new Float32Array(data.buffer);
+  const P = cloud.pos, S = cloud.scl, Q = cloud.rot, Cc = cloud.col, G = cloud.grp;
+  for (let i = 0; i < n; i++){
+    const base = ((i>>10)*2048 + (i&1023)*2)*4, i3 = i*3, i4 = i*4;
+    f32[base] = P[i3]; f32[base+1] = P[i3+1]; f32[base+2] = P[i3+2];
+    data[base+3] = (Cc[i4] | (Cc[i4+1]<<8) | (Cc[i4+2]<<16) | (Cc[i4+3]<<24)) >>> 0;
+    f32[base+4] = S[i3]; f32[base+5] = S[i3+1]; f32[base+6] = S[i3+2];
+    let qx = Q[i4], qy = Q[i4+1], qz = Q[i4+2]; if (Q[i4+3] < 0){ qx = -qx; qy = -qy; qz = -qz; }
+    const bx = Math.max(0, Math.min(255, Math.round((qx*0.5+0.5)*255))), by = Math.max(0, Math.min(255, Math.round((qy*0.5+0.5)*255))), bz = Math.max(0, Math.min(255, Math.round((qz*0.5+0.5)*255)));
+    data[base+7] = (bx | (by<<8) | (bz<<16) | ((G[i]&31)<<24)) >>> 0;
+  }
+  const tex = gl.createTexture(); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32UI, 2048, rows, 0, gl.RGBA_INTEGER, gl.UNSIGNED_INT, data);
+  const idx = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, idx); gl.bufferData(gl.ARRAY_BUFFER, n*4, gl.DYNAMIC_DRAW);
+  const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+  gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf); gl.enableVertexAttribArray(A_POS); gl.vertexAttribPointer(A_POS, 2, gl.FLOAT, false, 0, 0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, idx); gl.enableVertexAttribArray(A_IDX); gl.vertexAttribIPointer(A_IDX, 1, gl.UNSIGNED_INT, 0, 0); gl.vertexAttribDivisor(A_IDX, 1);
+  gl.bindVertexArray(null);
+  lv.gpu = { tex, idx, vao, n };
+  lv.count = n; lv.pos = P.subarray(0, n*3);
+  lv.groupCounts = new Array(lv.groups.length).fill(0); for (let i = 0; i < n; i++) lv.groupCounts[G[i]] = (lv.groupCounts[G[i]]||0) + 1;
+  const s = 1/lv.radius, c = lv.center, fy = lv.flipY ? -1 : 1;
+  lv.model = new Float32Array([s,0,0,0, 0,s*fy,0,0, 0,0,s*fy,0, -c[0]*s, -c[1]*s*fy, -c[2]*s*fy, 1]);
+  lv.sortKey = null;
+  if (!lv.alphas) lv.alphas = new Float32Array(32).fill(1);
+  lv.pulseArr = new Float32Array(32); lv.wobbleArr = new Float32Array(32);
+  lv.groups.forEach((g, i) => { lv.pulseArr[i] = g.pulse || 0; lv.wobbleArr[i] = (lv.groupWobble && lv.groupWobble[i]) || 0; });
+  lv.ready = true;
+}
+function buildLevel(lv){
+  if (lv.ready) return;
+  const t = performance.now(); const C = new Cloud(1<<17); lv.build(C); lv.buildMs = performance.now()-t;
+  uploadLevel(lv, C);
+}
+
+// ---- depth sort (counting sort, nearest first)
+const BUCKETS = 65536, counts = new Uint32Array(BUCKETS);
+let lastSortMs = 0;
+function sortLevel(lv, M){
+  const key = [M[2],M[6],M[10],M[14]];
+  if (lv.sortKey && Math.abs(key[0]-lv.sortKey[0]) + Math.abs(key[1]-lv.sortKey[1]) + Math.abs(key[2]-lv.sortKey[2]) + Math.abs(key[3]-lv.sortKey[3])*0.05 < 1e-4) return;
+  lv.sortKey = key;
+  const t0 = performance.now(), n = lv.count, P = lv.pos;
+  const depth = lv._d || (lv._d = new Float32Array(n)), keys = lv._k || (lv._k = new Uint32Array(n)), out = lv._o || (lv._o = new Uint32Array(n));
+  const m2 = M[2], m6 = M[6], m10 = M[10], m14 = M[14];
+  let mn = Infinity, mx = -Infinity;
+  for (let i = 0, j = 0; i < n; i++, j += 3){ const d = -(m2*P[j] + m6*P[j+1] + m10*P[j+2] + m14); depth[i] = d; if (d < mn) mn = d; if (d > mx) mx = d; }
+  const inv = (BUCKETS-1)/((mx-mn) || 1);
+  counts.fill(0);
+  for (let i = 0; i < n; i++){ const k = ((depth[i]-mn)*inv) | 0; keys[i] = k; counts[k]++; }
+  let acc = 0; for (let k = 0; k < BUCKETS; k++){ const c = counts[k]; counts[k] = acc; acc += c; }
+  for (let i = 0; i < n; i++) out[counts[keys[i]]++] = i;
+  gl.bindBuffer(gl.ARRAY_BUFFER, lv.gpu.idx); gl.bufferSubData(gl.ARRAY_BUFFER, 0, out);
+  lastSortMs = performance.now() - t0;
+}
+
+// =====================================================================
+//  App state
+// =====================================================================
+const DEFAULT_DIST = 2.7, DIVE_AT = 0.42, SURFACE_AT = 7.5, MIN_DIST = 0.12, MAX_DIST = 12;
+const state = {
+  cur: 0, trans: null, cam: { theta: 0.55, phi: 0.18, dist: DEFAULT_DIST, target: [0,0,0] },
+  autoRotate: true, live: true, splatScale: 1, alpha: 1, fov: 42*Math.PI/180, dprCap: 2, showBar: true,
+  lastInteract: -1e9, drawer: true, time: 0,
+};
+let W = 1, H = 1, DPR = 1;
+function resize(){
+  DPR = Math.min(window.devicePixelRatio || 1, state.dprCap);
+  W = Math.max(1, Math.floor(canvas.clientWidth * DPR)); H = Math.max(1, Math.floor(canvas.clientHeight * DPR));
+  if (canvas.width !== W || canvas.height !== H){ canvas.width = W; canvas.height = H; }
+}
+window.addEventListener('resize', resize);
+
+const ease = (t) => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+function normPoint(lv, p){ return p ? [(p[0]-lv.center[0])/lv.radius, (p[1]-lv.center[1])/lv.radius, (p[2]-lv.center[2])/lv.radius] : [0,0,0]; }
+
+function drawLevel(lv, alphaMul, cam, proj, focal){
+  if (!lv.ready) return;
+  const eye = [cam.target[0] + cam.dist*Math.cos(cam.phi)*Math.sin(cam.theta), cam.target[1] + cam.dist*Math.sin(cam.phi), cam.target[2] + cam.dist*Math.cos(cam.phi)*Math.cos(cam.theta)];
+  const view = lookAt(eye, cam.target, [0,1,0]);
+  const M = mul4(view, lv.model);
+  sortLevel(lv, M);
+  gl.uniformMatrix4fv(U.uView, false, M); gl.uniformMatrix4fv(U.uProj, false, proj);
+  gl.uniform2f(U.uFocal, focal[0], focal[1]); gl.uniform2f(U.uViewport, W, H);
+  gl.uniform1f(U.uSplatScale, state.splatScale); gl.uniform1f(U.uAlpha, alphaMul * state.alpha);
+  gl.uniform1fv(U.uGroupAlpha, lv.alphas); gl.uniform1fv(U.uGroupPulse, lv.pulseArr); gl.uniform1fv(U.uGroupWobble, state.live ? lv.wobbleArr : ZERO32);
+  const pc = lv.pulseCenter || [0,0,0]; gl.uniform3f(U.uCenter, pc[0], pc[1], pc[2]);
+  const ph = (state.time * 1.15) % 1; const pulse = state.live ? -Math.exp(-Math.pow((ph-0.22)/0.11, 2)) : 0;
+  gl.uniform1f(U.uPulse, pulse); gl.uniform1f(U.uTime, state.time);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, lv.gpu.tex);
+  gl.bindVertexArray(lv.gpu.vao); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, lv.count); gl.bindVertexArray(null);
+}
+const ZERO32 = new Float32Array(32);
+
+let lastT = performance.now(), fpsEma = 60, frames = 0;
+function frame(now){
+  requestAnimationFrame(frame);
+  const dt = Math.min(0.1, (now - lastT)/1000); lastT = now; state.time += dt;
+  fpsEma = fpsEma*0.95 + (dt > 0 ? 1/dt : 60)*0.05;
+  resize();
+  gl.viewport(0, 0, W, H); gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
+  const cam = state.cam;
+  if (state.autoRotate && !state.trans && now - state.lastInteract > 3500 && !drag.active) cam.theta += dt*0.10;
+  const proj = perspective(state.fov, W/H, 0.01, 60);
+  const focal = [proj[0]*W/2, proj[5]*H/2];
+  const cur = LEVELS[state.cur];
+  if (state.trans){
+    const tr = state.trans, t = Math.min(1, (now - tr.t0)/tr.dur), e = ease(t);
+    const from = LEVELS[tr.from], to = LEVELS[tr.to];
+    const camFrom = { theta:cam.theta, phi:cam.phi, dist: Math.exp(Math.log(tr.d0) + (Math.log(tr.d0*(tr.dir>0?0.22:3.2)) - Math.log(tr.d0))*e), target: V.lerp(tr.tg0, tr.dir>0 ? normPoint(from, from.divePoint) : [0,0,0], e) };
+    const toStart = tr.dir > 0 ? 8 : 0.3;
+    const camTo = { theta:cam.theta, phi:cam.phi, dist: Math.exp(Math.log(toStart) + (Math.log(DEFAULT_DIST) - Math.log(toStart))*e), target: V.lerp(tr.dir>0 ? [0,0,0] : normPoint(to, to.divePoint), [0,0,0], e) };
+    if (tr.dir > 0){ drawLevel(from, 1-e, camFrom, proj, focal); drawLevel(to, e, camTo, proj, focal); }
+    else { drawLevel(to, e, camTo, proj, focal); drawLevel(from, 1-e, camFrom, proj, focal); }
+    if (t >= 1){ state.cur = tr.to; cam.dist = DEFAULT_DIST; cam.target = [0,0,0]; state.trans = null; refreshUI(); }
+  } else drawLevel(cur, 1, cam, proj, focal);
+  if ((frames++ & 15) === 0){ $('stFps').textContent = Math.round(fpsEma); $('stSort').textContent = lastSortMs.toFixed(1); $('stSplats').textContent = (LEVELS[state.cur].count||0).toLocaleString(); updateScaleBar(); }
+}
+
+// ---- transitions
+function goTo(idx, opts){
+  idx = Math.max(0, Math.min(LEVELS.length-1, idx));
+  if (idx === state.cur || state.trans) return;
+  const to = LEVELS[idx]; if (!to.ready){ setHint('Sampling ' + to.name.toLowerCase() + '…', true); buildLevel(to); }
+  const dir = idx > state.cur ? 1 : -1;
+  if (opts && opts.instant){ state.cur = idx; state.cam.dist = DEFAULT_DIST; state.cam.target = [0,0,0]; to.sortKey = null; refreshUI(); return; }
+  state.trans = { from: state.cur, to: idx, dir, t0: performance.now(), dur: 1150, d0: state.cam.dist, tg0: state.cam.target.slice() };
+  LEVELS[idx].sortKey = null;
+  showToast(to.name);
+  $('live').textContent = 'Now viewing ' + to.name + ', ' + to.scale;
+  refreshUI(idx);
+}
+function showToast(txt){ const t = $('toast'); t.textContent = txt; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1400); }
+let hintTimer = null;
+function setHint(txt, sticky){ const h = $('hint'); h.innerHTML = txt; h.classList.remove('gone'); clearTimeout(hintTimer); if (!sticky) hintTimer = setTimeout(() => h.classList.add('gone'), 5000); }
+
+// ---- controls
+const drag = { active:false, id:null, x:0, y:0, btn:0, pts:new Map(), pinch:0 };
+canvas.addEventListener('pointerdown', (e) => { canvas.setPointerCapture(e.pointerId); drag.pts.set(e.pointerId, [e.clientX, e.clientY]); if (drag.pts.size === 1){ drag.active = true; drag.x = e.clientX; drag.y = e.clientY; drag.btn = e.button; drag.shift = e.shiftKey; canvas.classList.add('dragging'); } else if (drag.pts.size === 2){ const a = [...drag.pts.values()]; drag.pinch = Math.hypot(a[0][0]-a[1][0], a[0][1]-a[1][1]); } state.lastInteract = performance.now(); $('hint').classList.add('gone'); });
+canvas.addEventListener('pointermove', (e) => {
+  if (!drag.pts.has(e.pointerId)) return; drag.pts.set(e.pointerId, [e.clientX, e.clientY]); state.lastInteract = performance.now();
+  if (drag.pts.size === 2){ const a = [...drag.pts.values()]; const d = Math.hypot(a[0][0]-a[1][0], a[0][1]-a[1][1]); if (drag.pinch > 0) zoomBy(Math.pow(drag.pinch/d, 1.0)); drag.pinch = d; return; }
+  if (!drag.active) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
+  const cam = state.cam;
+  if (drag.btn === 2 || drag.btn === 1 || drag.shift){ const s = cam.dist*0.0016; const right = [Math.cos(cam.theta), 0, -Math.sin(cam.theta)]; const up = [-Math.sin(cam.phi)*Math.sin(cam.theta), Math.cos(cam.phi), -Math.sin(cam.phi)*Math.cos(cam.theta)]; cam.target = V.add(cam.target, V.add(V.mul(right, -dx*s), V.mul(up, dy*s))); }
+  else { cam.theta -= dx*0.0055; cam.phi = Math.max(-1.45, Math.min(1.45, cam.phi + dy*0.0055)); }
+});
+const endPtr = (e) => { drag.pts.delete(e.pointerId); if (drag.pts.size === 0){ drag.active = false; canvas.classList.remove('dragging'); } drag.pinch = 0; };
+canvas.addEventListener('pointerup', endPtr); canvas.addEventListener('pointercancel', endPtr);
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+canvas.addEventListener('wheel', (e) => { e.preventDefault(); state.lastInteract = performance.now(); zoomBy(Math.exp((e.deltaMode === 1 ? e.deltaY*18 : e.deltaY) * 0.0012)); }, { passive:false });
+function zoomBy(f){
+  if (state.trans) return;
+  const cam = state.cam; cam.dist = Math.max(MIN_DIST, Math.min(MAX_DIST, cam.dist * f));
+  if (cam.dist < DIVE_AT && state.cur < LEVELS.length-1) goTo(state.cur+1);
+  else if (cam.dist > SURFACE_AT && state.cur > 0) goTo(state.cur-1);
+}
+function resetView(){ const cam = state.cam; cam.dist = DEFAULT_DIST; cam.target = [0,0,0]; cam.theta = 0.55; cam.phi = 0.18; }
+window.addEventListener('keydown', (e) => {
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) return;
+  const k = e.key;
+  if (k === 'ArrowDown' || k === '+' || k === '=' || k === 'PageDown'){ goTo(state.cur+1); e.preventDefault(); }
+  else if (k === 'ArrowUp' || k === '-' || k === 'PageUp'){ goTo(state.cur-1); e.preventDefault(); }
+  else if (k === 'r' || k === 'R') resetView();
+  else if (k === ' '){ state.autoRotate = !state.autoRotate; $('rRotate').checked = state.autoRotate; e.preventDefault(); }
+  else if (k === 'h' || k === 'H') toggleDrawer();
+  else if (k >= '0' && k <= '9'){ const i = k === '0' ? 9 : (+k - 1); if (i < LEVELS.length) goTo(i); }
+});
+
+// ---- scale bar
+const SUP = {'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const sup = (n) => String(n).split('').map(c => SUP[c]||c).join('');
+const UNITS = [[1,'m'],[1e-2,'cm'],[1e-3,'mm'],[1e-6,'µm'],[1e-9,'nm'],[1e-12,'pm'],[1e-15,'fm'],[1e-18,'am'],[1e-21,'zm'],[1e-24,'ym']];
+function fmtNum(v){ return v >= 100 ? Math.round(v).toString() : v >= 10 ? (Math.round(v*10)/10).toString() : (Math.round(v*100)/100).toString(); }
+function formatLen(m){
+  if (m >= 1000) return fmtNum(m/1000) + ' km';
+  for (const [u, name] of UNITS) if (m >= u*0.9999) return fmtNum(m/u) + ' ' + name;
+  const e = Math.floor(Math.log10(m)), mant = m/Math.pow(10, e); return fmtNum(mant) + '×10' + sup(e) + ' m';
+}
+function updateScaleBar(){
+  const sb = $('scalebar'); if (!state.showBar){ sb.style.display = 'none'; return; } sb.style.display = '';
+  const lv = LEVELS[state.trans ? state.trans.to : state.cur]; const dist = state.trans ? DEFAULT_DIST : state.cam.dist;
+  const viewH = 2*dist*Math.tan(state.fov/2) * lv.metersPerUnit;
+  const pxPerM = canvas.clientHeight / viewH;
+  const target = 150/pxPerM, e = Math.floor(Math.log10(target)), mant = target/Math.pow(10, e);
+  const nice = (mant >= 5 ? 5 : mant >= 2 ? 2 : 1) * Math.pow(10, e);
+  $('sbBar').style.width = (nice*pxPerM).toFixed(1) + 'px'; $('sbLbl').textContent = formatLen(nice);
+  $('sbFov').textContent = 'view spans ≈ ' + formatLen(viewH);
+}
+
+// ---- UI: ladder, card, layers
+function refreshUI(pendingIdx){
+  const idx = pendingIdx == null ? state.cur : pendingIdx, lv = LEVELS[idx];
+  const lad = $('ladder'); lad.innerHTML = '';
+  LEVELS.forEach((L, i) => { const b = document.createElement('button'); b.className = (i === idx ? 'cur' : '') + (L.isScan ? ' scan' : ''); b.innerHTML = '<span class="sc">' + L.scale + '</span><span class="nm">' + L.name + '</span>'; b.title = L.eyebrow; b.addEventListener('click', () => goTo(i)); lad.appendChild(b); });
+  $('cEyebrow').textContent = lv.eyebrow; $('cTitle').textContent = lv.name;
+  $('cScale').textContent = 'about ' + lv.scale + ' across · 1 unit = ' + formatLen(lv.metersPerUnit) + (lv.buildMs ? ' · ' + (lv.count||0).toLocaleString() + ' splats' : '');
+  $('cBlurb').textContent = lv.blurb;
+  $('btnUp').disabled = idx === 0; $('btnDown').disabled = idx === LEVELS.length-1;
+  $('btnDown').textContent = lv.diveLabel ? 'Dive ' + lv.diveLabel + ' ↓' : 'Dive deeper ↓';
+  $('stSplats').textContent = (lv.count||0).toLocaleString(); updateScaleBar();
+  $('cNote').textContent = lv.isScan ? 'Your capture, rendered as loaded. Photoreal detail comes from the scan itself.' : (idx === LEVELS.length-1 ? 'End of the ladder. Scroll out to surface.' : 'Procedural anatomy: shapes and colors are illustrative. Load a real capture for a photoreal body.');
+  buildLayers(lv);
+}
+function buildLayers(lv){
+  const pr = $('presets'); pr.innerHTML = '';
+  Object.entries(lv.presets || {}).forEach(([name, arr]) => { const b = document.createElement('button'); b.textContent = name; b.addEventListener('click', () => { arr.forEach((v, i) => lv.alphas[i] = v); lv.prev = null; buildLayers(lv); }); pr.appendChild(b); });
+  const box = $('layers'); box.innerHTML = '';
+  lv.groups.forEach((g, i) => {
+    const row = document.createElement('div'); row.className = 'layer' + (lv.alphas[i] <= 0 ? ' off' : '');
+    const sw = document.createElement('button'); sw.className = 'sw'; sw.style.background = g.color; sw.style.opacity = 0.35 + 0.65*lv.alphas[i]; sw.title = 'Toggle ' + g.name; sw.setAttribute('aria-label', 'Toggle ' + g.name);
+    sw.addEventListener('click', () => { if (lv.alphas[i] > 0){ g._prev = lv.alphas[i]; lv.alphas[i] = 0; } else lv.alphas[i] = g._prev || 1; buildLayers(lv); });
+    const nm = document.createElement('div'); nm.className = 'nm'; nm.innerHTML = '<span>' + g.name + '</span><small>' + ((lv.groupCounts && lv.groupCounts[i]) || 0).toLocaleString() + ' splats</small>';
+    const r = document.createElement('input'); r.type = 'range'; r.min = 0; r.max = 1; r.step = 0.02; r.value = lv.alphas[i]; r.setAttribute('aria-label', g.name + ' opacity');
+    r.addEventListener('input', () => { lv.alphas[i] = +r.value; row.classList.toggle('off', lv.alphas[i] <= 0); sw.style.opacity = 0.35 + 0.65*lv.alphas[i]; });
+    const solo = document.createElement('button'); solo.textContent = 'solo'; solo.className = lv.solo === i ? 'on' : '';
+    solo.addEventListener('click', () => { if (lv.solo === i){ lv.solo = null; lv.groups.forEach((_, k) => lv.alphas[k] = lv._beforeSolo ? lv._beforeSolo[k] : 1); } else { if (lv.solo == null) lv._beforeSolo = Array.from(lv.alphas); lv.solo = i; lv.groups.forEach((_, k) => lv.alphas[k] = k === i ? 1 : (k === 0 && lv.id === 'body' ? 0.06 : 0)); } buildLayers(lv); });
+    row.append(sw, nm, r, solo); box.appendChild(row);
+  });
+}
+function toggleDrawer(){ state.drawer = !state.drawer; $('drawer').classList.toggle('hidden', !state.drawer); $('btnDrawer').setAttribute('aria-pressed', String(state.drawer)); }
+$('btnDrawer').addEventListener('click', toggleDrawer);
+$('btnUp').addEventListener('click', () => goTo(state.cur-1)); $('btnDown').addEventListener('click', () => goTo(state.cur+1)); $('btnReset').addEventListener('click', resetView);
+document.querySelectorAll('.drawer .tabs button').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('.drawer .tabs button').forEach(x => x.classList.toggle('on', x === b)); document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.id === 'pane-' + b.dataset.pane)); }));
+$('rSize').addEventListener('input', (e) => state.splatScale = +e.target.value);
+$('rAlpha').addEventListener('input', (e) => state.alpha = +e.target.value);
+$('rDpr').addEventListener('change', (e) => state.dprCap = +e.target.value);
+$('rRotate').addEventListener('change', (e) => state.autoRotate = e.target.checked);
+$('rLive').addEventListener('change', (e) => state.live = e.target.checked);
+$('rFov').addEventListener('input', (e) => state.fov = (+e.target.value)*Math.PI/180);
+$('rBar').addEventListener('change', (e) => { state.showBar = e.target.checked; updateScaleBar(); });
+$('rBg').addEventListener('change', (e) => { const v = e.target.value; $('app').style.background = v === 'black' ? '#000' : v === 'slate' ? 'radial-gradient(120% 90% at 50% 40%,#2A303C 0%,#1A1F29 60%,#12161E 100%)' : ''; });
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches){ state.autoRotate = false; $('rRotate').checked = false; }
+
+// =====================================================================
+//  Scan loading (.splat / 3DGS .ply)
+// =====================================================================
+function parseSplat(buf, maxN){
+  const total = Math.floor(buf.byteLength/32), stride = Math.max(1, Math.ceil(total/maxN)), n = Math.ceil(total/stride);
+  const f = new Float32Array(buf), u = new Uint8Array(buf), C = new Cloud(n+1);
+  for (let k = 0; k < total; k += stride){
+    const o = k*8, b = k*32;
+    let qw = (u[b+28]-128)/128, qx = (u[b+29]-128)/128, qy = (u[b+30]-128)/128, qz = (u[b+31]-128)/128; const l = Math.hypot(qw,qx,qy,qz)||1;
+    C.add(f[o],f[o+1],f[o+2], f[o+3],f[o+4],f[o+5], [qx/l,qy/l,qz/l,qw/l], u[b+24]/255,u[b+25]/255,u[b+26]/255,u[b+27]/255, 0);
+  }
+  return C;
+}
+function parsePly(buf, maxN){
+  const bytes = new Uint8Array(buf); let hdrEnd = -1;
+  for (let i = 0; i < Math.min(bytes.length, 100000) - 10; i++) if (bytes[i]===101 && bytes[i+1]===110 && bytes[i+2]===100 && bytes[i+3]===95 && bytes[i+4]===104 && bytes[i+5]===101 && bytes[i+6]===97 && bytes[i+7]===100 && bytes[i+8]===101 && bytes[i+9]===114){ hdrEnd = i + 10; break; }
+  if (hdrEnd < 0) throw new Error('Not a PLY file (no end_header).');
+  while (bytes[hdrEnd] === 13 || bytes[hdrEnd] === 10) hdrEnd++;
+  const header = new TextDecoder().decode(bytes.subarray(0, hdrEnd));
+  if (!/binary_little_endian/.test(header)) throw new Error('Only binary little-endian PLY is supported (ASCII PLY is not).');
+  const lines = header.split(/\r?\n/); let total = 0, props = [], inVertex = false;
+  const SZ = { float:4, float32:4, double:8, float64:8, uchar:1, uint8:1, char:1, int8:1, ushort:2, uint16:2, short:2, int16:2, uint:4, uint32:4, int:4, int32:4 };
+  for (const ln of lines){ const w = ln.trim().split(/\s+/); if (w[0] === 'element'){ inVertex = w[1] === 'vertex'; if (inVertex) total = +w[2]; } else if (w[0] === 'property' && inVertex){ if (w[1] === 'list') throw new Error('List properties in the vertex element are not supported.'); props.push({ type:w[1], name:w[2] }); } }
+  let off = 0; const P = {}; for (const p of props){ p.off = off; off += SZ[p.type] || 4; P[p.name] = p; } const row = off;
+  const need = ['x','y','z']; for (const nm of need) if (!P[nm]) throw new Error('PLY has no ' + nm + ' property.');
+  const has3dgs = P.scale_0 && P.rot_0 && P.opacity;
+  const dv = new DataView(buf, hdrEnd);
+  const rd = (p, i) => { const o = i*row + p.off; switch (p.type){ case 'float': case 'float32': return dv.getFloat32(o, true); case 'double': case 'float64': return dv.getFloat64(o, true); case 'uchar': case 'uint8': return dv.getUint8(o); case 'char': case 'int8': return dv.getInt8(o); case 'ushort': case 'uint16': return dv.getUint16(o, true); case 'short': case 'int16': return dv.getInt16(o, true); case 'uint': case 'uint32': return dv.getUint32(o, true); default: return dv.getInt32(o, true); } };
+  const stride = Math.max(1, Math.ceil(total/maxN)), C = new Cloud(Math.ceil(total/stride)+1), SH0 = 0.28209479177387814;
+  for (let i = 0; i < total; i += stride){
+    const x = rd(P.x,i), y = rd(P.y,i), z = rd(P.z,i); let r, g, b, a, sx, sy, sz, q;
+    if (has3dgs){
+      r = P.f_dc_0 ? 0.5 + SH0*rd(P.f_dc_0,i) : (P.red ? rd(P.red,i)/255 : 0.7); g = P.f_dc_1 ? 0.5 + SH0*rd(P.f_dc_1,i) : (P.green ? rd(P.green,i)/255 : 0.7); b = P.f_dc_2 ? 0.5 + SH0*rd(P.f_dc_2,i) : (P.blue ? rd(P.blue,i)/255 : 0.7);
+      a = 1/(1+Math.exp(-rd(P.opacity,i))); sx = Math.exp(rd(P.scale_0,i)); sy = Math.exp(rd(P.scale_1,i)); sz = Math.exp(rd(P.scale_2,i));
+      const qw = rd(P.rot_0,i), qx = rd(P.rot_1,i), qy = rd(P.rot_2,i), qz = rd(P.rot_3,i), l = Math.hypot(qw,qx,qy,qz)||1; q = [qx/l,qy/l,qz/l,qw/l];
+    } else { r = P.red ? rd(P.red,i)/255 : 0.75; g = P.green ? rd(P.green,i)/255 : 0.72; b = P.blue ? rd(P.blue,i)/255 : 0.68; a = 1; sx = sy = sz = 0; q = [0,0,0,1]; }
+    C.add(x,y,z, sx,sy,sz, q, r,g,b,a, 0);
+  }
+  if (!has3dgs){ // plain point cloud: give points a size from local spacing estimate
+    const n = C.n; let ext = 0; for (let i = 0; i < n*3; i += 3) ext = Math.max(ext, Math.abs(C.pos[i]), Math.abs(C.pos[i+1]), Math.abs(C.pos[i+2])); const s = ext*2/Math.cbrt(n)*0.9; for (let i = 0; i < n*3; i++) C.scl[i] = s; }
+  return C;
+}
+function robustBounds(C){
+  const n = C.n, m = Math.min(n, 30000), step = Math.max(1, Math.floor(n/m)); const xs = [], ys = [], zs = [];
+  for (let i = 0; i < n; i += step){ xs.push(C.pos[i*3]); ys.push(C.pos[i*3+1]); zs.push(C.pos[i*3+2]); }
+  const q = (arr, p) => { arr.sort((a,b)=>a-b); return arr[Math.floor((arr.length-1)*p)]; };
+  const lo = [q(xs,0.02), q(ys,0.02), q(zs,0.02)], hi = [q(xs,0.98), q(ys,0.98), q(zs,0.98)];
+  const center = V.lerp(lo, hi, 0.5), ext = V.sub(hi, lo);
+  return { center, radius: Math.max(ext[0], ext[1], ext[2])*0.55 || 1, ext };
+}
+async function loadScanFile(file){
+  const msg = $('fileMsg'); msg.className = 'msg'; msg.textContent = 'Reading ' + file.name + ' (' + (file.size/1048576).toFixed(1) + ' MB)…';
+  try {
+    const buf = await file.arrayBuffer(); const maxN = +$('sMax').value; const t0 = performance.now();
+    const C = /\.ply$/i.test(file.name) ? parsePly(buf, maxN) : parseSplat(buf, maxN);
+    if (C.n < 10) throw new Error('No splats found in the file.');
+    const b = robustBounds(C), height = Math.max(0.05, +$('sHeight').value || 1.75);
+    const lv = { id:'scan', isScan:true, eyebrow:'Your capture · Gaussian splat scan', name: file.name.replace(/\.(splat|ply)$/i,''), scale: formatLen(height), metersPerUnit: height*b.radius/Math.max(1e-9, b.ext[1]), center:b.center, radius:b.radius, flipY:$('sFlip').checked,
+      blurb:'Loaded from ' + file.name + ': ' + C.n.toLocaleString() + ' Gaussians rendered exactly as captured. Scroll in past the edge to continue down the procedural ladder from the whole body.',
+      divePoint:[b.center[0], b.center[1], b.center[2]], diveLabel:'into the procedural body', groups:[{name:'Scan', color:'#AEB5F0'}], presets:{}, build(){} };
+    const old = LEVELS.findIndex(L => L.isScan); if (old >= 0){ const O = LEVELS[old]; gl.deleteTexture(O.gpu.tex); gl.deleteBuffer(O.gpu.idx); gl.deleteVertexArray(O.gpu.vao); LEVELS.splice(old, 1); if (state.cur >= old) state.cur = Math.max(0, state.cur-1); }
+    uploadLevel(lv, C); lv.buildMs = performance.now()-t0;
+    LEVELS.unshift(lv); state.cur += 1; state.trans = null;
+    msg.textContent = 'Loaded ' + C.n.toLocaleString() + ' splats in ' + (lv.buildMs/1000).toFixed(1) + ' s.';
+    goTo(0, { instant:true }); resetView();
+  } catch (err){ msg.className = 'msg err'; msg.textContent = 'Could not load: ' + err.message; }
+}
+$('file').addEventListener('change', (e) => { if (e.target.files[0]) loadScanFile(e.target.files[0]); e.target.value = ''; });
+const fb = $('filebox');
+['dragenter','dragover'].forEach(ev => document.addEventListener(ev, (e) => { e.preventDefault(); fb.classList.add('over'); }));
+['dragleave','drop'].forEach(ev => document.addEventListener(ev, (e) => { e.preventDefault(); fb.classList.remove('over'); }));
+document.addEventListener('drop', (e) => { const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f && /\.(splat|ply)$/i.test(f.name)){ document.querySelector('.drawer .tabs button[data-pane=scan]').click(); if (!state.drawer) toggleDrawer(); loadScanFile(f); } });
+$('sFlip').addEventListener('change', () => { const lv = LEVELS.find(L => L.isScan); if (lv){ lv.flipY = $('sFlip').checked; const s = 1/lv.radius, c = lv.center, fy = lv.flipY ? -1 : 1; lv.model = new Float32Array([s,0,0,0, 0,s*fy,0,0, 0,0,s*fy,0, -c[0]*s, -c[1]*s*fy, -c[2]*s*fy, 1]); lv.sortKey = null; } });
+$('sHeight').addEventListener('change', () => { const lv = LEVELS.find(L => L.isScan); if (lv){ const h = Math.max(0.05, +$('sHeight').value || 1.75); lv.metersPerUnit = lv.metersPerUnit * h / (parseFloat(lv.scale) || h); lv.scale = formatLen(h); refreshUI(); } });
+
+// =====================================================================
+//  Boot: build the body first, the deeper levels in the background
+// =====================================================================
+(function boot(){
+  const prog = $('progBar'), st = $('progSt');
+  const steps = ['Sampling skin…','Laying down bone…','Threading vessels and nerves…','Placing organs…'];
+  let si = 0; const tick = setInterval(() => { st.textContent = steps[Math.min(steps.length-1, ++si)]; prog.style.width = Math.min(90, 25*si) + '%'; }, 120);
+  setTimeout(() => {
+    try { buildLevel(LEVELS[0]); } catch (err){ clearInterval(tick); $('loading').innerHTML = '<h1>Corpus <em>Descent</em></h1><p class="fatal">The body could not be generated: <code>' + String(err.message) + '</code></p>'; console.error(err); return; }
+    clearInterval(tick); prog.style.width = '100%';
+    resize(); refreshUI(); requestAnimationFrame(frame);
+    setTimeout(() => $('loading').classList.add('gone'), 150);
+    setTimeout(() => $('hint').classList.add('gone'), 9000);
+    let i = 1;
+    const next = () => { if (i >= LEVELS.length) { setHint('All ' + LEVELS.length + ' levels ready · <b>scroll in</b> to dive'); return; } const lv = LEVELS[i++]; if (!lv.ready){ try { buildLevel(lv); } catch (err){ console.error('level ' + lv.id, err); lv.ready = false; } } setTimeout(next, 30); };
+    setTimeout(next, 400);
+  }, 60);
+})();
+</script>
