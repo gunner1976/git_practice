@@ -9,7 +9,7 @@ Run:  python3 viewer/embed_imagery.py
 import base64, json, os, sys
 here = os.path.dirname(os.path.abspath(__file__))
 html = os.path.join(here, 'index.html'); imgdir = os.path.join(here, 'imagery')
-keys = ['body_front','body_back','body_side','heart_photo','tissue_micrograph','cell_micrograph','mito_micrograph']
+keys = ['body_front','body_back','body_side','heart_photo','tissue_micrograph','cell_micrograph','mito_micrograph'] + [f[:-4] for f in os.listdir(imgdir) if f.startswith('ref_')]
 mime = {'.jpg':'image/jpeg','.jpeg':'image/jpeg','.png':'image/png','.webp':'image/webp'}
 found = {}
 if os.path.isdir(imgdir):
