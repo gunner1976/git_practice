@@ -195,6 +195,7 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
       <h3>Splats</h3>
       <div class="ctl"><label for="rSize">Splat size</label><input id="rSize" type="range" min="0.4" max="2.5" step="0.05" value="1"></div>
       <div class="ctl"><label for="rAlpha">Opacity</label><input id="rAlpha" type="range" min="0.1" max="1" step="0.02" value="1"></div>
+      <div class="ctl"><label for="rShade">Studio lighting</label><input id="rShade" type="range" min="0" max="1" step="0.02" value="1"></div>
       <div class="ctl"><label for="rDpr">Resolution</label><select id="rDpr"><option value="1">1×</option><option value="1.5">1.5×</option><option value="2" selected>Native</option></select></div>
       <h3>Motion</h3>
       <div class="ctl"><label for="rRotate">Auto-orbit</label><input id="rRotate" type="checkbox" checked></div>
@@ -210,6 +211,8 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
       <p class="help">The built-in levels are procedural Gaussian clouds. For a photoreal body, load a real 3D Gaussian Splatting capture of a person: a <code>.splat</code> file or a 3DGS <code>.ply</code> (point_cloud.ply). It becomes the top rung of the ladder and shares every render control.</p>
       <label class="filebox" id="filebox"><input type="file" id="file" accept=".splat,.ply"><b>Drop a .splat / .ply here</b><br>or click to choose · nothing is uploaded, it stays in your browser</label>
       <div class="msg" id="fileMsg"></div>
+      <h3>Where a photoreal body scan comes from</h3>
+      <p class="help">A splat is trained from photographs, so photorealism needs a capture of a real person. Phone apps that export Gaussian splats: <code>Polycam</code>, <code>Luma AI</code>, <code>Scaniverse</code>, <code>KIRI Engine</code> (export as .ply or .splat). On a desktop, <code>Postshot</code> or <code>Nerfstudio</code> train from a video walk-around. Keep exports under about 1 M splats for smooth orbiting.</p>
       <h3>Scan settings</h3>
       <div class="ctl"><label for="sFlip">Flip Y (COLMAP up)</label><input id="sFlip" type="checkbox" checked></div>
       <div class="ctl"><label for="sHeight">Subject height (m)</label><input id="sHeight" type="number" min="0.1" step="0.05" value="1.75"></div>
@@ -286,6 +289,7 @@ const COVER = 0.42;   // splats per (size^2) of surface area
 class Cloud {
   constructor(cap){ this.n = 0; this.cap = cap || 65536; this.pos = new Float32Array(this.cap*3); this.scl = new Float32Array(this.cap*3); this.rot = new Float32Array(this.cap*4); this.col = new Uint8Array(this.cap*4); this.grp = new Uint8Array(this.cap); }
   grow(){ const c = this.cap * 2; const g = (old, k, T) => { const a = new T(c*k); a.set(old); return a; }; this.pos = g(this.pos,3,Float32Array); this.scl = g(this.scl,3,Float32Array); this.rot = g(this.rot,4,Float32Array); this.col = g(this.col,4,Uint8Array); this.grp = g(this.grp,1,Uint8Array); this.cap = c; }
+  filter(pred){ let w = 0; for (let i = 0; i < this.n; i++){ const i3 = i*3, i4 = i*4; if (!pred(this.pos[i3], this.pos[i3+1], this.pos[i3+2], this.grp[i])) continue; if (w !== i){ const w3 = w*3, w4 = w*4; this.pos[w3]=this.pos[i3]; this.pos[w3+1]=this.pos[i3+1]; this.pos[w3+2]=this.pos[i3+2]; this.scl[w3]=this.scl[i3]; this.scl[w3+1]=this.scl[i3+1]; this.scl[w3+2]=this.scl[i3+2]; this.rot[w4]=this.rot[i4]; this.rot[w4+1]=this.rot[i4+1]; this.rot[w4+2]=this.rot[i4+2]; this.rot[w4+3]=this.rot[i4+3]; this.col[w4]=this.col[i4]; this.col[w4+1]=this.col[i4+1]; this.col[w4+2]=this.col[i4+2]; this.col[w4+3]=this.col[i4+3]; this.grp[w]=this.grp[i]; } w++; } this.n = w; }
   add(x,y,z, sx,sy,sz, q, r,g,b,a, group){
     if (this.n >= this.cap) this.grow();
     const i = this.n++, i3 = i*3, i4 = i*4;
@@ -364,9 +368,10 @@ function ball(C, o, c, r, count){ // uniform solid ball
   for (let i = 0; i < count; i++){ const d = V.randDir(), k = Math.cbrt(rnd()); emit(C, oo, [c[0]+d[0]*r[0]*k, c[1]+d[1]*r[1]*k, c[2]+d[2]*r[2]*k], V.randDir(), null, k, 0); }
 }
 // ---- loft: closed surface of revolution-like sections [{y,rx,rz,cx,cz}] sorted by y
+function loftAt(secs, y){ let i = 0; while (i < secs.length-2 && y > secs[i+1].y) i++; const a = secs[i], b = secs[i+1]; let t = (y-a.y)/(b.y-a.y); t = Math.max(0, Math.min(1, t)); t = t*t*(3-2*t); return { rx:a.rx+(b.rx-a.rx)*t, rz:a.rz+(b.rz-a.rz)*t, cx:(a.cx||0)+((b.cx||0)-(a.cx||0))*t, cz:(a.cz||0)+((b.cz||0)-(a.cz||0))*t }; }
 function loft(C, o, secs){
   const y0 = secs[0].y, y1 = secs[secs.length-1].y;
-  const at = (y) => { let i = 0; while (i < secs.length-2 && y > secs[i+1].y) i++; const a = secs[i], b = secs[i+1]; let t = (y-a.y)/(b.y-a.y); t = Math.max(0, Math.min(1, t)); t = t*t*(3-2*t); return { rx:a.rx+(b.rx-a.rx)*t, rz:a.rz+(b.rz-a.rz)*t, cx:(a.cx||0)+((b.cx||0)-(a.cx||0))*t, cz:(a.cz||0)+((b.cz||0)-(a.cz||0))*t }; };
+  const at = (y) => loftAt(secs, y);
   const P = (y, th) => { const s = at(y); return [s.cx + s.rx*Math.cos(th), y, s.cz + s.rz*Math.sin(th)]; };
   let area = 0; for (let k = 0; k < 40; k++){ const s = at(y0 + (y1-y0)*(k+0.5)/40); area += Math.PI*(s.rx+s.rz)*(y1-y0)/40; }
   const n = countFor(o, area), eps = (y1-y0)*0.002;
@@ -457,11 +462,30 @@ LEVELS.push({
     seed(1701);
     const G = {skin:0,skel:1,musc:2,nerv:3,endo:4,card:5,lymph:6,resp:7,dig:8,urin:9,repro:10};
     const skinBase = [0.86,0.66,0.54];
-    const skinCol = (x,y,z,nx,ny,nz) => { const k = 1 + 0.08*(fbm(x*14,y*14,z*14,3)-0.5); const flush = 0.03*fbm(x*5,y*5,z*5,2); return [skinBase[0]*k+flush, skinBase[1]*k, skinBase[2]*k]; };
-    const skinTop = {size:0.0049, color:skinCol, group:G.skin, thick:0.2};
+    const warm = [[0.05,1.62,0.075,0.032,1],[-0.05,1.62,0.075,0.032,1],[0,1.605,0.105,0.02,1.2],[0.086,1.63,-0.008,0.02,0.8],[-0.086,1.63,-0.008,0.02,0.8],[0.29,0.735,0.05,0.035,0.8],[-0.29,0.735,0.05,0.035,0.8],[0.265,1.16,-0.07,0.045,0.6],[-0.265,1.16,-0.07,0.045,0.6],[0.09,0.5,0.065,0.05,0.5],[-0.09,0.5,0.065,0.05,0.5],[0.19,1.44,0.0,0.06,0.35],[-0.19,1.44,0.0,0.06,0.35],[0,1.55,0.05,0.04,0.4]];
+    const zone = (x,y,z) => { let r = 0; for (const w of warm){ const d2 = (x-w[0])*(x-w[0]) + (y-w[1])*(y-w[1]) + (z-w[2])*(z-w[2]); r += w[4]*Math.exp(-d2/(w[3]*w[3])); } return Math.min(1, r); };
+    const skinCol = (x,y,z,nx,ny,nz) => { const k = (1 + 0.07*(fbm(x*14,y*14,z*14,3)-0.5)) * (1 + 0.05*(vnoise(x*420,y*420,z*420)-0.5)); const flush = 0.03*fbm(x*5,y*5,z*5,2), zn = zone(x,y,z); return [skinBase[0]*k + flush + 0.07*zn, skinBase[1]*k - 0.03*zn, skinBase[2]*k - 0.03*zn]; };
+    const skinTop = {size:0.0038, color:skinCol, group:G.skin, thick:0.18, jitter:0.5, density:1.25};
+    const headC = [0,1.635,0], headR = [0.083,0.108,0.094];
+    const TORSO = [ {y:0.80,rx:0.135,rz:0.10,cz:0.0},{y:0.86,rx:0.17,rz:0.12},{y:0.97,rx:0.18,rz:0.125},{y:1.10,rx:0.152,rz:0.108},{y:1.24,rx:0.168,rz:0.12},{y:1.36,rx:0.19,rz:0.125},{y:1.45,rx:0.205,rz:0.105},{y:1.50,rx:0.075,rz:0.06,cz:-0.01} ];
+    const inCap = (p, a, b, r0, r1, m) => { const ab = V.sub(b, a), L2 = V.dot(ab, ab); let t = V.dot(V.sub(p, a), ab)/L2; t = Math.max(0, Math.min(1, t)); const q = V.add(a, V.mul(ab, t)); return V.len(V.sub(p, q)) < r0 + (r1-r0)*t - m; };
+    const inEll = (p, c, r, m) => { const d = [(p[0]-c[0])/(r[0]-m), (p[1]-c[1])/(r[1]-m), (p[2]-c[2])/(r[2]-m)]; return V.dot(d, d) < 1; };
+    const bodyInside = (p, m) => {
+      const [x,y,z] = p;
+      if (y > 0.80 && y < 1.50){ const sc = loftAt(TORSO, y); const dx = (x-sc.cx)/(sc.rx-m), dz = (z-sc.cz)/(sc.rz-m); if (dx*dx + dz*dz < 1) return true; }
+      if (inEll(p, headC, headR, m) || inEll(p, [0,1.565,0.022], [0.062,0.05,0.068], m) || inCap(p, [0,1.49,-0.012],[0,1.57,-0.012], 0.056, 0.05, m)) return true;
+      for (const s of [-1,1]){
+        if (inCap(p, [s*0.205,1.44,0],[s*0.265,1.16,-0.02], 0.058, 0.047, m) || inCap(p, [s*0.265,1.16,-0.02],[s*0.29,0.905,0.03], 0.047, 0.033, m)) return true;
+        if (inEll(p, [s*0.298,0.80,0.045], [0.042,0.075,0.02], m*0.5)) return true;
+        if (inCap(p, [s*0.095,0.90,0],[s*0.092,0.50,0.005], 0.086, 0.062, m) || inCap(p, [s*0.092,0.50,0.005],[s*0.088,0.09,-0.01], 0.062, 0.04, m)) return true;
+        if (inEll(p, [s*0.09,0.035,0.075], [0.048,0.033,0.13], m*0.5)) return true;
+        for (let k = 0; k < 4; k++) if (inCap(p, [s*(0.272+k*0.018),0.735,0.05],[s*(0.268+k*0.02),0.655-Math.abs(k-1.3)*0.012,0.055], 0.0085, 0.007, m*0.3)) return true;
+        if (inCap(p, [s*0.262,0.79,0.062],[s*0.238,0.735,0.085], 0.01, 0.0075, m*0.3)) return true;
+      }
+      return false;
+    };
     const skinPass = (skin, inner) => {
     // ---- head & face
-    const headC = [0,1.635,0], headR = [0.083,0.108,0.094];
     ellipsoid(C, Object.assign({}, skin, {color:(x,y,z,nx,ny,nz)=>{
       const dy = (y-headC[1])/headR[1], dz = (z-headC[2])/headR[2];
       if (dy > 0.32 || (dz < -0.35 && dy > -0.55) || (dy > -0.05 && dz < 0.05 && Math.abs(x) > 0.07)) return null; // hair region drawn separately
@@ -475,14 +499,15 @@ LEVELS.push({
     ellipsoid(C, Object.assign({}, skin, {size:0.003}), [0.086,1.63,-0.008], [0.007,0.026,0.018]);     // ears
     ellipsoid(C, Object.assign({}, skin, {size:0.003}), [-0.086,1.63,-0.008], [0.007,0.026,0.018]); }
     if (!inner) for (const sx of [-1,1]){
-      ellipsoid(C, {size:0.0022, color:flat([0.93,0.92,0.9]), group:G.skin}, [sx*0.031,1.648,0.076], [0.013,0.007,0.006]);
-      ellipsoid(C, {size:0.0018, color:flat([0.16,0.10,0.07]), group:G.skin}, [sx*0.031,1.648,0.081], [0.0058,0.0058,0.003]);
-      capsule(C, {size:0.0025, aspect:2.5, color:flat([0.2,0.13,0.09]), group:G.skin}, [sx*0.018,1.667,0.082],[sx*0.046,1.664,0.074], 0.003, 0.002);
+      ellipsoid(C, {size:0.002, color:flat([0.93,0.92,0.9]), group:G.skin}, [sx*0.031,1.647,0.083], [0.014,0.0075,0.006]);
+      ellipsoid(C, {size:0.0016, color:flat([0.22,0.14,0.09]), group:G.skin}, [sx*0.031,1.647,0.0885], [0.0058,0.0058,0.0025]);
+      ellipsoid(C, {size:0.0012, color:flat([0.02,0.02,0.02]), group:G.skin}, [sx*0.031,1.647,0.0905], [0.0026,0.0026,0.0015]);
+      capsule(C, {size:0.0025, aspect:2.5, color:flat([0.2,0.13,0.09]), group:G.skin}, [sx*0.016,1.667,0.089],[sx*0.047,1.664,0.081], 0.003, 0.002);
     }
-    ellipsoid(C, Object.assign({}, skin, {size:0.004}), [0,1.565,0.022], [0.062,0.05,0.068]);         // jaw
+    ellipsoid(C, Object.assign({}, skin, {size:0.0035, color:(x,y,z)=>{ const lips = Math.exp(-((x*x)/0.0006 + Math.pow(y-1.585,2)/0.00004 + Math.pow(z-0.088,2)/0.0002)); const c = skinCol(x,y,z); return [c[0]+0.06*lips, c[1]-0.16*lips, c[2]-0.12*lips]; }}), [0,1.565,0.022], [0.062,0.05,0.068]);         // jaw
     capsule(C, skin, [0,1.49,-0.012],[0,1.57,-0.012], 0.056, 0.05);                                    // neck
     // ---- torso
-    loft(C, skin, [ {y:0.80,rx:0.135,rz:0.10,cz:0.0},{y:0.86,rx:0.17,rz:0.12},{y:0.97,rx:0.18,rz:0.125},{y:1.10,rx:0.152,rz:0.108},{y:1.24,rx:0.168,rz:0.12},{y:1.36,rx:0.19,rz:0.125},{y:1.45,rx:0.205,rz:0.105},{y:1.50,rx:0.075,rz:0.06,cz:-0.01} ]);
+    loft(C, skin, TORSO);
     // ---- limbs
     for (const s of [-1,1]){
       limb(C, skin, [[s*0.205,1.44,0],[s*0.265,1.16,-0.02],[s*0.29,0.905,0.03]], [0.058,0.047,0.033]);
@@ -494,16 +519,17 @@ LEVELS.push({
     }
     };
     skinPass(skinTop, false);
-    skinPass({size:0.0105, inset:0.0075, thick:0.35, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const k = 0.86 + 0.1*(fbm(x*10,y*10,z*10,2)-0.5); return [skinBase[0]*k, skinBase[1]*k*0.96, skinBase[2]*k*0.95]; }}, true);
+    skinPass({size:0.008, inset:0.0055, thick:0.35, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const k = 0.86 + 0.1*(fbm(x*10,y*10,z*10,2)-0.5); return [skinBase[0]*k, skinBase[1]*k*0.96, skinBase[2]*k*0.95]; }}, true);
+    skinPass({size:0.013, inset:0.011, thick:0.4, jitter:0.25, group:G.skin, color:()=>[skinBase[0]*0.7, skinBase[1]*0.62, skinBase[2]*0.6]}, true);
     // ================= SKELETAL
     const bone = {size:0.0035, color:mottle([0.92,0.88,0.78], 60, 0.18), group:G.skel, thick:0.25};
     ellipsoid(C, bone, [0,1.64,-0.004], [0.073,0.092,0.084]);
-    tube(C, bone, catmull([[0.05,1.60,0.02],[0.055,1.555,0.04],[0.03,1.54,0.075],[0,1.535,0.085],[-0.03,1.54,0.075],[-0.055,1.555,0.04],[-0.05,1.60,0.02]]), 0.008);
+    tube(C, bone, catmull([[0.045,1.60,0.015],[0.05,1.555,0.03],[0.028,1.545,0.06],[0,1.54,0.068],[-0.028,1.545,0.06],[-0.05,1.555,0.03],[-0.045,1.60,0.015]]), 0.007);
     const spine = (t) => [0, 0.94 + 0.59*t, -0.055 + 0.028*Math.sin(t*6.2) - 0.02*t];
     for (let i = 0; i < 24; i++){ const t = (i+0.5)/24, p = spine(t); const r = 0.021 - 0.008*t; ellipsoid(C, bone, p, [r, 0.011, r*0.9]); capsule(C, Object.assign({}, bone, {size:0.003}), [p[0],p[1],p[2]-r*0.6],[p[0],p[1]-0.006,p[2]-r*0.6-0.03], 0.006, 0.003); }
     ellipsoid(C, bone, [0,0.905,-0.06], [0.045,0.05,0.02]);
     for (let i = 0; i < 12; i++){
-      const y = 1.415 - i*0.027, w = 0.135 + 0.06*Math.sin((i+1)/13*Math.PI), open = i >= 10 ? 0.45 : 0.08;
+      const y = 1.415 - i*0.027, w = 0.118 + 0.05*Math.sin((i+1)/13*Math.PI), open = i >= 10 ? 0.45 : 0.08;
       for (const s of [-1,1]) tube(C, Object.assign({}, bone, {size:0.0032, aspect:2}), (t)=>{ const ph = Math.PI*(1-t*(1-open)); return [s*w*Math.sin(ph)*1.05, y - 0.035*t - 0.01*Math.sin(ph), -0.065 + (0.10+0.065)*(1-Math.cos(ph))/2 - 0.02*Math.sin(ph)*Math.sin(ph)]; }, 0.0058);
     }
     capsule(C, bone, [0,1.43,0.108],[0,1.26,0.115], 0.013, 0.01);
@@ -523,15 +549,15 @@ LEVELS.push({
     // ================= MUSCULAR
     const muscCol = (x,y,z,nx,ny,nz,u,v) => { const k = 0.85 + 0.3*fbm(x*80,y*80,z*80,2) + 0.1*Math.sin(v*40); return [0.62*k, 0.19*k, 0.17*k]; };
     const musc = {size:0.0042, aspect:3, thick:0.2, color:muscCol, group:G.musc};
-    loft(C, Object.assign({}, musc, {tangent:()=>[0,1,0]}), [ {y:0.82,rx:0.12,rz:0.09},{y:0.97,rx:0.165,rz:0.112},{y:1.10,rx:0.138,rz:0.096},{y:1.24,rx:0.152,rz:0.108},{y:1.36,rx:0.172,rz:0.112},{y:1.45,rx:0.185,rz:0.095},{y:1.49,rx:0.07,rz:0.055,cz:-0.01} ]);
+    loft(C, Object.assign({}, musc, {tangent:()=>[0,1,0]}), [ {y:0.82,rx:0.11,rz:0.08},{y:0.97,rx:0.154,rz:0.1},{y:1.10,rx:0.128,rz:0.085},{y:1.24,rx:0.142,rz:0.095},{y:1.36,rx:0.162,rz:0.1},{y:1.45,rx:0.174,rz:0.083},{y:1.49,rx:0.06,rz:0.046,cz:-0.01} ]);
     for (const s of [-1,1]){
-      ellipsoid(C, musc, [s*0.085,1.36,0.10], [0.085,0.06,0.03], rotXYZ(0,0,s*0.2));
-      ellipsoid(C, musc, [s*0.2,1.415,0.0], [0.06,0.07,0.06]);
-      ellipsoid(C, musc, [s*0.1,0.94,-0.1], [0.085,0.09,0.045]);
-      for (let k = 0; k < 4; k++) ellipsoid(C, musc, [s*0.035,1.22-k*0.065,0.108], [0.03,0.028,0.018]);
-      limb(C, musc, [[s*0.205,1.42,0],[s*0.262,1.16,-0.02],[s*0.288,0.92,0.03]], [0.05,0.04,0.026]);
-      limb(C, musc, [[s*0.095,0.88,0],[s*0.092,0.50,0.005],[s*0.088,0.12,-0.01]], [0.077,0.055,0.034]);
-      capsule(C, musc, [s*0.09,0.50,-0.03],[s*0.09,0.15,-0.04], 0.05, 0.02); // calf
+      ellipsoid(C, musc, [s*0.08,1.355,0.082], [0.078,0.055,0.024], rotXYZ(0,0,s*0.2));
+      ellipsoid(C, musc, [s*0.2,1.415,0.0], [0.05,0.06,0.048]);
+      ellipsoid(C, musc, [s*0.095,0.94,-0.075], [0.075,0.085,0.035]);
+      for (let k = 0; k < 4; k++) ellipsoid(C, musc, [s*0.035,1.22-k*0.065,0.092], [0.03,0.028,0.014]);
+      limb(C, musc, [[s*0.205,1.42,0],[s*0.262,1.16,-0.02],[s*0.288,0.92,0.03]], [0.046,0.037,0.024]);
+      limb(C, musc, [[s*0.095,0.88,0],[s*0.092,0.50,0.005],[s*0.088,0.12,-0.01]], [0.072,0.05,0.03]);
+      capsule(C, musc, [s*0.09,0.50,-0.02],[s*0.09,0.15,-0.025], 0.036, 0.016); // calf
     }
     // ================= NERVOUS
     const brainCol = (x,y,z) => { const s = fbm(x*140,y*140,z*140,3); const k = 0.7 + 0.5*Math.pow(s,1.5); return [0.86*k, 0.7*k, 0.68*k]; };
@@ -544,7 +570,7 @@ LEVELS.push({
       tube(C, nerve, catmull([[s*0.02,1.45,-0.03],[s*0.12,1.43,-0.01],[s*0.21,1.40,0.0],[s*0.262,1.16,-0.01],[s*0.288,0.91,0.03],[s*0.29,0.80,0.045],[s*0.285,0.7,0.05]]), (t)=>0.0045-0.0025*t);
       tube(C, nerve, catmull([[s*0.02,0.98,-0.05],[s*0.08,0.93,-0.05],[s*0.105,0.88,-0.03],[s*0.10,0.5,-0.02],[s*0.09,0.12,-0.02],[s*0.08,0.03,0.08]]), (t)=>0.006-0.0035*t);
       tube(C, nerve, catmull([[s*0.02,1.02,-0.05],[s*0.08,0.95,0.02],[s*0.09,0.7,0.04],[s*0.09,0.45,0.03]]), 0.002);
-      for (let i = 0; i < 10; i++){ const y = 1.40 - i*0.03, w = 0.13 + 0.06*Math.sin((i+1)/13*Math.PI); tube(C, Object.assign({}, nerve, {size:0.0016}), (t)=>{ const ph = Math.PI*(1-t*0.85); return [s*w*Math.sin(ph), y-0.03*t, -0.055+0.16*(1-Math.cos(ph))/2]; }, 0.0012); }
+      for (let i = 0; i < 10; i++){ const y = 1.40 - i*0.03, w = 0.112 + 0.05*Math.sin((i+1)/13*Math.PI); tube(C, Object.assign({}, nerve, {size:0.0016}), (t)=>{ const ph = Math.PI*(1-t*0.85); return [s*w*Math.sin(ph), y-0.03*t, -0.055+0.16*(1-Math.cos(ph))/2]; }, 0.0012); }
       for (let k = 0; k < 4; k++) tree(C, Object.assign({}, nerve, {size:0.0015}), [s*0.2,1.40-k*0.0,0.0], V.norm([s*0.3,-1,0.3*(k-1.5)]), 0.05, 0.0012, 3, {spread:0.6, bias:[0,-0.4,0]});
       for (let k = 0; k < 4; k++) tree(C, Object.assign({}, nerve, {size:0.0015}), [s*0.09,0.85,0.02], V.norm([s*0.2,-1,0.4*(k-1.5)]), 0.08, 0.0014, 3, {spread:0.5, bias:[0,-0.4,0]});
       tree(C, Object.assign({}, nerve, {size:0.0014}), [s*0.05,1.58,0.03], V.norm([s*0.5,-0.2,1]), 0.04, 0.0012, 3, {spread:0.7});
@@ -591,7 +617,7 @@ LEVELS.push({
     const lym = {size:0.0022, color:mottle([0.5,0.75,0.45], 80, 0.25), group:G.lymph};
     ellipsoid(C, Object.assign({}, lym, {color:mottle([0.45,0.15,0.3], 90, 0.2)}), [-0.1,1.17,-0.045], [0.05,0.03,0.035], rotXYZ(0,0.4,0.3));
     const nodes = (c, n, r) => { for (let i = 0; i < n; i++) ellipsoid(C, lym, [c[0]+gauss()*r, c[1]+gauss()*r, c[2]+gauss()*r], [0.006,0.0045,0.005]); };
-    for (const s of [-1,1]){ nodes([s*0.05,1.5,0.02], 10, 0.025); nodes([s*0.185,1.36,0.0], 12, 0.022); nodes([s*0.1,0.87,0.06], 10, 0.025); nodes([s*0.09,0.52,-0.03], 5, 0.02); }
+    for (const s of [-1,1]){ nodes([s*0.028,1.51,0.012], 8, 0.01); nodes([s*0.185,1.36,0.0], 12, 0.022); nodes([s*0.1,0.87,0.06], 10, 0.025); nodes([s*0.09,0.52,-0.03], 5, 0.02); }
     nodes([0,1.02,0.0], 16, 0.04);
     const lv = Object.assign({}, lym, {size:0.0018, aspect:2.5, alpha:0.8});
     tube(C, lv, (t)=>{ const p = spine(t*0.9); return [p[0]+0.012, p[1], p[2]+0.03]; }, 0.0025);
@@ -625,6 +651,9 @@ LEVELS.push({
     const rp = {size:0.0025, color:mottle([0.8,0.5,0.65], 80, 0.2), group:G.repro};
     ellipsoid(C, rp, [0,0.885,0.02], [0.03,0.036,0.02]);
     for (const s of [-1,1]){ ellipsoid(C, rp, [s*0.05,0.9,0.02], [0.016,0.01,0.012]); tube(C, Object.assign({}, rp, {size:0.0018}), catmull([[s*0.028,0.9,0.02],[s*0.04,0.905,0.03],[s*0.05,0.9,0.02]]), 0.003); }
+    // keep every internal splat inside the skin envelope
+    const deep = new Set([G.nerv, G.card, G.lymph, G.endo]);
+    C.filter((x,y,z,g) => g === G.skin || bodyInside([x,y,z], deep.has(g) ? 0.016 : 0.007));
   }
 });
 
@@ -924,7 +953,7 @@ const VS = `#version 300 es
 precision highp float; precision highp int; precision highp usampler2D;
 uniform usampler2D uTex; uniform mat4 uView; uniform mat4 uProj; uniform vec2 uFocal; uniform vec2 uViewport;
 uniform float uSplatScale; uniform float uAlpha; uniform float uGroupAlpha[32]; uniform float uGroupPulse[32]; uniform float uGroupWobble[32];
-uniform vec3 uCenter; uniform float uPulse; uniform float uTime;
+uniform vec3 uCenter; uniform float uPulse; uniform float uTime; uniform float uShade;
 in vec2 aPos; in uint aIndex;
 out vec4 vColor; out vec2 vPos;
 void main(){
@@ -965,6 +994,21 @@ void main(){
   vec2 minor = min(sqrt(2.0*l2), 1024.0) * vec2(dv.y, -dv.x);
   uint c = t0.w;
   vec4 col = vec4(float(c & 255u), float((c >> 8u) & 255u), float((c >> 16u) & 255u), float(c >> 24u)) / 255.0;
+  float flatness = clamp(1.0 - s.z / max(1e-9, min(s.x, s.y)), 0.0, 1.0) * uShade;
+  if (flatness > 0.0){
+    vec3 nv = normalize(mat3(uView) * R[2]);
+    vec3 vd = normalize(-cam.xyz);
+    if (dot(nv, vd) < 0.0) nv = -nv;
+    vec3 L = normalize(vec3(-0.45, 0.55, 0.7)), Lf = normalize(vec3(0.7, 0.05, 0.4)), Lb = normalize(vec3(0.2, 0.3, -1.0));
+    float dk = dot(nv, L), wrap = clamp((dk + 0.35) / 1.35, 0.0, 1.0);
+    float df = max(dot(nv, Lf), 0.0), db = max(dot(nv, Lb), 0.0);
+    vec3 lum = col.rgb * col.rgb;
+    vec3 lit = lum * (vec3(0.16, 0.18, 0.22) + vec3(1.05, 0.98, 0.9) * wrap + vec3(0.22, 0.25, 0.32) * df)
+             + lum * vec3(0.9, 0.45, 0.35) * pow(max(0.0, 1.0 - abs(nv.z)), 2.5) * 0.35 * (0.3 + 0.7*db)
+             + vec3(1.0, 0.98, 0.95) * pow(max(dot(nv, normalize(L + vd)), 0.0), 56.0) * 0.14 * (0.4 + 0.6 * wrap);
+    vec3 shaded = sqrt(max(lit, 0.0));
+    col.rgb = mix(col.rgb, shaded, flatness);
+  }
   vColor = vec4(col.rgb, col.a * ga * uAlpha);
   vPos = aPos;
   vec2 ndc = pos2d.xy / pos2d.w;
@@ -978,7 +1022,7 @@ function compile(type, src){ const sh = gl.createShader(type); gl.shaderSource(s
 const prog = gl.createProgram(); gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog);
 if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
 gl.useProgram(prog);
-const U = {}; for (const n of ['uTex','uView','uProj','uFocal','uViewport','uSplatScale','uAlpha','uGroupAlpha','uGroupPulse','uGroupWobble','uCenter','uPulse','uTime']) U[n] = gl.getUniformLocation(prog, n);
+const U = {}; for (const n of ['uTex','uView','uProj','uFocal','uViewport','uSplatScale','uAlpha','uGroupAlpha','uGroupPulse','uGroupWobble','uCenter','uPulse','uTime','uShade']) U[n] = gl.getUniformLocation(prog, n);
 const A_POS = gl.getAttribLocation(prog, 'aPos'), A_IDX = gl.getAttribLocation(prog, 'aIndex');
 const quadBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-2,-2, 2,-2, -2,2, 2,2]), gl.STATIC_DRAW);
 gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFuncSeparate(gl.ONE_MINUS_DST_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
@@ -1059,7 +1103,7 @@ function sortLevel(lv, M){
 const DEFAULT_DIST = 2.7, DIVE_AT = 0.42, SURFACE_AT = 7.5, MIN_DIST = 0.12, MAX_DIST = 12;
 const state = {
   cur: 0, trans: null, cam: { theta: 0.55, phi: 0.18, dist: DEFAULT_DIST, target: [0,0,0] },
-  autoRotate: true, live: true, splatScale: 1, alpha: 1, fov: 42*Math.PI/180, dprCap: 2, showBar: true,
+  autoRotate: true, live: true, splatScale: 1, alpha: 1, shade: 1, fov: 42*Math.PI/180, dprCap: 2, showBar: true,
   lastInteract: -1e9, drawer: true, time: 0,
 };
 let W = 1, H = 1, DPR = 1;
@@ -1085,7 +1129,7 @@ function drawLevel(lv, alphaMul, cam, proj, focal){
   gl.uniform1fv(U.uGroupAlpha, lv.alphas); gl.uniform1fv(U.uGroupPulse, lv.pulseArr); gl.uniform1fv(U.uGroupWobble, state.live ? lv.wobbleArr : ZERO32);
   const pc = lv.pulseCenter || [0,0,0]; gl.uniform3f(U.uCenter, pc[0], pc[1], pc[2]);
   const ph = (state.time * 1.15) % 1; const pulse = state.live ? -Math.exp(-Math.pow((ph-0.22)/0.11, 2)) : 0;
-  gl.uniform1f(U.uPulse, pulse); gl.uniform1f(U.uTime, state.time);
+  gl.uniform1f(U.uPulse, pulse); gl.uniform1f(U.uTime, state.time); gl.uniform1f(U.uShade, lv.isScan ? 0 : state.shade);
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, lv.gpu.tex);
   gl.bindVertexArray(lv.gpu.vao); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, lv.count); gl.bindVertexArray(null);
 }
@@ -1199,7 +1243,7 @@ function refreshUI(pendingIdx){
   $('btnUp').disabled = idx === 0; $('btnDown').disabled = idx === LEVELS.length-1;
   $('btnDown').textContent = lv.diveLabel ? 'Dive ' + lv.diveLabel + ' ↓' : 'Dive deeper ↓';
   $('stSplats').textContent = (lv.count||0).toLocaleString(); updateScaleBar();
-  $('cNote').textContent = lv.isScan ? 'Your capture, rendered as loaded. Photoreal detail comes from the scan itself.' : (idx === LEVELS.length-1 ? 'End of the ladder. Scroll out to surface.' : 'Procedural anatomy: shapes and colors are illustrative. Load a real capture for a photoreal body.');
+  $('cNote').textContent = lv.isScan ? 'Your capture, rendered as loaded. Photoreal detail comes from the scan itself.' : (idx === LEVELS.length-1 ? 'End of the ladder. Scroll out to surface.' : 'Procedural anatomy under studio lighting: shapes and colors are illustrative. Photoreal detail comes only from a real capture, see Load scan.');
   buildLayers(lv);
 }
 function buildLayers(lv){
@@ -1224,6 +1268,7 @@ $('btnUp').addEventListener('click', () => goTo(state.cur-1)); $('btnDown').addE
 document.querySelectorAll('.drawer .tabs button').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('.drawer .tabs button').forEach(x => x.classList.toggle('on', x === b)); document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.id === 'pane-' + b.dataset.pane)); }));
 $('rSize').addEventListener('input', (e) => state.splatScale = +e.target.value);
 $('rAlpha').addEventListener('input', (e) => state.alpha = +e.target.value);
+$('rShade').addEventListener('input', (e) => state.shade = +e.target.value);
 $('rDpr').addEventListener('change', (e) => state.dprCap = +e.target.value);
 $('rRotate').addEventListener('change', (e) => state.autoRotate = e.target.checked);
 $('rLive').addEventListener('change', (e) => state.live = e.target.checked);
