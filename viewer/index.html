@@ -512,28 +512,28 @@ const sdCap = (p, a, b, ra, rb) => { const abx = b[0]-a[0], aby = b[1]-a[1], abz
 const smin = (a, b, k) => { const h = Math.max(k - Math.abs(a-b), 0)/k; return Math.min(a, b) - h*h*k*0.25; };
 const smax = (a, b, k) => -smin(-a, -b, k);
 class BodySDF {
-  constructor(){ this.prims = []; this.subs = []; this.cell = 0.12; this.grid = new Map(); }
+  constructor(scale){ this.prims = []; this.subs = []; this.cell = 0.12*(scale||1); this.eps = 0.0004*(scale||1); this.margin = 0.03*(scale||1); this.grid = new Map(); }
   ell(c, r, k, opt){ const pr = Object.assign({ t:'e', c, r, k: k == null ? 0.03 : k, bc:c, br:Math.max(r[0],r[1],r[2]), lo:[c[0]-r[0], c[1]-r[1], c[2]-r[2]], hi:[c[0]+r[0], c[1]+r[1], c[2]+r[2]] }, opt||{}); (pr.sub ? this.subs : this.prims).push(pr); return pr; }
   cap(a, b, ra, rb, k, opt){ const bc = V.lerp(a, b, 0.5), br = V.len(V.sub(b, a))/2 + Math.max(ra, rb), rr = Math.max(ra, rb); const pr = Object.assign({ t:'c', a, b, ra, rb, k: k == null ? 0.03 : k, bc, br, lo:[Math.min(a[0],b[0])-rr, Math.min(a[1],b[1])-rr, Math.min(a[2],b[2])-rr], hi:[Math.max(a[0],b[0])+rr, Math.max(a[1],b[1])+rr, Math.max(a[2],b[2])+rr] }, opt||{}); (pr.sub ? this.subs : this.prims).push(pr); return pr; }
-  finish(){ const cs = this.cell; this.grid.clear(); for (const list of [this.prims, this.subs]) for (const pr of list){ const R = pr.k*2 + 0.03; const lo = pr.lo.map(v => Math.floor((v-R)/cs)), hi = pr.hi.map(v => Math.floor((v+R)/cs)); for (let i = lo[0]; i <= hi[0]; i++) for (let j = lo[1]; j <= hi[1]; j++) for (let l = lo[2]; l <= hi[2]; l++){ const key = i*73856093 ^ j*19349663 ^ l*83492791; let cellList = this.grid.get(key); if (!cellList){ cellList = { a:[], s:[] }; this.grid.set(key, cellList); } (pr.sub ? cellList.s : cellList.a).push(pr); } } return this; }
+  finish(){ const cs = this.cell; this.grid.clear(); for (const list of [this.prims, this.subs]) for (const pr of list){ const R = pr.k*2 + this.margin; const lo = pr.lo.map(v => Math.floor((v-R)/cs)), hi = pr.hi.map(v => Math.floor((v+R)/cs)); for (let i = lo[0]; i <= hi[0]; i++) for (let j = lo[1]; j <= hi[1]; j++) for (let l = lo[2]; l <= hi[2]; l++){ const key = i*73856093 ^ j*19349663 ^ l*83492791; let cellList = this.grid.get(key); if (!cellList){ cellList = { a:[], s:[] }; this.grid.set(key, cellList); } (pr.sub ? cellList.s : cellList.a).push(pr); } } return this; }
   sd(pr, p){ return pr.t === 'e' ? sdEll(p, pr.c, pr.r) : sdCap(p, pr.a, pr.b, pr.ra, pr.rb); }
   F(p){ const cs = this.cell, key = Math.floor(p[0]/cs)*73856093 ^ Math.floor(p[1]/cs)*19349663 ^ Math.floor(p[2]/cs)*83492791; const cl = this.grid.get(key); if (!cl) return 1.0; let f = 1.0;
     for (const pr of cl.a){ if (f < 1.0){ const dx = Math.max(pr.lo[0]-p[0], 0, p[0]-pr.hi[0]), dy = Math.max(pr.lo[1]-p[1], 0, p[1]-pr.hi[1]), dz = Math.max(pr.lo[2]-p[2], 0, p[2]-pr.hi[2]); if (dx*dx+dy*dy+dz*dz > (f + pr.k)*(f + pr.k)) continue; } const d = this.sd(pr, p); f = f >= 1.0 ? d : smin(f, d, pr.k); }
     for (const pr of cl.s){ const dx = Math.max(pr.lo[0]-p[0], 0, p[0]-pr.hi[0]), dy = Math.max(pr.lo[1]-p[1], 0, p[1]-pr.hi[1]), dz = Math.max(pr.lo[2]-p[2], 0, p[2]-pr.hi[2]); if (dx*dx+dy*dy+dz*dz > pr.k*pr.k*4) continue; const d = this.sd(pr, p); f = smax(f, -d, pr.k); } return f; }
-  grad(p){ const e = 0.001; const f1 = this.F([p[0]+e,p[1]-e,p[2]-e]), f2 = this.F([p[0]-e,p[1]-e,p[2]+e]), f3 = this.F([p[0]-e,p[1]+e,p[2]-e]), f4 = this.F([p[0]+e,p[1]+e,p[2]+e]); return V.norm([f1-f2-f3+f4, -f1-f2+f3+f4, -f1+f2-f3+f4]); }
-  project(p){ for (let i = 0; i < 3; i++){ const f = this.F(p); if (Math.abs(f) < 0.0004) break; const g = this.grad(p); p = [p[0]-f*g[0], p[1]-f*g[1], p[2]-f*g[2]]; } return p; }
-  projectN(p){ let g = null; for (let i = 0; i < 2; i++){ const f = this.F(p); g = this.grad(p); p = [p[0]-f*g[0], p[1]-f*g[1], p[2]-f*g[2]]; if (Math.abs(f) < 0.0004) break; } return { p, n: g }; }
+  grad(p){ const e = this.eps*2.5; const f1 = this.F([p[0]+e,p[1]-e,p[2]-e]), f2 = this.F([p[0]-e,p[1]-e,p[2]+e]), f3 = this.F([p[0]-e,p[1]+e,p[2]-e]), f4 = this.F([p[0]+e,p[1]+e,p[2]+e]); return V.norm([f1-f2-f3+f4, -f1-f2+f3+f4, -f1+f2-f3+f4]); }
+  project(p){ for (let i = 0; i < 3; i++){ const f = this.F(p); if (Math.abs(f) < this.eps) break; const g = this.grad(p); p = [p[0]-f*g[0], p[1]-f*g[1], p[2]-f*g[2]]; } return p; }
+  projectN(p){ let g = null; for (let i = 0; i < 2; i++){ const f = this.F(p); g = this.grad(p); p = [p[0]-f*g[0], p[1]-f*g[1], p[2]-f*g[2]]; if (Math.abs(f) < this.eps) break; } return { p, n: g }; }
   // time-sliced variant: returns an object whose step(ms) processes cells until the budget is spent; done when it returns true
   sampleIter(o, emitFn, bbox, cellFilter){
     let lo = [1e9,1e9,1e9], hi = [-1e9,-1e9,-1e9];
-    for (const pr of this.prims) for (let k = 0; k < 3; k++){ lo[k] = Math.min(lo[k], pr.bc[k]-pr.br-0.03); hi[k] = Math.max(hi[k], pr.bc[k]+pr.br+0.03); }
+    for (const pr of this.prims) for (let k = 0; k < 3; k++){ lo[k] = Math.min(lo[k], pr.bc[k]-pr.br-this.margin); hi[k] = Math.max(hi[k], pr.bc[k]+pr.br+this.margin); }
     if (bbox){ for (let k = 0; k < 3; k++){ lo[k] = Math.max(lo[k], bbox.lo[k]); hi[k] = Math.min(hi[k], bbox.hi[k]); } }
-    const cs = 0.015, perCell = Math.max(1, Math.round(cs*cs * (o.density || 1) * COVER / (o.size*o.size)));
+    const cs = o.size * 6.0, perCell = Math.max(1, Math.round(cs*cs * (o.density || 1) * COVER / (o.size*o.size)));
     const nx = Math.max(0, Math.ceil((hi[0]-lo[0])/cs)), ny = Math.max(0, Math.ceil((hi[1]-lo[1])/cs)), nz = Math.max(0, Math.ceil((hi[2]-lo[2])/cs));
     let i = 0, j = 0, l = 0; const total = nx*ny*nz; let done = total === 0; const self = this;
     return { get done(){ return done; }, step(ms){ const t0 = performance.now(); while (!done){
       const c = [lo[0]+(i+0.5)*cs, lo[1]+(j+0.5)*cs, lo[2]+(l+0.5)*cs];
-      if (Math.abs(self.F(c)) <= cs*0.95 && (!cellFilter || cellFilter(c))) for (let k = 0; k < perCell; k++){ let p = [c[0]+(rnd()-0.5)*cs, c[1]+(rnd()-0.5)*cs, c[2]+(rnd()-0.5)*cs]; const r = self.projectN(p); p = r.p; if (Math.abs(self.F(p)) > 0.0025) continue; if (Math.abs(p[0]-c[0]) > cs || Math.abs(p[1]-c[1]) > cs || Math.abs(p[2]-c[2]) > cs) continue; emitFn(p, r.n); }
+      if (Math.abs(self.F(c)) <= cs*0.95 && (!cellFilter || cellFilter(c))) for (let k = 0; k < perCell; k++){ let p = [c[0]+(rnd()-0.5)*cs, c[1]+(rnd()-0.5)*cs, c[2]+(rnd()-0.5)*cs]; const r = self.projectN(p); p = r.p; if (Math.abs(self.F(p)) > cs*0.17) continue; if (Math.abs(p[0]-c[0]) > cs || Math.abs(p[1]-c[1]) > cs || Math.abs(p[2]-c[2]) > cs) continue; emitFn(p, r.n); }
       if (++l >= nz){ l = 0; if (++j >= ny){ j = 0; if (++i >= nx) done = true; } }
       if ((l & 7) === 0 && performance.now() - t0 > ms) break; }
       return done; } };
@@ -541,16 +541,16 @@ class BodySDF {
   // uniform surface sampling: march a grid over the field, seed random points in cells the surface crosses, project onto the zero level
   sample(o, emitFn, bbox){
     let lo = [1e9,1e9,1e9], hi = [-1e9,-1e9,-1e9];
-    for (const pr of this.prims) for (let k = 0; k < 3; k++){ lo[k] = Math.min(lo[k], pr.bc[k]-pr.br-0.03); hi[k] = Math.max(hi[k], pr.bc[k]+pr.br+0.03); }
+    for (const pr of this.prims) for (let k = 0; k < 3; k++){ lo[k] = Math.min(lo[k], pr.bc[k]-pr.br-this.margin); hi[k] = Math.max(hi[k], pr.bc[k]+pr.br+this.margin); }
     if (bbox){ for (let k = 0; k < 3; k++){ lo[k] = Math.max(lo[k], bbox.lo[k]); hi[k] = Math.min(hi[k], bbox.hi[k]); } if (lo[0] >= hi[0] || lo[1] >= hi[1] || lo[2] >= hi[2]) return; }
-    const cs = 0.015, perCell = Math.max(1, Math.round(cs*cs * (o.density || 1) * COVER / (o.size*o.size)));
+    const cs = o.size * 6.0, perCell = Math.max(1, Math.round(cs*cs * (o.density || 1) * COVER / (o.size*o.size)));
     const nx = Math.ceil((hi[0]-lo[0])/cs), ny = Math.ceil((hi[1]-lo[1])/cs), nz = Math.ceil((hi[2]-lo[2])/cs);
     for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) for (let l = 0; l < nz; l++){
       const c = [lo[0]+(i+0.5)*cs, lo[1]+(j+0.5)*cs, lo[2]+(l+0.5)*cs];
       const fc = this.F(c); if (Math.abs(fc) > cs*0.95) continue;
       for (let k = 0; k < perCell; k++){
         let p = [c[0]+(rnd()-0.5)*cs, c[1]+(rnd()-0.5)*cs, c[2]+(rnd()-0.5)*cs];
-        const r = this.projectN(p); p = r.p; if (Math.abs(this.F(p)) > 0.0025) continue;
+        const r = this.projectN(p); p = r.p; if (Math.abs(this.F(p)) > cs*0.17) continue;
         if (Math.abs(p[0]-c[0]) > cs || Math.abs(p[1]-c[1]) > cs || Math.abs(p[2]-c[2]) > cs) continue;
         emitFn(p, r.n);
       }
@@ -907,54 +907,58 @@ LEVELS.push({
     seed(4242);
     const tilt0 = rotXYZ(0.15, -0.1, 0.42), mirror = [-1,0,0, 0,1,0, 0,0,1];
     const mul3 = (a, b) => { const o = new Array(9).fill(0); for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) for (let k = 0; k < 3; k++) o[r*3+c] += a[r*3+k]*b[k*3+c]; return o; };
-    const tilt = mul3(tilt0, mirror);   // geometry is authored mirrored, then reflected so the right heart is on the person's right (-x)
+    const tilt = mul3(tilt0, mirror);   // authored mirrored, then reflected so the right heart sits on the person's right (-x)
+    const inv = mul3(mirror, [tilt0[0],tilt0[3],tilt0[6], tilt0[1],tilt0[4],tilt0[7], tilt0[2],tilt0[5],tilt0[8]]);
     const X = {m:tilt, t:[0,0,0]};
-    const myo = (x,y,z) => { const k = 0.78 + 0.45*fbm(x*0.9,y*0.9,z*0.9,3); const streak = 0.06*Math.sin(y*3 + x*2); return [0.64*k+streak, 0.22*k, 0.24*k]; };
-    const LV = {c:[-0.3,-1.4,0.2], r:[3.9,5.2,3.6]}, RV = {c:[2.6,-0.6,1.2], r:[2.7,4.1,2.4]};
-    ellipsoid(C, {size:0.12, color:myo, group:0, xform:X}, LV.c, LV.r);
-    ellipsoid(C, {size:0.12, color:myo, group:0, xform:X}, RV.c, RV.r);
-    ellipsoid(C, {size:0.12, color:(x,y,z)=>{const c=myo(x,y,z);return [c[0]+0.08,c[1]+0.1,c[2]+0.08];}, group:1, xform:X}, [-1.6,3.4,-2.0], [2.7,2.3,2.4]);
-    ellipsoid(C, {size:0.12, color:(x,y,z)=>{const c=myo(x,y,z);return [c[0]+0.08,c[1]+0.1,c[2]+0.08];}, group:1, xform:X}, [2.9,3.1,0.4], [2.5,2.5,2.3]);
-    for (const s of [-1,1]) ellipsoid(C, {size:0.1, color:myo, group:1, xform:X}, [s>0?4.4:-3.9, 4.4, s>0?1.4:-1.2], [1.0,0.8,1.2]); // auricles
+    // ---- blended distance field of the heart (cm, local frame). grp tags decide the layer of each surface splat
+    const S = new BodySDF(100);   // centimetre scale
+    const LV = S.ell([-0.3,-1.4,0.2], [3.9,5.2,3.6], 0.9, { grp:0 }), RV = S.ell([2.6,-0.6,1.2], [2.7,4.1,2.4], 0.9, { grp:0 });
+    S.ell([-1.3,-6.3,0.9], [1.7,1.9,1.5], 1.2, { grp:0 });                                                       // apex
+    S.ell([1.2,-2.2,-2.2], [3.6,3.4,1.6], 1.0, { grp:0 });                                                       // posterior wall
+    S.ell([-1.6,3.4,-2.0], [2.7,2.3,2.4], 0.7, { grp:1 }); S.ell([2.9,3.1,0.4], [2.5,2.5,2.3], 0.7, { grp:1 });   // left, right atrium
+    S.ell([-3.9,4.4,-1.2], [1.0,0.8,1.2], 0.5, { grp:1 }); S.ell([4.4,4.4,1.4], [1.0,0.8,1.2], 0.5, { grp:1 });   // auricles
+    const seg = (pts, r0, r1, k, grp) => { for (let i = 0; i + 1 < pts.length; i++) S.cap(pts[i], pts[i+1], r0 + (r1-r0)*i/(pts.length-1), r0 + (r1-r0)*(i+1)/(pts.length-1), k, { grp }); };
+    seg([[-0.6,4.2,-0.4],[-0.6,6.8,-0.6],[-1.6,8.6,-1.4],[-3.2,8.2,-2.6],[-3.4,5.5,-3.6]], 1.45, 1.2, 0.6, 2);   // aorta and arch
+    for (let k = 0; k < 3; k++) seg([[-1.2-k*0.9,8.3-k*0.3,-1.6-k*0.4],[-1.3-k*1.0,10.5,-2.0-k*0.4]], 0.4, 0.4, 0.3, 2);   // arch branches
+    seg([[1.6,4.1,1.3],[1.0,6.5,1.6],[-1.2,7.8,1.4],[-3.5,7.4,0.4]], 1.35, 1.05, 0.6, 3);                        // pulmonary trunk
+    seg([[0.2,7.2,1.6],[2.2,8.0,1.0],[4.0,7.6,-0.4]], 0.75, 0.75, 0.4, 3);                                       // right pulmonary artery
+    seg([[3.6,4.6,-0.4],[3.7,7.0,-0.8],[3.6,9.5,-1.2]], 1.0, 1.0, 0.5, 3); seg([[3.2,1.6,-1.6],[3.3,-1.5,-1.6],[3.2,-4.5,-1.4]], 1.15, 1.15, 0.5, 3);   // SVC, IVC
+    for (let k = 0; k < 4; k++) seg([[-2.5+(k%2)*1.6, 3.4+0.8*(k>>1), -3.6],[-3.5+(k%2)*2.4, 3.6+1.4*(k>>1), -6.2]], 0.55, 0.55, 0.35, 3);   // pulmonary veins
+    // grooves carved into the surface
+    S.cap([-0.6,3.4,2.6], [-1.6,-6.2,1.4], 0.55, 0.45, 0.5, { sub:true });                                       // anterior interventricular groove
+    S.cap([1.2,-3.0,-3.4], [-1.4,-6.4,0.4], 0.5, 0.4, 0.5, { sub:true });                                        // posterior interventricular groove
+    for (let i = 0; i < 12; i++){ const a0 = i/12*6.2832, a1 = (i+1)/12*6.2832; S.cap([3.6*Math.cos(a0), 2.2 - 0.6*Math.sin(a0), 3.2*Math.sin(a0)], [3.6*Math.cos(a1), 2.2 - 0.6*Math.sin(a1), 3.2*Math.sin(a1)], 0.55, 0.55, 0.45, { sub:true }); }   // atrioventricular groove
+    S.finish();
+    const tagOf = (p) => { let best = 1e9, g = 0; for (const pr of S.prims){ const d = S.sd(pr, p); if (d < best){ best = d; g = pr.grp; } } return g; };
+    const myo = (x,y,z) => { const k = 0.78 + 0.45*fbm(x*0.9,y*0.9,z*0.9,3); const streak = 0.05*Math.sin(y*3 + x*2); return [0.56*k+streak, 0.24*k, 0.24*k]; };
+    const atr = (x,y,z) => { const c = myo(x,y,z); return [c[0]+0.08, c[1]+0.1, c[2]+0.08]; };
     const artCol = mottle([0.86,0.58,0.52], 0.8, 0.2), venCol = mottle([0.55,0.48,0.66], 0.8, 0.2);
-    const gv = {size:0.11, aspect:1.8, group:2, xform:X, color:artCol};
-    tube(C, gv, catmull([[-0.6,4.2,-0.4],[-0.6,6.8,-0.6],[-1.6,8.6,-1.4],[-3.2,8.2,-2.6],[-3.4,5.5,-3.6]]), (t)=>1.45-0.25*t);
-    for (let k = 0; k < 3; k++) tube(C, Object.assign({}, gv, {size:0.08}), catmull([[-1.2-k*0.9,8.3-k*0.3,-1.6-k*0.4],[-1.3-k*1.0,10.5,-2.0-k*0.4]]), 0.4);
-    tube(C, Object.assign({}, gv, {group:3, color:venCol}), catmull([[1.6,4.1,1.3],[1.0,6.5,1.6],[-1.2,7.8,1.4],[-3.5,7.4,0.4]]), (t)=>1.35-0.3*t);
-    tube(C, Object.assign({}, gv, {group:3, color:venCol}), catmull([[0.2,7.2,1.6],[2.2,8.0,1.0],[4.0,7.6,-0.4]]), 0.75);
-    tube(C, Object.assign({}, gv, {group:3, color:venCol}), catmull([[3.6,4.6,-0.4],[3.7,7.0,-0.8],[3.6,9.5,-1.2]]), 1.0);
-    tube(C, Object.assign({}, gv, {group:3, color:venCol}), catmull([[3.2,1.6,-1.6],[3.3,-1.5,-1.6],[3.2,-4.5,-1.4]]), 1.15);
-    for (let k = 0; k < 4; k++) tube(C, Object.assign({}, gv, {size:0.08, group:3, color:venCol}), catmull([[-2.5+(k%2)*1.6, 3.4+0.8*(k>>1), -3.6],[-3.5+(k%2)*2.4, 3.6+1.4*(k>>1), -6.2]]), 0.55);
-    // coronary arteries on the ventricle surfaces
-    const onSurf = (E, p, k) => { const d = [(p[0]-E.c[0])/E.r[0], (p[1]-E.c[1])/E.r[1], (p[2]-E.c[2])/E.r[2]]; const l = V.len(d) || 1; return [E.c[0]+d[0]/l*E.r[0]*k, E.c[1]+d[1]/l*E.r[1]*k, E.c[2]+d[2]/l*E.r[2]*k]; };
-    const cor = {size:0.07, aspect:2, color:mottle([0.9,0.28,0.26], 1.5, 0.2), group:4, xform:X, sizeR:0.6};
-    const corV = {size:0.07, aspect:2, color:mottle([0.38,0.36,0.78], 1.5, 0.2), group:5, xform:X, sizeR:0.6};
-    const surfTree = (o, E, p, dir, len, rad, depth) => tree(C, o, p, dir, len, rad, depth, {spread:0.8, decay:0.75, rdec:0.7, bend:0.4, minRad:0.05, leaf:null}) ;
-    const project = (E, k) => (o) => Object.assign({}, o, {xform:null, color:o.color, post:null});
-    // LAD: front groove; use tube with projection
+    const cols = [myo, atr, artCol, venCol];
+    const surfacePass = (size, CC, bbox, iter, inset) => S[iter ? 'sampleIter' : 'sample']({ size, density:1.0 }, (p, n) => { const g = tagOf(p); emit(CC, { size, thick:0.2, jitter:0.4, group:g, xform:X, inset: inset || 0, color: cols[g] }, p, n, null, 0, 0); }, bbox);
+    surfacePass(0.07, C); surfacePass(0.12, C, null, false, 0.08);
+    // ---- coronary vessels on the surface: paths projected onto the field, branches re-projected after growth
+    const surf = (p, lift) => { const q = S.project(p); const g = S.grad(q); return [q[0]+g[0]*(lift||0.12), q[1]+g[1]*(lift||0.12), q[2]+g[2]*(lift||0.12)]; };
+    const cor = {size:0.05, aspect:2, color:mottle([0.9,0.28,0.26], 1.5, 0.2), group:4, xform:X, sizeR:0.6};
+    const corV = {size:0.05, aspect:2, color:mottle([0.38,0.36,0.78], 1.5, 0.2), group:5, xform:X, sizeR:0.6};
     const lad = catmull([[-0.6,3.6,2.4],[0.2,1.5,3.6],[0.4,-1.2,3.9],[0.0,-3.6,3.6],[-0.8,-5.6,2.6],[-1.4,-6.6,1.2]]);
-    tube(C, Object.assign({}, cor, {size:0.07}), (t)=>onSurf(LV, lad(t), 1.03), (t)=>0.19-0.10*t);   // LAD ~3.7 mm proximal
+    tube(C, Object.assign({}, cor, {size:0.06}), (t)=>surf(lad(t)), (t)=>0.19-0.10*t);
     const cx = catmull([[-0.8,3.6,2.0],[-3.0,3.0,1.6],[-4.4,1.6,0.0],[-4.2,-0.4,-2.2],[-3.0,-2.6,-3.2]]);
-    tube(C, Object.assign({}, cor, {size:0.07}), (t)=>onSurf(LV, cx(t), 1.03), (t)=>0.17-0.09*t);
+    tube(C, Object.assign({}, cor, {size:0.06}), (t)=>surf(cx(t)), (t)=>0.17-0.09*t);
     const rca = catmull([[1.2,3.4,2.4],[3.4,2.8,2.6],[5.0,1.2,1.4],[5.2,-1.2,-0.4],[4.0,-3.4,-1.2],[2.0,-4.6,-1.6]]);
-    tube(C, Object.assign({}, cor, {size:0.07}), (t)=>onSurf(RV, rca(t), 1.03), (t)=>0.19-0.10*t);   // RCA ~3.9 mm
+    tube(C, Object.assign({}, cor, {size:0.06}), (t)=>surf(rca(t)), (t)=>0.19-0.10*t);
     const gcv = catmull([[-1.2,3.2,2.6],[-2.2,1.2,3.4],[-2.4,-1.6,3.5],[-3.6,-3.4,2.0],[-4.6,-1.4,-1.6],[-3.4,1.2,-3.2],[-1.2,2.6,-3.6]]);
-    tube(C, Object.assign({}, corV, {size:0.07}), (t)=>onSurf(LV, gcv(t), 1.03), 0.16);
-    const branch = (o, E, path, n) => { for (let i = 0; i < n; i++){ const t = rn(0.1,0.9), p = onSurf(E, path(t), 1.02); const tg = V.norm(V.sub(path(t+0.01), path(t))); const side = V.cross(tg, V.norm(V.sub(p, E.c))); const oo = Object.assign({}, o, {size:0.06}); tree(C, Object.assign({}, oo, {color:oo.color}), p, V.norm(V.add(V.mul(side, rnd()<0.5?1:-1), V.mul(tg, rn(-0.3,0.3)))), rn(1.2,2.2), 0.085, 3, {spread:0.8, decay:0.75, rdec:0.72, bend:0.5, minRad:0.03}); } };
-    // constrain branch splats to the surface by re-projecting after generation of this block
+    tube(C, Object.assign({}, corV, {size:0.06}), (t)=>surf(gcv(t)), 0.16);
     const n0 = C.n;
-    branch(cor, LV, lad, 7); branch(cor, LV, cx, 5); branch(cor, RV, rca, 6); branch(corV, LV, gcv, 6);
-    for (let i = n0; i < C.n; i++){ // project onto the nearer ventricle surface (in tilted frame -> untilt, project, retilt)
-      const inv = mul3(mirror, [tilt0[0],tilt0[3],tilt0[6], tilt0[1],tilt0[4],tilt0[7], tilt0[2],tilt0[5],tilt0[8]]);   // (T·M)^-1 = M·Tᵀ
-      const p = V.m3v(inv, [C.pos[i*3],C.pos[i*3+1],C.pos[i*3+2]]);
-      const dL = V.len([(p[0]-LV.c[0])/LV.r[0],(p[1]-LV.c[1])/LV.r[1],(p[2]-LV.c[2])/LV.r[2]]), dR = V.len([(p[0]-RV.c[0])/RV.r[0],(p[1]-RV.c[1])/RV.r[1],(p[2]-RV.c[2])/RV.r[2]]);
-      const q = V.m3v(tilt, onSurf(Math.abs(dL-1) < Math.abs(dR-1) ? LV : RV, p, 1.025));
-      C.pos[i*3]=q[0]; C.pos[i*3+1]=q[1]; C.pos[i*3+2]=q[2];
-    }
-    // fat in the grooves
+    const branch = (o, path, n) => { for (let i = 0; i < n; i++){ const t = rn(0.1,0.9), p = surf(path(t)); const tg = V.norm(V.sub(path(t+0.01), path(t))); const side = V.cross(tg, S.grad(p)); tree(C, Object.assign({}, o, {size:0.05}), p, V.norm(V.add(V.mul(side, rnd()<0.5?1:-1), V.mul(tg, rn(-0.3,0.3)))), rn(1.2,2.2), 0.085, 3, {spread:0.8, decay:0.75, rdec:0.72, bend:0.5, minRad:0.03}); } };
+    branch(cor, lad, 7); branch(cor, cx, 5); branch(cor, rca, 6); branch(corV, gcv, 6);
+    for (let i = n0; i < C.n; i++){ const p = V.m3v(inv, [C.pos[i*3],C.pos[i*3+1],C.pos[i*3+2]]); const q = V.m3v(tilt, surf(p, 0.1)); C.pos[i*3]=q[0]; C.pos[i*3+1]=q[1]; C.pos[i*3+2]=q[2]; }
+    // ---- epicardial fat along the grooves
     const fat = {size:0.1, color:mottle([0.95,0.85,0.5], 1.2, 0.25, 0.85), group:6, xform:X};
-    for (let i = 0; i < 16; i++){ const t = rnd(); const p = onSurf(LV, cx(t), 1.0); blob(C, fat, [p[0]+gauss()*0.25, p[1]+gauss()*0.25, p[2]+gauss()*0.25], [0.35,0.28,0.28], 14); }
-    for (let i = 0; i < 16; i++){ const t = rnd(); const p = onSurf(RV, rca(t), 1.0); blob(C, fat, [p[0]+gauss()*0.25, p[1]+gauss()*0.25, p[2]+gauss()*0.25], [0.35,0.28,0.28], 14); }
+    for (let i = 0; i < 16; i++){ const p = surf(cx(rnd()), 0.05); blob(C, fat, [p[0]+gauss()*0.25, p[1]+gauss()*0.25, p[2]+gauss()*0.25], [0.35,0.28,0.28], 14); }
+    for (let i = 0; i < 16; i++){ const p = surf(rca(rnd()), 0.05); blob(C, fat, [p[0]+gauss()*0.25, p[1]+gauss()*0.25, p[2]+gauss()*0.25], [0.35,0.28,0.28], 14); }
+    for (let i = 0; i < 10; i++){ const a = rnd()*6.2832; const p = surf([3.6*Math.cos(a), 2.2 - 0.6*Math.sin(a), 3.2*Math.sin(a)], 0.05); blob(C, fat, p, [0.4,0.3,0.3], 12); }
+    // adaptive refinement: resample the surface around the target (given in raw heart coordinates) at fine size
+    this.refine = (center, r, size) => { const cl = V.m3v(inv, center); const C2 = new Cloud(1<<16); const bbox = { lo:[cl[0]-r, cl[1]-r, cl[2]-r], hi:[cl[0]+r, cl[1]+r, cl[2]+r] }; const iters = [surfacePass(size, C2, bbox, true), surfacePass(size*1.9, C2, bbox, true, 0.06)]; return { cloud: C2, iters }; };
   }
 });
 
