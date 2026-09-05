@@ -61,6 +61,8 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
 .card .row{display:flex;gap:8px;align-items:center}
 .card .row .sp{flex:1}
 .card .note{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:10px}
+.card .vitals{font-size:11px;color:var(--hema2);margin-top:8px;font-variant-numeric:tabular-nums;line-height:1.5}
+.card .vitals:empty{display:none}
 .card .imgs{display:flex;gap:6px;margin-top:10px}
 .card .imgs:empty{display:none}
 .card .imgs img{height:44px;width:auto;max-width:80px;object-fit:cover;border-radius:3px;border:1px solid var(--line2)}
@@ -196,6 +198,7 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
       <span class="sp"></span>
       <button id="btnReset" title="Reset view (R)">Reset view</button>
     </div>
+    <div class="vitals mono" id="cVitals"></div>
     <div class="imgs" id="cImgs"></div>
     <div class="note" id="cNote"></div>
   </aside>
@@ -238,9 +241,13 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
       <div class="ctl"><label for="rAlpha">Opacity</label><input id="rAlpha" type="range" min="0.1" max="1" step="0.02" value="1"></div>
       <div class="ctl"><label for="rShade">Studio lighting</label><input id="rShade" type="range" min="0" max="1" step="0.02" value="1"></div>
       <div class="ctl"><label for="rDpr">Resolution</label><select id="rDpr"><option value="1">1×</option><option value="1.5">1.5×</option><option value="2" selected>Native</option></select></div>
+      <h3>Physiology</h3>
+      <div class="presets" id="physPresets"></div>
+      <div class="ctl"><label for="pHR">Heart rate (bpm)</label><input id="pHR" type="range" min="40" max="180" step="1" value="70"></div>
+      <div class="ctl"><label for="pRR">Breathing (per min)</label><input id="pRR" type="range" min="6" max="40" step="1" value="14"></div>
+      <div class="ctl"><label for="rLive">Physiology &amp; thermal motion</label><input id="rLive" type="checkbox" checked></div>
       <h3>Motion</h3>
       <div class="ctl"><label for="rRotate">Auto-orbit</label><input id="rRotate" type="checkbox" checked></div>
-      <div class="ctl"><label for="rLive">Heartbeat &amp; thermal motion</label><input id="rLive" type="checkbox" checked></div>
       <h3>View</h3>
       <div class="ctl"><label for="rFov">Field of view</label><input id="rFov" type="range" min="20" max="80" step="1" value="42"></div>
       <div class="ctl"><label for="rBg">Ground</label><select id="rBg"><option value="studio" selected>Studio</option><option value="black">Black</option><option value="slate">Slate</option></select></div>
@@ -500,26 +507,28 @@ const LEVELS = [];
 function defaultBodyParams(){
   return {
     H:1.75,
-    head:{ c:[0,1.635,0], r:[0.083,0.108,0.094] }, jaw:{ c:[0,1.565,0.022], r:[0.062,0.05,0.068] }, neck:{ a:[0,1.49,-0.012], b:[0,1.57,-0.012], r:[0.056,0.05] },
-    torso:[ {y:0.80,rx:0.135,rz:0.10,cz:0.0},{y:0.86,rx:0.17,rz:0.12},{y:0.97,rx:0.18,rz:0.125},{y:1.10,rx:0.152,rz:0.108},{y:1.24,rx:0.168,rz:0.12},{y:1.36,rx:0.19,rz:0.125},{y:1.45,rx:0.205,rz:0.105},{y:1.50,rx:0.075,rz:0.06,cz:-0.01} ],
-    arm:{ pts:[[0.205,1.44,0],[0.265,1.16,-0.02],[0.29,0.905,0.03]], r:[0.058,0.047,0.033] },
-    hand:{ c:[0.298,0.80,0.045], r:[0.042,0.075,0.02] },
-    leg:{ pts:[[0.095,0.90,0],[0.092,0.50,0.005],[0.088,0.09,-0.01]], r:[0.086,0.062,0.04] },
-    foot:{ c:[0.09,0.035,0.075], r:[0.048,0.033,0.13] },
+    // vertex 1.75, eye 0.936H, chin 0.870H, acromion 0.818H, elbow 0.630H, wrist 0.485H, trochanter 0.530H, knee 0.285H, ankle 0.039H,
+    // biacromial 0.259H, bi-iliac 0.191H, head width 0.15 m, foot 0.152H, hand 0.108H (Drillis & Contini 1966)
+    head:{ c:[0,1.637,0], r:[0.0775,0.108,0.094] }, jaw:{ c:[0,1.56,0.02], r:[0.06,0.048,0.066] }, neck:{ a:[0,1.475,-0.012], b:[0,1.56,-0.012], r:[0.058,0.052] },
+    torso:[ {y:0.81,rx:0.13,rz:0.10,cz:0.0},{y:0.87,rx:0.165,rz:0.12},{y:0.98,rx:0.172,rz:0.125},{y:1.10,rx:0.15,rz:0.108},{y:1.24,rx:0.165,rz:0.118},{y:1.35,rx:0.185,rz:0.122},{y:1.43,rx:0.22,rz:0.105},{y:1.49,rx:0.075,rz:0.06,cz:-0.01} ],
+    arm:{ pts:[[0.20,1.425,0],[0.245,1.10,-0.02],[0.265,0.85,0.03]], r:[0.056,0.045,0.031] },
+    hand:{ c:[0.272,0.75,0.045], r:[0.042,0.07,0.02] },
+    leg:{ pts:[[0.092,0.92,0],[0.09,0.50,0.005],[0.086,0.07,-0.01]], r:[0.088,0.062,0.04] },
+    foot:{ c:[0.088,0.03,0.075], r:[0.048,0.03,0.133] },
     fitted:false,
   };
 }
 LEVELS.push({
-  id:'body', eyebrow:'Level 0 · Organism', name:'The whole body', scale:'1.75 m', metersPerUnit:0.95, center:[0,0.88,0], radius:0.95,
-  blurb:'A standing adult sampled as a cloud of oriented Gaussians. Fade the skin down to reveal all eleven organ systems, each its own layer.',
-  divePoint:[0.02,1.28,0.04], diveLabel:'into the heart',
+  id:'body', eyebrow:'Level 0 · Organism', name:'The whole body', scale:'1.75 m', metersPerUnit:0.95, center:[0,0.88,0], radius:0.95, vitals:true,
+  blurb:'A 1.75 m adult at Drillis–Contini segment proportions, organs at standard adult sizes and positions (liver right, spleen and stomach left, heart two-thirds left of the midline). Breathing and the arterial pulse wave run at physiological rates.',
+  divePoint:[0.025,1.265,0.035], diveLabel:'into the heart',
   groups:[
     {name:'Integumentary (skin)', color:'#DDAE8F'}, {name:'Skeletal', color:'#E9E1CB'}, {name:'Muscular', color:'#A5342E'},
-    {name:'Nervous', color:'#F1D86B'}, {name:'Endocrine', color:'#B98BD9'}, {name:'Cardiovascular', color:'#D1332F'},
-    {name:'Lymphatic', color:'#8FC77A'}, {name:'Respiratory', color:'#E9A0A6'}, {name:'Digestive', color:'#E3A48F'},
+    {name:'Nervous', color:'#F1D86B'}, {name:'Endocrine', color:'#B98BD9'}, {name:'Cardiovascular', color:'#D1332F', sizePulse:0.10},
+    {name:'Lymphatic', color:'#8FC77A'}, {name:'Respiratory', color:'#E9A0A6', breath:0.045}, {name:'Digestive', color:'#E3A48F', breath:0.012},
     {name:'Urinary', color:'#C9A24C'}, {name:'Reproductive', color:'#D48BB0'}, {name:'Real imaging (CT, MRI, X-ray, scan)', color:'#CFE6FF'} ],
   presets:{ 'Skin':[1,1,1,1,1,1,1,1,1,1,1,1], 'X-ray':[0.1,1,0.35,1,1,1,1,0.8,1,1,1,1], 'Skeleton':[0.06,1,0,0.5,0,0,0,0,0,0,0,1], 'Organs':[0.08,0.25,0,0,1,1,0.6,0.85,1,1,1,0.5], 'Vessels & nerves':[0.06,0.15,0,1,0,1,1,0,0,0,0,0.4], 'Muscle':[0.08,0.6,1,0,0,0,0,0,0,0,0,0], 'Radiology':[0.05,0.12,0,0,0,0,0,0,0,0,0,1] },
-  pulseCenter:[0.02,1.28,0.04],
+  pulseCenter:[0.025,1.265,0.035], breathCenter:[0,1.46,-0.01], rawUnit:1,
   planes:[
     { key:'ref_bone_scan', group:11, center:[0,0.87,0.0], right:[1,0,0], up:[0,1,0], w:0.465, h:1.86, spacing:0.0045, mode:'glow', alpha:1, gain:2.2 },
     { key:'ref_chest_xray', group:11, center:[0,1.27,-0.03], right:[1,0,0], up:[0,1,0], w:0.40, h:0.458, spacing:0.004, mode:'glow', alpha:0.75 },
@@ -548,7 +557,7 @@ LEVELS.push({
     const inCap = (p, a, b, r0, r1, m) => { const ab = V.sub(b, a), L2 = V.dot(ab, ab); let t = V.dot(V.sub(p, a), ab)/L2; t = Math.max(0, Math.min(1, t)); const q = V.add(a, V.mul(ab, t)); return V.len(V.sub(p, q)) < r0 + (r1-r0)*t - m; };
     const inEll = (p, c, r, m) => { const d = [(p[0]-c[0])/(r[0]-m), (p[1]-c[1])/(r[1]-m), (p[2]-c[2])/(r[2]-m)]; return V.dot(d, d) < 1; };
     const mx = (p, s) => [s*p[0], p[1], p[2]];
-    const fingers = (s) => { const out = []; const hc = P.hand.c, hr = P.hand.r; for (let k = 0; k < 4; k++) out.push([[s*(hc[0]-0.026+k*0.018), hc[1]-hr[1]+0.01, hc[2]+0.005],[s*(hc[0]-0.03+k*0.02), hc[1]-hr[1]-0.07-Math.abs(k-1.3)*0.012, hc[2]+0.01], 0.0085, 0.007]); out.push([[s*(hc[0]-0.036), hc[1]-0.01, hc[2]+0.017],[s*(hc[0]-0.06), hc[1]-0.065, hc[2]+0.04], 0.01, 0.0075]); return out; };
+    const fingers = (s) => { const out = []; const hc = P.hand.c, hr = P.hand.r; for (let k = 0; k < 4; k++) out.push([[s*(hc[0]-0.026+k*0.018), hc[1]-hr[1]+0.01, hc[2]+0.005],[s*(hc[0]-0.03+k*0.02), hc[1]-hr[1]-0.065-Math.abs(k-1.3)*0.012, hc[2]+0.01], 0.0085, 0.007]); out.push([[s*(hc[0]-0.036), hc[1]-0.01, hc[2]+0.017],[s*(hc[0]-0.06), hc[1]-0.065, hc[2]+0.04], 0.01, 0.0075]); return out; };
     const bodyInside = (p, m) => {
       const [x,y,z] = p;
       if (y > TORSO[0].y && y < TORSO[TORSO.length-1].y){ const sc = loftAt(TORSO, y); const dx = (x-sc.cx)/(sc.rx-m), dz = (z-sc.cz)/(sc.rz-m); if (dx*dx + dz*dz < 1) return true; }
@@ -599,126 +608,141 @@ LEVELS.push({
     skinPass({size:0.013, inset:0.011, thick:0.4, jitter:0.25, group:G.skin, color:()=>[skinBase[0]*0.7, skinBase[1]*0.62, skinBase[2]*0.6]}, true);
     const nSkin = C.n;
     // ================= internal anatomy, built at default proportions then scaled to the fitted body
+    // Coordinates: +x is the person's LEFT (they face +z). Positions and sizes follow standard adult reference values.
     const bone = {size:0.0035, color:mottle([0.92,0.88,0.78], 60, 0.18), group:G.skel, thick:0.25};
-    ellipsoid(C, bone, [0,1.64,-0.004], [0.073,0.092,0.084]);
-    tube(C, bone, catmull([[0.045,1.60,0.015],[0.05,1.555,0.03],[0.028,1.545,0.06],[0,1.54,0.068],[-0.028,1.545,0.06],[-0.05,1.555,0.03],[-0.045,1.60,0.015]]), 0.007);
-    const spine = (t) => [0, 0.94 + 0.59*t, -0.055 + 0.028*Math.sin(t*6.2) - 0.02*t];
-    for (let i = 0; i < 24; i++){ const t = (i+0.5)/24, p = spine(t); const r = 0.021 - 0.008*t; ellipsoid(C, bone, p, [r, 0.011, r*0.9]); capsule(C, Object.assign({}, bone, {size:0.003}), [p[0],p[1],p[2]-r*0.6],[p[0],p[1]-0.006,p[2]-r*0.6-0.03], 0.006, 0.003); }
-    ellipsoid(C, bone, [0,0.905,-0.06], [0.045,0.05,0.02]);
+    ellipsoid(C, bone, [0,1.645,-0.004], [0.07,0.092,0.086]);                                             // cranium ~ 15 x 19 cm
+    tube(C, bone, catmull([[0.045,1.60,0.015],[0.05,1.555,0.03],[0.028,1.545,0.06],[0,1.54,0.068],[-0.028,1.545,0.06],[-0.05,1.555,0.03],[-0.045,1.60,0.015]]), 0.007); // mandible
+    // vertebral column C1 (~1.55) to S1 (~0.99): cervical lordosis, thoracic kyphosis, lumbar lordosis
+    const spine = (t) => [0, 0.99 + 0.56*t, -0.05 - 0.022*Math.sin(t*6.6 + 0.4) - 0.012*t];
+    for (let i = 0; i < 24; i++){ const t = (i+0.5)/24, p = spine(t); const r = i < 5 ? 0.024 - 0.002*(i-0) : (i < 17 ? 0.017 + 0.0004*(i-5) : 0.014 - 0.0006*(i-17)); ellipsoid(C, bone, p, [r, 0.0115, r*0.9]); capsule(C, Object.assign({}, bone, {size:0.003}), [p[0],p[1],p[2]-r*0.6],[p[0],p[1]-0.006,p[2]-r*0.6-0.03], 0.006, 0.003); }
+    ellipsoid(C, bone, [0,0.955,-0.055], [0.05,0.055,0.02], rotXYZ(0.5,0,0));                             // sacrum
+    // 12 rib pairs; true ribs reach the sternum, false ribs the costal margin, floating ribs 11-12
     for (let i = 0; i < 12; i++){
-      const y = 1.415 - i*0.027, w = 0.118 + 0.05*Math.sin((i+1)/13*Math.PI), open = i >= 10 ? 0.45 : 0.08;
-      for (const s of [-1,1]) tube(C, Object.assign({}, bone, {size:0.0032, aspect:2}), (t)=>{ const ph = Math.PI*(1-t*(1-open)); return [s*w*Math.sin(ph)*1.05, y - 0.035*t - 0.01*Math.sin(ph), -0.065 + (0.10+0.065)*(1-Math.cos(ph))/2 - 0.02*Math.sin(ph)*Math.sin(ph)]; }, 0.0058);
+      const y = 1.405 - i*0.026, w = 0.118 + 0.05*Math.sin((i+1)/13*Math.PI), open = i >= 10 ? 0.45 : (i >= 7 ? 0.18 : 0.08);
+      for (const s of [-1,1]) tube(C, Object.assign({}, bone, {size:0.0032, aspect:2}), (t)=>{ const ph = Math.PI*(1-t*(1-open)); return [s*w*Math.sin(ph)*1.05, y - 0.04*t - 0.01*Math.sin(ph), -0.062 + (0.10+0.062)*(1-Math.cos(ph))/2 - 0.02*Math.sin(ph)*Math.sin(ph)]; }, 0.0058);
     }
-    capsule(C, bone, [0,1.43,0.108],[0,1.26,0.115], 0.013, 0.01);
+    capsule(C, bone, [0,1.44,0.105],[0,1.27,0.112], 0.014, 0.011);                                       // sternum: manubrium to xiphoid
     for (const s of [-1,1]){
-      tube(C, Object.assign({}, bone, {aspect:2}), catmull([[0,1.455,0.06],[s*0.09,1.462,0.045],[s*0.18,1.46,0.0]]), 0.0065);
-      ellipsoid(C, bone, [s*0.10,1.365,-0.095], [0.06,0.072,0.01], rotXYZ(0.2, s*0.5, 0));
-      ellipsoid(C, bone, [s*0.105,0.965,-0.03], [0.045,0.075,0.022], rotXYZ(0.35, s*0.6, s*0.2));
-      capsule(C, bone, [s*0.19,1.43,0],[s*0.255,1.165,-0.02], 0.015, 0.013); ellipsoid(C, bone, [s*0.19,1.43,0],[0.024,0.024,0.024]); ellipsoid(C, bone, [s*0.255,1.165,-0.02],[0.022,0.016,0.02]);
-      capsule(C, bone, [s*0.25,1.16,-0.015],[s*0.283,0.91,0.03], 0.0085, 0.008); capsule(C, bone, [s*0.264,1.16,-0.03],[s*0.297,0.905,0.02], 0.0075, 0.006);
-      for (let k = 0; k < 5; k++){ const x0 = s*(0.27+k*0.016), top = k===4 ? [s*0.262,0.79,0.062] : [x0,0.80,0.045]; capsule(C, Object.assign({}, bone,{size:0.0025}), top, k===4 ? [s*0.238,0.735,0.085] : [x0+s*0.004,0.66-Math.abs(k-1.3)*0.012,0.055], 0.005, 0.0035); }
-      capsule(C, bone, [s*0.09,0.905,-0.01],[s*0.09,0.515,0.0], 0.019, 0.017); ellipsoid(C, bone, [s*0.10,0.905,-0.01],[0.03,0.03,0.03]); ellipsoid(C, bone, [s*0.09,0.51,0.0],[0.036,0.025,0.03]);
-      ellipsoid(C, bone, [s*0.09,0.505,0.05],[0.02,0.024,0.01]);
-      capsule(C, bone, [s*0.09,0.495,-0.005],[s*0.088,0.10,-0.015], 0.016, 0.013); capsule(C, bone, [s*0.115,0.49,-0.02],[s*0.11,0.10,-0.02], 0.007, 0.006);
-      ellipsoid(C, bone, [s*0.088,0.08,-0.01],[0.03,0.028,0.035]);
-      for (let k = 0; k < 5; k++) capsule(C, Object.assign({}, bone,{size:0.0025}), [s*(0.06+k*0.016),0.045,0.03],[s*(0.055+k*0.018),0.028,0.18-Math.abs(k-1)*0.012], 0.0065, 0.0045);
+      tube(C, Object.assign({}, bone, {aspect:2}), catmull([[s*0.012,1.445,0.06],[s*0.09,1.452,0.045],[s*0.19,1.445,0.0]]), 0.0065);   // clavicle
+      ellipsoid(C, bone, [s*0.10,1.35,-0.095], [0.06,0.075,0.01], rotXYZ(0.2, s*0.5, 0));                 // scapula
+      ellipsoid(C, bone, [s*0.10,1.0,-0.03], [0.045,0.075,0.022], rotXYZ(0.35, s*0.6, s*0.2));            // ilium (crest ~1.03)
+      capsule(C, bone, [s*0.19,1.42,0],[s*0.24,1.105,-0.02], 0.014, 0.012); ellipsoid(C, bone, [s*0.19,1.42,0],[0.024,0.024,0.024]); ellipsoid(C, bone, [s*0.24,1.105,-0.02],[0.022,0.016,0.02]); // humerus 33 cm
+      capsule(C, bone, [s*0.235,1.10,-0.015],[s*0.26,0.855,0.03], 0.008, 0.0075); capsule(C, bone, [s*0.248,1.10,-0.03],[s*0.272,0.85,0.02], 0.007, 0.0055);        // radius, ulna 26 cm
+      for (let k = 0; k < 5; k++){ const x0 = s*(0.246+k*0.015), top = k===4 ? [s*0.238,0.74,0.062] : [x0,0.75,0.045]; capsule(C, Object.assign({}, bone,{size:0.0025}), top, k===4 ? [s*0.214,0.685,0.085] : [x0+s*0.004,0.615-Math.abs(k-1.3)*0.012,0.055], 0.005, 0.0035); }
+      capsule(C, bone, [s*0.09,0.925,-0.01],[s*0.09,0.515,0.0], 0.019, 0.017); ellipsoid(C, bone, [s*0.098,0.925,-0.01],[0.03,0.03,0.03]); ellipsoid(C, bone, [s*0.09,0.51,0.0],[0.036,0.025,0.03]);  // femur 45 cm
+      ellipsoid(C, bone, [s*0.09,0.505,0.05],[0.02,0.024,0.01]);                                           // patella
+      capsule(C, bone, [s*0.09,0.495,-0.005],[s*0.088,0.085,-0.015], 0.016, 0.013); capsule(C, bone, [s*0.113,0.49,-0.02],[s*0.108,0.085,-0.02], 0.007, 0.006);   // tibia, fibula 38 cm
+      ellipsoid(C, bone, [s*0.088,0.065,-0.01],[0.03,0.028,0.035]);                                        // talus / calcaneus
+      for (let k = 0; k < 5; k++) capsule(C, Object.assign({}, bone,{size:0.0025}), [s*(0.06+k*0.016),0.04,0.03],[s*(0.055+k*0.018),0.024,0.18-Math.abs(k-1)*0.012], 0.0065, 0.0045);
     }
     const muscCol = (x,y,z,nx,ny,nz,u,v) => { const k = 0.85 + 0.3*fbm(x*80,y*80,z*80,2) + 0.1*Math.sin(v*40); return [0.62*k, 0.19*k, 0.17*k]; };
     const musc = {size:0.0042, aspect:3, thick:0.2, color:muscCol, group:G.musc};
-    loft(C, Object.assign({}, musc, {tangent:()=>[0,1,0]}), [ {y:0.82,rx:0.11,rz:0.08},{y:0.97,rx:0.154,rz:0.1},{y:1.10,rx:0.128,rz:0.085},{y:1.24,rx:0.142,rz:0.095},{y:1.36,rx:0.162,rz:0.1},{y:1.45,rx:0.174,rz:0.083},{y:1.49,rx:0.06,rz:0.046,cz:-0.01} ]);
+    loft(C, Object.assign({}, musc, {tangent:()=>[0,1,0]}), [ {y:0.83,rx:0.108,rz:0.08},{y:0.98,rx:0.148,rz:0.1},{y:1.10,rx:0.126,rz:0.085},{y:1.24,rx:0.14,rz:0.093},{y:1.35,rx:0.158,rz:0.097},{y:1.43,rx:0.19,rz:0.083},{y:1.48,rx:0.06,rz:0.046,cz:-0.01} ]);
     for (const s of [-1,1]){
-      ellipsoid(C, musc, [s*0.078,1.355,0.07], [0.074,0.052,0.022], rotXYZ(0,0,s*0.2));
-      ellipsoid(C, musc, [s*0.2,1.415,0.0], [0.05,0.06,0.048]);
-      ellipsoid(C, musc, [s*0.095,0.94,-0.075], [0.075,0.085,0.035]);
-      for (let k = 0; k < 4; k++) ellipsoid(C, musc, [s*0.035,1.22-k*0.065,0.076], [0.03,0.028,0.012]);
-      limb(C, musc, [[s*0.205,1.42,0],[s*0.262,1.16,-0.02],[s*0.288,0.92,0.03]], [0.046,0.037,0.024]);
-      limb(C, musc, [[s*0.095,0.88,0],[s*0.092,0.50,0.005],[s*0.088,0.12,-0.01]], [0.072,0.05,0.03]);
-      capsule(C, musc, [s*0.09,0.50,-0.02],[s*0.09,0.15,-0.025], 0.036, 0.016);
+      ellipsoid(C, musc, [s*0.078,1.34,0.068], [0.074,0.052,0.022], rotXYZ(0,0,s*0.2));                 // pectoralis major
+      ellipsoid(C, musc, [s*0.195,1.40,0.0], [0.05,0.06,0.048]);                                          // deltoid
+      ellipsoid(C, musc, [s*0.095,0.96,-0.075], [0.075,0.085,0.035]);                                     // gluteus maximus
+      for (let k = 0; k < 4; k++) ellipsoid(C, musc, [s*0.035,1.20-k*0.06,0.074], [0.03,0.026,0.012]);   // rectus abdominis
+      limb(C, musc, [[s*0.20,1.40,0],[s*0.243,1.10,-0.02],[s*0.263,0.86,0.03]], [0.045,0.036,0.023]);
+      limb(C, musc, [[s*0.092,0.90,0],[s*0.09,0.50,0.005],[s*0.086,0.10,-0.01]], [0.074,0.05,0.03]);
+      capsule(C, musc, [s*0.09,0.49,-0.02],[s*0.09,0.15,-0.025], 0.036, 0.016);                          // gastrocnemius
     }
+    // ---- nervous: brain ~14 x 17 x 9 cm, cerebellum, brainstem, cord to L1/L2, plexuses
     const brainCol = (x,y,z) => { const s = fbm(x*140,y*140,z*140,3); const k = 0.7 + 0.5*Math.pow(s,1.5); return [0.86*k, 0.7*k, 0.68*k]; };
-    for (const s of [-1,1]) ellipsoid(C, {size:0.0025, color:brainCol, group:G.nerv}, [s*0.034,1.652,-0.006], [0.056,0.062,0.078]);
-    ellipsoid(C, {size:0.0025, color:brainCol, group:G.nerv}, [0,1.598,-0.055], [0.046,0.03,0.036]);
+    for (const s of [-1,1]) ellipsoid(C, {size:0.0025, color:brainCol, group:G.nerv}, [s*0.034,1.665,-0.008], [0.036,0.05,0.083]);
+    ellipsoid(C, {size:0.0025, color:brainCol, group:G.nerv}, [0,1.605,-0.055], [0.05,0.03,0.035]);       // cerebellum
     const nerve = {size:0.002, aspect:2.5, color:mottle([0.96,0.86,0.45], 40, 0.2), group:G.nerv};
-    tube(C, Object.assign({}, nerve, {size:0.0028}), (t)=>{ const p = spine(1-t); return [p[0], p[1]+0.03, p[2]+0.012]; }, (t)=>0.007-0.003*t, 0, 0.9);
-    tube(C, Object.assign({}, nerve, {size:0.0028}), catmull([[0,1.535,-0.03],[0,1.565,-0.02],[0,1.59,-0.01]]), 0.008);
+    tube(C, Object.assign({}, nerve, {size:0.0028}), (t)=>{ const p = spine(1-t); return [p[0], p[1]+0.03, p[2]+0.012]; }, (t)=>0.007-0.003*t, 0, 0.78);   // spinal cord ends ~L1
+    tube(C, Object.assign({}, nerve, {size:0.0028}), catmull([[0,1.545,-0.03],[0,1.575,-0.02],[0,1.60,-0.012]]), 0.008);                                       // brainstem
     for (const s of [-1,1]){
-      tube(C, nerve, catmull([[s*0.02,1.45,-0.03],[s*0.12,1.43,-0.01],[s*0.21,1.40,0.0],[s*0.262,1.16,-0.01],[s*0.288,0.91,0.03],[s*0.29,0.80,0.045],[s*0.285,0.7,0.05]]), (t)=>0.0045-0.0025*t);
-      tube(C, nerve, catmull([[s*0.02,0.98,-0.05],[s*0.08,0.93,-0.05],[s*0.105,0.88,-0.03],[s*0.10,0.5,-0.02],[s*0.09,0.12,-0.02],[s*0.08,0.03,0.08]]), (t)=>0.006-0.0035*t);
-      tube(C, nerve, catmull([[s*0.02,1.02,-0.05],[s*0.08,0.95,0.02],[s*0.09,0.7,0.04],[s*0.09,0.45,0.03]]), 0.002);
-      for (let i = 0; i < 10; i++){ const y = 1.40 - i*0.03, w = 0.112 + 0.05*Math.sin((i+1)/13*Math.PI); tube(C, Object.assign({}, nerve, {size:0.0016}), (t)=>{ const ph = Math.PI*(1-t*0.85); return [s*w*Math.sin(ph), y-0.03*t, -0.055+0.16*(1-Math.cos(ph))/2]; }, 0.0012); }
-      for (let k = 0; k < 4; k++) tree(C, Object.assign({}, nerve, {size:0.0015}), [s*0.2,1.40,0.0], V.norm([s*0.3,-1,0.3*(k-1.5)]), 0.05, 0.0012, 3, {spread:0.6, bias:[0,-0.4,0]});
-      for (let k = 0; k < 4; k++) tree(C, Object.assign({}, nerve, {size:0.0015}), [s*0.09,0.85,0.02], V.norm([s*0.2,-1,0.4*(k-1.5)]), 0.08, 0.0014, 3, {spread:0.5, bias:[0,-0.4,0]});
-      tree(C, Object.assign({}, nerve, {size:0.0014}), [s*0.05,1.58,0.03], V.norm([s*0.5,-0.2,1]), 0.04, 0.0012, 3, {spread:0.7});
+      tube(C, nerve, catmull([[s*0.02,1.44,-0.03],[s*0.12,1.42,-0.01],[s*0.20,1.39,0.0],[s*0.243,1.10,-0.01],[s*0.263,0.855,0.03],[s*0.27,0.75,0.045],[s*0.268,0.65,0.05]]), (t)=>0.0045-0.0025*t);   // brachial plexus -> median nerve
+      tube(C, nerve, catmull([[s*0.02,1.0,-0.05],[s*0.08,0.95,-0.05],[s*0.105,0.90,-0.03],[s*0.10,0.5,-0.02],[s*0.09,0.10,-0.02],[s*0.08,0.03,0.08]]), (t)=>0.006-0.0035*t);              // sciatic -> tibial
+      tube(C, nerve, catmull([[s*0.02,1.04,-0.05],[s*0.08,0.97,0.02],[s*0.09,0.7,0.04],[s*0.09,0.45,0.03]]), 0.002);                                                                  // femoral
+      for (let i = 0; i < 10; i++){ const y = 1.39 - i*0.03, w = 0.112 + 0.05*Math.sin((i+1)/13*Math.PI); tube(C, Object.assign({}, nerve, {size:0.0016}), (t)=>{ const ph = Math.PI*(1-t*0.85); return [s*w*Math.sin(ph), y-0.03*t, -0.055+0.16*(1-Math.cos(ph))/2]; }, 0.0012); }   // intercostals
+      for (let k = 0; k < 4; k++) tree(C, Object.assign({}, nerve, {size:0.0015}), [s*0.2,1.39,0.0], V.norm([s*0.3,-1,0.3*(k-1.5)]), 0.05, 0.0012, 3, {spread:0.6, bias:[0,-0.4,0]});
+      for (let k = 0; k < 4; k++) tree(C, Object.assign({}, nerve, {size:0.0015}), [s*0.09,0.87,0.02], V.norm([s*0.2,-1,0.4*(k-1.5)]), 0.08, 0.0014, 3, {spread:0.5, bias:[0,-0.4,0]});
+      tree(C, Object.assign({}, nerve, {size:0.0014}), [s*0.05,1.58,0.03], V.norm([s*0.5,-0.2,1]), 0.04, 0.0012, 3, {spread:0.7});                                                   // facial / trigeminal branches
     }
+    // ---- endocrine: pituitary at the sella (eye level), thyroid C5-T1, thymus behind the manubrium, adrenals, pancreas L1-L2, gonads
     const endo = {size:0.0025, color:mottle([0.74,0.55,0.86], 80, 0.25), group:G.endo};
-    ellipsoid(C, endo, [0,1.615,0.005], [0.006,0.005,0.006]);
+    ellipsoid(C, endo, [0,1.632,0.008], [0.006,0.005,0.006]);
     for (const s of [-1,1]) ellipsoid(C, endo, [s*0.017,1.49,0.038], [0.012,0.022,0.01]);
-    ellipsoid(C, endo, [0,1.41,0.085], [0.025,0.03,0.012]);
-    for (const s of [-1,1]) ellipsoid(C, endo, [s*0.055,1.135,-0.065], [0.015,0.012,0.008], rotXYZ(0,0,s*0.6));
-    tube(C, Object.assign({}, endo, {size:0.003}), catmull([[0.02,1.09,0.0],[-0.03,1.10,0.01],[-0.08,1.115,-0.01]]), (t)=>0.014-0.006*t);
-    for (const s of [-1,1]) ellipsoid(C, endo, [s*0.05,0.895,0.03], [0.012,0.009,0.01]);
+    ellipsoid(C, endo, [0,1.40,0.085], [0.025,0.03,0.012]);
+    ellipsoid(C, endo, [0.055,1.15,-0.065], [0.015,0.012,0.008], rotXYZ(0,0,0.6)); ellipsoid(C, endo, [-0.055,1.13,-0.065], [0.015,0.012,0.008], rotXYZ(0,0,-0.6));
+    tube(C, Object.assign({}, endo, {size:0.003}), catmull([[-0.03,1.085,0.0],[0.03,1.10,0.0],[0.10,1.12,-0.02]]), (t)=>0.014-0.006*t);   // pancreas: head right, tail to the splenic hilum
+    for (const s of [-1,1]) ellipsoid(C, endo, [s*0.05,0.915,0.03], [0.012,0.009,0.01]);
+    // ---- cardiovascular: heart 12 x 8.5 x 6 cm, two-thirds left of midline, apex at the 5th interspace; aorta and venae cavae
     const heartCol = (x,y,z) => { const k = 0.8 + 0.4*fbm(x*120,y*120,z*120,3); return [0.66*k, 0.2*k, 0.22*k]; };
-    ellipsoid(C, {size:0.0028, color:heartCol, group:G.card}, [0.015,1.275,0.04], [0.055,0.07,0.05], rotXYZ(0.2,0,-0.5));
-    ellipsoid(C, {size:0.0028, color:(x,y,z)=>{const c=heartCol(x,y,z);return [c[0]+0.1,c[1]+0.1,c[2]+0.08];}, group:G.card}, [0.03,1.33,0.02], [0.04,0.03,0.035]);
+    ellipsoid(C, {size:0.0028, color:heartCol, group:G.card}, [0.025,1.265,0.035], [0.05,0.065,0.045], rotXYZ(0.25,0.3,-0.55));
+    ellipsoid(C, {size:0.0028, color:(x,y,z)=>{const c=heartCol(x,y,z);return [c[0]+0.1,c[1]+0.1,c[2]+0.08];}, group:G.card}, [-0.005,1.32,0.015], [0.04,0.03,0.035]);
     const art = {size:0.0025, aspect:2.2, thick:0.2, color:mottle([0.80,0.16,0.15], 50, 0.2), group:G.card, sizeR:0.7};
     const vein = {size:0.0025, aspect:2.2, thick:0.2, color:mottle([0.28,0.32,0.72], 50, 0.2), group:G.card, sizeR:0.7};
-    const aorta = [[0.0,1.32,0.03],[-0.005,1.39,0.005],[-0.02,1.405,-0.03],[-0.01,1.36,-0.05],[0,1.2,-0.045],[0,1.0,-0.04],[0.0,0.96,-0.035]];
-    tube(C, Object.assign({}, art, {size:0.0035}), catmull(aorta), (t)=>0.014-0.006*t);
-    tube(C, Object.assign({}, vein, {size:0.0035}), catmull([[0.03,1.3,0.0],[0.025,1.2,-0.03],[0.02,1.0,-0.03],[0.02,0.96,-0.025]]), 0.013);
-    tube(C, Object.assign({}, vein, {size:0.0035}), catmull([[0.03,1.32,0.0],[0.03,1.40,-0.01],[0.02,1.46,-0.02]]), 0.011);
+    const aorta = [[0.0,1.32,0.03],[-0.005,1.38,0.005],[-0.01,1.395,-0.03],[0.005,1.36,-0.05],[0.012,1.2,-0.045],[0.012,1.05,-0.04],[0.01,0.99,-0.035]];   // arch at T4, bifurcation at L4
+    tube(C, Object.assign({}, art, {size:0.0035}), catmull(aorta), (t)=>0.0135-0.005*t);
+    tube(C, Object.assign({}, vein, {size:0.0035}), catmull([[-0.02,1.3,0.0],[-0.022,1.2,-0.03],[-0.02,1.05,-0.03],[-0.018,0.99,-0.025]]), 0.012);          // inferior vena cava, right of the aorta
+    tube(C, Object.assign({}, vein, {size:0.0035}), catmull([[-0.02,1.32,0.0],[-0.025,1.40,-0.01],[-0.02,1.45,-0.02]]), 0.01);                               // superior vena cava
     const trunks = (o, off, r0) => {
       for (const s of [-1,1]){
-        tube(C, o, catmull([[off[0],0.96,-0.035+off[2]],[s*0.05+off[0],0.92,-0.02+off[2]],[s*0.09+off[0],0.88,0.01+off[2]],[s*0.088+off[0],0.5,-0.01+off[2]],[s*0.086+off[0],0.09,-0.01+off[2]],[s*0.08+off[0],0.03,0.1+off[2]]]), (t)=>r0*(1-0.55*t));
-        tube(C, o, catmull([[off[0],1.40,-0.02+off[2]],[s*0.1+off[0],1.42,0.0+off[2]],[s*0.2+off[0],1.41,0.01+off[2]],[s*0.262+off[0],1.16,0.0+off[2]],[s*0.29+off[0],0.90,0.04+off[2]],[s*0.29+off[0],0.75,0.05+off[2]]]), (t)=>r0*0.65*(1-0.55*t));
-        tube(C, o, catmull([[s*0.01+off[0],1.40,-0.02+off[2]],[s*0.025+off[0],1.5,-0.01+off[2]],[s*0.035+off[0],1.58,0.0+off[2]],[s*0.03+off[0],1.64,0.02+off[2]]]), (t)=>r0*0.55*(1-0.5*t));
-        tube(C, o, catmull([[s*0.005+off[0],1.35,-0.045+off[2]],[s*0.03+off[0],1.28,-0.03+off[2]],[s*0.06+off[0],1.2,0.0+off[2]]]), r0*0.4);
-        tube(C, o, catmull([[off[0],1.14,-0.045+off[2]],[s*0.05+off[0],1.13,0.0+off[2]],[s*0.09+off[0],1.12,0.03+off[2]]]), r0*0.4);
-        tube(C, o, catmull([[off[0],1.08,-0.04+off[2]],[s*0.05+off[0],1.08,-0.06+off[2]]]), r0*0.35);
+        tube(C, o, catmull([[off[0],0.99,-0.035+off[2]],[s*0.05+off[0],0.95,-0.02+off[2]],[s*0.09+off[0],0.90,0.02+off[2]],[s*0.085+off[0],0.5,-0.025+off[2]],[s*0.084+off[0],0.08,-0.01+off[2]],[s*0.08+off[0],0.03,0.1+off[2]]]), (t)=>r0*(1-0.55*t));   // iliac -> femoral -> popliteal -> tibial
+        tube(C, o, catmull([[off[0],1.39,-0.02+off[2]],[s*0.1+off[0],1.41,0.0+off[2]],[s*0.19+off[0],1.40,0.01+off[2]],[s*0.243+off[0],1.10,0.0+off[2]],[s*0.265+off[0],0.85,0.04+off[2]],[s*0.268+off[0],0.70,0.05+off[2]]]), (t)=>r0*0.65*(1-0.55*t));   // subclavian -> brachial -> radial
+        tube(C, o, catmull([[s*0.01+off[0],1.39,-0.02+off[2]],[s*0.025+off[0],1.5,-0.01+off[2]],[s*0.035+off[0],1.58,0.0+off[2]],[s*0.03+off[0],1.64,0.02+off[2]]]), (t)=>r0*0.55*(1-0.5*t));   // carotid
+        tube(C, o, catmull([[s*0.005+off[0],1.34,-0.045+off[2]],[s*0.03+off[0],1.28,-0.03+off[2]],[s*0.06+off[0],1.2,0.0+off[2]]]), r0*0.4);
+        tube(C, o, catmull([[off[0],1.14,-0.045+off[2]],[s*0.05+off[0],1.13,0.0+off[2]],[s*0.09+off[0],1.12,0.03+off[2]]]), r0*0.4);                     // coeliac / hepatic / splenic
+        tube(C, o, catmull([[off[0],1.08,-0.04+off[2]],[s*0.05+off[0],1.08,-0.06+off[2]]]), r0*0.35);                                                      // renal
       }
     };
-    trunks(art, [0,0,0], 0.009); trunks(vein, [0.01,0,0.012], 0.0105);
+    trunks(art, [0.01,0,0], 0.009); trunks(vein, [-0.012,0,0.012], 0.0105);
     const artTwig = Object.assign({}, art, {size:0.0016}), veinTwig = Object.assign({}, vein, {size:0.0016});
     const sprout = (o, p, d) => tree(C, o, p, d, rn(0.035,0.06), 0.0022, 4, {spread:0.7, rdec:0.66, decay:0.7, bend:0.3});
     for (const s of [-1,1]){
-      for (let k = 0; k < 6; k++){ sprout(artTwig, [s*0.09, 0.85-k*0.13, 0.0], V.norm([s*0.4*(rnd()-0.5), -0.5, rn(-1,1)])); sprout(veinTwig, [s*0.1, 0.8-k*0.13, 0.01], V.norm([s*0.4*(rnd()-0.5), -0.5, rn(-1,1)])); }
-      for (let k = 0; k < 4; k++){ sprout(artTwig, [s*(0.21+k*0.02), 1.38-k*0.14, 0.0], V.norm([s*0.3, -0.6, rn(-1,1)])); sprout(veinTwig, [s*(0.22+k*0.02), 1.33-k*0.14, 0.012], V.norm([s*0.3,-0.6,rn(-1,1)])); }
+      for (let k = 0; k < 6; k++){ sprout(artTwig, [s*0.09, 0.87-k*0.13, 0.0], V.norm([s*0.4*(rnd()-0.5), -0.5, rn(-1,1)])); sprout(veinTwig, [s*0.1, 0.82-k*0.13, 0.01], V.norm([s*0.4*(rnd()-0.5), -0.5, rn(-1,1)])); }
+      for (let k = 0; k < 4; k++){ sprout(artTwig, [s*(0.20+k*0.02), 1.36-k*0.14, 0.0], V.norm([s*0.3, -0.6, rn(-1,1)])); sprout(veinTwig, [s*(0.21+k*0.02), 1.31-k*0.14, 0.012], V.norm([s*0.3,-0.6,rn(-1,1)])); }
       sprout(artTwig, [s*0.03,1.64,0.02], V.norm([s*0.6,0.5,rn(-0.5,0.5)])); sprout(veinTwig, [s*0.04,1.63,0.03], V.norm([s*0.6,0.4,rn(-0.5,0.5)]));
       for (let k = 0; k < 3; k++){ sprout(artTwig, [s*0.1, 1.24-k*0.06, -0.02], V.norm([s*0.8, rn(-0.5,0.5), rn(-0.5,0.5)])); sprout(veinTwig, [s*0.11, 1.22-k*0.06, -0.01], V.norm([s*0.8, rn(-0.5,0.5), rn(-0.5,0.5)])); }
     }
-    for (let k = 0; k < 8; k++){ sprout(artTwig, [rn(-0.08,0.08), rn(0.92,1.12), rn(-0.02,0.06)], V.randDir()); sprout(veinTwig, [rn(-0.08,0.08), rn(0.92,1.12), rn(-0.02,0.06)], V.randDir()); }
+    for (let k = 0; k < 8; k++){ sprout(artTwig, [rn(-0.08,0.08), rn(0.94,1.12), rn(-0.02,0.06)], V.randDir()); sprout(veinTwig, [rn(-0.08,0.08), rn(0.94,1.12), rn(-0.02,0.06)], V.randDir()); }
+    // ---- lymphatic: spleen (left, ribs 9-11), node groups, thoracic duct
     const lym = {size:0.0022, color:mottle([0.5,0.75,0.45], 80, 0.25), group:G.lymph};
-    ellipsoid(C, Object.assign({}, lym, {color:mottle([0.45,0.15,0.3], 90, 0.2)}), [-0.1,1.17,-0.045], [0.05,0.03,0.035], rotXYZ(0,0.4,0.3));
+    ellipsoid(C, Object.assign({}, lym, {color:mottle([0.45,0.15,0.3], 90, 0.2)}), [0.105,1.16,-0.06], [0.06,0.035,0.02], rotXYZ(0,-0.4,-0.3));   // spleen 12 x 7 x 4 cm
     const nodes = (c, n, r) => { for (let i = 0; i < n; i++) ellipsoid(C, lym, [c[0]+gauss()*r, c[1]+gauss()*r, c[2]+gauss()*r], [0.006,0.0045,0.005]); };
-    for (const s of [-1,1]){ nodes([s*0.028,1.51,0.012], 8, 0.01); nodes([s*0.185,1.36,0.0], 12, 0.022); nodes([s*0.1,0.87,0.06], 10, 0.025); nodes([s*0.09,0.52,-0.03], 5, 0.02); }
-    nodes([0,1.02,0.0], 16, 0.04);
+    for (const s of [-1,1]){ nodes([s*0.028,1.51,0.012], 8, 0.01); nodes([s*0.18,1.35,0.0], 12, 0.022); nodes([s*0.1,0.90,0.06], 10, 0.025); nodes([s*0.09,0.52,-0.03], 5, 0.02); }
+    nodes([0,1.04,0.0], 16, 0.04);
     const lv = Object.assign({}, lym, {size:0.0018, aspect:2.5, alpha:0.8});
-    tube(C, lv, (t)=>{ const p = spine(t*0.9); return [p[0]+0.012, p[1], p[2]+0.03]; }, 0.0025);
+    tube(C, lv, (t)=>{ const p = spine(t*0.9); return [p[0]-0.008+0.02*t, p[1], p[2]+0.03]; }, 0.0025);   // cisterna chyli -> thoracic duct, crossing to the left
     for (const s of [-1,1]){
-      tube(C, lv, catmull([[s*0.1,0.87,0.06],[s*0.11,0.7,0.06],[s*0.1,0.5,0.03],[s*0.09,0.3,0.02],[s*0.085,0.1,0.02]]), 0.0016);
-      tube(C, lv, catmull([[s*0.185,1.36,0],[s*0.26,1.15,0.0],[s*0.29,0.9,0.045]]), 0.0014);
+      tube(C, lv, catmull([[s*0.1,0.90,0.06],[s*0.11,0.7,0.06],[s*0.1,0.5,0.03],[s*0.09,0.3,0.02],[s*0.085,0.1,0.02]]), 0.0016);
+      tube(C, lv, catmull([[s*0.18,1.35,0],[s*0.243,1.10,0.0],[s*0.265,0.85,0.045]]), 0.0014);
       tube(C, lv, catmull([[s*0.05,1.5,0.02],[s*0.05,1.58,0.01],[s*0.06,1.62,-0.02]]), 0.0012);
     }
+    // ---- respiratory: right lung larger (3 lobes) and shorter, left with the cardiac notch; carina at T4-T5; diaphragm domes, right higher
     const lungCol = (x,y,z) => { const k = 0.75 + 0.5*fbm(x*90,y*90,z*90,3); return [0.9*k, 0.6*k, 0.62*k, 0.55]; };
-    ellipsoid(C, {size:0.004, color:lungCol, group:G.resp}, [0.095,1.28,-0.01], [0.075,0.135,0.088]);
-    ellipsoid(C, {size:0.004, color:lungCol, group:G.resp}, [-0.10,1.26,-0.012], [0.068,0.125,0.086]);
+    ellipsoid(C, {size:0.004, color:lungCol, group:G.resp}, [-0.09,1.30,-0.012], [0.078,0.13,0.09]);
+    ellipsoid(C, {size:0.004, color:(x,y,z)=>{ if (x < 0.075 && z > 0.0 && y < 1.30 && y > 1.20) return null; return lungCol(x,y,z); }, group:G.resp}, [0.092,1.295,-0.014], [0.07,0.14,0.088]);
     const airway = {size:0.0025, color:(x,y,z,nx,ny,nz,u)=>{ const ring = 0.8 + 0.25*Math.pow(Math.sin(u*90),2); return [0.86*ring, 0.76*ring, 0.66*ring]; }, group:G.resp};
-    tube(C, airway, catmull([[0,1.51,0.02],[0,1.45,0.005],[0,1.38,-0.01]]), 0.0095);
-    for (const s of [-1,1]) tree(C, Object.assign({}, airway, {size:0.002, sizeR:0.5}), [0,1.38,-0.01], V.norm([s*0.7,-1,-0.1]), 0.055, 0.007, 5, {spread:0.62, decay:0.72, rdec:0.7, bend:0.15});
-    ellipsoid(C, {size:0.004, color:flat([0.78,0.45,0.45], 0.4), group:G.resp}, [0,1.155,0.0], [0.18,0.03,0.12]);
+    tube(C, airway, catmull([[0,1.50,0.02],[0,1.44,0.005],[0,1.365,-0.012]]), 0.0095);                     // trachea ~11 cm
+    tree(C, Object.assign({}, airway, {size:0.002, sizeR:0.5}), [0,1.365,-0.012], V.norm([-0.62,-1,-0.1]), 0.05, 0.0075, 5, {spread:0.6, decay:0.72, rdec:0.7, bend:0.15});   // right main bronchus: wider, steeper
+    tree(C, Object.assign({}, airway, {size:0.002, sizeR:0.5}), [0,1.365,-0.012], V.norm([0.85,-1,-0.1]), 0.06, 0.0065, 5, {spread:0.62, decay:0.72, rdec:0.7, bend:0.15});    // left main bronchus: longer, more horizontal
+    ellipsoid(C, {size:0.004, color:flat([0.78,0.45,0.45], 0.4), group:G.resp}, [-0.09,1.185,0.0], [0.09,0.028,0.11]);
+    ellipsoid(C, {size:0.004, color:flat([0.78,0.45,0.45], 0.4), group:G.resp}, [0.09,1.165,0.0], [0.09,0.026,0.11]);
+    // ---- digestive: oesophagus, stomach (left), liver (right, ~1.5 kg, 20 x 15 x 12 cm), gallbladder, small bowel, colon frame
     const dig = {size:0.0035, color:mottle([0.88,0.64,0.6], 70, 0.2), group:G.dig};
-    tube(C, Object.assign({}, dig, {size:0.0025}), catmull([[0,1.5,-0.03],[0,1.35,-0.05],[-0.02,1.2,-0.03],[-0.04,1.15,0.0]]), 0.0075);
-    ellipsoid(C, dig, [-0.055,1.115,0.03], [0.062,0.045,0.04], rotXYZ(0.2,0.3,0.5));
-    ellipsoid(C, Object.assign({}, dig, {color:mottle([0.5,0.19,0.16], 60, 0.15)}), [0.07,1.15,0.035], [0.11,0.05,0.07], rotXYZ(0,0,-0.15));
-    ellipsoid(C, Object.assign({}, dig, {size:0.0025, color:flat([0.35,0.55,0.3])}), [0.05,1.10,0.075], [0.012,0.022,0.012]);
-    const gutPts = []; for (let i = 0; i < 70; i++){ const t = i/69; gutPts.push([0.085*Math.sin(t*44+1)*(1-0.3*Math.abs(Math.sin(t*9))), 1.06-0.15*t+0.015*Math.sin(t*23), 0.035+0.04*Math.cos(t*44+1)]); }
-    tube(C, Object.assign({}, dig, {size:0.003, color:mottle([0.9,0.66,0.6], 100, 0.2)}), catmull(gutPts), 0.0115);
-    tube(C, Object.assign({}, dig, {size:0.0035, color:(x,y,z,nx,ny,nz,u)=>{ const k = 0.85+0.25*Math.pow(Math.sin(u*70),2)+0.1*fbm(x*100,y*100,z*100,2); return [0.8*k,0.56*k,0.5*k]; }}), catmull([[0.11,0.9,0.03],[0.12,1.0,0.02],[0.12,1.075,0.02],[0.05,1.07,0.045],[-0.03,1.065,0.05],[-0.115,1.085,0.03],[-0.12,1.0,0.02],[-0.115,0.91,0.02],[-0.06,0.87,0.0],[0,0.85,-0.02],[0,0.82,-0.04]]), (t)=>0.02*(1+0.12*Math.sin(t*160)));
+    tube(C, Object.assign({}, dig, {size:0.0025}), catmull([[0,1.50,-0.03],[0,1.35,-0.05],[0.01,1.22,-0.035],[0.035,1.165,0.0]]), 0.0075);
+    ellipsoid(C, dig, [0.06,1.12,0.03], [0.065,0.05,0.04], rotXYZ(0.2,-0.3,-0.5));                         // stomach
+    ellipsoid(C, Object.assign({}, dig, {color:mottle([0.5,0.19,0.16], 60, 0.15)}), [-0.055,1.14,0.03], [0.105,0.06,0.07], rotXYZ(0,0,0.15));   // liver
+    ellipsoid(C, Object.assign({}, dig, {size:0.0025, color:flat([0.35,0.55,0.3])}), [-0.05,1.09,0.075], [0.012,0.022,0.012]);                 // gallbladder
+    const gutPts = []; for (let i = 0; i < 70; i++){ const t = i/69; gutPts.push([0.085*Math.sin(t*44+1)*(1-0.3*Math.abs(Math.sin(t*9))), 1.08-0.15*t+0.015*Math.sin(t*23), 0.035+0.04*Math.cos(t*44+1)]); }
+    tube(C, Object.assign({}, dig, {size:0.003, color:mottle([0.9,0.66,0.6], 100, 0.2)}), catmull(gutPts), 0.0115);                                          // small intestine ~6 m coiled
+    tube(C, Object.assign({}, dig, {size:0.0035, color:(x,y,z,nx,ny,nz,u)=>{ const k = 0.85+0.25*Math.pow(Math.sin(u*70),2)+0.1*fbm(x*100,y*100,z*100,2); return [0.8*k,0.56*k,0.5*k]; }}),
+      catmull([[-0.11,0.93,0.03],[-0.12,1.02,0.02],[-0.12,1.09,0.02],[-0.05,1.08,0.045],[0.03,1.07,0.05],[0.115,1.10,0.03],[0.12,1.02,0.02],[0.115,0.93,0.02],[0.06,0.90,0.0],[0,0.88,-0.02],[0,0.85,-0.04]]), (t)=>0.02*(1+0.12*Math.sin(t*160)));   // caecum right -> ascending -> transverse -> descending left -> sigmoid -> rectum
+    capsule(C, Object.assign({}, dig, {size:0.0025}), [-0.11,0.93,0.03],[-0.10,0.885,0.045], 0.004, 0.003);   // appendix
+    // ---- urinary: kidneys T12-L3 (right lower), ureters, bladder behind the pubic symphysis (~0.91)
     const ur = {size:0.0028, color:mottle([0.56,0.22,0.22], 80, 0.2), group:G.urin};
-    for (const s of [-1,1]){ ellipsoid(C, ur, [s*0.07,1.075,-0.07], [0.03,0.052,0.026], rotXYZ(0,0,s*0.15)); tube(C, Object.assign({}, ur, {size:0.0018, color:flat([0.85,0.75,0.55])}), catmull([[s*0.055,1.05,-0.06],[s*0.05,0.95,-0.04],[s*0.03,0.88,0.02],[s*0.015,0.865,0.04]]), 0.0022); }
-    ellipsoid(C, Object.assign({}, ur, {color:mottle([0.85,0.75,0.55], 60, 0.15, 0.85)}), [0,0.865,0.045], [0.04,0.03,0.035]);
+    for (const s of [-1,1]){ ellipsoid(C, ur, [s*0.07, s > 0 ? 1.085 : 1.065, -0.07], [0.03,0.055,0.026], rotXYZ(0,0,s*0.15)); tube(C, Object.assign({}, ur, {size:0.0018, color:flat([0.85,0.75,0.55])}), catmull([[s*0.055,1.04,-0.06],[s*0.05,0.98,-0.04],[s*0.03,0.94,0.02],[s*0.015,0.93,0.04]]), 0.0022); }
+    ellipsoid(C, Object.assign({}, ur, {color:mottle([0.85,0.75,0.55], 60, 0.15, 0.85)}), [0,0.935,0.045], [0.04,0.03,0.035]);
+    // ---- reproductive (generic pelvic organs, midline and paired gonads)
     const rp = {size:0.0025, color:mottle([0.8,0.5,0.65], 80, 0.2), group:G.repro};
-    ellipsoid(C, rp, [0,0.885,0.02], [0.03,0.036,0.02]);
-    for (const s of [-1,1]){ ellipsoid(C, rp, [s*0.05,0.9,0.02], [0.016,0.01,0.012]); tube(C, Object.assign({}, rp, {size:0.0018}), catmull([[s*0.028,0.9,0.02],[s*0.04,0.905,0.03],[s*0.05,0.9,0.02]]), 0.003); }
+    ellipsoid(C, rp, [0,0.905,0.01], [0.03,0.036,0.02]);
+    for (const s of [-1,1]){ ellipsoid(C, rp, [s*0.05,0.915,0.02], [0.016,0.01,0.012]); tube(C, Object.assign({}, rp, {size:0.0018}), catmull([[s*0.028,0.915,0.02],[s*0.04,0.92,0.03],[s*0.05,0.915,0.02]]), 0.003); }
     addImagePlanes(this, C);
     // scale the internal anatomy to the fitted body, then keep it inside the skin envelope
     if (P.fitted){ const sx = P.scaleX || 1, sy = P.H/1.75, sz = P.scaleZ || 1; for (let i = nSkin; i < C.n; i++){ C.pos[i*3] *= sx; C.pos[i*3+1] *= sy; C.pos[i*3+2] *= sz; } }
@@ -731,16 +755,19 @@ LEVELS.push({
 // ---------------------------------------------------------------- HEART
 LEVELS.push({
   id:'heart', eyebrow:'Level 1 · Organ', name:'The heart', scale:'12 cm', metersPerUnit:0.085, center:[0,0.5,0], radius:8.5,
-  blurb:'Four chambers, the great vessels and the coronary arteries that feed the muscle itself. It beats about 100,000 times a day; the pulse here is a shader scaling the ventricles.',
-  divePoint:[-2.5,-2.5,3.2], diveLabel:'into the ventricle wall',
-  groups:[ {name:'Ventricles (myocardium)', color:'#9E3A3C', pulse:0.045}, {name:'Atria', color:'#C56A6A', pulse:-0.02}, {name:'Aorta & arteries', color:'#D9A08E', pulse:0.01}, {name:'Veins & pulmonary trunk', color:'#8A7BA8', pulse:0.01}, {name:'Coronary arteries', color:'#E24C4C', pulse:0.045}, {name:'Coronary veins', color:'#6C6FD1', pulse:0.045}, {name:'Epicardial fat', color:'#E9D08A', pulse:0.045}, {name:'Echocardiogram (real ultrasound)', color:'#CFE6FF'} ],
+  blurb:'Right ventricle anterior and to the right, left ventricle forming the apex, atria behind. The cycle is timed physiologically: atrial systole, then ventricular systole ejecting about 70 mL, then diastolic filling. The aorta distends with each stroke.',
+  divePoint:[2.5,-2.5,3.2], diveLabel:'into the ventricle wall',
+  groups:[ {name:'Ventricles (myocardium)', color:'#9E3A3C', pulse:-0.11}, {name:'Atria', color:'#C56A6A', pulseA:-0.10, pulse:0.04}, {name:'Aorta & arteries', color:'#D9A08E', sizePulse:0.10}, {name:'Veins & pulmonary trunk', color:'#8A7BA8', sizePulse:0.03}, {name:'Coronary arteries', color:'#E24C4C', pulse:-0.11, sizePulse:0.08}, {name:'Coronary veins', color:'#6C6FD1', pulse:-0.11}, {name:'Epicardial fat', color:'#E9D08A', pulse:-0.11}, {name:'Echocardiogram (real ultrasound)', color:'#CFE6FF'} ],
+  rawUnit:0.01, vitals:true,
   presets:{ 'Whole heart':[1,1,1,1,1,1,1,0.6], 'Coronaries':[0.12,0.12,0.3,0.3,1,1,0,0], 'Chambers':[1,1,0.2,0.2,0,0,0,0], 'Echocardiogram':[0.1,0.1,0.12,0.12,0,0,0,1] },
-  planes:[ { key:'ref_echo', group:7, center:[0.3,0.2,0.4], right:[1,0,0], up:[0,1,0], w:15, h:11.2, spacing:0.09, mode:'glow', alpha:1, gain:1.6 } ],
-  pulseCenter:[0,-1,0],
+  planes:[ { key:'ref_echo', group:7, center:[-0.3,0.2,0.4], right:[1,0,0], up:[0,1,0], w:15, h:11.2, spacing:0.09, mode:'glow', alpha:1, gain:1.6 } ],
+  pulseCenter:[0,-0.5,0],
   slots:[ {key:'heart_photo', label:'Heart, anterior view', kind:'project', prompt:'Photorealistic medical specimen photograph of an isolated healthy human heart, anterior view, apex pointing down and to the left, aorta and pulmonary trunk at the top, coronary arteries and yellow epicardial fat visible on the surface, plain black background, soft even studio light, sharp focus.'} ],
   build(C){
     seed(4242);
-    const tilt = rotXYZ(0.15, 0.1, -0.42);
+    const tilt0 = rotXYZ(0.15, -0.1, 0.42), mirror = [-1,0,0, 0,1,0, 0,0,1];
+    const mul3 = (a, b) => { const o = new Array(9).fill(0); for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) for (let k = 0; k < 3; k++) o[r*3+c] += a[r*3+k]*b[k*3+c]; return o; };
+    const tilt = mul3(tilt0, mirror);   // geometry is authored mirrored, then reflected so the right heart is on the person's right (-x)
     const X = {m:tilt, t:[0,0,0]};
     const myo = (x,y,z) => { const k = 0.78 + 0.45*fbm(x*0.9,y*0.9,z*0.9,3); const streak = 0.06*Math.sin(y*3 + x*2); return [0.64*k+streak, 0.22*k, 0.24*k]; };
     const LV = {c:[-0.3,-1.4,0.2], r:[3.9,5.2,3.6]}, RV = {c:[2.6,-0.6,1.2], r:[2.7,4.1,2.4]};
@@ -766,19 +793,19 @@ LEVELS.push({
     const project = (E, k) => (o) => Object.assign({}, o, {xform:null, color:o.color, post:null});
     // LAD: front groove; use tube with projection
     const lad = catmull([[-0.6,3.6,2.4],[0.2,1.5,3.6],[0.4,-1.2,3.9],[0.0,-3.6,3.6],[-0.8,-5.6,2.6],[-1.4,-6.6,1.2]]);
-    tube(C, Object.assign({}, cor, {size:0.09}), (t)=>onSurf(LV, lad(t), 1.03), (t)=>0.32-0.18*t);
+    tube(C, Object.assign({}, cor, {size:0.07}), (t)=>onSurf(LV, lad(t), 1.03), (t)=>0.19-0.10*t);   // LAD ~3.7 mm proximal
     const cx = catmull([[-0.8,3.6,2.0],[-3.0,3.0,1.6],[-4.4,1.6,0.0],[-4.2,-0.4,-2.2],[-3.0,-2.6,-3.2]]);
-    tube(C, Object.assign({}, cor, {size:0.09}), (t)=>onSurf(LV, cx(t), 1.03), (t)=>0.3-0.16*t);
+    tube(C, Object.assign({}, cor, {size:0.07}), (t)=>onSurf(LV, cx(t), 1.03), (t)=>0.17-0.09*t);
     const rca = catmull([[1.2,3.4,2.4],[3.4,2.8,2.6],[5.0,1.2,1.4],[5.2,-1.2,-0.4],[4.0,-3.4,-1.2],[2.0,-4.6,-1.6]]);
-    tube(C, Object.assign({}, cor, {size:0.09}), (t)=>onSurf(RV, rca(t), 1.03), (t)=>0.3-0.16*t);
+    tube(C, Object.assign({}, cor, {size:0.07}), (t)=>onSurf(RV, rca(t), 1.03), (t)=>0.19-0.10*t);   // RCA ~3.9 mm
     const gcv = catmull([[-1.2,3.2,2.6],[-2.2,1.2,3.4],[-2.4,-1.6,3.5],[-3.6,-3.4,2.0],[-4.6,-1.4,-1.6],[-3.4,1.2,-3.2],[-1.2,2.6,-3.6]]);
-    tube(C, Object.assign({}, corV, {size:0.09}), (t)=>onSurf(LV, gcv(t), 1.03), 0.24);
-    const branch = (o, E, path, n) => { for (let i = 0; i < n; i++){ const t = rn(0.1,0.9), p = onSurf(E, path(t), 1.02); const tg = V.norm(V.sub(path(t+0.01), path(t))); const side = V.cross(tg, V.norm(V.sub(p, E.c))); const oo = Object.assign({}, o, {size:0.06}); tree(C, Object.assign({}, oo, {color:oo.color}), p, V.norm(V.add(V.mul(side, rnd()<0.5?1:-1), V.mul(tg, rn(-0.3,0.3)))), rn(1.2,2.2), 0.13, 3, {spread:0.8, decay:0.75, rdec:0.72, bend:0.5, minRad:0.04}); } };
+    tube(C, Object.assign({}, corV, {size:0.07}), (t)=>onSurf(LV, gcv(t), 1.03), 0.16);
+    const branch = (o, E, path, n) => { for (let i = 0; i < n; i++){ const t = rn(0.1,0.9), p = onSurf(E, path(t), 1.02); const tg = V.norm(V.sub(path(t+0.01), path(t))); const side = V.cross(tg, V.norm(V.sub(p, E.c))); const oo = Object.assign({}, o, {size:0.06}); tree(C, Object.assign({}, oo, {color:oo.color}), p, V.norm(V.add(V.mul(side, rnd()<0.5?1:-1), V.mul(tg, rn(-0.3,0.3)))), rn(1.2,2.2), 0.085, 3, {spread:0.8, decay:0.75, rdec:0.72, bend:0.5, minRad:0.03}); } };
     // constrain branch splats to the surface by re-projecting after generation of this block
     const n0 = C.n;
     branch(cor, LV, lad, 7); branch(cor, LV, cx, 5); branch(cor, RV, rca, 6); branch(corV, LV, gcv, 6);
     for (let i = n0; i < C.n; i++){ // project onto the nearer ventricle surface (in tilted frame -> untilt, project, retilt)
-      const inv = [tilt[0],tilt[3],tilt[6], tilt[1],tilt[4],tilt[7], tilt[2],tilt[5],tilt[8]];
+      const inv = mul3(mirror, [tilt0[0],tilt0[3],tilt0[6], tilt0[1],tilt0[4],tilt0[7], tilt0[2],tilt0[5],tilt0[8]]);   // (T·M)^-1 = M·Tᵀ
       const p = V.m3v(inv, [C.pos[i*3],C.pos[i*3+1],C.pos[i*3+2]]);
       const dL = V.len([(p[0]-LV.c[0])/LV.r[0],(p[1]-LV.c[1])/LV.r[1],(p[2]-LV.c[2])/LV.r[2]]), dR = V.len([(p[0]-RV.c[0])/RV.r[0],(p[1]-RV.c[1])/RV.r[1],(p[2]-RV.c[2])/RV.r[2]]);
       const q = V.m3v(tilt, onSurf(Math.abs(dL-1) < Math.abs(dR-1) ? LV : RV, p, 1.025));
@@ -1031,6 +1058,7 @@ const VS = `#version 300 es
 precision highp float; precision highp int; precision highp usampler2D;
 uniform usampler2D uTex; uniform mat4 uView; uniform mat4 uProj; uniform vec2 uFocal; uniform vec2 uViewport;
 uniform float uSplatScale; uniform float uAlpha; uniform float uGroupAlpha[32]; uniform float uGroupPulse[32]; uniform float uGroupWobble[32]; uniform float uGroupShade[32]; uniform vec4 uGroupMat[32]; uniform vec4 uGroupDetail[32]; uniform float uFar; uniform float uDetailMul;
+uniform float uGroupPulseA[32]; uniform float uGroupBreath[32]; uniform float uGroupSizePulse[32]; uniform vec3 uCenterB; uniform float uPulseA, uBreath, uPWV, uPeriod;
 uniform vec3 uCenter; uniform float uPulse; uniform float uTime; uniform float uShade;
 in vec2 aPos; in uint aIndex;
 out vec4 vColor; out vec2 vPos; out float vDepth; out vec4 vDetail; out float vSeed;
@@ -1042,15 +1070,18 @@ void main(){
   uint pk = t1.w; uint g = pk >> 24u;
   float ga = uGroupAlpha[g];
   vec3 p = uintBitsToFloat(t0.xyz);
-  float pw = uGroupPulse[g];
-  if (pw != 0.0) p += (p - uCenter) * (uPulse * pw);
+  float pw = uGroupPulse[g], pa = uGroupPulseA[g], br = uGroupBreath[g], spz = uGroupSizePulse[g];
+  if (pw != 0.0 || pa != 0.0) p += (p - uCenter) * (uPulse * pw + uPulseA * pa);
+  if (br != 0.0) p += (p - uCenterB) * (uBreath * br);
+  float sizeMul = 1.0;
+  if (spz != 0.0 && uPWV > 0.0){ float d = distance(p, uCenter); float ph = fract((uTime - d / uPWV) / uPeriod); float pwv = exp(-pow((ph - 0.17)/0.07, 2.0)) + 0.35*exp(-pow((ph - 0.45)/0.09, 2.0)); sizeMul = 1.0 + spz * pwv; }
   float wb = uGroupWobble[g];
   if (wb != 0.0){ float fi = float(i); p += wb * vec3(sin(uTime*1.7 + fi*0.731), sin(uTime*1.3 + fi*1.17), cos(uTime*1.1 + fi*0.39)); }
   vec4 cam = uView * vec4(p, 1.0);
   vec4 pos2d = uProj * cam;
   float clip = 1.2 * pos2d.w;
   if (ga <= 0.0 || pos2d.z < -clip || pos2d.x < -clip || pos2d.x > clip || pos2d.y < -clip || pos2d.y > clip){ gl_Position = vec4(0.0, 0.0, 2.0, 1.0); return; }
-  vec3 s = uintBitsToFloat(t1.xyz) * uSplatScale;
+  vec3 s = uintBitsToFloat(t1.xyz) * uSplatScale * sizeMul;
   vec3 q = vec3(float(pk & 255u), float((pk >> 8u) & 255u), float((pk >> 16u) & 255u)) / 255.0 * 2.0 - 1.0;
   float qw = sqrt(max(0.0, 1.0 - dot(q, q)));
   float x = q.x, y = q.y, z = q.z, w = qw;
@@ -1110,7 +1141,7 @@ function compile(type, src){ const sh = gl.createShader(type); gl.shaderSource(s
 const prog = gl.createProgram(); gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog);
 if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
 gl.useProgram(prog);
-const U = {}; for (const n of ['uTex','uView','uProj','uFocal','uViewport','uSplatScale','uAlpha','uGroupAlpha','uGroupPulse','uGroupWobble','uCenter','uPulse','uTime','uShade','uGroupShade','uGroupMat','uGroupDetail','uFar','uDetailMul']) U[n] = gl.getUniformLocation(prog, n);
+const U = {}; for (const n of ['uTex','uView','uProj','uFocal','uViewport','uSplatScale','uAlpha','uGroupAlpha','uGroupPulse','uGroupWobble','uCenter','uPulse','uTime','uShade','uGroupShade','uGroupMat','uGroupDetail','uFar','uDetailMul','uGroupPulseA','uGroupBreath','uGroupSizePulse','uCenterB','uPulseA','uBreath','uPWV','uPeriod']) U[n] = gl.getUniformLocation(prog, n);
 const A_POS = gl.getAttribLocation(prog, 'aPos'), A_IDX = gl.getAttribLocation(prog, 'aIndex');
 const quadBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-2,-2, 2,-2, -2,2, 2,2]), gl.STATIC_DRAW);
 gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFuncSeparate(gl.ONE_MINUS_DST_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
@@ -1157,7 +1188,8 @@ function uploadLevel(lv, cloud){
   lv.pulseArr = new Float32Array(32); lv.wobbleArr = new Float32Array(32); if (!lv.shadeArr) lv.shadeArr = new Float32Array(32).fill(1);
   if (!lv.matNames) lv.matNames = lv.groups.map(g => materialFor(g.name)); lv.matArr = new Float32Array(128); lv.detArr = new Float32Array(128); lv.matNames.forEach((m, i) => { lv.matArr.set(MATERIALS[m] || MATERIALS.wet, i*4); lv.detArr.set(DETAILS[m] || DETAILS.wet, i*4); });
   lv.cloud = cloud; if (!cloud.col0) cloud.col0 = cloud.col.slice(0, cloud.n*4);
-  lv.groups.forEach((g, i) => { lv.pulseArr[i] = g.pulse || 0; lv.wobbleArr[i] = (lv.groupWobble && lv.groupWobble[i]) || 0; });
+  lv.pulseAArr = new Float32Array(32); lv.breathArr = new Float32Array(32); lv.sizePulseArr = new Float32Array(32);
+  lv.groups.forEach((g, i) => { lv.pulseArr[i] = g.pulse || 0; lv.pulseAArr[i] = g.pulseA || 0; lv.breathArr[i] = g.breath || 0; lv.sizePulseArr[i] = g.sizePulse || 0; lv.wobbleArr[i] = (lv.groupWobble && lv.groupWobble[i]) || 0; });
   lv.ready = true;
 }
 function buildLevel(lv){
@@ -1222,12 +1254,26 @@ function drawLevel(lv, alphaMul, cam, proj, focal){
   gl.uniform1f(U.uSplatScale, state.splatScale); gl.uniform1f(U.uAlpha, alphaMul * state.alpha);
   gl.uniform1fv(U.uGroupAlpha, lv.alphas); gl.uniform1fv(U.uGroupPulse, lv.pulseArr); gl.uniform1fv(U.uGroupWobble, state.live ? lv.wobbleArr : ZERO32); gl.uniform1fv(U.uGroupShade, lv.shadeArr || ONE32); gl.uniform4fv(U.uGroupMat, lv.matArr || DEFAULT_MAT); gl.uniform4fv(U.uGroupDetail, lv.detArr || ZERO128); gl.uniform1f(U.uFar, FAR); gl.uniform1f(U.uDetailMul, ENGINE.detail);
   const pc = lv.pulseCenter || [0,0,0]; gl.uniform3f(U.uCenter, pc[0], pc[1], pc[2]);
-  const ph = (state.time * 1.15) % 1; const pulse = state.live ? -Math.exp(-Math.pow((ph-0.22)/0.11, 2)) : 0;
-  gl.uniform1f(U.uPulse, pulse); gl.uniform1f(U.uTime, state.time); gl.uniform1f(U.uShade, lv.isScan ? 0 : state.shade);
+  const ph = PHYS.cardiac(state.time);
+  gl.uniform1f(U.uPulse, state.live ? ph.v : 0); gl.uniform1f(U.uPulseA, state.live ? ph.a : 0); gl.uniform1f(U.uBreath, state.live ? PHYS.breath(state.time) : 0);
+  gl.uniform1fv(U.uGroupPulseA, lv.pulseAArr || ZERO32); gl.uniform1fv(U.uGroupBreath, lv.breathArr || ZERO32); gl.uniform1fv(U.uGroupSizePulse, state.live ? (lv.sizePulseArr || ZERO32) : ZERO32);
+  const bc = lv.breathCenter || [0,0,0]; gl.uniform3f(U.uCenterB, bc[0], bc[1], bc[2]); gl.uniform1f(U.uPWV, lv.rawUnit ? PHYS.pwv / lv.rawUnit : 0); gl.uniform1f(U.uPeriod, 60 / PHYS.hr);
+  gl.uniform1f(U.uTime, state.time); gl.uniform1f(U.uShade, lv.isScan ? 0 : state.shade);
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, lv.gpu.tex);
   gl.bindVertexArray(lv.gpu.vao); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, lv.count); gl.bindVertexArray(null);
 }
 const ZERO32 = new Float32Array(32), ONE32 = new Float32Array(32).fill(1), FAR = 16;
+// ---- physiology: cardiac cycle (atrial then ventricular systole), arterial pulse wave, respiration
+const PHYS = {
+  hr: 70, rr: 14, pwv: 6.0,   // beats/min, breaths/min, aortic pulse wave velocity m/s
+  cardiac(t){ const T = 60/this.hr, ph = ((t % T) + T) % T / T;
+    const sys = Math.min(0.5, 0.31*Math.sqrt(T/0.857));                 // ventricular systole ~0.3 s at 70 bpm (QT scales with sqrt RR)
+    const v = ph < sys ? Math.pow(Math.sin(Math.PI*ph/sys), 0.8) : 0;    // ventricular contraction/relaxation
+    const aw = 0.16/T, a = ph > 1-aw ? Math.sin(Math.PI*(ph-(1-aw))/aw) : 0;   // atrial systole in the 160 ms before the R wave
+    return { v, a, ph, sys }; },
+  breath(t){ const T = 60/this.rr, ph = ((t % T) + T) % T / T; return ph < 0.4 ? 0.5 - 0.5*Math.cos(Math.PI*ph/0.4) : 0.5 + 0.5*Math.cos(Math.PI*(ph-0.4)/0.6); },   // inspiration 40 %, expiration 60 %
+  vitals(){ const sv = Math.max(45, 70*(1 - 0.12*Math.max(0, this.hr-70)/110)); const co = this.hr*sv/1000; const tv = 0.5*(1 + 0.6*Math.max(0, this.rr-14)/26); return { sv, co, ef: 0.58, tv, mv: tv*this.rr, sys: Math.round(120 + 0.35*(this.hr-70)), dia: 80 }; },
+};
 const MATERIALS = { skin:[0.14,42,1.0,0.15], wet:[0.55,80,0.5,0.6], bone:[0.08,28,0.25,0.05], muscle:[0.4,64,0.55,0.45], membrane:[0.3,50,0.3,0.7], matte:[0.05,20,0.2,0.0], glass:[0.8,120,0.1,0.9], nerve:[0.3,48,0.4,0.3] };
 function materialFor(name){ const n = name.toLowerCase(); if (/skin|integument/.test(n)) return 'skin'; if (/skelet|bone|histone/.test(n)) return 'bone'; if (/muscul|myofibril|cardiomyo|ventricle|atria|myocard/.test(n)) return 'muscle'; if (/nerv|neuron|dna|backbone|base pair/.test(n)) return 'nerve'; if (/membrane|sarcolemma|reticulum|cristae|boundary/.test(n)) return 'membrane'; if (/imaging|micrograph|echo|scan|fluct|quark|gluon|electron|nucleus \(|proton|neutron|pion|sea|water|virtual|topology/.test(n)) return 'matte'; return 'wet'; }
 const DEFAULT_MAT = new Float32Array(128); for (let i = 0; i < 32; i++) DEFAULT_MAT.set(MATERIALS.wet, i*4);
@@ -1431,6 +1477,7 @@ function refreshUI(pendingIdx){
   $('cEyebrow').textContent = lv.eyebrow; $('cTitle').textContent = lv.name;
   $('cScale').textContent = 'about ' + lv.scale + ' across · 1 unit = ' + formatLen(lv.metersPerUnit) + (lv.buildMs ? ' · ' + (lv.count||0).toLocaleString() + ' splats' : '');
   $('cBlurb').textContent = lv.blurb;
+  updateVitals();
   $('btnUp').disabled = idx === 0; $('btnDown').disabled = idx === LEVELS.length-1;
   $('btnDown').textContent = lv.diveLabel ? 'Dive ' + lv.diveLabel + ' ↓' : 'Dive deeper ↓';
   $('stSplats').textContent = (lv.count||0).toLocaleString(); updateScaleBar();
@@ -1458,6 +1505,7 @@ function buildLayers(lv){
     row.append(sw, nm, r, solo); box.appendChild(row);
   });
 }
+function updateVitals(){ const lv = LEVELS[state.cur]; const el = $('cVitals'); if (!lv.vitals){ el.textContent = ''; return; } const v = PHYS.vitals(); el.textContent = PHYS.hr + ' bpm · SV ' + Math.round(v.sv) + ' mL · CO ' + v.co.toFixed(1) + ' L/min · EF ' + Math.round(v.ef*100) + ' % · BP ' + v.sys + '/' + v.dia + ' · ' + PHYS.rr + ' breaths/min · TV ' + Math.round(v.tv*1000) + ' mL · PWV ' + PHYS.pwv + ' m/s'; }
 function toggleDrawer(){ state.drawer = !state.drawer; $('drawer').classList.toggle('hidden', !state.drawer); $('btnDrawer').setAttribute('aria-pressed', String(state.drawer)); }
 $('btnDrawer').addEventListener('click', toggleDrawer);
 $('btnUp').addEventListener('click', () => goTo(state.cur-1)); $('btnDown').addEventListener('click', () => goTo(state.cur+1)); $('btnReset').addEventListener('click', resetView);
@@ -1487,6 +1535,8 @@ $('rShade').addEventListener('input', (e) => state.shade = +e.target.value);
 $('rDpr').addEventListener('change', (e) => state.dprCap = +e.target.value);
 $('rRotate').addEventListener('change', (e) => state.autoRotate = e.target.checked);
 $('rLive').addEventListener('change', (e) => state.live = e.target.checked);
+$('pHR').addEventListener('input', (e) => { PHYS.hr = +e.target.value; updateVitals(); }); $('pRR').addEventListener('input', (e) => { PHYS.rr = +e.target.value; updateVitals(); });
+(function(){ const box = $('physPresets'); for (const [name, v] of Object.entries({ 'Rest':[70,14], 'Sleep':[55,11], 'Brisk walk':[105,20], 'Exercise':[150,32] })){ const b = document.createElement('button'); b.textContent = name; b.addEventListener('click', () => { PHYS.hr = v[0]; PHYS.rr = v[1]; $('pHR').value = v[0]; $('pRR').value = v[1]; updateVitals(); box.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); }); box.appendChild(b); } })();
 $('rFov').addEventListener('input', (e) => state.fov = (+e.target.value)*Math.PI/180);
 $('rBar').addEventListener('change', (e) => { state.showBar = e.target.checked; updateScaleBar(); });
 $('rBg').addEventListener('change', (e) => { const v = e.target.value; $('app').style.background = v === 'black' ? '#000' : v === 'slate' ? 'radial-gradient(120% 90% at 50% 40%,#2A303C 0%,#1A1F29 60%,#12161E 100%)' : ''; });
