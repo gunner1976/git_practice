@@ -212,6 +212,25 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
       <div id="layers"></div>
     </div>
     <div class="pane" id="pane-render">
+      <h3>Look</h3>
+      <div class="presets" id="looks"></div>
+      <div class="ctl"><label for="eOn">Cinematic engine</label><input id="eOn" type="checkbox" checked></div>
+      <div class="ctl"><label for="eExp">Exposure</label><input id="eExp" type="range" min="0.4" max="2" step="0.02" value="0.95"></div>
+      <div class="ctl"><label for="eBloom">Bloom</label><input id="eBloom" type="range" min="0" max="1" step="0.02" value="0.3"></div>
+      <div class="ctl"><label for="eAp">Depth of field</label><input id="eAp" type="range" min="0" max="1.5" step="0.02" value="0.4"></div>
+      <div class="ctl"><label for="eFocus">Focus (near ↔ far)</label><input id="eFocus" type="range" min="-0.6" max="0.8" step="0.02" value="0"></div>
+      <div class="ctl"><label for="eFog">Atmosphere</label><input id="eFog" type="range" min="0" max="1" step="0.02" value="0.18"></div>
+      <div class="ctl"><label for="eGrain">Film grain</label><input id="eGrain" type="range" min="0" max="0.3" step="0.01" value="0.05"></div>
+      <div class="ctl"><label for="eVig">Vignette</label><input id="eVig" type="range" min="0" max="1" step="0.02" value="0.35"></div>
+      <div class="ctl"><label for="eSat">Saturation</label><input id="eSat" type="range" min="0.5" max="1.5" step="0.02" value="1.06"></div>
+      <h3>Materials &amp; style</h3>
+      <p class="help">Pick a layer of the current level, give it a material, or grade it from any picture: the engine extracts the picture’s palette and gloss and re-maps the layer’s tones to it. Web imagery becomes a style reference, not a texture.</p>
+      <div class="ctl"><label for="mLayer">Layer</label><select id="mLayer"></select></div>
+      <div class="ctl"><label for="mMat">Material</label><select id="mMat"><option value="skin">Skin (subsurface)</option><option value="wet">Wet organ</option><option value="muscle">Muscle</option><option value="bone">Bone</option><option value="membrane">Membrane</option><option value="nerve">Nerve / fibre</option><option value="glass">Glassy</option><option value="matte">Matte</option></select></div>
+      <div class="ctl"><label for="mRef">Style from embedded image</label><select id="mRef"><option value="">— none —</option></select></div>
+      <div class="ctl"><label for="mKeep">Keep original hue</label><input id="mKeep" type="range" min="0" max="0.9" step="0.05" value="0.25"></div>
+      <div class="row" style="display:flex;gap:8px;margin:8px 0 4px"><label class="filebox" style="flex:1;padding:8px" id="mDrop"><input type="file" id="mFile" accept="image/*"><b>Drop or choose a style picture</b></label><button id="mReset">Reset layer</button></div>
+      <div class="msg" id="mMsg"></div>
       <h3>Splats</h3>
       <div class="ctl"><label for="rSize">Splat size</label><input id="rSize" type="range" min="0.4" max="2.5" step="0.05" value="1"></div>
       <div class="ctl"><label for="rAlpha">Opacity</label><input id="rAlpha" type="range" min="0.1" max="1" step="0.02" value="1"></div>
@@ -1009,10 +1028,10 @@ if (!gl){ $('loading').innerHTML = '<h1>Corpus <em>Descent</em></h1><p class="fa
 const VS = `#version 300 es
 precision highp float; precision highp int; precision highp usampler2D;
 uniform usampler2D uTex; uniform mat4 uView; uniform mat4 uProj; uniform vec2 uFocal; uniform vec2 uViewport;
-uniform float uSplatScale; uniform float uAlpha; uniform float uGroupAlpha[32]; uniform float uGroupPulse[32]; uniform float uGroupWobble[32]; uniform float uGroupShade[32];
+uniform float uSplatScale; uniform float uAlpha; uniform float uGroupAlpha[32]; uniform float uGroupPulse[32]; uniform float uGroupWobble[32]; uniform float uGroupShade[32]; uniform vec4 uGroupMat[32]; uniform float uFar;
 uniform vec3 uCenter; uniform float uPulse; uniform float uTime; uniform float uShade;
 in vec2 aPos; in uint aIndex;
-out vec4 vColor; out vec2 vPos;
+out vec4 vColor; out vec2 vPos; out float vDepth;
 void main(){
   uint i = aIndex;
   ivec2 tc = ivec2(int((i & 1023u) << 1u), int(i >> 10u));
@@ -1060,26 +1079,29 @@ void main(){
     float dk = dot(nv, L), wrap = clamp((dk + 0.35) / 1.35, 0.0, 1.0);
     float df = max(dot(nv, Lf), 0.0), db = max(dot(nv, Lb), 0.0);
     vec3 lum = col.rgb * col.rgb;
+    vec4 Mt = uGroupMat[g];                                    // x: specular, y: shininess, z: subsurface, w: wet fresnel
+    float fres = pow(1.0 - max(dot(nv, vd), 0.0), 4.0);
     vec3 lit = lum * (vec3(0.16, 0.18, 0.22) + vec3(1.05, 0.98, 0.9) * wrap + vec3(0.22, 0.25, 0.32) * df)
-             + lum * vec3(0.9, 0.45, 0.35) * pow(max(0.0, 1.0 - abs(nv.z)), 2.5) * 0.35 * (0.3 + 0.7*db)
-             + vec3(1.0, 0.98, 0.95) * pow(max(dot(nv, normalize(L + vd)), 0.0), 56.0) * 0.14 * (0.4 + 0.6 * wrap);
+             + lum * vec3(0.9, 0.45, 0.35) * pow(max(0.0, 1.0 - abs(nv.z)), 2.5) * 0.5 * Mt.z * (0.3 + 0.7*db)
+             + vec3(1.0, 0.98, 0.95) * pow(max(dot(nv, normalize(L + vd)), 0.0), Mt.y) * Mt.x * (0.4 + 0.6 * wrap)
+             + vec3(0.8, 0.86, 0.95) * fres * Mt.w * 0.35;
     vec3 shaded = sqrt(max(lit, 0.0));
     col.rgb = mix(col.rgb, shaded, flatness);
   }
   vColor = vec4(col.rgb, col.a * ga * uAlpha);
-  vPos = aPos;
+  vPos = aPos; vDepth = clamp(-cam.z / uFar, 0.0, 1.0);
   vec2 ndc = pos2d.xy / pos2d.w;
   gl_Position = vec4(ndc + (aPos.x * major + aPos.y * minor) / uViewport * 2.0, 0.0, 1.0);
 }`;
 const FS = `#version 300 es
 precision highp float;
-in vec4 vColor; in vec2 vPos; out vec4 frag;
-void main(){ float A = -dot(vPos, vPos); if (A < -4.0) discard; float B = exp(A) * vColor.a; frag = vec4(B * vColor.rgb, B); }`;
+in vec4 vColor; in vec2 vPos; in float vDepth; layout(location=0) out vec4 frag; layout(location=1) out vec4 fragD;
+void main(){ float A = -dot(vPos, vPos); if (A < -4.0) discard; float B = exp(A) * vColor.a; frag = vec4(B * vColor.rgb, B); fragD = vec4(B * vDepth, 0.0, 0.0, B); }`;
 function compile(type, src){ const sh = gl.createShader(type); gl.shaderSource(sh, src); gl.compileShader(sh); if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh)); return sh; }
 const prog = gl.createProgram(); gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog);
 if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
 gl.useProgram(prog);
-const U = {}; for (const n of ['uTex','uView','uProj','uFocal','uViewport','uSplatScale','uAlpha','uGroupAlpha','uGroupPulse','uGroupWobble','uCenter','uPulse','uTime','uShade','uGroupShade']) U[n] = gl.getUniformLocation(prog, n);
+const U = {}; for (const n of ['uTex','uView','uProj','uFocal','uViewport','uSplatScale','uAlpha','uGroupAlpha','uGroupPulse','uGroupWobble','uCenter','uPulse','uTime','uShade','uGroupShade','uGroupMat','uFar']) U[n] = gl.getUniformLocation(prog, n);
 const A_POS = gl.getAttribLocation(prog, 'aPos'), A_IDX = gl.getAttribLocation(prog, 'aIndex');
 const quadBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-2,-2, 2,-2, -2,2, 2,2]), gl.STATIC_DRAW);
 gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFuncSeparate(gl.ONE_MINUS_DST_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
@@ -1124,6 +1146,8 @@ function uploadLevel(lv, cloud){
   lv.sortKey = null;
   if (!lv.alphas) lv.alphas = new Float32Array(32).fill(1);
   lv.pulseArr = new Float32Array(32); lv.wobbleArr = new Float32Array(32); if (!lv.shadeArr) lv.shadeArr = new Float32Array(32).fill(1);
+  if (!lv.matNames) lv.matNames = lv.groups.map(g => materialFor(g.name)); lv.matArr = new Float32Array(128); lv.matNames.forEach((m, i) => lv.matArr.set(MATERIALS[m] || MATERIALS.wet, i*4));
+  lv.cloud = cloud; if (!cloud.col0) cloud.col0 = cloud.col.slice(0, cloud.n*4);
   lv.groups.forEach((g, i) => { lv.pulseArr[i] = g.pulse || 0; lv.wobbleArr[i] = (lv.groupWobble && lv.groupWobble[i]) || 0; });
   lv.ready = true;
 }
@@ -1132,7 +1156,7 @@ function buildLevel(lv){
   const t = performance.now(); const C = new Cloud(1<<17);
   const P = lv.id === 'body' ? bodyParamsFromImagery() : undefined;
   lv.imageryUsed = []; lv.build(C, P); if (lv.id !== 'body') addImagePlanes(lv, C); const used = lv.imageryUsed; applyImagery(lv, C); lv.imageryUsed = used.concat(lv.imageryUsed); if (lv.planes) for (const pl of lv.planes) lv.shadeArr[pl.group] = 0; lv.buildMs = performance.now()-t;
-  uploadLevel(lv, C);
+  uploadLevel(lv, C); applyStyles(lv);
 }
 function disposeLevel(lv){ if (!lv.gpu) return; gl.deleteTexture(lv.gpu.tex); gl.deleteBuffer(lv.gpu.idx); gl.deleteVertexArray(lv.gpu.vao); lv.gpu = null; lv.ready = false; lv._d = lv._k = lv._o = null; }
 function rebuildLevel(lv){ if (lv.isScan) return; const alphas = lv.alphas; disposeLevel(lv); buildLevel(lv); if (alphas) lv.alphas = alphas; lv.sortKey = null; if (LEVELS[state.cur] === lv) refreshUI(); }
@@ -1187,14 +1211,100 @@ function drawLevel(lv, alphaMul, cam, proj, focal){
   gl.uniformMatrix4fv(U.uView, false, M); gl.uniformMatrix4fv(U.uProj, false, proj);
   gl.uniform2f(U.uFocal, focal[0], focal[1]); gl.uniform2f(U.uViewport, W, H);
   gl.uniform1f(U.uSplatScale, state.splatScale); gl.uniform1f(U.uAlpha, alphaMul * state.alpha);
-  gl.uniform1fv(U.uGroupAlpha, lv.alphas); gl.uniform1fv(U.uGroupPulse, lv.pulseArr); gl.uniform1fv(U.uGroupWobble, state.live ? lv.wobbleArr : ZERO32); gl.uniform1fv(U.uGroupShade, lv.shadeArr || ONE32);
+  gl.uniform1fv(U.uGroupAlpha, lv.alphas); gl.uniform1fv(U.uGroupPulse, lv.pulseArr); gl.uniform1fv(U.uGroupWobble, state.live ? lv.wobbleArr : ZERO32); gl.uniform1fv(U.uGroupShade, lv.shadeArr || ONE32); gl.uniform4fv(U.uGroupMat, lv.matArr || DEFAULT_MAT); gl.uniform1f(U.uFar, FAR);
   const pc = lv.pulseCenter || [0,0,0]; gl.uniform3f(U.uCenter, pc[0], pc[1], pc[2]);
   const ph = (state.time * 1.15) % 1; const pulse = state.live ? -Math.exp(-Math.pow((ph-0.22)/0.11, 2)) : 0;
   gl.uniform1f(U.uPulse, pulse); gl.uniform1f(U.uTime, state.time); gl.uniform1f(U.uShade, lv.isScan ? 0 : state.shade);
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, lv.gpu.tex);
   gl.bindVertexArray(lv.gpu.vao); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, lv.count); gl.bindVertexArray(null);
 }
-const ZERO32 = new Float32Array(32), ONE32 = new Float32Array(32).fill(1);
+const ZERO32 = new Float32Array(32), ONE32 = new Float32Array(32).fill(1), FAR = 16;
+const MATERIALS = { skin:[0.14,42,1.0,0.15], wet:[0.55,80,0.5,0.6], bone:[0.08,28,0.25,0.05], muscle:[0.4,64,0.55,0.45], membrane:[0.3,50,0.3,0.7], matte:[0.05,20,0.2,0.0], glass:[0.8,120,0.1,0.9], nerve:[0.3,48,0.4,0.3] };
+function materialFor(name){ const n = name.toLowerCase(); if (/skin|integument/.test(n)) return 'skin'; if (/skelet|bone|histone/.test(n)) return 'bone'; if (/muscul|myofibril|cardiomyo|ventricle|atria|myocard/.test(n)) return 'muscle'; if (/nerv|neuron|dna|backbone|base pair/.test(n)) return 'nerve'; if (/membrane|sarcolemma|reticulum|cristae|boundary/.test(n)) return 'membrane'; if (/imaging|micrograph|echo|scan|fluct|quark|gluon|electron|nucleus \(|proton|neutron|pion|sea|water|virtual|topology/.test(n)) return 'matte'; return 'wet'; }
+const DEFAULT_MAT = new Float32Array(128); for (let i = 0; i < 32; i++) DEFAULT_MAT.set(MATERIALS.wet, i*4);
+
+// =====================================================================
+//  Visualization engine: MRT scene buffer (color + depth) -> bloom -> composite
+// =====================================================================
+const ENGINE = { on:true, exposure:0.95, bloom:0.3, aperture:0.4, focusOff:0, fog:0.18, grain:0.05, vignette:0.35, sat:1.06, contrast:1.04, fogColor:[0.055,0.07,0.10] };
+const LOOKS = {
+  'Cinematic': { exposure:0.95, bloom:0.32, aperture:0.4, fog:0.2, grain:0.06, vignette:0.4, sat:1.08, contrast:1.06 },
+  'Clinical': { exposure:1.05, bloom:0.08, aperture:0.0, fog:0.0, grain:0.0, vignette:0.05, sat:1.0, contrast:1.0 },
+  'Specimen': { exposure:0.95, bloom:0.25, aperture:0.3, fog:0.05, grain:0.03, vignette:0.6, sat:1.12, contrast:1.1 },
+  'Micrograph': { exposure:1.1, bloom:0.15, aperture:0.75, fog:0.0, grain:0.12, vignette:0.25, sat:0.92, contrast:1.02 },
+};
+const extFloat = gl.getExtension('EXT_color_buffer_float');
+const RT_FMT = extFloat ? gl.RGBA16F : gl.RGBA8, RT_TYPE = extFloat ? gl.HALF_FLOAT : gl.UNSIGNED_BYTE;
+function mkTex(w, h, fmt, type){ const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, fmt, w, h, 0, gl.RGBA, type, null); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); return t; }
+const RT = { w:0, h:0 };
+function setupRT(w, h){
+  if (RT.w === w && RT.h === h) return;
+  for (const k of ['color','depth','bloomA','bloomB']) if (RT[k]) gl.deleteTexture(RT[k]); for (const k of ['fbo','fboA','fboB']) if (RT[k]) gl.deleteFramebuffer(RT[k]);
+  RT.w = w; RT.h = h; RT.bw = Math.max(1, w>>2); RT.bh = Math.max(1, h>>2);
+  RT.color = mkTex(w, h, RT_FMT, RT_TYPE); RT.depth = mkTex(w, h, RT_FMT, RT_TYPE); RT.bloomA = mkTex(RT.bw, RT.bh, RT_FMT, RT_TYPE); RT.bloomB = mkTex(RT.bw, RT.bh, RT_FMT, RT_TYPE);
+  RT.fbo = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, RT.fbo); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, RT.color, 0); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, RT.depth, 0); gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1]);
+  RT.fboA = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, RT.fboA); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, RT.bloomA, 0);
+  RT.fboB = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, RT.fboB); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, RT.bloomB, 0);
+  RT.ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE; gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+const FS_VS = `#version 300 es
+void main(){ vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2)); gl_Position = vec4(p*2.0 - 1.0, 0.0, 1.0); }`;
+const BLUR_FS = `#version 300 es
+precision highp float; uniform sampler2D uSrc; uniform vec2 uDir; uniform vec2 uRes; uniform float uThresh; out vec4 frag;
+void main(){ vec2 uv = gl_FragCoord.xy / uRes; vec4 acc = vec4(0.0); float ws[5] = float[5](0.227, 0.194, 0.121, 0.054, 0.016);
+  for (int i = -4; i <= 4; i++){ vec4 s = texture(uSrc, uv + uDir * float(i) / uRes); if (uThresh > 0.0){ float l = dot(s.rgb, vec3(0.299,0.587,0.114)); s.rgb *= smoothstep(uThresh, uThresh + 0.35, l); } acc += s * ws[abs(i)]; }
+  frag = acc; }`;
+const POST_FS = `#version 300 es
+precision highp float; uniform sampler2D uColor, uDepth, uBloom; uniform vec2 uRes; uniform float uExposure, uSat, uContrast, uVignette, uGrain, uTime, uFocus, uAperture, uFog, uBloomAmt, uDpr; uniform vec3 uFogColor; out vec4 frag;
+vec3 aces(vec3 x){ return clamp((x*(2.51*x + 0.03))/(x*(2.43*x + 0.59) + 0.14), 0.0, 1.0); }
+float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+float depthAt(vec2 uv){ vec4 d = texture(uDepth, uv); return d.a > 1e-4 ? d.r / d.a : 1.0; }
+void main(){
+  vec2 uv = gl_FragCoord.xy / uRes;
+  float depth = depthAt(uv);
+  float coc = clamp(abs(depth - uFocus) * uAperture * 28.0, 0.0, 1.0) * 14.0 * uDpr;
+  vec4 c = texture(uColor, uv);
+  if (coc > 0.6){
+    vec2 taps[12] = vec2[12](vec2(1.0,0.0), vec2(0.5,0.866), vec2(-0.5,0.866), vec2(-1.0,0.0), vec2(-0.5,-0.866), vec2(0.5,-0.866), vec2(0.35,0.2), vec2(-0.2,0.35), vec2(-0.35,-0.2), vec2(0.2,-0.35), vec2(0.0,0.6), vec2(0.0,-0.6));
+    vec4 acc = c; float ws = 1.0;
+    for (int i = 0; i < 12; i++){ vec2 o = taps[i] * coc / uRes; float dd = depthAt(uv + o); float w = 1.0 - 0.6 * step(dd, depth - 0.02) * step(0.0, uFocus - dd); acc += texture(uColor, uv + o) * w; ws += w; }
+    c = acc / ws;
+  }
+  float a = c.a; vec3 col = c.rgb;
+  if (a > 1e-4){ float f = 1.0 - exp(-uFog * depth * 5.0); col = mix(col, uFogColor * a, f); }
+  vec3 bl = texture(uBloom, uv).rgb * uBloomAmt; col += bl; a = min(1.0, a + dot(bl, vec3(0.333)) * 0.8);
+  vec3 lin = a > 1e-4 ? col / a : col;
+  lin = pow(max(lin, 0.0), vec3(2.2)) * uExposure;
+  lin = aces(lin * 0.95);
+  lin = pow(lin, vec3(1.0/2.2));
+  float l = dot(lin, vec3(0.299, 0.587, 0.114)); lin = mix(vec3(l), lin, uSat); lin = (lin - 0.5) * uContrast + 0.5;
+  float g = (hash(gl_FragCoord.xy + fract(uTime) * 100.0) - 0.5) * uGrain * (1.0 - l*0.6); lin += g;
+  float v = uVignette * smoothstep(0.35, 1.15, length((uv - 0.5) * vec2(uRes.x/uRes.y, 1.0)) * 1.3);
+  col = clamp(lin, 0.0, 1.0) * a * (1.0 - v); a = a + (1.0 - a) * v;
+  frag = vec4(col, a);
+}`;
+function mkProg(vs, fs){ const p = gl.createProgram(); gl.attachShader(p, compile(gl.VERTEX_SHADER, vs)); gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; }
+const blurProg = mkProg(FS_VS, BLUR_FS), postProg = mkProg(FS_VS, POST_FS);
+const BU = {}; for (const n of ['uSrc','uDir','uRes','uThresh']) BU[n] = gl.getUniformLocation(blurProg, n);
+const PU = {}; for (const n of ['uColor','uDepth','uBloom','uRes','uExposure','uSat','uContrast','uVignette','uGrain','uTime','uFocus','uAperture','uFog','uBloomAmt','uDpr','uFogColor']) PU[n] = gl.getUniformLocation(postProg, n);
+const emptyVao = gl.createVertexArray();
+function postProcess(){
+  gl.disable(gl.BLEND); gl.bindVertexArray(emptyVao);
+  gl.useProgram(blurProg); gl.uniform1i(BU.uSrc, 0); gl.activeTexture(gl.TEXTURE0);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, RT.fboA); gl.viewport(0, 0, RT.bw, RT.bh); gl.bindTexture(gl.TEXTURE_2D, RT.color); gl.uniform2f(BU.uDir, 1.5, 0); gl.uniform2f(BU.uRes, RT.bw, RT.bh); gl.uniform1f(BU.uThresh, 0.55); gl.drawArrays(gl.TRIANGLES, 0, 3);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, RT.fboB); gl.bindTexture(gl.TEXTURE_2D, RT.bloomA); gl.uniform2f(BU.uDir, 0, 1.5); gl.uniform1f(BU.uThresh, 0.0); gl.drawArrays(gl.TRIANGLES, 0, 3);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, RT.fboA); gl.bindTexture(gl.TEXTURE_2D, RT.bloomB); gl.uniform2f(BU.uDir, 2.5, 0); gl.drawArrays(gl.TRIANGLES, 0, 3);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, RT.fboB); gl.bindTexture(gl.TEXTURE_2D, RT.bloomA); gl.uniform2f(BU.uDir, 0, 2.5); gl.drawArrays(gl.TRIANGLES, 0, 3);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, W, H); gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.useProgram(postProg);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, RT.color); gl.uniform1i(PU.uColor, 0);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, RT.depth); gl.uniform1i(PU.uDepth, 1);
+  gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, RT.bloomB); gl.uniform1i(PU.uBloom, 2);
+  gl.uniform2f(PU.uRes, W, H); gl.uniform1f(PU.uExposure, ENGINE.exposure); gl.uniform1f(PU.uSat, ENGINE.sat); gl.uniform1f(PU.uContrast, ENGINE.contrast); gl.uniform1f(PU.uVignette, ENGINE.vignette); gl.uniform1f(PU.uGrain, ENGINE.grain); gl.uniform1f(PU.uTime, state.time);
+  const focusDist = state.trans ? DEFAULT_DIST : state.cam.dist; gl.uniform1f(PU.uFocus, Math.min(1, (focusDist * (1 + ENGINE.focusOff)) / FAR)); gl.uniform1f(PU.uAperture, ENGINE.aperture); gl.uniform1f(PU.uFog, ENGINE.fog); gl.uniform1f(PU.uBloomAmt, ENGINE.bloom); gl.uniform1f(PU.uDpr, DPR); gl.uniform3f(PU.uFogColor, ENGINE.fogColor[0], ENGINE.fogColor[1], ENGINE.fogColor[2]);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  gl.bindVertexArray(null); gl.activeTexture(gl.TEXTURE0); gl.enable(gl.BLEND); gl.useProgram(prog);
+}
 
 let lastT = performance.now(), fpsEma = 60, frames = 0;
 function frame(now){
@@ -1202,6 +1312,8 @@ function frame(now){
   const dt = Math.min(0.1, (now - lastT)/1000); lastT = now; state.time += dt;
   fpsEma = fpsEma*0.95 + (dt > 0 ? 1/dt : 60)*0.05;
   resize();
+  const engineOn = ENGINE.on && (setupRT(W, H), RT.ok);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, engineOn ? RT.fbo : null); gl.useProgram(prog); gl.enable(gl.BLEND);
   gl.viewport(0, 0, W, H); gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
   const cam = state.cam;
   if (state.autoRotate && !state.trans && now - state.lastInteract > 3500 && !drag.active) cam.theta += dt*0.10;
@@ -1218,6 +1330,7 @@ function frame(now){
     else { drawLevel(to, e, camTo, proj, focal); drawLevel(from, 1-e, camFrom, proj, focal); }
     if (t >= 1){ state.cur = tr.to; cam.dist = DEFAULT_DIST; cam.target = [0,0,0]; state.trans = null; refreshUI(); }
   } else drawLevel(cur, 1, cam, proj, focal);
+  if (engineOn) postProcess();
   if ((frames++ & 15) === 0){ $('stFps').textContent = Math.round(fpsEma); $('stSort').textContent = lastSortMs.toFixed(1); $('stSplats').textContent = (LEVELS[state.cur].count||0).toLocaleString(); updateScaleBar(); }
 }
 
@@ -1310,6 +1423,7 @@ function refreshUI(pendingIdx){
   if (lv.planes && lv.planes.some(pl => IMG[pl.key])) $('cNote').textContent = (lv.fitNote || '') + ' Real clinical and microscope imagery is embedded as planes; see Imagery for sources.';
   buildLayers(lv);
   renderSlots();
+  if (typeof refreshMaterialUI === 'function' && lv.groups) refreshMaterialUI();
 }
 function buildLayers(lv){
   const pr = $('presets'); pr.innerHTML = '';
@@ -1332,6 +1446,25 @@ $('btnDrawer').addEventListener('click', toggleDrawer);
 $('btnUp').addEventListener('click', () => goTo(state.cur-1)); $('btnDown').addEventListener('click', () => goTo(state.cur+1)); $('btnReset').addEventListener('click', resetView);
 document.querySelectorAll('.drawer .tabs button').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('.drawer .tabs button').forEach(x => x.classList.toggle('on', x === b)); document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.id === 'pane-' + b.dataset.pane)); }));
 $('rSize').addEventListener('input', (e) => state.splatScale = +e.target.value);
+// ---- engine controls
+const EBIND = { eExp:'exposure', eBloom:'bloom', eAp:'aperture', eFocus:'focusOff', eFog:'fog', eGrain:'grain', eVig:'vignette', eSat:'sat' };
+for (const [id, key] of Object.entries(EBIND)) $(id).addEventListener('input', (e) => { ENGINE[key] = +e.target.value; $('looks').querySelectorAll('button').forEach(b => b.classList.remove('on')); });
+$('eOn').addEventListener('change', (e) => ENGINE.on = e.target.checked);
+(function(){ const box = $('looks'); for (const [name, look] of Object.entries(LOOKS)){ const b = document.createElement('button'); b.textContent = name; if (name === 'Cinematic') b.classList.add('on'); b.addEventListener('click', () => { Object.assign(ENGINE, look); for (const [id, key] of Object.entries(EBIND)) if (look[key] != null) $(id).value = look[key]; box.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); }); box.appendChild(b); } })();
+if (!extFloat) setHint('Half-float render targets are unavailable here; the engine runs in 8-bit.');
+function refreshMaterialUI(){
+  const lv = LEVELS[state.cur], sel = $('mLayer'); const prev = sel.value; sel.innerHTML = '';
+  lv.groups.forEach((g, i) => { const o = document.createElement('option'); o.value = i; o.textContent = g.name; sel.appendChild(o); }); if (prev && +prev < lv.groups.length) sel.value = prev;
+  const ref = $('mRef'); const keepv = ref.value; ref.innerHTML = '<option value="">— none —</option>'; for (const r of REFERENCE_IMAGERY) if (IMG[r.key]){ const o = document.createElement('option'); o.value = r.key; o.textContent = r.what; ref.appendChild(o); } for (const k of Object.keys(IMG)) if (!k.startsWith('ref_')){ const o = document.createElement('option'); o.value = k; o.textContent = k; ref.appendChild(o); } ref.value = keepv || '';
+  syncMaterialSelect();
+}
+function syncMaterialSelect(){ const lv = LEVELS[state.cur], g = +$('mLayer').value || 0; if (lv.matNames) $('mMat').value = lv.matNames[g] || 'wet'; const st = STYLES[lv.id] && STYLES[lv.id][g]; $('mMsg').textContent = st && st.style ? 'Graded from a picture (' + st.style.palette.length + '-colour palette, gloss ' + st.style.gloss.toFixed(2) + ').' : ''; }
+$('mLayer').addEventListener('change', syncMaterialSelect);
+$('mMat').addEventListener('change', () => { const lv = LEVELS[state.cur]; setLayerMaterial(lv, +$('mLayer').value, $('mMat').value); });
+$('mRef').addEventListener('change', async () => { const key = $('mRef').value; if (!key || !IMG[key]) return; const lv = LEVELS[state.cur], g = +$('mLayer').value; $('mMsg').textContent = 'Grading…'; try { await styleLayerFromImage(lv, g, IMG[key].url, +$('mKeep').value); syncMaterialSelect(); } catch (err){ $('mMsg').textContent = 'Could not grade: ' + err.message; } });
+$('mFile').addEventListener('change', (e) => { const f = e.target.files[0]; if (!f) return; const rd = new FileReader(); rd.onload = async () => { const lv = LEVELS[state.cur], g = +$('mLayer').value; $('mMsg').textContent = 'Grading from ' + f.name + '…'; try { await styleLayerFromImage(lv, g, rd.result, +$('mKeep').value); syncMaterialSelect(); } catch (err){ $('mMsg').textContent = 'Could not grade: ' + err.message; } }; rd.readAsDataURL(f); e.target.value = ''; });
+$('mDrop').addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); }); $('mDrop').addEventListener('drop', (e) => { e.preventDefault(); e.stopPropagation(); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if (!f) return; const rd = new FileReader(); rd.onload = async () => { const lv = LEVELS[state.cur], g = +$('mLayer').value; try { await styleLayerFromImage(lv, g, rd.result, +$('mKeep').value); syncMaterialSelect(); } catch (err){ $('mMsg').textContent = 'Could not grade: ' + err.message; } }; rd.readAsDataURL(f); });
+$('mReset').addEventListener('click', () => { const lv = LEVELS[state.cur]; resetLayerStyle(lv, +$('mLayer').value); syncMaterialSelect(); });
 $('rAlpha').addEventListener('input', (e) => state.alpha = +e.target.value);
 $('rShade').addEventListener('input', (e) => state.shade = +e.target.value);
 $('rDpr').addEventListener('change', (e) => state.dprCap = +e.target.value);
@@ -1643,6 +1776,41 @@ const REFERENCE_IMAGERY = [
   { key:'ref_colon_ihc', what:'Human colon, immunohistochemistry (hematoxylin + DAB)', src:'scikit-image data' },
   { key:'ref_cell', what:'Single cell, optical microscopy', src:'scikit-image data' },
 ];
+// ---- style from image: palette + gloss extracted from any picture, graded onto one layer
+function extractStyle(im){
+  const n = im.w*im.h, step = Math.max(1, Math.floor(n/6000)), px = [];
+  for (let i = 0; i < n; i += step) px.push([im.data[i*4]/255, im.data[i*4+1]/255, im.data[i*4+2]/255]);
+  const K = 6; let cents = []; for (let k = 0; k < K; k++) cents.push(px[Math.floor(px.length*(k+0.5)/K)].slice());
+  for (let it = 0; it < 10; it++){ const sum = cents.map(() => [0,0,0,0]); for (const p of px){ let bi = 0, bd = 1e9; for (let k = 0; k < K; k++){ const c = cents[k], d = (p[0]-c[0])**2 + (p[1]-c[1])**2 + (p[2]-c[2])**2; if (d < bd){ bd = d; bi = k; } } const s = sum[bi]; s[0] += p[0]; s[1] += p[1]; s[2] += p[2]; s[3]++; } cents = sum.map((s, k) => s[3] ? [s[0]/s[3], s[1]/s[3], s[2]/s[3]] : cents[k]); }
+  const lum = (c) => 0.299*c[0] + 0.587*c[1] + 0.114*c[2];
+  cents.sort((a, b) => lum(a) - lum(b));
+  let hi = 0, sat = 0; for (const p of px){ const l = lum(p); if (l > 0.9) hi++; sat += Math.max(p[0],p[1],p[2]) - Math.min(p[0],p[1],p[2]); }
+  return { palette: cents, gloss: Math.min(1, hi/px.length*12), saturation: sat/px.length };
+}
+function paletteAt(pal, q){ const t = Math.max(0, Math.min(0.9999, q))*(pal.length-1), i = Math.floor(t), f = t-i; const a = pal[i], b = pal[Math.min(pal.length-1, i+1)]; return [a[0]+(b[0]-a[0])*f, a[1]+(b[1]-a[1])*f, a[2]+(b[2]-a[2])*f]; }
+function gradeLayer(lv, g, style, keep){
+  const C = lv.cloud; if (!C) return; const hist = new Uint32Array(256); let cnt = 0;
+  for (let i = 0; i < C.n; i++){ if (C.grp[i] !== g) continue; const o = i*4; hist[Math.round(0.299*C.col0[o] + 0.587*C.col0[o+1] + 0.114*C.col0[o+2])]++; cnt++; }
+  if (!cnt) return; const cdf = new Float32Array(256); let acc = 0; for (let k = 0; k < 256; k++){ acc += hist[k]; cdf[k] = acc/cnt; }
+  for (let i = 0; i < C.n; i++){ if (C.grp[i] !== g) continue; const o = i*4; const l = Math.round(0.299*C.col0[o] + 0.587*C.col0[o+1] + 0.114*C.col0[o+2]); const pc = paletteAt(style.palette, cdf[l]*0.92 + 0.04);
+    C.col[o] = Math.round((pc[0]*(1-keep) + C.col0[o]/255*keep)*255); C.col[o+1] = Math.round((pc[1]*(1-keep) + C.col0[o+1]/255*keep)*255); C.col[o+2] = Math.round((pc[2]*(1-keep) + C.col0[o+2]/255*keep)*255); }
+  const m = MATERIALS[lv.matNames[g]] || MATERIALS.wet; lv.matArr.set([Math.max(0.05, style.gloss*0.8), m[1], m[2], m[3]], g*4);
+}
+function reuploadColors(lv){
+  const C = lv.cloud, n = C.n, rows = Math.max(1, Math.ceil(n/1024)); const data = new Uint32Array(2048*4*rows), f32 = new Float32Array(data.buffer);
+  for (let i = 0; i < n; i++){ const base = ((i>>10)*2048 + (i&1023)*2)*4, i3 = i*3, i4 = i*4; f32[base] = C.pos[i3]; f32[base+1] = C.pos[i3+1]; f32[base+2] = C.pos[i3+2]; data[base+3] = (C.col[i4] | (C.col[i4+1]<<8) | (C.col[i4+2]<<16) | (C.col[i4+3]<<24)) >>> 0; f32[base+4] = C.scl[i3]; f32[base+5] = C.scl[i3+1]; f32[base+6] = C.scl[i3+2]; let qx = C.rot[i4], qy = C.rot[i4+1], qz = C.rot[i4+2]; if (C.rot[i4+3] < 0){ qx = -qx; qy = -qy; qz = -qz; } data[base+7] = ((Math.round((qx*0.5+0.5)*255)) | (Math.round((qy*0.5+0.5)*255)<<8) | (Math.round((qz*0.5+0.5)*255)<<16) | ((C.grp[i]&31)<<24)) >>> 0; }
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, lv.gpu.tex); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32UI, 2048, rows, 0, gl.RGBA_INTEGER, gl.UNSIGNED_INT, data);
+}
+const STYLE_STORE = 'cd.styles.v1'; let STYLES = {}; try { STYLES = JSON.parse(localStorage.getItem(STYLE_STORE) || '{}') || {}; } catch (e){}
+function applyStyles(lv){ const st = STYLES[lv.id]; if (!st || !lv.cloud) return; let any = false; for (const [g, rec] of Object.entries(st)){ if (rec.style){ gradeLayer(lv, +g, rec.style, rec.keep == null ? 0.25 : rec.keep); any = true; } if (rec.material && MATERIALS[rec.material]){ lv.matNames[+g] = rec.material; lv.matArr.set(MATERIALS[rec.material], (+g)*4); } } if (any) reuploadColors(lv); }
+async function styleLayerFromImage(lv, g, url, keep){
+  const im = await decodeImage(url); const style = extractStyle(im); const thumb = await downscaleDataURL(url, 96, 0.7);
+  STYLES[lv.id] = STYLES[lv.id] || {}; STYLES[lv.id][g] = Object.assign(STYLES[lv.id][g] || {}, { style, keep, thumb });
+  try { localStorage.setItem(STYLE_STORE, JSON.stringify(STYLES)); } catch (e){}
+  gradeLayer(lv, g, style, keep); reuploadColors(lv);
+}
+function setLayerMaterial(lv, g, mat){ STYLES[lv.id] = STYLES[lv.id] || {}; STYLES[lv.id][g] = Object.assign(STYLES[lv.id][g] || {}, { material: mat }); try { localStorage.setItem(STYLE_STORE, JSON.stringify(STYLES)); } catch (e){} lv.matNames[g] = mat; lv.matArr.set(MATERIALS[mat], g*4); }
+function resetLayerStyle(lv, g){ if (STYLES[lv.id]) delete STYLES[lv.id][g]; try { localStorage.setItem(STYLE_STORE, JSON.stringify(STYLES)); } catch (e){} const C = lv.cloud; if (C){ for (let i = 0; i < C.n; i++) if (C.grp[i] === g){ const o = i*4; C.col[o] = C.col0[o]; C.col[o+1] = C.col0[o+1]; C.col[o+2] = C.col0[o+2]; } reuploadColors(lv); } lv.matNames[g] = materialFor(lv.groups[g].name); lv.matArr.set(MATERIALS[lv.matNames[g]], g*4); }
 // ---- storage and UI
 function downscaleDataURL(url, max, q){ return new Promise((res) => { const img = new Image(); img.onload = () => { const sc = Math.min(1, max/Math.max(img.width, img.height)); const cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(img.width*sc)); cv.height = Math.max(1, Math.round(img.height*sc)); cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); res(cv.toDataURL('image/jpeg', q)); }; img.onerror = () => res(url); img.src = url; }); }
 function saveImageryStore(){ try { const o = {}; for (const k of Object.keys(IMG)) if (IMG[k].stored) o[k] = IMG[k].stored; localStorage.setItem(IMG_STORE, JSON.stringify(o)); } catch (e){ setHint('Browser storage is full: this image will not survive a reload. Commit it to the repo instead.'); } }
