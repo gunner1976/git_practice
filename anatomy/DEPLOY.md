@@ -7,7 +7,24 @@ EXR). It has no backend and is relocatable, so it runs unchanged at
 server). Total size is about 110 MB, dominated by the organ-system files that
 load on demand (skeleton first, 16 MB).
 
-Pick one of the three paths in `deploy/`:
+## Chosen path: the Hetzner server, at anatomy.gunninginc.click
+
+Run once on the server over SSH (any sudo user):
+
+```
+curl -fsSL https://raw.githubusercontent.com/gunner1976/git_practice/claude/gaussian-splat-body-viewer-ksbgzs/anatomy/deploy/server-install.sh | sudo bash
+```
+
+`deploy/server-install.sh` installs git, Node 22 and rsync if needed, clones
+this branch into `/opt/anatomy-src`, builds the bundle into
+`/var/www/anatomy`, opens 80/443 in ufw if it is active, and configures
+whatever serves the site already: an nginx vhost with a certbot certificate,
+a Caddy site block (automatic HTTPS), or, if nothing listens on 80/443,
+installs nginx and certbot. Re-run the same command to update after a push.
+Override `DOMAIN`, `BRANCH`, `WEB_ROOT` or `CERT_EMAIL` with environment
+variables if needed.
+
+Other paths kept in `deploy/` for reference:
 
 | Path | When | What to run |
 |---|---|---|
