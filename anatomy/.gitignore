@@ -3,3 +3,4 @@ web/dist/
 web/public/assets/*.glb
 !web/public/assets/*.opt.glb
 pipeline/__pycache__/
+web/public/assets/tiles/
