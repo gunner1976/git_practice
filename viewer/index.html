@@ -554,7 +554,7 @@ function buildBodySDF(P){
   S.ell(hp(0, -0.052, 0.088), hs(0.018, 0.0055, 0.009), 0.006, { lip:1 });               // upper lip
   S.ell(hp(0, -0.062, 0.087), hs(0.016, 0.0055, 0.009), 0.006, { lip:1 });               // lower lip
   S.ell(hp(0, -0.057, 0.093), hs(0.02, 0.0012, 0.005), 0.003, { sub:true });             // mouth line
-  for (const s of [-1,1]){ S.ell(hp(s*0.031, 0.004, 0.095), hs(0.015, 0.0068, 0.02), 0.006, { sub:true }); S.ell(hp(s*0.075, -0.002, -0.006), hs(0.008, 0.027, 0.018), 0.012); }   // palpebral apertures (carved), ears
+  for (const s of [-1,1]){ S.ell(hp(s*0.031, 0.004, 0.094), hs(0.0145, 0.006, 0.018), 0.006, { sub:true }); S.ell(hp(s*0.075, -0.002, -0.006), hs(0.008, 0.027, 0.018), 0.012); }   // palpebral apertures (carved), ears
   // ---- neck and shoulders
   S.cap(P.neck.a, [P.neck.b[0], P.neck.b[1]+0.02, P.neck.b[2]], P.neck.r[0], P.neck.r[1], 0.035);
   const shY = P.torso[P.torso.length-2].y, shX = P.torso[P.torso.length-2].rx;
@@ -682,7 +682,7 @@ LEVELS.push({
     skinSample(skinTop, false);
     if (!textured){
       for (const sx of [-1,1]){   // eyes: sclera, iris, pupil, and a brow of oriented strands
-        const ec = hp(sx*0.031, 0.004, 0.079);
+        const ec = hp(sx*0.031, 0.004, 0.0755);
         ellipsoid(C, {size:0.0014, color:(x,y,z)=>{ const k = 0.93 + 0.06*fbm(x*500,y*500,z*500,2); return [0.95*k, 0.93*k, 0.91*k]; }, group:G.skin, jitter:0.2}, ec, [0.012*kx, 0.012*ky, 0.012*kz]);
         ellipsoid(C, {size:0.0009, color:(x,y,z)=>{ const r = Math.hypot(x-ec[0], y-ec[1])/(0.0058*kx); const k = 0.55 + 0.6*fbm(x*1400,y*1400,z*1400,2); return r > 0.42 ? [0.32*k,0.2*k,0.1*k] : [0.02,0.02,0.02]; }, group:G.skin, jitter:0.2}, [ec[0], ec[1], ec[2]+0.0108*kz], [0.0058*kx, 0.0058*ky, 0.0014]);
         for (let i = 0; i < 38; i++){ const t = i/37; const q = SDF.project(hp(sx*(0.014 + 0.034*t), 0.024 + 0.006*Math.sin(t*3.1) - 0.004*t, 0.095)); const n = SDF.grad(q); emit(C, {size:0.0011, aspect:3.2, thick:0.15, color:flat([0.19,0.12,0.08]), group:G.skin, inset:-0.0005, jitter:0.3}, q, n, [sx, 0.35 - 0.7*t, 0], 0, 0); }
