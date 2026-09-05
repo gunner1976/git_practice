@@ -1,0 +1,39 @@
+name: Deploy anatomy explorer to GitHub Pages
+# Publishes anatomy/web/dist to the repository's GitHub Pages site.
+# To serve it at anatomy.gunninginc.click, add a CNAME record for that name pointing to
+# gunner1976.github.io and set the custom domain in Settings -> Pages (the workflow writes
+# the CNAME file when PAGES_CUSTOM_DOMAIN is set as a repository variable).
+on:
+  push:
+    branches: [master, claude/gaussian-splat-body-viewer-ksbgzs]
+    paths: ['anatomy/web/**', '.github/workflows/deploy-anatomy.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency: { group: pages, cancel-in-progress: true }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: anatomy/web/package-lock.json }
+      - run: npm ci --no-audit --no-fund
+        working-directory: anatomy/web
+      - run: npm run build
+        working-directory: anatomy/web
+      - name: custom domain
+        if: vars.PAGES_CUSTOM_DOMAIN != ''
+        run: echo "${{ vars.PAGES_CUSTOM_DOMAIN }}" > anatomy/web/dist/CNAME
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: anatomy/web/dist }
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: { name: github-pages, url: ${{ steps.deployment.outputs.page_url }} }
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

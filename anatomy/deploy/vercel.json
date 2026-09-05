@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd anatomy/web && npm ci",
+  "buildCommand": "cd anatomy/web && npm run build",
+  "outputDirectory": "anatomy/web/dist",
+  "framework": null,
+  "headers": [
+    { "source": "/assets/(.*)\\.opt\\.glb", "headers": [{ "key": "Cache-Control", "value": "public, max-age=2592000, immutable" }] },
+    { "source": "/(.*)\\.glb", "headers": [{ "key": "Content-Type", "value": "model/gltf-binary" }] }
+  ]
+}

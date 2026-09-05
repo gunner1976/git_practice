@@ -1,0 +1,15 @@
+# Anatomy Explorer — Caddy snippets (automatic HTTPS).
+# Option A: subpath on the existing site block for gunninginc.click:
+#   handle_path /anatomy/* {
+#       root * /var/www/anatomy
+#       file_server
+#       header /*.glb Cache-Control "public, max-age=2592000, immutable"
+#   }
+# Option B: subdomain:
+anatomy.gunninginc.click {
+    root * /var/www/anatomy
+    file_server
+    header /*.glb Cache-Control "public, max-age=2592000, immutable"
+    header /*.webp Cache-Control "public, max-age=2592000, immutable"
+    encode zstd gzip
+}
