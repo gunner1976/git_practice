@@ -25,7 +25,7 @@ For every organ system listed in config.json this script
      tissue class, display metadata, description) plus the attribution block.
 
 Everything is deterministic and repeatable; re-running only rebuilds what is
-requested. Run `node optimize.mjs` afterwards for Meshopt compression.
+requested. Run `npm run optimize` in web/ afterwards for Meshopt compression.
 """
 import argparse, json, math, os, re, sys, time, hashlib
 import numpy as np
@@ -56,6 +56,14 @@ def strip_suffix(name):
     """'Deltoid muscle.l' -> ('Deltoid muscle', 'l', 'organ'); 'Deltoid muscle.ol' -> (..., 'l', 'origin')."""
     name = re.sub(r'\.\d{3}$', '', name)
     side, role = None, 'organ'
+    m = re.match(r'^(.*)\.([oe])(\d*)([lr])$', name)          # .ol .or .el .er .o2l .e3r ... (numbered attachment areas)
+    if m:
+        name = m.group(1)
+        role = 'origin' if m.group(2) == 'o' else 'insertion'
+        side = m.group(4)
+        if m.group(3):
+            name = f'{name} ({role} {m.group(3)})'
+        return name, side, role
     m = re.match(r'^(.*)\.([a-zA-Z]{1,2})$', name)
     if m and (m.group(2).lower() in ('l', 'r') or m.group(2).lower() in ROLE_SUFFIX):
         suf = m.group(2).lower()
@@ -64,10 +72,6 @@ def strip_suffix(name):
             side = suf
         else:
             role = ROLE_SUFFIX[suf]
-            if suf in ('ol', 'el'):
-                side = 'l'
-            elif suf in ('or', 'er'):
-                side = 'r'
     return name, side, role
 
 
@@ -351,11 +355,19 @@ def make_export_material(cls, p, tiles_dir, cache):
 # ----------------------------------------------------------------------------
 # geometry stages
 # ----------------------------------------------------------------------------
-def bake_world_transform(obj):
-    m = obj.matrix_world.copy()
-    obj.data.transform(m)
-    obj.matrix_world = Matrix.Identity(4)
-    obj.parent = None
+def bake_world_transforms(objs):
+    """Fold every object's full world transform (all parent empties and parent meshes) into its mesh data.
+    The matrices are snapshotted first: baking a parent changes the world matrix of the meshes parented to it.
+    Mirrored objects (negative determinant, the whole left side in Z-Anatomy) get their normals flipped back."""
+    bpy.context.view_layer.update()
+    mats = {o.name: o.matrix_world.copy() for o in objs}
+    for o in objs:
+        m = mats[o.name]
+        o.parent = None
+        o.matrix_world = Matrix.Identity(4)
+        o.data.transform(m)
+        if m.determinant() < 0:
+            o.data.flip_normals()
 
 
 def box_uv(mesh, scale):
@@ -572,8 +584,7 @@ def build_system(sysname, spec, cfg, args, descriptions, manifest, out_dir, tile
         }
 
     # flatten transforms, drop everything else from the scene
-    for o in keep:
-        bake_world_transform(o)
+    bake_world_transforms(keep)
     for o in list(scene.objects):
         if o not in keep:
             bpy.data.objects.remove(o, do_unlink=True)

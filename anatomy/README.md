@@ -14,7 +14,7 @@ anatomy/
   pipeline/
     config.json        systems, polygon budgets, exclusions, tissue rules, tissue material params
     build_assets.py    Blender (bpy) pipeline: source -> per-system .glb + manifest.json
-    optimize.mjs       gltf-transform: dedup, quantize, Meshopt -> *.opt.glb
+    (see web/scripts/optimize.mjs for the glTF optimiser)
   web/                 Vite + TypeScript + three.js app
     src/main.ts        scene, lights, post chain, UI, selection, peel, section planes
     src/materials.ts   per-tissue MeshPhysicalMaterial (+ AO from COLOR_0, wrap SSS, clipping)

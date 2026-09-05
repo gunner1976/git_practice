@@ -289,4 +289,4 @@ renderer.setAnimationLoop(() => {
 });
 
 // debugging hooks
-(window as any).anatomy = { scene, camera, renderer, systems, materials: allTissueMaterials, sssPass, gtao, frameAll, select, ensureLoaded };
+(window as any).anatomy = { scene, camera, controls, renderer, systems, materials: allTissueMaterials, sssPass, gtao, bloom, frameAll, select, ensureLoaded, applyVisibility };

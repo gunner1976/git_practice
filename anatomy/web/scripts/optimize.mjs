@@ -12,8 +12,8 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const cfg = JSON.parse(readFileSync(path.join(here, 'config.json'), 'utf8'));
-const assets = path.resolve(here, cfg.output_dir);
+const cfg = JSON.parse(readFileSync(path.join(here, '..', '..', 'pipeline', 'config.json'), 'utf8'));
+const assets = path.resolve(here, '..', '..', 'pipeline', cfg.output_dir);
 const args = process.argv.slice(2);
 const useDraco = args.includes('--draco');
 const wanted = args.filter(a => !a.startsWith('--'));

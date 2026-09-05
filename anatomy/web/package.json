@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "optimize": "node ../pipeline/optimize.mjs"
+    "optimize": "node scripts/optimize.mjs"
   },
   "dependencies": {
     "@pmndrs/assets": "^1.7.0",
