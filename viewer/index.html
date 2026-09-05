@@ -528,6 +528,9 @@ class BodySDF {
   cap(a, b, ra, rb, k, opt){ const bc = V.lerp(a, b, 0.5), br = V.len(V.sub(b, a))/2 + Math.max(ra, rb), rr = Math.max(ra, rb); const pr = Object.assign({ t:'c', a, b, ra, rb, k: k == null ? 0.03 : k, bc, br, lo:[Math.min(a[0],b[0])-rr, Math.min(a[1],b[1])-rr, Math.min(a[2],b[2])-rr], hi:[Math.max(a[0],b[0])+rr, Math.max(a[1],b[1])+rr, Math.max(a[2],b[2])+rr] }, opt||{}); (pr.sub ? this.subs : this.prims).push(pr); return pr; }
   finish(){ const cs = this.cell; this.grid.clear(); for (const list of [this.prims, this.subs]) for (const pr of list){ const R = pr.k*2 + this.margin; const lo = pr.lo.map(v => Math.floor((v-R)/cs)), hi = pr.hi.map(v => Math.floor((v+R)/cs)); for (let i = lo[0]; i <= hi[0]; i++) for (let j = lo[1]; j <= hi[1]; j++) for (let l = lo[2]; l <= hi[2]; l++){ const key = i*73856093 ^ j*19349663 ^ l*83492791; let cellList = this.grid.get(key); if (!cellList){ cellList = { a:[], s:[] }; this.grid.set(key, cellList); } (pr.sub ? cellList.s : cellList.a).push(pr); } } return this; }
   sd(pr, p){ return pr.t === 'e' ? sdEll(p, pr.c, pr.r) : sdCap(p, pr.a, pr.b, pr.ra, pr.rb); }
+  // the blended field split in two: the primitives of one part, and everything else (both blended exactly as F does)
+  partDists(p, part){ const cs = this.cell, key = Math.floor(p[0]/cs)*73856093 ^ Math.floor(p[1]/cs)*19349663 ^ Math.floor(p[2]/cs)*83492791; const cl = this.grid.get(key); let fA = 1.0, fO = 1.0; if (!cl) return [1e9, 1e9];
+    for (const pr of cl.a){ const d = this.sd(pr, p); if (pr.part === part) fA = fA >= 1.0 ? d : smin(fA, d, pr.k); else fO = fO >= 1.0 ? d : smin(fO, d, pr.k); } return [fA >= 1.0 ? 1e9 : fA, fO >= 1.0 ? 1e9 : fO]; }
   F(p){ const cs = this.cell, key = Math.floor(p[0]/cs)*73856093 ^ Math.floor(p[1]/cs)*19349663 ^ Math.floor(p[2]/cs)*83492791; const cl = this.grid.get(key); if (!cl) return 1.0; let f = 1.0;
     for (const pr of cl.a){ if (f < 1.0){ const dx = Math.max(pr.lo[0]-p[0], 0, p[0]-pr.hi[0]), dy = Math.max(pr.lo[1]-p[1], 0, p[1]-pr.hi[1]), dz = Math.max(pr.lo[2]-p[2], 0, p[2]-pr.hi[2]); if (dx*dx+dy*dy+dz*dz > (f + pr.k)*(f + pr.k)) continue; } const d = this.sd(pr, p); f = f >= 1.0 ? d : smin(f, d, pr.k); }
     for (const pr of cl.s){ const dx = Math.max(pr.lo[0]-p[0], 0, p[0]-pr.hi[0]), dy = Math.max(pr.lo[1]-p[1], 0, p[1]-pr.hi[1]), dz = Math.max(pr.lo[2]-p[2], 0, p[2]-pr.hi[2]); if (dx*dx+dy*dy+dz*dz > pr.k*pr.k*4) continue; const d = this.sd(pr, p); f = smax(f, -d, pr.k); } return f; }
@@ -618,7 +621,7 @@ function buildBodySDF(P){
   for (const s of [-1,1]){
     S.ell([s*0.075*sc, yRib+0.01, rib.rz*0.78], [0.075*sc, 0.05*sc, 0.018*sc], 0.06);    // pectoralis (flat plate)
     S.ell([s*0.085*sc, yPel-0.03*sc, -pel.rz*0.75], [0.085*sc, 0.09*sc, 0.05*sc], 0.05); // gluteus
-    S.ell([s*(shX-delt*0.55), shY-0.02, 0.0], [delt, delt*1.1, delt], 0.045);            // deltoid
+    S.ell([s*(shX-delt*0.55), shY-0.02, 0.0], [delt, delt*1.1, delt], 0.045, { part: s > 0 ? 'armL' : 'armR' });   // deltoid (moves with the arm)
     S.ell([s*0.03*sc, yAbd+0.02, abd.rz*0.85], [0.035*sc, 0.1*sc, 0.012*sc], 0.05);     // rectus abdominis plane
   }
   if (P.physique === 'david'){
@@ -634,6 +637,7 @@ function buildBodySDF(P){
   // ---- arms
   const A = P.arm, mx = (p, s) => [s*p[0], p[1], p[2]];
   for (const s of [-1,1]){
+    const armFrom = S.prims.length;
     const sh = mx(A.pts[0], s), el = mx(A.pts[1], s), wr = mx(A.pts[2], s);
     S.cap(sh, el, A.r[0]*0.92, A.r[1]*0.98, 0.035);
     const mid = V.lerp(sh, el, 0.45); S.ell([mid[0], mid[1], mid[2]+0.02*sc], [A.r[0]*0.85, 0.075*sc, A.r[0]*0.8], 0.04);    // biceps
@@ -648,6 +652,7 @@ function buildBodySDF(P){
     for (let k = 0; k < 4; k++){ const bx = hcn[0] + s*(-0.029 + k*0.0195)*(hrr[0]/0.042), by = hcn[1] - hrr[1]*0.75, bz = hcn[2] + 0.004; const len = (0.075 - Math.abs(k-1.2)*0.008)*sc*hk, r0 = 0.0078*sc*hk; let a = [bx, by, bz]; for (let ph = 0; ph < 3; ph++){ const L = len*[0.42,0.32,0.26][ph]; const b = [a[0] + s*0.002*ph*(k-1.5), a[1] - L*Math.cos(0.15*ph), a[2] + L*Math.sin(0.15*ph) + 0.002]; S.cap(a, b, r0*(1-0.1*ph), r0*(1-0.1*(ph+1)), ph === 0 ? 0.006 : 0.0035); a = b; } }
     const tb0 = [hcn[0] - s*hrr[0]*0.85, hcn[1] - 0.005, hcn[2] + 0.012], tb1 = [hcn[0] - s*hrr[0]*1.3, hcn[1] - 0.05*sc, hcn[2] + 0.035], tb2 = [hcn[0] - s*hrr[0]*1.45, hcn[1] - 0.085*sc, hcn[2] + 0.045];
     S.cap(tb0, tb1, 0.011*sc, 0.009*sc, 0.008); S.cap(tb1, tb2, 0.009*sc, 0.007*sc, 0.006);
+    for (let i = armFrom; i < S.prims.length; i++) S.prims[i].part = s > 0 ? 'armL' : 'armR';
   }
   // ---- legs
   const Lg = P.leg;
@@ -678,7 +683,7 @@ const M3 = {
   quat:(m) => quatFromBasis([m[0],m[3],m[6]], [m[1],m[4],m[7]], [m[2],m[5],m[8]]),
 };
 const qmul = (a, b) => [a[3]*b[0] + a[0]*b[3] + a[1]*b[2] - a[2]*b[1], a[3]*b[1] - a[0]*b[2] + a[1]*b[3] + a[2]*b[0], a[3]*b[2] + a[0]*b[1] - a[1]*b[0] + a[2]*b[3], a[3]*b[3] - a[0]*b[0] - a[1]*b[1] - a[2]*b[2]];
-function buildRig(P, pose){
+function buildRig(P, pose, SDF){
   const A = P.arm.pts, Lg = P.leg.pts, sc = P.H/1.75, mx = (p, s) => [s*p[0], p[1], p[2]];
   const shY = P.torso[P.torso.length-2].y, pelY = P.torso[1].y + 0.11*sc;
   const B = {};
@@ -702,34 +707,79 @@ function buildRig(P, pose){
     B.spine2.R = M3.mul(M3.axis([0,0,1], 5*d2r), M3.axis([0,1,0], -8*d2r));
     B.neck.R = M3.axis([0,1,0], -12*d2r);
     B.head.R = M3.mul(M3.axis([0,1,0], -18*d2r), M3.mul(M3.axis([1,0,0], 4*d2r), M3.axis([0,0,1], -3*d2r)));
-    B.uarmR.R = M3.mul(M3.axis([0,0,1], -7*d2r), M3.axis([1,0,0], -6*d2r));      // hangs close to the thigh, a little forward
-    B.farmR.R = M3.axis([1,0,0], -14*d2r); B.handR.R = M3.axis([0,1,0], 25*d2r);   // slight elbow bend; palm turns toward the thigh
-    B.uarmL.R = M3.mul(M3.axis([0,0,1], 16*d2r), M3.axis([1,0,0], -14*d2r));      // left arm slightly out and forward
+    B.uarmR.R = M3.mul(M3.axis([0,0,1], 5*d2r), M3.axis([1,0,0], -3*d2r));       // hangs beside the thigh, a little forward
+    B.farmR.R = M3.axis([1,0,0], -5*d2r); B.handR.R = M3.axis([0,1,0], 25*d2r);   // slight elbow bend; palm turns toward the thigh
+    B.uarmL.R = M3.mul(M3.axis([0,0,1], 11*d2r), M3.axis([1,0,0], -14*d2r));      // left arm slightly out and forward
     B.thighL.R = M3.mul(M3.axis([1,0,0], -14*d2r), M3.axis([0,0,1], 6*d2r));      // left knee forward and outward
     B.shinL.R = M3.axis([1,0,0], 24*d2r); B.footL.R = M3.axis([1,0,0], 22*d2r);   // relaxed knee, heel lifted
-    B.thighR.R = M3.axis([0,0,1], -2*d2r);
+    B.thighR.R = M3.axis([0,0,1], 8*d2r);                                          // the standing leg stays vertical under the tilted pelvis, foot a little inward
   }
   // world rotation and joint positions by forward kinematics
   const worldR = (b) => b.par ? M3.mul(worldR(B[b.par]), b.R) : b.R;
   const xf = (b, p) => { const q = V.add(b.a, V.m3v(b.R, V.sub(p, b.a))); return b.par ? xf(B[b.par], q) : V.add(q, b.T || [0,0,0]); };
   for (const b of Object.values(B)){ b.Rw = worldR(b); b.qw = M3.quat(b.Rw); b.aP = xf(b, b.a); b.bP = xf(b, b.b); }
-  if (pose === 'david'){ // left forearm folded up in front of the chest, hand resting at the shoulder
-    B.farmL.R = M3.mul(M3.axis([0,0,1], 42*d2r), M3.axis([1,0,0], -136*d2r));       // folded up and inward to the shoulder
-    B.handL.R = M3.mul(M3.axis([1,0,0], -35*d2r), M3.axis([0,0,1], 20*d2r));
+  if (pose === 'david'){ // left forearm folded up, the hand resting on the sling at the left shoulder
+    const fa = B.farmL, wristTarget = [0.215*sc, 1.405*sc, 0.125*sc];
+    const restDir = V.norm(V.sub(fa.b, fa.a)), want = V.norm(V.sub(wristTarget, B.uarmL.bP));
+    fa.R = M3.mul(M3.fromTo(restDir, V.m3v(M3.tr(B.uarmL.Rw), want)), M3.axis(restDir, 25*d2r));   // aim at the shoulder, then roll the palm inward
+    for (const b of Object.values(B)){ b.Rw = worldR(b); b.qw = M3.quat(b.Rw); b.aP = xf(b, b.a); b.bP = xf(b, b.b); }
+    const ha = B.handL, hRest = V.norm(V.sub(ha.b, ha.a)), hWant = V.norm([-0.3, 0.5, -0.6]);                       // over the top of the shoulder, fingers curling behind it
+    ha.R = M3.mul(M3.fromTo(hRest, V.m3v(M3.tr(fa.Rw), hWant)), M3.axis(hRest, -20*d2r));
     for (const b of Object.values(B)){ b.Rw = worldR(b); b.qw = M3.quat(b.Rw); b.aP = xf(b, b.a); b.bP = xf(b, b.b); }
   }
   const list = Object.values(B);
   const segDist = (p, a, b) => { const ab = V.sub(b, a), L2 = Math.max(1e-9, V.dot(ab, ab)); let t = V.dot(V.sub(p, a), ab)/L2; t = t < 0 ? 0 : t > 1 ? 1 : t; return V.len(V.sub(p, V.add(a, V.mul(ab, t)))); };
   const idx = {}; list.forEach((b, i) => idx[b.n] = i); for (const b of list){ b.kids = list.filter(c => c.par === b.n); }
+  const shX = Math.abs(B.uarmL.a[0]), shJY = B.uarmL.a[1], hipY = B.thighL.a[1];
+  const smf = (x) => { x = Math.max(0, Math.min(1, x)); return x*x*(3-2*x); };
+  // arm chain vs trunk: a point belongs to the arm if it lies within the arm's own radius of the rest arm axis or clearly outside the trunk's half-width
+  const trunkRx = (y) => { const T = P.torso; if (y <= T[0].y) return T[0].rx; for (let i = 1; i < T.length; i++) if (y <= T[i].y){ const t = (y - T[i-1].y)/(T[i].y - T[i-1].y); return T[i-1].rx + (T[i].rx - T[i-1].rx)*t; } return T[T.length-1].rx; };
+  const neckA = B.neck.a, trunkCap = (y) => Math.min(trunkRx(y), 0.175);
+  // signed distances to the rest-pose surfaces of the arm, the trunk and the legs: a point belongs to whichever it is closest to, softly
+  const capDist = (p, a, b, r0, r1) => { const ab = V.sub(b, a), L2 = Math.max(1e-9, V.dot(ab, ab)); let t = V.dot(V.sub(p, a), ab)/L2; t = t < 0 ? 0 : t > 1 ? 1 : t; return V.len(V.sub(p, V.add(a, V.mul(ab, t)))) - (r0 + (r1 - r0)*t); };
+  const armSurf = (p, side) => { const s = side === 'L' ? 1 : -1, A = P.arm.pts, r = P.arm.r, hc = mx(P.hand.c, s);
+    const fm = V.lerp(mx(A[1], s), mx(A[2], s), 0.3);   // forearm flexor bulge
+    return Math.min(capDist(p, mx(A[0], s), mx(A[1], s), r[0], r[1]), capDist(p, mx(A[1], s), mx(A[2], s), r[1], r[2]), capDist(p, [fm[0], fm[1]+0.04*sc, fm[2]], [fm[0], fm[1]-0.04*sc, fm[2]], 0.044*sc, 0.044*sc), capDist(p, mx(A[2], s), [hc[0], hc[1] - 0.13*sc, hc[2]], 0.045, 0.05)); };
+  const trunkSurf = (p) => { const T = P.torso, y = p[1]; if (y < T[0].y - 0.06 || y > T[T.length-1].y + 0.12) return 1e9; let rz = T[T.length-1].rz, cz = 0; for (let i = 1; i < T.length; i++) if (y <= T[i].y){ const t = Math.max(0, (y - T[i-1].y)/(T[i].y - T[i-1].y)); rz = T[i-1].rz + (T[i].rz - T[i-1].rz)*t; cz = (T[i-1].cz || 0) + ((T[i].cz || 0) - (T[i-1].cz || 0))*t; break; }
+    const rx = trunkCap(y) + 0.02*smf((y - 0.84*sc)/0.06)*(1 - smf((y - 0.98*sc)/0.05)); return (Math.hypot(p[0]/rx, (p[2] - cz)/rz) - 1) * Math.min(rx, rz); };   // hips flare beyond the torso profile
+  const legSurf = (p) => { if (p[1] > hipY + 0.12) return 1e9; const Lg = P.leg.pts, r = P.leg.r; let d = 1e9; for (const s of [-1,1]){ d = Math.min(d, capDist(p, mx(Lg[0], s), mx(Lg[1], s), r[0], r[1]), capDist(p, mx(Lg[1], s), mx(Lg[2], s), r[1], r[2])); } return d; };
+  const armF = (p, side) => { if (p[1] > shJY + 0.14) return 0;
+    if (SDF){ const [dA, dO] = SDF.partDists(p, 'arm'+side); if (dA > 1e8 && dO > 1e8) return 0; return smf((dO - dA)/0.045 + 0.5); }   // exact: the body's own primitives decide
+    const dA = armSurf(p, side), dO = Math.min(trunkSurf(p), legSurf(p)); return smf((dO - dA)/0.03 + 0.5); };
   const weights = (p, posed) => {
-    const w = new Array(list.length).fill(0); let bi = 0, bd = 1e9;
-    for (let i = 0; i < list.length; i++){ const b = list[i]; const d = (posed ? segDist(p, b.aP, b.bP) : segDist(p, b.a, b.b)) / b.sig; if (d < bd){ bd = d; bi = i; } }
-    const b = list[bi]; const A = posed ? b.aP : b.a, Bp = posed ? b.bP : b.b; const dir = V.norm(V.sub(Bp, A)), L = V.len(V.sub(Bp, A)); const t = V.dot(V.sub(p, A), dir);
-    const h = b.sig * 1.1; const sm = (x) => { x = Math.max(0, Math.min(1, x)); return x*x*(3-2*x); };
-    w[bi] = 1;
-    if (b.par && t < h){ const f = sm((t + h) / (2*h)); w[bi] = f; w[idx[b.par]] = 1 - f; }                   // across the head joint, blend with the parent
-    else if (b.kids.length === 1 && t > L - h){ const c = b.kids[0]; const f = sm((t - (L - h)) / (2*h)); w[bi] = 1 - f; w[idx[c.n]] = f; }   // across the tail joint, blend with the single child
-    return { w, sum: 1, dom: w[bi] >= 0.5 ? bi : (b.par && t < h ? idx[b.par] : (b.kids.length === 1 ? idx[b.kids[0].n] : bi)) };
+    const w = new Array(list.length).fill(0);
+    const y = p[1], ax = Math.abs(p[0]), side = p[0] > 0 ? 'L' : 'R';
+    const finish = () => { let dom = 0; for (let i = 1; i < w.length; i++) if (w[i] > w[dom]) dom = i; return { w, sum: 1, dom }; };
+    // trunk: pelvis -> spine1 -> spine2 -> neck -> head blended purely by height, so the flank never flips between bones
+    const trunk = (k) => {
+      if (y > neckA[1] && p[2] - neckA[2] > 0.035 && ax < 0.08 && Math.hypot(p[0], p[2] - neckA[2]) > 0.066){ w[idx.head] += k; return; }   // chin and jaw ride with the head
+      const tops = [B.spine1.a[1], B.spine2.a[1], neckA[1], B.head.a[1]], names = ['pelvis','spine1','spine2','neck','head'], hws = [0.05, 0.05, 0.03, 0.03];
+      let i = 0; while (i < tops.length && y > tops[i]) i++;
+      let fu = 0, fl = 0;
+      if (i < tops.length && y > tops[i] - hws[i]) fu = smf((y - tops[i] + hws[i])/(2*hws[i]));
+      if (i > 0 && y < tops[i-1] + hws[i-1]) fl = 1 - smf((y - tops[i-1] + hws[i-1])/(2*hws[i-1]));
+      w[idx[names[i]]] += k*(1 - fu - fl); if (fu > 0) w[idx[names[i+1]]] += k*fu; if (fl > 0) w[idx[names[i-1]]] += k*fl;
+    };
+    // limb chain: nearest bone of the chain by normalized distance, blended across its internal joints along the bone axis
+    const chain = (bones, k) => {
+      let bi = 0, bd = 1e9; for (let j = 0; j < bones.length; j++){ const b = B[bones[j]]; const d = (posed ? segDist(p, b.aP, b.bP) : segDist(p, b.a, b.b))/b.sig; if (d < bd){ bd = d; bi = j; } }
+      const b = B[bones[bi]]; const A = posed ? b.aP : b.a, Bp = posed ? b.bP : b.b; const dir = V.norm(V.sub(Bp, A)), L = V.len(V.sub(Bp, A)); const t = V.dot(V.sub(p, A), dir); const h = b.sig*1.1;
+      if (bi > 0 && t < h){ const f = smf((t + h)/(2*h)); w[idx[b.n]] += k*f; w[idx[bones[bi-1]]] += k*(1-f); }
+      else if (bi < bones.length-1 && t > L - h){ const f = smf((t - (L - h))/(2*h)); w[idx[b.n]] += k*(1-f); w[idx[bones[bi+1]]] += k*f; }
+      else w[idx[b.n]] += k;
+    };
+    // everything that is not arm: legs below the hip band, thigh-into-pelvis across it, trunk above
+    const body = (k) => {
+      if (y < hipY + 0.07 && (ax > 0.03 || y < hipY - 0.07)){
+        if (y > hipY - 0.07){ const f = smf((hipY + 0.06 - y) / 0.13); w[idx['thigh'+side]] += k*f; trunk(k*(1 - f)); return; }
+        chain(['thigh'+side, 'shin'+side, 'foot'+side], k); return;
+      }
+      trunk(k);
+    };
+    const fa = armF(p, side);
+    if (fa > 0.001) chain(['uarm'+side, 'farm'+side, 'hand'+side], fa);
+    if (fa < 0.999) body(1 - fa);
+    return finish();
   };
   const pose_ = (p) => { const { w, sum } = weights(p, false); const out = [0,0,0]; for (let i = 0; i < list.length; i++){ if (w[i] < 1e-4) continue; const q = xf(list[i], p); const k = w[i]/sum; out[0] += q[0]*k; out[1] += q[1]*k; out[2] += q[2]*k; } return out; };
   const unpose_ = (p) => { let r = p; for (let it = 0; it < 3; it++){ const { w, sum } = weights(r, false); const guess = [0,0,0]; for (let i = 0; i < list.length; i++){ if (w[i] < 1e-4) continue; const b = list[i]; const q = V.add(b.a, V.m3v(M3.tr(b.Rw), V.sub(V.sub(p, b.T || [0,0,0]), b.aP))); const k = w[i]/sum; guess[0] += q[0]*k; guess[1] += q[1]*k; guess[2] += q[2]*k; } r = guess; } return r; };
@@ -737,16 +787,23 @@ function buildRig(P, pose){
 }
 function poseCloud(C, rig){
   if (!rig || !rig.active) return;
+  const lbs = (p, w, sum) => { let x = 0, y = 0, z = 0; for (let k = 0; k < rig.list.length; k++){ if (w[k] < 1e-4) continue; const b = rig.list[k]; let q = V.add(b.a, V.m3v(b.R, V.sub(p, b.a))); let par = b.par; while (par){ const pb = rig.bones[par]; q = V.add(pb.a, V.m3v(pb.R, V.sub(q, pb.a))); par = pb.par; } q = V.add(q, rig.bones.pelvis.T || [0,0,0]); const kk = w[k]/sum; x += q[0]*kk; y += q[1]*kk; z += q[2]*kk; } return [x, y, z]; };
+  const at = (p) => { const r = rig.weights(p, false); return lbs(p, r.w, r.sum); };
+  C.rest = C.pos.slice(0, C.n*3);   // rest-pose positions, kept for diagnostics and refinement
   for (let i = 0; i < C.n; i++){
     const i3 = i*3, i4 = i*4, p = [C.pos[i3], C.pos[i3+1], C.pos[i3+2]];
     const grp = C.grp[i]; let { w, sum, dom } = rig.weights(p, false);
-    if (grp === 11 || grp === 12){ const allow = grp === 12 ? ['head'] : null; let bi = -1, bd = 1e9; for (let k = 0; k < rig.list.length; k++){ const b = rig.list[k]; if (allow && !allow.includes(b.n)) continue; const ab = V.sub(b.b, b.a), L2 = Math.max(1e-9, V.dot(ab,ab)); let t = V.dot(V.sub(p, b.a), ab)/L2; t = Math.max(0, Math.min(1, t)); const d = V.len(V.sub(p, V.add(b.a, V.mul(ab, t)))); if (d < bd){ bd = d; bi = k; } } w = new Array(rig.list.length).fill(0); w[bi] = 1; sum = 1; dom = bi; }
-    let x = 0, y = 0, z = 0;
-    for (let k = 0; k < rig.list.length; k++){ if (w[k] < 1e-4) continue; const b = rig.list[k]; let q = V.add(b.a, V.m3v(b.R, V.sub(p, b.a))); let par = b.par; while (par){ const pb = rig.bones[par]; q = V.add(pb.a, V.m3v(pb.R, V.sub(q, pb.a))); par = pb.par; } q = V.add(q, rig.bones.pelvis.T || [0,0,0]); const kk = w[k]/sum; x += q[0]*kk; y += q[1]*kk; z += q[2]*kk; }
+    if (grp === 12){ const allow = ['head']; let bi = -1, bd = 1e9; for (let k = 0; k < rig.list.length; k++){ const b = rig.list[k]; if (allow && !allow.includes(b.n)) continue; const ab = V.sub(b.b, b.a), L2 = Math.max(1e-9, V.dot(ab,ab)); let t = V.dot(V.sub(p, b.a), ab)/L2; t = Math.max(0, Math.min(1, t)); const d = V.len(V.sub(p, V.add(b.a, V.mul(ab, t)))); if (d < bd){ bd = d; bi = k; } } w = new Array(rig.list.length).fill(0); w[bi] = 1; sum = 1; dom = bi; }
+    const [x, y, z] = lbs(p, w, sum);
+    const q0 = [C.rot[i4], C.rot[i4+1], C.rot[i4+2], C.rot[i4+3]];
+    // where two bones blend the surface stretches (outside of a bend) or bunches; let the splat follow so no gaps open over a flexed joint
+    let mixed = 0; for (let k = 0; k < w.length; k++) if (w[k] > 0.02*sum) mixed++;
+    if (mixed > 1 && grp === 0){ const eps = 0.006; for (const ax of [0, 1]){ const d = qrot(q0, ax === 0 ? [1,0,0] : [0,1,0]); const a = at([p[0]+d[0]*eps, p[1]+d[1]*eps, p[2]+d[2]*eps]), b = at([p[0]-d[0]*eps, p[1]-d[1]*eps, p[2]-d[2]*eps]); const st = Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2])/(2*eps); C.scl[i3+ax] *= Math.max(1, Math.min(C.scl[i3+1] > 0.0045 ? 1.9 : 1.4, st)); } }   // the inset dermis may grow more: it cannot poke out
     C.pos[i3] = x; C.pos[i3+1] = y; C.pos[i3+2] = z;
-    const qw = rig.list[dom].qw, q0 = [C.rot[i4], C.rot[i4+1], C.rot[i4+2], C.rot[i4+3]]; const qr = qmul(qw, q0); C.rot[i4] = qr[0]; C.rot[i4+1] = qr[1]; C.rot[i4+2] = qr[2]; C.rot[i4+3] = qr[3];
+    const qw = rig.list[dom].qw; const qr = qmul(qw, q0); C.rot[i4] = qr[0]; C.rot[i4+1] = qr[1]; C.rot[i4+2] = qr[2]; C.rot[i4+3] = qr[3];
   }
 }
+const qrot = (q, v) => { const u = [q[0], q[1], q[2]], w = q[3]; const c1 = V.cross(u, v), c2 = V.cross(u, c1); return [v[0] + 2*(w*c1[0] + c2[0]), v[1] + 2*(w*c1[1] + c2[1]), v[2] + 2*(w*c1[2] + c2[2])]; };
 
 // Default proportions (metres, y up, facing +z). A silhouette fit overrides these.
 let BODY_POSE = 'david';
@@ -757,8 +814,8 @@ function defaultBodyParams(){
     // biacromial 0.259H, bi-iliac 0.191H, head width 0.15 m, foot 0.152H, hand 0.108H (Drillis & Contini 1966)
     head:{ c:[0,1.637,0], r:[0.0775,0.108,0.094] }, jaw:{ c:[0,1.56,0.02], r:[0.06,0.048,0.066] }, neck:{ a:[0,1.475,-0.012], b:[0,1.56,-0.012], r:[0.058,0.052] },
     torso:[ {y:0.81,rx:0.13,rz:0.10,cz:0.0},{y:0.87,rx:0.165,rz:0.12},{y:0.98,rx:0.172,rz:0.125},{y:1.10,rx:0.15,rz:0.108},{y:1.24,rx:0.165,rz:0.118},{y:1.35,rx:0.185,rz:0.122},{y:1.43,rx:0.22,rz:0.105},{y:1.49,rx:0.075,rz:0.06,cz:-0.01} ],
-    arm:{ pts:[[0.20,1.425,0],[0.245,1.10,-0.02],[0.265,0.85,0.03]], r:[0.056,0.045,0.031] },
-    hand:{ c:[0.272,0.75,0.045], r:[0.042,0.07,0.02] },
+    arm:{ pts:[[0.20,1.425,0],[0.275,1.10,-0.02],[0.31,0.85,0.03]], r:[0.056,0.045,0.031] },   // A-pose: forearms clear the hips so the skin never webs between them
+    hand:{ c:[0.32,0.75,0.045], r:[0.042,0.07,0.02] },
     leg:{ pts:[[0.092,0.92,0],[0.09,0.50,0.005],[0.086,0.07,-0.01]], r:[0.088,0.062,0.04] },
     foot:{ c:[0.088,0.03,0.075], r:[0.048,0.03,0.133] },
     fitted:false, pose: BODY_POSE, physique: BODY_POSE === 'david' ? 'david' : 'neutral',
@@ -794,14 +851,14 @@ LEVELS.push({
     P = P || defaultBodyParams();
     const G = {skin:0,skel:1,musc:2,nerv:3,endo:4,card:5,lymph:6,resp:7,dig:8,urin:9,repro:10};
     const sc = P.H/1.75;
-    const skinBase = [0.86,0.66,0.54];
+    const skinBase = [0.80,0.585,0.46];
     const headC = P.head.c, headR = P.head.r, TORSO = P.torso;
-    const warm = [[0.05,1.62,0.075,0.032,1],[-0.05,1.62,0.075,0.032,1],[0,1.605,0.105,0.02,1.2],[0.086,1.63,-0.008,0.02,0.8],[-0.086,1.63,-0.008,0.02,0.8],[0.29,0.735,0.05,0.035,0.8],[-0.29,0.735,0.05,0.035,0.8],[0.265,1.16,-0.07,0.045,0.6],[-0.265,1.16,-0.07,0.045,0.6],[0.09,0.5,0.065,0.05,0.5],[-0.09,0.5,0.065,0.05,0.5],[0.19,1.44,0.0,0.06,0.35],[-0.19,1.44,0.0,0.06,0.35],[0,1.55,0.05,0.04,0.4]];
+    const warm = [[0.05,1.62,0.075,0.032,1],[-0.05,1.62,0.075,0.032,1],[0,1.605,0.105,0.02,1.2],[0.086,1.63,-0.008,0.02,0.8],[-0.086,1.63,-0.008,0.02,0.8],[P.hand.c[0]+0.018,0.735,0.05,0.035,0.8],[-P.hand.c[0]-0.018,0.735,0.05,0.035,0.8],[P.arm.pts[1][0]+0.02,1.16,-0.07,0.045,0.6],[-P.arm.pts[1][0]-0.02,1.16,-0.07,0.045,0.6],[0.09,0.5,0.065,0.05,0.5],[-0.09,0.5,0.065,0.05,0.5],[0.19,1.44,0.0,0.06,0.35],[-0.19,1.44,0.0,0.06,0.35],[0,1.55,0.05,0.04,0.4]];
     const zone = (x,y,z) => { let r = 0; for (const w of warm){ const d2 = (x-w[0])*(x-w[0]) + (y-w[1])*(y-w[1]) + (z-w[2])*(z-w[2]); r += w[4]*Math.exp(-d2/(w[3]*w[3])); } return Math.min(1, r); };
-    const skinCol = (x,y,z) => { let k = (1 + 0.07*(fbm(x*14,y*14,z*14,3)-0.5)) * (1 + 0.05*(vnoise(x*420,y*420,z*420)-0.5)); const flush = 0.03*fbm(x*5,y*5,z*5,2), zn = zone(x,y,z);
-      const palm = (Math.abs(x) > 0.23 && y < 0.8 && z > 0.05) ? 1 : 0; k *= 1 + 0.08*palm;
-      const veinReg = (Math.abs(x) > 0.22 && y > 0.62 && y < 1.1 && z > -0.01) ? 1 : 0; const vv = Math.max(0, 0.03 - Math.abs(fbm(x*70,y*70,z*70,2)-0.5))/0.03; const vein = veinReg*vv*(P.physique === 'david' && y < 0.82 ? 1.0 : 0.6);
-      const mole = vnoise(x*160+3.7, y*160, z*160) > 0.992 ? 1 : 0; const ar = Math.exp(-(Math.pow(Math.abs(x)-0.078,2) + Math.pow(y-1.29,2))/0.00012) * (z > 0.08 ? 1 : 0); const nav = Math.exp(-(x*x + Math.pow(y-1.045,2))/0.00003) * (z > 0.08 ? 1 : 0); let c = [(skinBase[0]*k + flush + 0.07*zn)*(1-0.25*ar)*(1-0.3*nav), (skinBase[1]*k - 0.03*zn)*(1-0.4*ar)*(1-0.3*nav), (skinBase[2]*k - 0.03*zn)*(1-0.4*ar)*(1-0.3*nav)];
+    const skinCol = (x,y,z) => { let k = (1 + 0.028*(fbm(x*14,y*14,z*14,3)-0.5)) * (1 + 0.04*(vnoise(x*420,y*420,z*420)-0.5)) * (1 + 0.012*(fbm(x*45+11,y*45,z*45,2)-0.5)); const flush = 0.03*fbm(x*5,y*5,z*5,2) + 0.02*(fbm(x*9+3,y*9,z*9,2)-0.5), zn = zone(x,y,z);
+      const palm = (Math.abs(x) > P.hand.c[0]-0.045 && y < 0.8 && z > 0.05) ? 1 : 0; k *= 1 + 0.08*palm;
+      const veinReg = (Math.abs(x) > P.arm.pts[1][0]-0.03 && y > 0.62 && y < 1.1 && z > -0.01) ? 1 : 0; const vv = Math.max(0, 0.03 - Math.abs(fbm(x*70,y*70,z*70,2)-0.5))/0.03; const vein = veinReg*vv*(P.physique === 'david' && y < 0.82 ? 1.0 : 0.6);
+      const mole = vnoise(x*260+3.7, y*260, z*260) > 0.9982 ? 1 : 0; const ar = Math.exp(-(Math.pow(Math.abs(x)-0.078,2) + Math.pow(y-1.29,2))/0.00012) * (z > 0.08 ? 1 : 0); const nav = Math.exp(-(x*x + Math.pow(y-1.045,2))/0.00003) * (z > 0.08 ? 1 : 0); let c = [(skinBase[0]*k + flush + 0.07*zn)*(1-0.25*ar)*(1-0.3*nav), (skinBase[1]*k - 0.03*zn)*(1-0.4*ar)*(1-0.3*nav), (skinBase[2]*k - 0.03*zn)*(1-0.4*ar)*(1-0.3*nav)];
       if (vein > 0) c = [c[0]*(1-0.12*vein), c[1]*(1-0.05*vein), c[2]*(1+0.04*vein)]; if (mole) c = [c[0]*0.45, c[1]*0.35, c[2]*0.32]; return c; };
     const skinTop = {size:0.0032, color:skinCol, group:G.skin, thick:0.18, jitter:0.5, density:1.0};
     const A = P.arm, Lg = P.leg;
@@ -851,7 +908,7 @@ LEVELS.push({
       ellipsoid(C0, {size:0.0006, color:nailCol, group:G.skin, jitter:0.2}, [hcn[0] - s*hrr[0]*1.45, hcn[1] - 0.085*sc + 0.006, hcn[2] + 0.045 - 0.006], [0.0045, 0.0055, 0.0012]);
       const fc = [s*P.foot.c[0], P.foot.c[1], P.foot.c[2]], fr = P.foot.r; for (let k = 0; k < 5; k++){ const tx = fc[0] + s*(-0.032 + k*0.016)*(fr[0]/0.048), tz = fc[2] + fr[2]*0.9 - k*0.006 + 0.02*sc*(1-k*0.08); ellipsoid(C0, {size:0.0006, color:nailCol, group:G.skin, jitter:0.2}, [tx, fc[1] - 0.01 + 0.0085*sc*(1-k*0.08)*0.9, tz], [0.0045*(1-k*0.1), 0.0012, 0.005*(1-k*0.1)]); }
     }
-    skinSample({size:0.0062, inset:0.0028, thick:0.3, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const k = 0.94 + 0.08*(fbm(x*12,y*12,z*12,2)-0.5); return [skinBase[0]*k, skinBase[1]*k*0.98, skinBase[2]*k*0.97]; }}, true);
+    skinSample({size:0.0062, inset:0.0028, thick:0.3, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const c = skinCol(x,y,z); return [c[0]*0.985, c[1]*0.98, c[2]*0.98]; }}, true);   // same tone as the surface so it never reads as a stain where the top layer thins
     skinSample({size:0.008, inset:0.0055, thick:0.35, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const k = 0.86 + 0.1*(fbm(x*10,y*10,z*10,2)-0.5); return [skinBase[0]*k, skinBase[1]*k*0.96, skinBase[2]*k*0.95]; }}, true);
     const nSkin = C.n;
     // ================= internal anatomy, built at default proportions then scaled to the fitted body
@@ -874,7 +931,7 @@ LEVELS.push({
       ellipsoid(C, bone, [s*0.10,1.35,-0.095], [0.06,0.075,0.01], rotXYZ(0.2, s*0.5, 0));                 // scapula
       ellipsoid(C, bone, [s*0.10,1.0,-0.03], [0.045,0.075,0.022], rotXYZ(0.35, s*0.6, s*0.2));            // ilium (crest ~1.03)
       capsule(C, bone, [s*0.19,1.42,0],[s*0.24,1.105,-0.02], 0.014, 0.012); ellipsoid(C, bone, [s*0.19,1.42,0],[0.024,0.024,0.024]); ellipsoid(C, bone, [s*0.24,1.105,-0.02],[0.022,0.016,0.02]); // humerus 33 cm
-      capsule(C, bone, [s*0.235,1.10,-0.015],[s*0.26,0.855,0.03], 0.008, 0.0075); capsule(C, bone, [s*0.248,1.10,-0.03],[s*0.272,0.85,0.02], 0.007, 0.0055);        // radius, ulna 26 cm
+      capsule(C, bone, [s*(A.pts[1][0]-0.01),1.10,-0.015],[s*(A.pts[2][0]-0.005),0.855,0.03], 0.008, 0.0075); capsule(C, bone, [s*(A.pts[1][0]+0.003),1.10,-0.03],[s*(A.pts[2][0]+0.007),0.85,0.02], 0.007, 0.0055);        // radius, ulna 26 cm
       for (let k = 0; k < 5; k++){ const x0 = s*(0.246+k*0.015), top = k===4 ? [s*0.238,0.74,0.062] : [x0,0.75,0.045]; capsule(C, Object.assign({}, bone,{size:0.0025}), top, k===4 ? [s*0.214,0.685,0.085] : [x0+s*0.004,0.615-Math.abs(k-1.3)*0.012,0.055], 0.005, 0.0035); }
       capsule(C, bone, [s*0.09,0.925,-0.01],[s*0.09,0.515,0.0], 0.019, 0.017); ellipsoid(C, bone, [s*0.098,0.925,-0.01],[0.03,0.03,0.03]); ellipsoid(C, bone, [s*0.09,0.51,0.0],[0.036,0.025,0.03]);  // femur 45 cm
       ellipsoid(C, bone, [s*0.09,0.505,0.05],[0.02,0.024,0.01]);                                           // patella
@@ -890,7 +947,7 @@ LEVELS.push({
       ellipsoid(C, musc, [s*0.195,1.40,0.0], [0.05,0.06,0.048]);                                          // deltoid
       ellipsoid(C, musc, [s*0.095,0.96,-0.075], [0.075,0.085,0.035]);                                     // gluteus maximus
       for (let k = 0; k < 4; k++) ellipsoid(C, musc, [s*0.035,1.20-k*0.06,0.074], [0.03,0.026,0.012]);   // rectus abdominis
-      limb(C, musc, [[s*0.20,1.40,0],[s*0.243,1.10,-0.02],[s*0.263,0.86,0.03]], [0.038,0.029,0.019]);
+      limb(C, musc, [[s*0.20,1.40,0],[s*(A.pts[1][0]-0.002),1.10,-0.02],[s*(A.pts[2][0]-0.002),0.86,0.03]], [0.038,0.029,0.019]);
       limb(C, musc, [[s*0.092,0.90,0],[s*0.09,0.50,0.005],[s*0.086,0.10,-0.01]], [0.068,0.046,0.026]);
       capsule(C, musc, [s*0.09,0.47,-0.02],[s*0.09,0.17,-0.025], 0.03, 0.014);                           // gastrocnemius
     }
@@ -902,7 +959,7 @@ LEVELS.push({
     tube(C, Object.assign({}, nerve, {size:0.0028}), (t)=>{ const p = spine(1-t); return [p[0], p[1]+0.03, p[2]+0.012]; }, (t)=>0.007-0.003*t, 0, 0.78);   // spinal cord ends ~L1
     tube(C, Object.assign({}, nerve, {size:0.0028}), catmull([[0,1.545,-0.03],[0,1.575,-0.02],[0,1.60,-0.012]]), 0.008);                                       // brainstem
     for (const s of [-1,1]){
-      tube(C, nerve, catmull([[s*0.02,1.44,-0.03],[s*0.12,1.42,-0.01],[s*0.20,1.39,0.0],[s*0.243,1.10,-0.01],[s*0.263,0.855,0.03],[s*0.27,0.75,0.045],[s*0.268,0.65,0.05]]), (t)=>0.0045-0.0025*t);   // brachial plexus -> median nerve
+      tube(C, nerve, catmull([[s*0.02,1.44,-0.03],[s*0.12,1.42,-0.01],[s*0.20,1.39,0.0],[s*(A.pts[1][0]-0.002),1.10,-0.01],[s*(A.pts[2][0]-0.002),0.855,0.03],[s*(P.hand.c[0]-0.002),0.75,0.045],[s*(P.hand.c[0]-0.004),0.65,0.05]]), (t)=>0.0045-0.0025*t);   // brachial plexus -> median nerve
       tube(C, nerve, catmull([[s*0.02,1.0,-0.05],[s*0.08,0.95,-0.05],[s*0.105,0.90,-0.03],[s*0.10,0.5,-0.02],[s*0.09,0.10,-0.02],[s*0.08,0.03,0.08]]), (t)=>0.006-0.0035*t);              // sciatic -> tibial
       tube(C, nerve, catmull([[s*0.02,1.04,-0.05],[s*0.08,0.97,0.02],[s*0.09,0.7,0.04],[s*0.09,0.45,0.03]]), 0.002);                                                                  // femoral
       for (let i = 0; i < 10; i++){ const y = 1.39 - i*0.03, w = 0.112 + 0.05*Math.sin((i+1)/13*Math.PI); tube(C, Object.assign({}, nerve, {size:0.0016}), (t)=>{ const ph = Math.PI*(1-t*0.85); return [s*w*Math.sin(ph), y-0.03*t, -0.055+0.16*(1-Math.cos(ph))/2]; }, 0.0012); }   // intercostals
@@ -931,7 +988,7 @@ LEVELS.push({
     const trunks = (o, off, r0) => {
       for (const s of [-1,1]){
         tube(C, o, catmull([[off[0],0.99,-0.035+off[2]],[s*0.05+off[0],0.95,-0.02+off[2]],[s*0.09+off[0],0.90,0.02+off[2]],[s*0.085+off[0],0.5,-0.025+off[2]],[s*0.084+off[0],0.08,-0.01+off[2]],[s*0.08+off[0],0.03,0.1+off[2]]]), (t)=>r0*(1-0.55*t));   // iliac -> femoral -> popliteal -> tibial
-        tube(C, o, catmull([[off[0],1.39,-0.02+off[2]],[s*0.1+off[0],1.41,0.0+off[2]],[s*0.19+off[0],1.40,0.01+off[2]],[s*0.243+off[0],1.10,0.0+off[2]],[s*0.265+off[0],0.85,0.04+off[2]],[s*0.268+off[0],0.70,0.05+off[2]]]), (t)=>r0*0.65*(1-0.55*t));   // subclavian -> brachial -> radial
+        tube(C, o, catmull([[off[0],1.39,-0.02+off[2]],[s*0.1+off[0],1.41,0.0+off[2]],[s*0.19+off[0],1.40,0.01+off[2]],[s*(A.pts[1][0]-0.002)+off[0],1.10,0.0+off[2]],[s*A.pts[2][0]+off[0],0.85,0.04+off[2]],[s*(P.hand.c[0]-0.004)+off[0],0.70,0.05+off[2]]]), (t)=>r0*0.65*(1-0.55*t));   // subclavian -> brachial -> radial
         tube(C, o, catmull([[s*0.01+off[0],1.39,-0.02+off[2]],[s*0.025+off[0],1.5,-0.01+off[2]],[s*0.035+off[0],1.58,0.0+off[2]],[s*0.03+off[0],1.64,0.02+off[2]]]), (t)=>r0*0.55*(1-0.5*t));   // carotid
         tube(C, o, catmull([[s*0.005+off[0],1.34,-0.045+off[2]],[s*0.03+off[0],1.28,-0.03+off[2]],[s*0.06+off[0],1.2,0.0+off[2]]]), r0*0.4);
         tube(C, o, catmull([[off[0],1.14,-0.045+off[2]],[s*0.05+off[0],1.13,0.0+off[2]],[s*0.09+off[0],1.12,0.03+off[2]]]), r0*0.4);                     // coeliac / hepatic / splenic
@@ -958,7 +1015,7 @@ LEVELS.push({
     tube(C, lv, (t)=>{ const p = spine(t*0.9); return [p[0]-0.008+0.02*t, p[1], p[2]+0.03]; }, 0.0025);   // cisterna chyli -> thoracic duct, crossing to the left
     for (const s of [-1,1]){
       tube(C, lv, catmull([[s*0.1,0.90,0.06],[s*0.11,0.7,0.06],[s*0.1,0.5,0.03],[s*0.09,0.3,0.02],[s*0.085,0.1,0.02]]), 0.0016);
-      tube(C, lv, catmull([[s*0.18,1.35,0],[s*0.243,1.10,0.0],[s*0.265,0.85,0.045]]), 0.0014);
+      tube(C, lv, catmull([[s*0.18,1.35,0],[s*(A.pts[1][0]-0.002),1.10,0.0],[s*A.pts[2][0],0.85,0.045]]), 0.0014);
       tube(C, lv, catmull([[s*0.05,1.5,0.02],[s*0.05,1.58,0.01],[s*0.06,1.62,-0.02]]), 0.0012);
     }
     // ---- respiratory: right lung larger (3 lobes) and shorter, left with the cardiac notch; carina at T4-T5; diaphragm domes, right higher
@@ -994,9 +1051,11 @@ LEVELS.push({
     // scale the internal anatomy to the fitted body, then keep it inside the skin envelope
     if (P.fitted){ const sx = P.scaleX || 1, sy = P.H/1.75, sz = P.scaleZ || 1; for (let i = nSkin; i < C.n; i++){ C.pos[i*3] *= sx; C.pos[i*3+1] *= sy; C.pos[i*3+2] *= sz; } }
     const deep = new Set([G.nerv, G.card, G.lymph, G.endo]);
-    C.filter((x,y,z,g) => g === G.skin || g === 11 || g === 12 || bodyInside([x,y,z], deep.has(g) ? 0.016 : (g === G.musc ? 0.013 : 0.008)));
+    const posed = (P.pose || 'apose') !== 'apose', hipJ = Lg.pts[0][1], shJ = A.pts[0][1];
+    const jointNear = (x, y, g) => { if (!posed) return 0; const trunkJ = Math.abs(x) < 0.19 && (Math.abs(y - hipJ + 0.03) < 0.14 || Math.abs(y - shJ + 0.05) < 0.12), elbow = Math.abs(x) > 0.19 && Math.abs(y - A.pts[1][1]) < 0.09; return (trunkJ || elbow) ? (g === G.skel ? 0.012 : 0.007) : 0; };   // skin stretches over the bent joints, so the flesh sits a little deeper there
+    C.filter((x,y,z,g) => g === G.skin || g === 12 || bodyInside([x,y,z], (g === 11 ? 0.015 : deep.has(g) ? 0.016 : (g === G.musc ? 0.013 : g === G.skel ? 0.011 : 0.008)) + jointNear(x, y, g)));   // imaging planes are clipped to the trunk too, so their edges never show beside the arms
     C.skinCount = nSkin;
-    const rig = buildRig(P, P.pose || 'apose'); this.rig = rig; poseCloud(C, rig);
+    const rig = buildRig(P, P.pose || 'apose', SDF); this.rig = rig; this.sdf = SDF; poseCloud(C, rig);
     this.pulseCenter = rig.pose([0.025,1.265,0.035]); this.breathCenter = rig.pose([0,1.46,-0.01]); this.divePoint = this.pulseCenter;
   }
 });
@@ -1362,13 +1421,13 @@ void main(){
     vec3 nv = normalize(mat3(uView) * R[2]);
     vec3 vd = normalize(-cam.xyz);
     if (dot(nv, vd) < 0.0) nv = -nv;
-    vec3 L = normalize(vec3(-0.45, 0.55, 0.7)), Lf = normalize(vec3(0.7, 0.05, 0.4)), Lb = normalize(vec3(0.2, 0.3, -1.0));
+    vec3 L = normalize(mat3(uView) * vec3(-0.5, 0.78, 0.6)), Lf = normalize(vec3(0.7, 0.05, 0.4)), Lb = normalize(vec3(0.2, 0.3, -1.0));   // key light fixed in the world (upper front-left), fill and rim follow the camera
     float dk = dot(nv, L), wrap = clamp((dk + 0.35) / 1.35, 0.0, 1.0);
     float df = max(dot(nv, Lf), 0.0), db = max(dot(nv, Lb), 0.0);
     vec3 lum = col.rgb * col.rgb;
     vec4 Mt = uGroupMat[g];                                    // x: specular, y: shininess, z: subsurface, w: wet fresnel
     float fres = pow(1.0 - max(dot(nv, vd), 0.0), 4.0);
-    vec3 lit = lum * (vec3(0.16, 0.18, 0.22) + vec3(1.05, 0.98, 0.9) * wrap + vec3(0.22, 0.25, 0.32) * df)
+    vec3 lit = lum * (vec3(0.17, 0.18, 0.21) + vec3(1.05, 0.98, 0.9) * wrap + vec3(0.2, 0.2, 0.22) * df)
              + lum * vec3(0.9, 0.45, 0.35) * pow(max(0.0, 1.0 - abs(nv.z)), 2.5) * 0.5 * Mt.z * (0.3 + 0.7*db)
              + vec3(1.0, 0.98, 0.95) * pow(max(dot(nv, normalize(L + vd)), 0.0), Mt.y) * Mt.x * (0.4 + 0.6 * wrap)
              + vec3(0.8, 0.86, 0.95) * fres * Mt.w * 0.35;
