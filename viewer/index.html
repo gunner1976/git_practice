@@ -219,13 +219,14 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
       <div class="presets" id="looks"></div>
       <div class="ctl"><label for="eOn">Cinematic engine</label><input id="eOn" type="checkbox" checked></div>
       <div class="ctl"><label for="eExp">Exposure</label><input id="eExp" type="range" min="0.4" max="2" step="0.02" value="0.95"></div>
-      <div class="ctl"><label for="eBloom">Bloom</label><input id="eBloom" type="range" min="0" max="1" step="0.02" value="0.3"></div>
-      <div class="ctl"><label for="eAp">Depth of field</label><input id="eAp" type="range" min="0" max="1.5" step="0.02" value="0.4"></div>
+      <div class="ctl"><label for="eBloom">Bloom</label><input id="eBloom" type="range" min="0" max="1" step="0.02" value="0.14"></div>
+      <div class="ctl"><label for="eAp">Depth of field</label><input id="eAp" type="range" min="0" max="1.5" step="0.02" value="0.3"></div>
       <div class="ctl"><label for="eFocus">Focus (near ↔ far)</label><input id="eFocus" type="range" min="-0.6" max="0.8" step="0.02" value="0"></div>
+      <div class="ctl"><label for="eSharp">Sharpness</label><input id="eSharp" type="range" min="0" max="1.5" step="0.05" value="0.7"></div>
       <div class="ctl"><label for="eAO">Contact shadows</label><input id="eAO" type="range" min="0" max="1.5" step="0.05" value="0.6"></div>
-      <div class="ctl"><label for="eDetail">Micro-detail</label><input id="eDetail" type="range" min="0" max="2.5" step="0.05" value="1"></div>
-      <div class="ctl"><label for="eFog">Atmosphere</label><input id="eFog" type="range" min="0" max="1" step="0.02" value="0.18"></div>
-      <div class="ctl"><label for="eGrain">Film grain</label><input id="eGrain" type="range" min="0" max="0.3" step="0.01" value="0.05"></div>
+      <div class="ctl"><label for="eDetail">Micro-detail</label><input id="eDetail" type="range" min="0" max="2.5" step="0.05" value="1.3"></div>
+      <div class="ctl"><label for="eFog">Atmosphere</label><input id="eFog" type="range" min="0" max="1" step="0.02" value="0.14"></div>
+      <div class="ctl"><label for="eGrain">Film grain</label><input id="eGrain" type="range" min="0" max="0.3" step="0.01" value="0.02"></div>
       <div class="ctl"><label for="eVig">Vignette</label><input id="eVig" type="range" min="0" max="1" step="0.02" value="0.35"></div>
       <div class="ctl"><label for="eSat">Saturation</label><input id="eSat" type="range" min="0.5" max="1.5" step="0.02" value="1.06"></div>
       <h3>Materials &amp; style</h3>
@@ -512,17 +513,36 @@ const smin = (a, b, k) => { const h = Math.max(k - Math.abs(a-b), 0)/k; return M
 const smax = (a, b, k) => -smin(-a, -b, k);
 class BodySDF {
   constructor(){ this.prims = []; this.subs = []; this.cell = 0.12; this.grid = new Map(); }
-  ell(c, r, k, opt){ const pr = Object.assign({ t:'e', c, r, k: k == null ? 0.03 : k, bc:c, br:Math.max(r[0],r[1],r[2]) }, opt||{}); (pr.sub ? this.subs : this.prims).push(pr); return pr; }
-  cap(a, b, ra, rb, k, opt){ const bc = V.lerp(a, b, 0.5), br = V.len(V.sub(b, a))/2 + Math.max(ra, rb); const pr = Object.assign({ t:'c', a, b, ra, rb, k: k == null ? 0.03 : k, bc, br }, opt||{}); (pr.sub ? this.subs : this.prims).push(pr); return pr; }
-  finish(){ const cs = this.cell; this.grid.clear(); for (const list of [this.prims, this.subs]) for (const pr of list){ const R = pr.br + pr.k*2 + 0.04; const lo = pr.bc.map(v => Math.floor((v-R)/cs)), hi = pr.bc.map(v => Math.floor((v+R)/cs)); for (let i = lo[0]; i <= hi[0]; i++) for (let j = lo[1]; j <= hi[1]; j++) for (let l = lo[2]; l <= hi[2]; l++){ const key = i*73856093 ^ j*19349663 ^ l*83492791; let cellList = this.grid.get(key); if (!cellList){ cellList = { a:[], s:[] }; this.grid.set(key, cellList); } (pr.sub ? cellList.s : cellList.a).push(pr); } } return this; }
+  ell(c, r, k, opt){ const pr = Object.assign({ t:'e', c, r, k: k == null ? 0.03 : k, bc:c, br:Math.max(r[0],r[1],r[2]), lo:[c[0]-r[0], c[1]-r[1], c[2]-r[2]], hi:[c[0]+r[0], c[1]+r[1], c[2]+r[2]] }, opt||{}); (pr.sub ? this.subs : this.prims).push(pr); return pr; }
+  cap(a, b, ra, rb, k, opt){ const bc = V.lerp(a, b, 0.5), br = V.len(V.sub(b, a))/2 + Math.max(ra, rb), rr = Math.max(ra, rb); const pr = Object.assign({ t:'c', a, b, ra, rb, k: k == null ? 0.03 : k, bc, br, lo:[Math.min(a[0],b[0])-rr, Math.min(a[1],b[1])-rr, Math.min(a[2],b[2])-rr], hi:[Math.max(a[0],b[0])+rr, Math.max(a[1],b[1])+rr, Math.max(a[2],b[2])+rr] }, opt||{}); (pr.sub ? this.subs : this.prims).push(pr); return pr; }
+  finish(){ const cs = this.cell; this.grid.clear(); for (const list of [this.prims, this.subs]) for (const pr of list){ const R = pr.k*2 + 0.03; const lo = pr.lo.map(v => Math.floor((v-R)/cs)), hi = pr.hi.map(v => Math.floor((v+R)/cs)); for (let i = lo[0]; i <= hi[0]; i++) for (let j = lo[1]; j <= hi[1]; j++) for (let l = lo[2]; l <= hi[2]; l++){ const key = i*73856093 ^ j*19349663 ^ l*83492791; let cellList = this.grid.get(key); if (!cellList){ cellList = { a:[], s:[] }; this.grid.set(key, cellList); } (pr.sub ? cellList.s : cellList.a).push(pr); } } return this; }
   sd(pr, p){ return pr.t === 'e' ? sdEll(p, pr.c, pr.r) : sdCap(p, pr.a, pr.b, pr.ra, pr.rb); }
-  F(p){ const cs = this.cell, key = Math.floor(p[0]/cs)*73856093 ^ Math.floor(p[1]/cs)*19349663 ^ Math.floor(p[2]/cs)*83492791; const cl = this.grid.get(key); if (!cl) return 1.0; let f = 1.0; for (const pr of cl.a){ const d = this.sd(pr, p); f = f >= 1.0 ? d : smin(f, d, pr.k); } for (const pr of cl.s){ const d = this.sd(pr, p); f = smax(f, -d, pr.k); } return f; }
-  grad(p){ const e = 0.0012; return V.norm([this.F([p[0]+e,p[1],p[2]]) - this.F([p[0]-e,p[1],p[2]]), this.F([p[0],p[1]+e,p[2]]) - this.F([p[0],p[1]-e,p[2]]), this.F([p[0],p[1],p[2]+e]) - this.F([p[0],p[1],p[2]-e])]); }
-  project(p){ for (let i = 0; i < 4; i++){ const f = this.F(p); if (Math.abs(f) < 0.0004) break; const g = this.grad(p); p = [p[0]-f*g[0], p[1]-f*g[1], p[2]-f*g[2]]; } return p; }
-  // uniform surface sampling: march a grid over the field, seed random points in cells the surface crosses, project onto the zero level
-  sample(o, emitFn){
+  F(p){ const cs = this.cell, key = Math.floor(p[0]/cs)*73856093 ^ Math.floor(p[1]/cs)*19349663 ^ Math.floor(p[2]/cs)*83492791; const cl = this.grid.get(key); if (!cl) return 1.0; let f = 1.0;
+    for (const pr of cl.a){ if (f < 1.0){ const dx = Math.max(pr.lo[0]-p[0], 0, p[0]-pr.hi[0]), dy = Math.max(pr.lo[1]-p[1], 0, p[1]-pr.hi[1]), dz = Math.max(pr.lo[2]-p[2], 0, p[2]-pr.hi[2]); if (dx*dx+dy*dy+dz*dz > (f + pr.k)*(f + pr.k)) continue; } const d = this.sd(pr, p); f = f >= 1.0 ? d : smin(f, d, pr.k); }
+    for (const pr of cl.s){ const dx = Math.max(pr.lo[0]-p[0], 0, p[0]-pr.hi[0]), dy = Math.max(pr.lo[1]-p[1], 0, p[1]-pr.hi[1]), dz = Math.max(pr.lo[2]-p[2], 0, p[2]-pr.hi[2]); if (dx*dx+dy*dy+dz*dz > pr.k*pr.k*4) continue; const d = this.sd(pr, p); f = smax(f, -d, pr.k); } return f; }
+  grad(p){ const e = 0.001; const f1 = this.F([p[0]+e,p[1]-e,p[2]-e]), f2 = this.F([p[0]-e,p[1]-e,p[2]+e]), f3 = this.F([p[0]-e,p[1]+e,p[2]-e]), f4 = this.F([p[0]+e,p[1]+e,p[2]+e]); return V.norm([f1-f2-f3+f4, -f1-f2+f3+f4, -f1+f2-f3+f4]); }
+  project(p){ for (let i = 0; i < 3; i++){ const f = this.F(p); if (Math.abs(f) < 0.0004) break; const g = this.grad(p); p = [p[0]-f*g[0], p[1]-f*g[1], p[2]-f*g[2]]; } return p; }
+  projectN(p){ let g = null; for (let i = 0; i < 2; i++){ const f = this.F(p); g = this.grad(p); p = [p[0]-f*g[0], p[1]-f*g[1], p[2]-f*g[2]]; if (Math.abs(f) < 0.0004) break; } return { p, n: g }; }
+  // time-sliced variant: returns an object whose step(ms) processes cells until the budget is spent; done when it returns true
+  sampleIter(o, emitFn, bbox, cellFilter){
     let lo = [1e9,1e9,1e9], hi = [-1e9,-1e9,-1e9];
     for (const pr of this.prims) for (let k = 0; k < 3; k++){ lo[k] = Math.min(lo[k], pr.bc[k]-pr.br-0.03); hi[k] = Math.max(hi[k], pr.bc[k]+pr.br+0.03); }
+    if (bbox){ for (let k = 0; k < 3; k++){ lo[k] = Math.max(lo[k], bbox.lo[k]); hi[k] = Math.min(hi[k], bbox.hi[k]); } }
+    const cs = 0.015, perCell = Math.max(1, Math.round(cs*cs * (o.density || 1) * COVER / (o.size*o.size)));
+    const nx = Math.max(0, Math.ceil((hi[0]-lo[0])/cs)), ny = Math.max(0, Math.ceil((hi[1]-lo[1])/cs)), nz = Math.max(0, Math.ceil((hi[2]-lo[2])/cs));
+    let i = 0, j = 0, l = 0; const total = nx*ny*nz; let done = total === 0; const self = this;
+    return { get done(){ return done; }, step(ms){ const t0 = performance.now(); while (!done){
+      const c = [lo[0]+(i+0.5)*cs, lo[1]+(j+0.5)*cs, lo[2]+(l+0.5)*cs];
+      if (Math.abs(self.F(c)) <= cs*0.95 && (!cellFilter || cellFilter(c))) for (let k = 0; k < perCell; k++){ let p = [c[0]+(rnd()-0.5)*cs, c[1]+(rnd()-0.5)*cs, c[2]+(rnd()-0.5)*cs]; const r = self.projectN(p); p = r.p; if (Math.abs(self.F(p)) > 0.0025) continue; if (Math.abs(p[0]-c[0]) > cs || Math.abs(p[1]-c[1]) > cs || Math.abs(p[2]-c[2]) > cs) continue; emitFn(p, r.n); }
+      if (++l >= nz){ l = 0; if (++j >= ny){ j = 0; if (++i >= nx) done = true; } }
+      if ((l & 7) === 0 && performance.now() - t0 > ms) break; }
+      return done; } };
+  }
+  // uniform surface sampling: march a grid over the field, seed random points in cells the surface crosses, project onto the zero level
+  sample(o, emitFn, bbox){
+    let lo = [1e9,1e9,1e9], hi = [-1e9,-1e9,-1e9];
+    for (const pr of this.prims) for (let k = 0; k < 3; k++){ lo[k] = Math.min(lo[k], pr.bc[k]-pr.br-0.03); hi[k] = Math.max(hi[k], pr.bc[k]+pr.br+0.03); }
+    if (bbox){ for (let k = 0; k < 3; k++){ lo[k] = Math.max(lo[k], bbox.lo[k]); hi[k] = Math.min(hi[k], bbox.hi[k]); } if (lo[0] >= hi[0] || lo[1] >= hi[1] || lo[2] >= hi[2]) return; }
     const cs = 0.015, perCell = Math.max(1, Math.round(cs*cs * (o.density || 1) * COVER / (o.size*o.size)));
     const nx = Math.ceil((hi[0]-lo[0])/cs), ny = Math.ceil((hi[1]-lo[1])/cs), nz = Math.ceil((hi[2]-lo[2])/cs);
     for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) for (let l = 0; l < nz; l++){
@@ -530,9 +550,9 @@ class BodySDF {
       const fc = this.F(c); if (Math.abs(fc) > cs*0.95) continue;
       for (let k = 0; k < perCell; k++){
         let p = [c[0]+(rnd()-0.5)*cs, c[1]+(rnd()-0.5)*cs, c[2]+(rnd()-0.5)*cs];
-        p = this.project(p); if (Math.abs(this.F(p)) > 0.0025) continue;
+        const r = this.projectN(p); p = r.p; if (Math.abs(this.F(p)) > 0.0025) continue;
         if (Math.abs(p[0]-c[0]) > cs || Math.abs(p[1]-c[1]) > cs || Math.abs(p[2]-c[2]) > cs) continue;
-        emitFn(p, this.grad(p));
+        emitFn(p, r.n);
       }
     }
   }
@@ -658,7 +678,7 @@ LEVELS.push({
     const warm = [[0.05,1.62,0.075,0.032,1],[-0.05,1.62,0.075,0.032,1],[0,1.605,0.105,0.02,1.2],[0.086,1.63,-0.008,0.02,0.8],[-0.086,1.63,-0.008,0.02,0.8],[0.29,0.735,0.05,0.035,0.8],[-0.29,0.735,0.05,0.035,0.8],[0.265,1.16,-0.07,0.045,0.6],[-0.265,1.16,-0.07,0.045,0.6],[0.09,0.5,0.065,0.05,0.5],[-0.09,0.5,0.065,0.05,0.5],[0.19,1.44,0.0,0.06,0.35],[-0.19,1.44,0.0,0.06,0.35],[0,1.55,0.05,0.04,0.4]];
     const zone = (x,y,z) => { let r = 0; for (const w of warm){ const d2 = (x-w[0])*(x-w[0]) + (y-w[1])*(y-w[1]) + (z-w[2])*(z-w[2]); r += w[4]*Math.exp(-d2/(w[3]*w[3])); } return Math.min(1, r); };
     const skinCol = (x,y,z) => { const k = (1 + 0.07*(fbm(x*14,y*14,z*14,3)-0.5)) * (1 + 0.05*(vnoise(x*420,y*420,z*420)-0.5)); const flush = 0.03*fbm(x*5,y*5,z*5,2), zn = zone(x,y,z); const ar = Math.exp(-(Math.pow(Math.abs(x)-0.078,2) + Math.pow(y-1.29,2))/0.00012) * (z > 0.08 ? 1 : 0); const nav = Math.exp(-(x*x + Math.pow(y-1.045,2))/0.00003) * (z > 0.08 ? 1 : 0); return [(skinBase[0]*k + flush + 0.07*zn)*(1-0.25*ar)*(1-0.3*nav), (skinBase[1]*k - 0.03*zn)*(1-0.4*ar)*(1-0.3*nav), (skinBase[2]*k - 0.03*zn)*(1-0.4*ar)*(1-0.3*nav)]; };
-    const skinTop = {size:0.0038, color:skinCol, group:G.skin, thick:0.18, jitter:0.5, density:1.0};
+    const skinTop = {size:0.0032, color:skinCol, group:G.skin, thick:0.18, jitter:0.5, density:1.0};
     const A = P.arm, Lg = P.leg;
     const SDF = buildBodySDF(P);
     const bodyInside = (p, m) => SDF.F(p) < -m;
@@ -667,27 +687,31 @@ LEVELS.push({
     const hp = (dx, dy, dz) => [headC[0]+dx*kx, headC[1]+dy*ky, headC[2]+dz*kz];
     const cranC = hp(0, 0.018, -0.008);
     const hairRegion = (p) => { const dy = (p[1]-cranC[1])/(0.088*ky), dz = (p[2]-cranC[2])/(0.086*kz), dx = Math.abs(p[0]-cranC[0])/(0.074*kx); return dy > 0.36 || (dz < -0.3 && dy > -0.5) || (dy > 0.0 && dz < 0.15 && dx > 0.8); };
-    const lipTint = (c, p) => { const d = Math.hypot((p[0]-headC[0])/0.02, (p[1]-hp(0,-0.057,0)[1])/0.009); const w = Math.exp(-d*d)*1.3; return [c[0]+0.02*w, c[1]-0.22*w, c[2]-0.16*w]; };
-    const skinSample = (skin, inner) => {
+    const lipTint = (c, p) => { const d = Math.hypot((p[0]-headC[0])/0.019, (p[1]-hp(0,-0.057,0)[1])/0.0075); const w = Math.exp(-d*d); return [c[0]+0.01*w, c[1]-0.2*w, c[2]-0.15*w]; };
+    const skinSample = (skin, inner, CC, bbox, iter, cellFilter) => {
+      const C = CC || C0;
       const mouthY = hp(0,-0.057,0)[1], faceZ = headC[2] + 0.07*kz;
-      SDF.sample(skin, (p, n) => {
+      return SDF[iter ? 'sampleIter' : 'sample'](skin, (p, n) => {
         if (!inner && !textured && p[1] > P.neck.b[1] + 0.01 && hairRegion(p)){
           const k = 0.7 + 0.6*fbm(p[0]*90,p[1]*90,p[2]*90,2); const t = [-n[0]*n[1]*0.2, -1, -n[2]*n[1]*0.2];
           emit(C, Object.assign({}, skin, {size:0.0042, aspect:3.4, thick:0.15, inset:-0.003, color:()=>[0.17*k,0.11*k,0.07*k]}), p, n, t, 0, 0); return;
         }
-        if (!inner && !textured && Math.abs(p[0]-headC[0]) < 0.026*kx && Math.abs(p[1]-mouthY) < 0.014*ky && p[2] > faceZ){ emit(C, Object.assign({}, skin, {color:(x,y,z)=>lipTint(skin.color(x,y,z), [x,y,z])}), p, n, null, 0, 0); return; }
+        if (!inner && !textured && Math.abs(p[0]-headC[0]) < 0.026*kx && Math.abs(p[1]-mouthY) < 0.014*ky && p[2] > faceZ){ emit(C, Object.assign({}, skin, {color:(x,y,z)=>{ const c = skin.color(x,y,z); return c ? lipTint(c, [x,y,z]) : null; }}), p, n, null, 0, 0); return; }
         emit(C, skin, p, n, null, 0, 0);
-      });
+      }, bbox, cellFilter);
     };
+    const C0 = C;
     skinSample(skinTop, false);
-    if (!textured){
+    this.refine = (center, r, size, toCam) => { const C2 = new Cloud(1<<16); const bbox = { lo:[center[0]-r, center[1]-r, center[2]-r], hi:[center[0]+r, center[1]+r, center[2]+r] }; const inSphere = (p) => Math.hypot(p[0]-center[0], p[1]-center[1], p[2]-center[2]) <= r; const facing = toCam ? (c) => V.dot(SDF.grad(c), toCam) > -0.15 : null; const gate = (o) => Object.assign({}, o, { density: 0.75, color:(x,y,z,nx,ny,nz,u,v) => inSphere([x,y,z]) ? o.color(x,y,z,nx,ny,nz,u,v) : null }); const iters = [skinSample(gate(Object.assign({}, skinTop, {size, density:0.9})), false, C2, bbox, true, facing), skinSample(gate({size:size*1.9, inset:0.0028, thick:0.3, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const k = 0.94 + 0.08*(fbm(x*12,y*12,z*12,2)-0.5); return [skinBase[0]*k, skinBase[1]*k*0.98, skinBase[2]*k*0.97]; }}), true, C2, bbox, true, facing), skinSample(gate({size:size*3.2, inset:0.0065, thick:0.35, jitter:0.25, group:G.skin, color:()=>[skinBase[0]*0.8, skinBase[1]*0.74, skinBase[2]*0.72]}), true, C2, bbox, true, facing)]; if (Math.hypot(center[0]-headC[0], center[1]-headC[1], center[2]-headC[2]) < r + 0.12) faceFeatures(C2); return { cloud: C2, iters }; };
+    const faceFeatures = (C) => { if (textured) return;
       for (const sx of [-1,1]){   // eyes: sclera, iris, pupil, and a brow of oriented strands
         const ec = hp(sx*0.031, 0.004, 0.0755);
         ellipsoid(C, {size:0.0014, color:(x,y,z)=>{ const k = 0.93 + 0.06*fbm(x*500,y*500,z*500,2); return [0.95*k, 0.93*k, 0.91*k]; }, group:G.skin, jitter:0.2}, ec, [0.012*kx, 0.012*ky, 0.012*kz]);
         ellipsoid(C, {size:0.0009, color:(x,y,z)=>{ const r = Math.hypot(x-ec[0], y-ec[1])/(0.0058*kx); const k = 0.55 + 0.6*fbm(x*1400,y*1400,z*1400,2); return r > 0.42 ? [0.32*k,0.2*k,0.1*k] : [0.02,0.02,0.02]; }, group:G.skin, jitter:0.2}, [ec[0], ec[1], ec[2]+0.0108*kz], [0.0058*kx, 0.0058*ky, 0.0014]);
         for (let i = 0; i < 38; i++){ const t = i/37; const q = SDF.project(hp(sx*(0.014 + 0.034*t), 0.024 + 0.006*Math.sin(t*3.1) - 0.004*t, 0.095)); const n = SDF.grad(q); emit(C, {size:0.0011, aspect:3.2, thick:0.15, color:flat([0.19,0.12,0.08]), group:G.skin, inset:-0.0005, jitter:0.3}, q, n, [sx, 0.35 - 0.7*t, 0], 0, 0); }
       }
-    }
+    };
+    faceFeatures(C0);
     skinSample({size:0.0062, inset:0.0028, thick:0.3, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const k = 0.94 + 0.08*(fbm(x*12,y*12,z*12,2)-0.5); return [skinBase[0]*k, skinBase[1]*k*0.98, skinBase[2]*k*0.97]; }}, true);
     skinSample({size:0.008, inset:0.0055, thick:0.35, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const k = 0.86 + 0.1*(fbm(x*10,y*10,z*10,2)-0.5); return [skinBase[0]*k, skinBase[1]*k*0.96, skinBase[2]*k*0.95]; }}, true);
     const nSkin = C.n;
@@ -1142,7 +1166,7 @@ const VS = `#version 300 es
 precision highp float; precision highp int; precision highp usampler2D;
 uniform usampler2D uTex; uniform mat4 uView; uniform mat4 uProj; uniform vec2 uFocal; uniform vec2 uViewport;
 uniform float uSplatScale; uniform float uAlpha; uniform float uGroupAlpha[32]; uniform float uGroupPulse[32]; uniform float uGroupWobble[32]; uniform float uGroupShade[32]; uniform vec4 uGroupMat[32]; uniform vec4 uGroupDetail[32]; uniform float uFar; uniform float uDetailMul;
-uniform float uGroupPulseA[32]; uniform float uGroupBreath[32]; uniform float uGroupSizePulse[32]; uniform vec3 uCenterB; uniform float uPulseA, uBreath, uPWV, uPeriod;
+uniform float uGroupPulseA[32]; uniform float uGroupBreath[32]; uniform float uGroupSizePulse[32]; uniform vec3 uCenterB; uniform float uPulseA, uBreath, uPWV, uPeriod; uniform vec4 uHole; uniform int uHoleGroup;
 uniform vec3 uCenter; uniform float uPulse; uniform float uTime; uniform float uShade;
 in vec2 aPos; in uint aIndex;
 out vec4 vColor; out vec2 vPos; out float vDepth; out vec4 vDetail; out float vSeed;
@@ -1154,6 +1178,7 @@ void main(){
   uint pk = t1.w; uint g = pk >> 24u;
   float ga = uGroupAlpha[g];
   vec3 p = uintBitsToFloat(t0.xyz);
+  if (uHole.w > 0.0 && int(g) == uHoleGroup && distance(p, uHole.xyz) < uHole.w) ga = 0.0;
   float pw = uGroupPulse[g], pa = uGroupPulseA[g], br = uGroupBreath[g], spz = uGroupSizePulse[g];
   if (pw != 0.0 || pa != 0.0) p += (p - uCenter) * (uPulse * pw + uPulseA * pa);
   if (br != 0.0) p += (p - uCenterB) * (uBreath * br);
@@ -1225,7 +1250,7 @@ function compile(type, src){ const sh = gl.createShader(type); gl.shaderSource(s
 const prog = gl.createProgram(); gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog);
 if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
 gl.useProgram(prog);
-const U = {}; for (const n of ['uTex','uView','uProj','uFocal','uViewport','uSplatScale','uAlpha','uGroupAlpha','uGroupPulse','uGroupWobble','uCenter','uPulse','uTime','uShade','uGroupShade','uGroupMat','uGroupDetail','uFar','uDetailMul','uGroupPulseA','uGroupBreath','uGroupSizePulse','uCenterB','uPulseA','uBreath','uPWV','uPeriod']) U[n] = gl.getUniformLocation(prog, n);
+const U = {}; for (const n of ['uTex','uView','uProj','uFocal','uViewport','uSplatScale','uAlpha','uGroupAlpha','uGroupPulse','uGroupWobble','uCenter','uPulse','uTime','uShade','uGroupShade','uGroupMat','uGroupDetail','uFar','uDetailMul','uGroupPulseA','uGroupBreath','uGroupSizePulse','uCenterB','uPulseA','uBreath','uPWV','uPeriod','uHole','uHoleGroup']) U[n] = gl.getUniformLocation(prog, n);
 const A_POS = gl.getAttribLocation(prog, 'aPos'), A_IDX = gl.getAttribLocation(prog, 'aIndex');
 const quadBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-2,-2, 2,-2, -2,2, 2,2]), gl.STATIC_DRAW);
 gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFuncSeparate(gl.ONE_MINUS_DST_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
@@ -1283,8 +1308,8 @@ function buildLevel(lv){
   lv.imageryUsed = []; lv.build(C, P); if (lv.id !== 'body') addImagePlanes(lv, C); const used = lv.imageryUsed; applyImagery(lv, C); lv.imageryUsed = used.concat(lv.imageryUsed); if (lv.planes) for (const pl of lv.planes) lv.shadeArr[pl.group] = 0; lv.buildMs = performance.now()-t;
   uploadLevel(lv, C); applyStyles(lv);
 }
-function disposeLevel(lv){ if (!lv.gpu) return; gl.deleteTexture(lv.gpu.tex); gl.deleteBuffer(lv.gpu.idx); gl.deleteVertexArray(lv.gpu.vao); lv.gpu = null; lv.ready = false; lv._d = lv._k = lv._o = null; }
-function rebuildLevel(lv){ if (lv.isScan) return; const alphas = lv.alphas; disposeLevel(lv); buildLevel(lv); if (alphas) lv.alphas = alphas; lv.sortKey = null; if (LEVELS[state.cur] === lv) refreshUI(); }
+function disposeLevel(lv){ if (lv.patch){ disposeLevel(lv.patch); lv.patch = null; } lv.pending = null; if (!lv.gpu) return; gl.deleteTexture(lv.gpu.tex); gl.deleteBuffer(lv.gpu.idx); gl.deleteVertexArray(lv.gpu.vao); lv.gpu = null; lv.ready = false; lv._d = lv._k = lv._o = null; }
+function rebuildLevel(lv){ if (lv.isScan) return; const alphas = lv.alphas; disposeLevel(lv); lv.refine = null; buildLevel(lv); if (alphas) lv.alphas = alphas; lv.sortKey = null; if (LEVELS[state.cur] === lv) refreshUI(); }
 
 // ---- depth sort (counting sort, nearest first)
 const BUCKETS = 65536, counts = new Uint32Array(BUCKETS);
@@ -1343,6 +1368,7 @@ function drawLevel(lv, alphaMul, cam, proj, focal){
   gl.uniform1fv(U.uGroupPulseA, lv.pulseAArr || ZERO32); gl.uniform1fv(U.uGroupBreath, lv.breathArr || ZERO32); gl.uniform1fv(U.uGroupSizePulse, state.live ? (lv.sizePulseArr || ZERO32) : ZERO32);
   const bc = lv.breathCenter || [0,0,0]; gl.uniform3f(U.uCenterB, bc[0], bc[1], bc[2]); gl.uniform1f(U.uPWV, lv.rawUnit ? PHYS.pwv / lv.rawUnit : 0); gl.uniform1f(U.uPeriod, 60 / PHYS.hr);
   gl.uniform1f(U.uTime, state.time); gl.uniform1f(U.uShade, lv.isScan ? 0 : state.shade);
+  const hole = (!lv.isPatch && lv.patch && lv.patch.ready) ? lv.patch.sphere : null; gl.uniform4f(U.uHole, hole ? hole[0] : 0, hole ? hole[1] : 0, hole ? hole[2] : 0, hole ? hole[3] : 0); gl.uniform1i(U.uHoleGroup, 0);
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, lv.gpu.tex);
   gl.bindVertexArray(lv.gpu.vao); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, lv.count); gl.bindVertexArray(null);
 }
@@ -1368,12 +1394,12 @@ const DETAILS = { skin:[0.11,3.6,0,0], wet:[0.07,2.6,0,0.06], bone:[0.06,4.2,0,0
 // =====================================================================
 //  Visualization engine: MRT scene buffer (color + depth) -> bloom -> composite
 // =====================================================================
-const ENGINE = { on:true, ao:0.6, detail:1.0, exposure:0.95, bloom:0.3, aperture:0.4, focusOff:0, fog:0.18, grain:0.05, vignette:0.35, sat:1.06, contrast:1.04, fogColor:[0.055,0.07,0.10] };
+const ENGINE = { on:true, ao:0.6, detail:1.3, sharp:0.7, exposure:0.95, bloom:0.14, aperture:0.3, focusOff:0, fog:0.14, grain:0.02, vignette:0.3, sat:1.06, contrast:1.05, fogColor:[0.055,0.07,0.10] };
 const LOOKS = {
-  'Cinematic': { ao:0.7, detail:1.0, exposure:0.95, bloom:0.32, aperture:0.4, fog:0.2, grain:0.06, vignette:0.4, sat:1.08, contrast:1.06 },
-  'Clinical': { ao:0.35, detail:0.6, exposure:1.05, bloom:0.08, aperture:0.0, fog:0.0, grain:0.0, vignette:0.05, sat:1.0, contrast:1.0 },
-  'Specimen': { ao:1.0, detail:1.4, exposure:0.95, bloom:0.25, aperture:0.3, fog:0.05, grain:0.03, vignette:0.6, sat:1.12, contrast:1.1 },
-  'Micrograph': { ao:0.5, detail:1.2, exposure:1.1, bloom:0.15, aperture:0.75, fog:0.0, grain:0.12, vignette:0.25, sat:0.92, contrast:1.02 },
+  'Cinematic': { ao:0.7, detail:1.3, sharp:0.7, exposure:0.95, bloom:0.16, aperture:0.35, fog:0.16, grain:0.025, vignette:0.35, sat:1.08, contrast:1.06 },
+  'Clinical': { ao:0.35, detail:0.9, sharp:0.9, exposure:1.05, bloom:0.08, aperture:0.0, fog:0.0, grain:0.0, vignette:0.05, sat:1.0, contrast:1.0 },
+  'Specimen': { ao:1.0, detail:1.6, sharp:0.8, exposure:0.95, bloom:0.25, aperture:0.3, fog:0.05, grain:0.03, vignette:0.6, sat:1.12, contrast:1.1 },
+  'Micrograph': { ao:0.5, detail:1.4, sharp:1.0, exposure:1.1, bloom:0.15, aperture:0.75, fog:0.0, grain:0.12, vignette:0.25, sat:0.92, contrast:1.02 },
 };
 const extFloat = gl.getExtension('EXT_color_buffer_float');
 const RT_FMT = extFloat ? gl.RGBA16F : gl.RGBA8, RT_TYPE = extFloat ? gl.HALF_FLOAT : gl.UNSIGNED_BYTE;
@@ -1397,14 +1423,14 @@ void main(){ vec2 uv = gl_FragCoord.xy / uRes; vec4 acc = vec4(0.0); float ws[5]
   for (int i = -4; i <= 4; i++){ vec4 s = texture(uSrc, uv + uDir * float(i) / uRes); if (uThresh > 0.0){ float l = dot(s.rgb, vec3(0.299,0.587,0.114)); s.rgb *= smoothstep(uThresh, uThresh + 0.35, l); } acc += s * ws[abs(i)]; }
   frag = acc; }`;
 const POST_FS = `#version 300 es
-precision highp float; uniform sampler2D uColor, uDepth, uBloom; uniform vec2 uRes; uniform float uExposure, uSat, uContrast, uVignette, uGrain, uTime, uFocus, uAperture, uFog, uBloomAmt, uDpr, uAO; uniform vec3 uFogColor; out vec4 frag;
+precision highp float; uniform sampler2D uColor, uDepth, uBloom; uniform vec2 uRes; uniform float uExposure, uSat, uContrast, uVignette, uGrain, uTime, uFocus, uAperture, uFog, uBloomAmt, uDpr, uAO, uSharp; uniform vec3 uFogColor; out vec4 frag;
 vec3 aces(vec3 x){ return clamp((x*(2.51*x + 0.03))/(x*(2.43*x + 0.59) + 0.14), 0.0, 1.0); }
 float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 float depthAt(vec2 uv){ vec4 d = texture(uDepth, uv); return d.a > 1e-4 ? d.r / d.a : 1.0; }
 void main(){
   vec2 uv = gl_FragCoord.xy / uRes;
   float depth = depthAt(uv);
-  float coc = clamp(abs(depth - uFocus) * uAperture * 28.0, 0.0, 1.0) * 14.0 * uDpr;
+  float coc = clamp(max(0.0, abs(depth - uFocus) - 0.02) * uAperture * 14.0, 0.0, 1.0) * 14.0 * uDpr;
   vec4 c = texture(uColor, uv);
   if (coc > 0.6){
     vec2 taps[12] = vec2[12](vec2(1.0,0.0), vec2(0.5,0.866), vec2(-0.5,0.866), vec2(-1.0,0.0), vec2(-0.5,-0.866), vec2(0.5,-0.866), vec2(0.35,0.2), vec2(-0.2,0.35), vec2(-0.35,-0.2), vec2(0.2,-0.35), vec2(0.0,0.6), vec2(0.0,-0.6));
@@ -1412,6 +1438,7 @@ void main(){
     for (int i = 0; i < 12; i++){ vec2 o = taps[i] * coc / uRes; float dd = depthAt(uv + o); float w = 1.0 - 0.6 * step(dd, depth - 0.02) * step(0.0, uFocus - dd); acc += texture(uColor, uv + o) * w; ws += w; }
     c = acc / ws;
   }
+  if (uSharp > 0.0 && coc <= 0.6){ vec2 px = 1.0 / uRes; vec4 nb = texture(uColor, uv + vec2(px.x, 0.0)) + texture(uColor, uv - vec2(px.x, 0.0)) + texture(uColor, uv + vec2(0.0, px.y)) + texture(uColor, uv - vec2(0.0, px.y)); c.rgb += (c.rgb - nb.rgb * 0.25) * uSharp; c.rgb = max(c.rgb, 0.0); }
   float a = c.a; vec3 col = c.rgb;
   if (uAO > 0.0 && a > 1e-3 && depth < 0.999){
     float R = clamp(0.055 / max(depth, 0.02), 6.0, 42.0) * uDpr; float occ = 0.0; float ang = hash(gl_FragCoord.xy) * 6.2832;
@@ -1433,12 +1460,12 @@ void main(){
 function mkProg(vs, fs){ const p = gl.createProgram(); gl.attachShader(p, compile(gl.VERTEX_SHADER, vs)); gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; }
 const blurProg = mkProg(FS_VS, BLUR_FS), postProg = mkProg(FS_VS, POST_FS);
 const BU = {}; for (const n of ['uSrc','uDir','uRes','uThresh']) BU[n] = gl.getUniformLocation(blurProg, n);
-const PU = {}; for (const n of ['uColor','uDepth','uBloom','uRes','uExposure','uSat','uContrast','uVignette','uGrain','uTime','uFocus','uAperture','uFog','uBloomAmt','uDpr','uFogColor','uAO']) PU[n] = gl.getUniformLocation(postProg, n);
+const PU = {}; for (const n of ['uColor','uDepth','uBloom','uRes','uExposure','uSat','uContrast','uVignette','uGrain','uTime','uFocus','uAperture','uFog','uBloomAmt','uDpr','uFogColor','uAO','uSharp']) PU[n] = gl.getUniformLocation(postProg, n);
 const emptyVao = gl.createVertexArray();
 function postProcess(){
   gl.disable(gl.BLEND); gl.bindVertexArray(emptyVao);
   gl.useProgram(blurProg); gl.uniform1i(BU.uSrc, 0); gl.activeTexture(gl.TEXTURE0);
-  gl.bindFramebuffer(gl.FRAMEBUFFER, RT.fboA); gl.viewport(0, 0, RT.bw, RT.bh); gl.bindTexture(gl.TEXTURE_2D, RT.color); gl.uniform2f(BU.uDir, 1.5, 0); gl.uniform2f(BU.uRes, RT.bw, RT.bh); gl.uniform1f(BU.uThresh, 0.55); gl.drawArrays(gl.TRIANGLES, 0, 3);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, RT.fboA); gl.viewport(0, 0, RT.bw, RT.bh); gl.bindTexture(gl.TEXTURE_2D, RT.color); gl.uniform2f(BU.uDir, 1.5, 0); gl.uniform2f(BU.uRes, RT.bw, RT.bh); gl.uniform1f(BU.uThresh, 0.72); gl.drawArrays(gl.TRIANGLES, 0, 3);
   gl.bindFramebuffer(gl.FRAMEBUFFER, RT.fboB); gl.bindTexture(gl.TEXTURE_2D, RT.bloomA); gl.uniform2f(BU.uDir, 0, 1.5); gl.uniform1f(BU.uThresh, 0.0); gl.drawArrays(gl.TRIANGLES, 0, 3);
   gl.bindFramebuffer(gl.FRAMEBUFFER, RT.fboA); gl.bindTexture(gl.TEXTURE_2D, RT.bloomB); gl.uniform2f(BU.uDir, 2.5, 0); gl.drawArrays(gl.TRIANGLES, 0, 3);
   gl.bindFramebuffer(gl.FRAMEBUFFER, RT.fboB); gl.bindTexture(gl.TEXTURE_2D, RT.bloomA); gl.uniform2f(BU.uDir, 0, 2.5); gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -1448,10 +1475,37 @@ function postProcess(){
   gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, RT.depth); gl.uniform1i(PU.uDepth, 1);
   gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, RT.bloomB); gl.uniform1i(PU.uBloom, 2);
   gl.uniform2f(PU.uRes, W, H); gl.uniform1f(PU.uExposure, ENGINE.exposure); gl.uniform1f(PU.uSat, ENGINE.sat); gl.uniform1f(PU.uContrast, ENGINE.contrast); gl.uniform1f(PU.uVignette, ENGINE.vignette); gl.uniform1f(PU.uGrain, ENGINE.grain); gl.uniform1f(PU.uTime, state.time);
-  const focusDist = state.trans ? DEFAULT_DIST : state.cam.dist; gl.uniform1f(PU.uFocus, Math.min(1, (focusDist * (1 + ENGINE.focusOff)) / FAR)); gl.uniform1f(PU.uAperture, ENGINE.aperture); gl.uniform1f(PU.uFog, ENGINE.fog); gl.uniform1f(PU.uBloomAmt, ENGINE.bloom); gl.uniform1f(PU.uDpr, DPR); gl.uniform1f(PU.uAO, ENGINE.ao); gl.uniform3f(PU.uFogColor, ENGINE.fogColor[0], ENGINE.fogColor[1], ENGINE.fogColor[2]);
+  const focusDist = state.trans ? DEFAULT_DIST : state.cam.dist; gl.uniform1f(PU.uFocus, Math.min(1, (focusDist * (1 + ENGINE.focusOff)) / FAR)); gl.uniform1f(PU.uAperture, ENGINE.aperture); gl.uniform1f(PU.uFog, ENGINE.fog); gl.uniform1f(PU.uBloomAmt, ENGINE.bloom); gl.uniform1f(PU.uDpr, DPR); gl.uniform1f(PU.uAO, ENGINE.ao); gl.uniform1f(PU.uSharp, ENGINE.sharp); gl.uniform3f(PU.uFogColor, ENGINE.fogColor[0], ENGINE.fogColor[1], ENGINE.fogColor[2]);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
   gl.bindVertexArray(null); gl.activeTexture(gl.TEXTURE0); gl.enable(gl.BLEND); gl.useProgram(prog);
 }
+
+// ---- adaptive refinement: resample the skin near the camera target at fine splat size when close
+function updateRefine(lv, cam, now){
+  if (!lv.refine || !lv.ready || lv.isScan) return;
+  const near = cam.dist < 0.8;
+  if (!near){ if (lv.patch){ disposeLevel(lv.patch); lv.patch = null; } lv.pending = null; return; }
+  const raw = [cam.target[0]*lv.radius + lv.center[0], cam.target[1]*lv.radius + lv.center[1], cam.target[2]*lv.radius + lv.center[2]];
+  const r = Math.max(0.16, Math.min(0.32, 0.12 + 0.35*cam.dist)) * lv.radius, size = Math.max(0.0014, Math.min(0.0026, 0.0017 * cam.dist/0.4)) * lv.radius;
+  const pt = lv.patch, pend = lv.pending;
+  if (pend){ // continue building the pending patch within a per-frame budget
+    const it = pend.iters.find(x => !x.done); if (it) it.step(drag.active ? 4 : 12);
+    if (pend.iters.every(x => x.done)){
+      if (pt) disposeLevel(pt);
+      const np = { id: lv.id + '-patch', isPatch:true, groups: lv.groups, center: lv.center, radius: lv.radius, flipY: lv.flipY, pulseCenter: lv.pulseCenter, breathCenter: lv.breathCenter, rawUnit: lv.rawUnit, groupWobble: lv.groupWobble, matNames: lv.matNames };
+      uploadLevel(np, pend.cloud); np.alphas = lv.alphas; np.matArr = lv.matArr; np.detArr = lv.detArr; np.shadeArr = lv.shadeArr; np.sphere = pend.sphere; np.size = pend.size; np.count = pend.cloud.n;
+      lv.patch = np; lv.pending = null; lastRefineMs = performance.now() - pend.t0;
+    }
+    return;
+  }
+  const ref = pt || null;
+  if (ref && Math.hypot(ref.sphere[0]-raw[0], ref.sphere[1]-raw[1], ref.sphere[2]-raw[2]) < ref.sphere[3]*0.35 && Math.abs(ref.size/size - 1) < 0.35) return;
+  if (lv._lastRefine && now - lv._lastRefine < 500) return; lv._lastRefine = now;
+  const toCam = V.norm([Math.cos(cam.phi)*Math.sin(cam.theta), Math.sin(cam.phi), Math.cos(cam.phi)*Math.cos(cam.theta)]);
+  const job = lv.refine(raw, r + 0.02*lv.radius, size, toCam);
+  lv.pending = { cloud: job.cloud, iters: job.iters, sphere: [raw[0], raw[1], raw[2], r], size, t0: performance.now() };
+}
+let lastRefineMs = 0;
 
 let lastT = performance.now(), fpsEma = 60, frames = 0;
 function frame(now){
@@ -1476,9 +1530,9 @@ function frame(now){
     if (tr.dir > 0){ drawLevel(from, 1-e, camFrom, proj, focal); drawLevel(to, e, camTo, proj, focal); }
     else { drawLevel(to, e, camTo, proj, focal); drawLevel(from, 1-e, camFrom, proj, focal); }
     if (t >= 1){ state.cur = tr.to; cam.dist = DEFAULT_DIST; cam.target = [0,0,0]; state.trans = null; refreshUI(); }
-  } else drawLevel(cur, 1, cam, proj, focal);
+  } else { updateRefine(cur, cam, now); if (cur.patch && cur.patch.ready) drawLevel(cur.patch, 1, cam, proj, focal); drawLevel(cur, 1, cam, proj, focal); }
   if (engineOn) postProcess();
-  if ((frames++ & 15) === 0){ $('stFps').textContent = Math.round(fpsEma); $('stSort').textContent = lastSortMs.toFixed(1); $('stSplats').textContent = (LEVELS[state.cur].count||0).toLocaleString(); updateScaleBar(); }
+  if ((frames++ & 15) === 0){ $('stFps').textContent = Math.round(fpsEma); $('stSort').textContent = lastSortMs.toFixed(1); $('stSplats').textContent = ((LEVELS[state.cur].count||0) + (LEVELS[state.cur].patch ? LEVELS[state.cur].patch.count : 0)).toLocaleString(); updateScaleBar(); }
 }
 
 // ---- transitions
@@ -1596,7 +1650,7 @@ $('btnUp').addEventListener('click', () => goTo(state.cur-1)); $('btnDown').addE
 document.querySelectorAll('.drawer .tabs button').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('.drawer .tabs button').forEach(x => x.classList.toggle('on', x === b)); document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.id === 'pane-' + b.dataset.pane)); }));
 $('rSize').addEventListener('input', (e) => state.splatScale = +e.target.value);
 // ---- engine controls
-const EBIND = { eExp:'exposure', eBloom:'bloom', eAp:'aperture', eFocus:'focusOff', eFog:'fog', eGrain:'grain', eVig:'vignette', eSat:'sat', eAO:'ao', eDetail:'detail' };
+const EBIND = { eExp:'exposure', eBloom:'bloom', eAp:'aperture', eFocus:'focusOff', eFog:'fog', eGrain:'grain', eVig:'vignette', eSat:'sat', eAO:'ao', eDetail:'detail', eSharp:'sharp' };
 for (const [id, key] of Object.entries(EBIND)) $(id).addEventListener('input', (e) => { ENGINE[key] = +e.target.value; $('looks').querySelectorAll('button').forEach(b => b.classList.remove('on')); });
 $('eOn').addEventListener('change', (e) => ENGINE.on = e.target.checked);
 (function(){ const box = $('looks'); for (const [name, look] of Object.entries(LOOKS)){ const b = document.createElement('button'); b.textContent = name; if (name === 'Cinematic') b.classList.add('on'); b.addEventListener('click', () => { Object.assign(ENGINE, look); for (const [id, key] of Object.entries(EBIND)) if (look[key] != null) $(id).value = look[key]; box.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); }); box.appendChild(b); } })();
