@@ -57,11 +57,12 @@ export async function loadSystem(base: string, manifest: Manifest, name: string,
     const organ = zid ? manifest.organs[zid] : undefined;
     if (!organ) return;
     const geom = src.geometry;
-    geom.applyMatrix4(src.matrixWorld);            // the pipeline flattened transforms; bake any node transform left
     const cls = organ.tissue;
     const params = manifest.tissue_classes[cls] ?? manifest.tissue_classes['organ'];
     const mat = tissueMaterial(name, cls, params, src.material as THREE.MeshStandardMaterial);
     const mesh = new THREE.Mesh(geom, mat) as unknown as OrganMesh;
+    // keep the node transform on the object: quantized (normalized int16) positions cannot hold metres if baked into the attribute
+    mesh.applyMatrix4(src.matrixWorld);
     mesh.name = zid!;
     mesh.userData = { zid: zid!, organ, system: name };
     mesh.castShadow = true;

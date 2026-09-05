@@ -53,6 +53,7 @@ export function tissueMaterial(system: string, cls: string, p: TissueParams, bas
     uSSS: sssUniforms.uSSS,
     uClipPlane: { value: new THREE.Vector4(0, 0, 0, 0) },   // xyz normal, w distance; zero = off
     uClipOn: { value: 0 },
+    uCutColor: { value: new THREE.Color(p.color[0], p.color[1], p.color[2]).multiplyScalar(0.55) },   // flat interior colour for section caps
   };
   m.userData.uniforms = uniforms;
 
@@ -64,7 +65,7 @@ export function tissueMaterial(system: string, cls: string, p: TissueParams, bas
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>
         varying vec3 vWorldPos;
-        uniform vec3 uSSSColor; uniform float uSSSAmount; uniform float uSSS; uniform vec4 uClipPlane; uniform float uClipOn;`)
+        uniform vec3 uSSSColor; uniform float uSSSAmount; uniform float uSSS; uniform vec4 uClipPlane; uniform float uClipOn; uniform vec3 uCutColor;`)
       // COLOR_0 is occlusion, not albedo: do not tint the base colour with it
       .replace('#include <color_fragment>', '')
       // section planes: discard in front of the plane, and draw the cut faces flat so caps read as solid
@@ -83,6 +84,9 @@ export function tissueMaterial(system: string, cls: string, p: TissueParams, bas
         float dotNV = saturate( dot( geometryNormal, geometryViewDir ) );
         reflectedLight.indirectSpecular *= computeSpecularOcclusion( dotNV, ambientOcclusion, material.roughness );`)
       // wrapped + back-scattered diffuse so light bleeds through thin tissue; strength scaled by the class
+      // capped sections: with the front faces discarded, the back faces seen through the cut are drawn as the flat interior
+      .replace('#include <dithering_fragment>', `#include <dithering_fragment>
+        if (uClipOn > 0.5 && !gl_FrontFacing) gl_FragColor = vec4(uCutColor * (0.85 + 0.15 * vColor.r), diffuseColor.a);`)
       .replace('#include <lights_fragment_begin>', `#include <lights_fragment_begin>
         {
           float wrap = 0.35 * uSSSAmount * uSSS;
@@ -100,7 +104,7 @@ export function tissueMaterial(system: string, cls: string, p: TissueParams, bas
         }`)
       ;
   };
-  m.customProgramCacheKey = () => 'tissue-v5';
+  m.customProgramCacheKey = () => 'tissue-v6';
   cache.set(key, m);
   return m;
 }
@@ -113,6 +117,8 @@ export function allTissueMaterials(): TissueMaterial[] {
 export function setClipPlane(normal: THREE.Vector3 | null, distance = 0) {
   for (const m of cache.values()) {
     const u = m.userData.uniforms!;
+    m.side = normal ? THREE.DoubleSide : THREE.FrontSide;   // back faces stand in for the cap surface
+    m.needsUpdate = false;
     if (!normal) {
       u.uClipOn.value = 0;
     } else {
