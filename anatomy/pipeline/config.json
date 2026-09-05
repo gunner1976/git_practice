@@ -16,8 +16,11 @@
     },
     "muscular": {
       "file": "MuscularSystem100.fbx",
+      "roots_exclude": [
+        "Fasciae.g"
+      ],
       "budget": 520000,
-      "order": 2
+      "order": 3
     },
     "cardiovascular": {
       "file": "CardioVascular41.fbx",
@@ -80,10 +83,19 @@
       "file": "Regions of human body100.fbx",
       "budget": 60000,
       "order": 11
+    },
+    "fascia": {
+      "file": "MuscularSystem100.fbx",
+      "roots": [
+        "Fasciae.g"
+      ],
+      "budget": 90000,
+      "order": 2
     }
   },
   "peel_order": [
     "integumentary",
+    "fascia",
     "muscular",
     "joints",
     "cardiovascular",

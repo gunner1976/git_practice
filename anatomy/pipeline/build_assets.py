@@ -524,6 +524,7 @@ def build_system(sysname, spec, cfg, args, descriptions, manifest, out_dir, tile
     scene = bpy.context.scene
     objs = [o for o in scene.objects if o.type == 'MESH']
     roots = spec.get('roots')
+    roots_exclude = set(spec.get('roots_exclude', []))
     excl_pat = [re.compile(p) for p in cfg.get('exclude_name_patterns', [])]
     excl_lic = [(why, [re.compile(p) for p in pats]) for why, pats in cfg.get('exclude_licensed', {}).items()]
     keep, excluded, landmarks = [], [], []
@@ -532,6 +533,8 @@ def build_system(sysname, spec, cfg, args, descriptions, manifest, out_dir, tile
         root = chain[-1] if chain else o.name
         if roots and root not in roots:
             continue                                  # belongs to another system of the same file
+        if root in roots_exclude:
+            continue
         bare, _, role = strip_suffix(o.name)
         if '?' in o.name:
             excluded.append({'name': o.name, 'reason': 'unnamed placeholder'})
