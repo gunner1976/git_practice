@@ -237,6 +237,9 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
       <div class="ctl"><label for="eGrain">Film grain</label><input id="eGrain" type="range" min="0" max="0.3" step="0.01" value="0.02"></div>
       <div class="ctl"><label for="eVig">Vignette</label><input id="eVig" type="range" min="0" max="1" step="0.02" value="0.35"></div>
       <div class="ctl"><label for="eSat">Saturation</label><input id="eSat" type="range" min="0.5" max="1.5" step="0.02" value="1.06"></div>
+      <h3>Figure</h3>
+      <div class="ctl"><label for="fPose">Pose</label><select id="fPose"><option value="david">Michelangelo’s David (contrapposto)</option><option value="apose">Anatomical A-pose</option></select></div>
+      <div class="ctl"><label for="fMarble">Carrara marble</label><input id="fMarble" type="checkbox"></div>
       <h3>Materials &amp; style</h3>
       <p class="help">Pick a layer of the current level, give it a material, or grade it from any picture: the engine extracts the picture’s palette and gloss and re-maps the layer’s tones to it. Web imagery becomes a style reference, not a texture.</p>
       <div class="ctl"><label for="mLayer">Layer</label><select id="mLayer"></select></div>
@@ -573,6 +576,7 @@ function buildBodySDF(P){
   // ---- head
   S.ell(hp(0, 0.018, -0.008), hs(0.074, 0.088, 0.086), 0.02);                          // cranium
   S.ell(hp(0, 0.03, 0.05), hs(0.06, 0.038, 0.04), 0.03);                                 // frontal bone / forehead
+  if (P.physique === 'david'){ S.cap(hp(-0.05, 0.02, 0.084), hp(0.05, 0.02, 0.084), 0.009, 0.009, 0.012); S.cap(hp(0, 0.03, 0.09), hp(0, 0.008, 0.096), 0.0016, 0.0016, 0.003, { sub:true }); S.cap(hp(-0.008, 0.028, 0.09), hp(-0.005, 0.01, 0.095), 0.0012, 0.0012, 0.003, { sub:true }); S.cap(hp(0.008, 0.028, 0.09), hp(0.005, 0.01, 0.095), 0.0012, 0.0012, 0.003, { sub:true }); }   // supraorbital ridge, glabellar furrows
   S.ell(hp(0, -0.035, 0.046), hs(0.042, 0.038, 0.038), 0.03);                           // maxilla / midface
   for (const s of [-1,1]){ S.ell(hp(s*0.045, -0.015, 0.06), hs(0.02, 0.017, 0.018), 0.03); S.ell(hp(s*0.056, 0.0, 0.028), hs(0.015, 0.03, 0.03), 0.035); S.ell(hp(s*0.038, -0.055, 0.052), hs(0.015, 0.016, 0.015), 0.03); }   // zygomatic, temporal, cheek
   S.cap(hp(-0.058, -0.03, -0.004), hp(-0.014, -0.108, 0.046), 0.017, 0.016, 0.026); S.cap(hp(0.058, -0.03, -0.004), hp(0.014, -0.108, 0.046), 0.017, 0.016, 0.026);   // mandible (angle to chin)
@@ -586,7 +590,7 @@ function buildBodySDF(P){
     S.ell(hp(s*0.079, -0.004, -0.004), hs(0.004, 0.013, 0.009), 0.004, { sub:true });     // concha
   }
   S.ell(hp(0, -0.046, 0.0955), hs(0.0035, 0.0075, 0.004), 0.004, { sub:true });           // philtrum
-  S.cap(hp(0, 0.014, 0.086), hp(0, -0.027, 0.106), 0.0085, 0.013, 0.01);                // nasal bridge to tip (tip ~2 cm proud of the face plane)
+  S.cap(hp(0, 0.016, 0.088), hp(0, -0.027, 0.106), P.physique === 'david' ? 0.0105 : 0.0085, 0.013, 0.01);   // nasal bridge to tip
   S.ell(hp(0, -0.031, 0.097), hs(0.017, 0.0095, 0.012), 0.008);                          // alae
   S.ell(hp(0, -0.056, 0.089), hs(0.019, 0.0055, 0.009), 0.006, { lip:1 });               // upper lip
   S.ell(hp(0, -0.067, 0.088), hs(0.017, 0.0058, 0.0095), 0.006, { lip:1 });              // lower lip
@@ -617,6 +621,16 @@ function buildBodySDF(P){
     S.ell([s*(shX-delt*0.55), shY-0.02, 0.0], [delt, delt*1.1, delt], 0.045);            // deltoid
     S.ell([s*0.03*sc, yAbd+0.02, abd.rz*0.85], [0.035*sc, 0.1*sc, 0.012*sc], 0.05);     // rectus abdominis plane
   }
+  if (P.physique === 'david'){
+    S.cap([0, yAbd+0.16*sc, abd.rz*0.99], [0, yAbd-0.09*sc, abd.rz*0.96], 0.006, 0.005, 0.012, { sub:true });                 // linea alba
+    for (let k = 0; k < 3; k++) S.cap([-0.045*sc, yAbd+0.12*sc-k*0.065*sc, abd.rz*0.99], [0.045*sc, yAbd+0.12*sc-k*0.065*sc, abd.rz*0.99], 0.005, 0.005, 0.012, { sub:true });   // tendinous intersections
+    S.cap([0, yRib+0.06*sc, rib.rz*1.02], [0, yRib-0.05*sc, rib.rz*1.0], 0.008, 0.007, 0.02, { sub:true });                   // intermammary groove
+    for (const s of [-1,1]){
+      for (let k = 0; k < 4; k++) S.ell([s*(0.105+0.008*k)*sc, yRib-0.03*sc-k*0.03*sc, rib.rz*(0.55-0.08*k)], [0.028*sc, 0.012*sc, 0.02*sc], 0.02);   // serratus anterior digitations
+      S.ell([s*0.13*sc, yAbd+0.02*sc, abd.rz*0.55], [0.035*sc, 0.09*sc, 0.03*sc], 0.035);                                       // external oblique
+      S.ell([s*0.1*sc, yPel+0.07*sc, abd.rz*0.75], [0.05*sc, 0.02*sc, 0.02*sc], 0.02);                                          // inguinal ridge
+    }
+  }
   // ---- arms
   const A = P.arm, mx = (p, s) => [s*p[0], p[1], p[2]];
   for (const s of [-1,1]){
@@ -629,8 +643,9 @@ function buildBodySDF(P){
     const fm = V.lerp(el, wr, 0.3); S.ell(fm, [A.r[1]*1.0, 0.07*sc, A.r[1]*0.95], 0.04);                                         // forearm flexor mass
     S.ell([wr[0], wr[1]-0.01, wr[2]], [A.r[2]*1.15, 0.02*sc, A.r[2]*0.9], 0.02);                                                  // wrist, flattened
     // hand: palm + 5 fingers with three phalanges and a slight curl
-    const hcn = mx(P.hand.c, s), hrr = P.hand.r; S.ell(hcn, [hrr[0], hrr[1]*0.8, hrr[2]], 0.02);
-    for (let k = 0; k < 4; k++){ const bx = hcn[0] + s*(-0.029 + k*0.0195)*(hrr[0]/0.042), by = hcn[1] - hrr[1]*0.75, bz = hcn[2] + 0.004; const len = (0.075 - Math.abs(k-1.2)*0.008)*sc, r0 = 0.0078*sc; let a = [bx, by, bz]; for (let ph = 0; ph < 3; ph++){ const L = len*[0.42,0.32,0.26][ph]; const b = [a[0] + s*0.002*ph*(k-1.5), a[1] - L*Math.cos(0.15*ph), a[2] + L*Math.sin(0.15*ph) + 0.002]; S.cap(a, b, r0*(1-0.1*ph), r0*(1-0.1*(ph+1)), ph === 0 ? 0.006 : 0.0035); a = b; } }
+    const hk = P.physique === 'david' ? 1.12 : 1.0;
+    const hcn = mx(P.hand.c, s), hrr = P.hand.r.map(v => v*hk); S.ell(hcn, [hrr[0], hrr[1]*0.8, hrr[2]], 0.02);
+    for (let k = 0; k < 4; k++){ const bx = hcn[0] + s*(-0.029 + k*0.0195)*(hrr[0]/0.042), by = hcn[1] - hrr[1]*0.75, bz = hcn[2] + 0.004; const len = (0.075 - Math.abs(k-1.2)*0.008)*sc*hk, r0 = 0.0078*sc*hk; let a = [bx, by, bz]; for (let ph = 0; ph < 3; ph++){ const L = len*[0.42,0.32,0.26][ph]; const b = [a[0] + s*0.002*ph*(k-1.5), a[1] - L*Math.cos(0.15*ph), a[2] + L*Math.sin(0.15*ph) + 0.002]; S.cap(a, b, r0*(1-0.1*ph), r0*(1-0.1*(ph+1)), ph === 0 ? 0.006 : 0.0035); a = b; } }
     const tb0 = [hcn[0] - s*hrr[0]*0.85, hcn[1] - 0.005, hcn[2] + 0.012], tb1 = [hcn[0] - s*hrr[0]*1.3, hcn[1] - 0.05*sc, hcn[2] + 0.035], tb2 = [hcn[0] - s*hrr[0]*1.45, hcn[1] - 0.085*sc, hcn[2] + 0.045];
     S.cap(tb0, tb1, 0.011*sc, 0.009*sc, 0.008); S.cap(tb1, tb2, 0.009*sc, 0.007*sc, 0.006);
   }
@@ -651,7 +666,90 @@ function buildBodySDF(P){
   return S.finish();
 }
 
+// =====================================================================
+//  Pose rig: linear-blend skinning of the rest-pose cloud onto a posed skeleton
+// =====================================================================
+const M3 = {
+  mul:(a, b) => { const o = new Array(9).fill(0); for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) for (let k = 0; k < 3; k++) o[r*3+c] += a[r*3+k]*b[k*3+c]; return o; },
+  tr:(a) => [a[0],a[3],a[6], a[1],a[4],a[7], a[2],a[5],a[8]],
+  I:() => [1,0,0, 0,1,0, 0,0,1],
+  axis:(ax, ang) => { const [x,y,z] = V.norm(ax), c = Math.cos(ang), s = Math.sin(ang), t = 1-c; return [t*x*x+c, t*x*y-s*z, t*x*z+s*y, t*x*y+s*z, t*y*y+c, t*y*z-s*x, t*x*z-s*y, t*y*z+s*x, t*z*z+c]; },
+  fromTo:(a, b) => { a = V.norm(a); b = V.norm(b); const ax = V.cross(a, b), s = V.len(ax), c = V.dot(a, b); if (s < 1e-6) return c > 0 ? M3.I() : M3.axis(V.perp(a), Math.PI); return M3.axis(ax, Math.atan2(s, c)); },
+  quat:(m) => quatFromBasis([m[0],m[3],m[6]], [m[1],m[4],m[7]], [m[2],m[5],m[8]]),
+};
+const qmul = (a, b) => [a[3]*b[0] + a[0]*b[3] + a[1]*b[2] - a[2]*b[1], a[3]*b[1] - a[0]*b[2] + a[1]*b[3] + a[2]*b[0], a[3]*b[2] + a[0]*b[1] - a[1]*b[0] + a[2]*b[3], a[3]*b[3] - a[0]*b[0] - a[1]*b[1] - a[2]*b[2]];
+function buildRig(P, pose){
+  const A = P.arm.pts, Lg = P.leg.pts, sc = P.H/1.75, mx = (p, s) => [s*p[0], p[1], p[2]];
+  const shY = P.torso[P.torso.length-2].y, pelY = P.torso[1].y + 0.11*sc;
+  const B = {};
+  const add = (n, a, b, par, sig) => { B[n] = { n, a, b, par, sig, R: M3.I() }; };
+  add('pelvis', [0, pelY, -0.01], [0, pelY+0.05, -0.01], null, 0.17*sc);
+  add('spine1', [0, pelY+0.02, -0.02], [0, pelY+0.24*sc, -0.02], 'pelvis', 0.15*sc);
+  add('spine2', [0, pelY+0.24*sc, -0.02], [0, shY+0.01, -0.02], 'spine1', 0.16*sc);
+  add('neck', [0, P.neck.a[1]+0.01, -0.015], [0, P.neck.b[1], -0.015], 'spine2', 0.055*sc);
+  add('head', [0, P.neck.b[1], -0.01], [0, P.H, -0.01], 'neck', 0.13*sc);
+  for (const s of [-1,1]){ const t = s > 0 ? 'L' : 'R';
+    add('uarm'+t, mx(A[0], s), mx(A[1], s), 'spine2', 0.065*sc); add('farm'+t, mx(A[1], s), mx(A[2], s), 'uarm'+t, 0.05*sc);
+    const hc = mx(P.hand.c, s); add('hand'+t, mx(A[2], s), [hc[0], hc[1]-P.hand.r[1]-0.07*sc, hc[2]], 'farm'+t, 0.06*sc);
+    add('thigh'+t, mx(Lg[0], s), mx(Lg[1], s), 'pelvis', 0.11*sc); add('shin'+t, mx(Lg[1], s), mx(Lg[2], s), 'thigh'+t, 0.075*sc);
+    const fc = mx(P.foot.c, s); add('foot'+t, mx(Lg[2], s), [fc[0], fc[1], fc[2]+P.foot.r[2]], 'shin'+t, 0.07*sc);
+  }
+  const d2r = Math.PI/180;
+  if (pose === 'david'){
+    // contrapposto: weight on the right leg (-x). Right hip up, right shoulder down, torso turned a little to his right, head turned to his left.
+    B.pelvis.R = M3.mul(M3.axis([0,0,1], -6*d2r), M3.axis([0,1,0], 6*d2r)); B.pelvis.T = [0.012, 0, 0];
+    B.spine1.R = M3.axis([0,0,1], 4*d2r);
+    B.spine2.R = M3.mul(M3.axis([0,0,1], 5*d2r), M3.axis([0,1,0], -8*d2r));
+    B.neck.R = M3.axis([0,1,0], -12*d2r);
+    B.head.R = M3.mul(M3.axis([0,1,0], -18*d2r), M3.mul(M3.axis([1,0,0], 4*d2r), M3.axis([0,0,1], -3*d2r)));
+    B.uarmR.R = M3.mul(M3.axis([0,0,1], -7*d2r), M3.axis([1,0,0], -6*d2r));      // hangs close to the thigh, a little forward
+    B.farmR.R = M3.axis([1,0,0], -14*d2r); B.handR.R = M3.axis([0,1,0], 25*d2r);   // slight elbow bend; palm turns toward the thigh
+    B.uarmL.R = M3.mul(M3.axis([0,0,1], 16*d2r), M3.axis([1,0,0], -14*d2r));      // left arm slightly out and forward
+    B.thighL.R = M3.mul(M3.axis([1,0,0], -14*d2r), M3.axis([0,0,1], 6*d2r));      // left knee forward and outward
+    B.shinL.R = M3.axis([1,0,0], 24*d2r); B.footL.R = M3.axis([1,0,0], 22*d2r);   // relaxed knee, heel lifted
+    B.thighR.R = M3.axis([0,0,1], -2*d2r);
+  }
+  // world rotation and joint positions by forward kinematics
+  const worldR = (b) => b.par ? M3.mul(worldR(B[b.par]), b.R) : b.R;
+  const xf = (b, p) => { const q = V.add(b.a, V.m3v(b.R, V.sub(p, b.a))); return b.par ? xf(B[b.par], q) : V.add(q, b.T || [0,0,0]); };
+  for (const b of Object.values(B)){ b.Rw = worldR(b); b.qw = M3.quat(b.Rw); b.aP = xf(b, b.a); b.bP = xf(b, b.b); }
+  if (pose === 'david'){ // left forearm folded up in front of the chest, hand resting at the shoulder
+    B.farmL.R = M3.mul(M3.axis([0,0,1], 42*d2r), M3.axis([1,0,0], -136*d2r));       // folded up and inward to the shoulder
+    B.handL.R = M3.mul(M3.axis([1,0,0], -35*d2r), M3.axis([0,0,1], 20*d2r));
+    for (const b of Object.values(B)){ b.Rw = worldR(b); b.qw = M3.quat(b.Rw); b.aP = xf(b, b.a); b.bP = xf(b, b.b); }
+  }
+  const list = Object.values(B);
+  const segDist = (p, a, b) => { const ab = V.sub(b, a), L2 = Math.max(1e-9, V.dot(ab, ab)); let t = V.dot(V.sub(p, a), ab)/L2; t = t < 0 ? 0 : t > 1 ? 1 : t; return V.len(V.sub(p, V.add(a, V.mul(ab, t)))); };
+  const idx = {}; list.forEach((b, i) => idx[b.n] = i); for (const b of list){ b.kids = list.filter(c => c.par === b.n); }
+  const weights = (p, posed) => {
+    const w = new Array(list.length).fill(0); let bi = 0, bd = 1e9;
+    for (let i = 0; i < list.length; i++){ const b = list[i]; const d = (posed ? segDist(p, b.aP, b.bP) : segDist(p, b.a, b.b)) / b.sig; if (d < bd){ bd = d; bi = i; } }
+    const b = list[bi]; const A = posed ? b.aP : b.a, Bp = posed ? b.bP : b.b; const dir = V.norm(V.sub(Bp, A)), L = V.len(V.sub(Bp, A)); const t = V.dot(V.sub(p, A), dir);
+    const h = b.sig * 1.1; const sm = (x) => { x = Math.max(0, Math.min(1, x)); return x*x*(3-2*x); };
+    w[bi] = 1;
+    if (b.par && t < h){ const f = sm((t + h) / (2*h)); w[bi] = f; w[idx[b.par]] = 1 - f; }                   // across the head joint, blend with the parent
+    else if (b.kids.length === 1 && t > L - h){ const c = b.kids[0]; const f = sm((t - (L - h)) / (2*h)); w[bi] = 1 - f; w[idx[c.n]] = f; }   // across the tail joint, blend with the single child
+    return { w, sum: 1, dom: w[bi] >= 0.5 ? bi : (b.par && t < h ? idx[b.par] : (b.kids.length === 1 ? idx[b.kids[0].n] : bi)) };
+  };
+  const pose_ = (p) => { const { w, sum } = weights(p, false); const out = [0,0,0]; for (let i = 0; i < list.length; i++){ if (w[i] < 1e-4) continue; const q = xf(list[i], p); const k = w[i]/sum; out[0] += q[0]*k; out[1] += q[1]*k; out[2] += q[2]*k; } return out; };
+  const unpose_ = (p) => { let r = p; for (let it = 0; it < 3; it++){ const { w, sum } = weights(r, false); const guess = [0,0,0]; for (let i = 0; i < list.length; i++){ if (w[i] < 1e-4) continue; const b = list[i]; const q = V.add(b.a, V.m3v(M3.tr(b.Rw), V.sub(V.sub(p, b.T || [0,0,0]), b.aP))); const k = w[i]/sum; guess[0] += q[0]*k; guess[1] += q[1]*k; guess[2] += q[2]*k; } r = guess; } return r; };
+  return { bones: B, list, pose: pose_, unpose: unpose_, weights, active: pose !== 'apose' };
+}
+function poseCloud(C, rig){
+  if (!rig || !rig.active) return;
+  for (let i = 0; i < C.n; i++){
+    const i3 = i*3, i4 = i*4, p = [C.pos[i3], C.pos[i3+1], C.pos[i3+2]];
+    const grp = C.grp[i]; let { w, sum, dom } = rig.weights(p, false);
+    if (grp === 11 || grp === 12){ const allow = grp === 12 ? ['head'] : null; let bi = -1, bd = 1e9; for (let k = 0; k < rig.list.length; k++){ const b = rig.list[k]; if (allow && !allow.includes(b.n)) continue; const ab = V.sub(b.b, b.a), L2 = Math.max(1e-9, V.dot(ab,ab)); let t = V.dot(V.sub(p, b.a), ab)/L2; t = Math.max(0, Math.min(1, t)); const d = V.len(V.sub(p, V.add(b.a, V.mul(ab, t)))); if (d < bd){ bd = d; bi = k; } } w = new Array(rig.list.length).fill(0); w[bi] = 1; sum = 1; dom = bi; }
+    let x = 0, y = 0, z = 0;
+    for (let k = 0; k < rig.list.length; k++){ if (w[k] < 1e-4) continue; const b = rig.list[k]; let q = V.add(b.a, V.m3v(b.R, V.sub(p, b.a))); let par = b.par; while (par){ const pb = rig.bones[par]; q = V.add(pb.a, V.m3v(pb.R, V.sub(q, pb.a))); par = pb.par; } q = V.add(q, rig.bones.pelvis.T || [0,0,0]); const kk = w[k]/sum; x += q[0]*kk; y += q[1]*kk; z += q[2]*kk; }
+    C.pos[i3] = x; C.pos[i3+1] = y; C.pos[i3+2] = z;
+    const qw = rig.list[dom].qw, q0 = [C.rot[i4], C.rot[i4+1], C.rot[i4+2], C.rot[i4+3]]; const qr = qmul(qw, q0); C.rot[i4] = qr[0]; C.rot[i4+1] = qr[1]; C.rot[i4+2] = qr[2]; C.rot[i4+3] = qr[3];
+  }
+}
+
 // Default proportions (metres, y up, facing +z). A silhouette fit overrides these.
+let BODY_POSE = 'david';
 function defaultBodyParams(){
   return {
     H:1.75,
@@ -663,7 +761,7 @@ function defaultBodyParams(){
     hand:{ c:[0.272,0.75,0.045], r:[0.042,0.07,0.02] },
     leg:{ pts:[[0.092,0.92,0],[0.09,0.50,0.005],[0.086,0.07,-0.01]], r:[0.088,0.062,0.04] },
     foot:{ c:[0.088,0.03,0.075], r:[0.048,0.03,0.133] },
-    fitted:false,
+    fitted:false, pose: BODY_POSE, physique: BODY_POSE === 'david' ? 'david' : 'neutral',
   };
 }
 LEVELS.push({
@@ -702,7 +800,7 @@ LEVELS.push({
     const zone = (x,y,z) => { let r = 0; for (const w of warm){ const d2 = (x-w[0])*(x-w[0]) + (y-w[1])*(y-w[1]) + (z-w[2])*(z-w[2]); r += w[4]*Math.exp(-d2/(w[3]*w[3])); } return Math.min(1, r); };
     const skinCol = (x,y,z) => { let k = (1 + 0.07*(fbm(x*14,y*14,z*14,3)-0.5)) * (1 + 0.05*(vnoise(x*420,y*420,z*420)-0.5)); const flush = 0.03*fbm(x*5,y*5,z*5,2), zn = zone(x,y,z);
       const palm = (Math.abs(x) > 0.23 && y < 0.8 && z > 0.05) ? 1 : 0; k *= 1 + 0.08*palm;
-      const veinReg = (Math.abs(x) > 0.22 && y > 0.62 && y < 1.1 && z > -0.01) ? 1 : 0; const vv = Math.max(0, 0.03 - Math.abs(fbm(x*70,y*70,z*70,2)-0.5))/0.03; const vein = veinReg*vv*0.6;
+      const veinReg = (Math.abs(x) > 0.22 && y > 0.62 && y < 1.1 && z > -0.01) ? 1 : 0; const vv = Math.max(0, 0.03 - Math.abs(fbm(x*70,y*70,z*70,2)-0.5))/0.03; const vein = veinReg*vv*(P.physique === 'david' && y < 0.82 ? 1.0 : 0.6);
       const mole = vnoise(x*160+3.7, y*160, z*160) > 0.992 ? 1 : 0; const ar = Math.exp(-(Math.pow(Math.abs(x)-0.078,2) + Math.pow(y-1.29,2))/0.00012) * (z > 0.08 ? 1 : 0); const nav = Math.exp(-(x*x + Math.pow(y-1.045,2))/0.00003) * (z > 0.08 ? 1 : 0); let c = [(skinBase[0]*k + flush + 0.07*zn)*(1-0.25*ar)*(1-0.3*nav), (skinBase[1]*k - 0.03*zn)*(1-0.4*ar)*(1-0.3*nav), (skinBase[2]*k - 0.03*zn)*(1-0.4*ar)*(1-0.3*nav)];
       if (vein > 0) c = [c[0]*(1-0.12*vein), c[1]*(1-0.05*vein), c[2]*(1+0.04*vein)]; if (mole) c = [c[0]*0.45, c[1]*0.35, c[2]*0.32]; return c; };
     const skinTop = {size:0.0032, color:skinCol, group:G.skin, thick:0.18, jitter:0.5, density:1.0};
@@ -721,6 +819,7 @@ LEVELS.push({
       return SDF[iter ? 'sampleIter' : 'sample'](skin, (p, n) => {
         if (!inner && !textured && p[1] > P.neck.b[1] + 0.01 && hairRegion(p)){
           const k = 0.6 + 0.8*fbm(p[0]*140,p[1]*140,p[2]*140,2), part = Math.exp(-Math.pow((p[0]-headC[0]-0.02)/0.006, 2)) * (p[2] > headC[2] - 0.03 ? 1 : 0); const front = Math.max(0, (p[2]-headC[2])/(0.086*kz)); const t = [-n[0]*n[1]*0.2 + (p[0] > headC[0]+0.02 ? 0.35 : -0.35), -1 + 1.5*front, -n[2]*n[1]*0.2 - 1.2*front];
+          if (P.physique === 'david'){ const curl = V.randDir(); const lift = 0.008 + 0.014*fbm(p[0]*60+7, p[1]*60, p[2]*60, 2); emit(C, Object.assign({}, skin, {size:0.0030, aspect:2.6, thick:0.35, inset:-lift, jitter:0.6, color:()=>[0.2*k, 0.13*k, 0.08*k]}), p, n, [curl[0]+t[0]*0.5, curl[1]+t[1]*0.5, curl[2]+t[2]*0.5], 0, 0); if (rnd() < 0.5) emit(C, Object.assign({}, skin, {size:0.0028, aspect:2.2, thick:0.35, inset:-lift*0.5, jitter:0.6, color:()=>[0.17*k, 0.11*k, 0.07*k]}), p, n, V.randDir(), 0, 0); return; }
           emit(C, Object.assign({}, skin, {size:0.0036, aspect:4.5, thick:0.12, inset:-0.003 - 0.004*fbm(p[0]*200,p[1]*200,p[2]*200,1), color:()=>[0.19*k + 0.1*part, 0.12*k + 0.06*part, 0.075*k + 0.04*part]}), p, n, t, 0, 0); return;
         }
         if (!inner && !textured && Math.abs(p[0]-headC[0]) < 0.026*kx && Math.abs(p[1]-mouthY) < 0.014*ky && p[2] > faceZ){ emit(C, Object.assign({}, skin, {color:(x,y,z)=>{ const c = skin.color(x,y,z); return c ? lipTint(c, [x,y,z]) : null; }}), p, n, null, 0, 0); return; }
@@ -897,6 +996,8 @@ LEVELS.push({
     const deep = new Set([G.nerv, G.card, G.lymph, G.endo]);
     C.filter((x,y,z,g) => g === G.skin || g === 11 || g === 12 || bodyInside([x,y,z], deep.has(g) ? 0.016 : (g === G.musc ? 0.013 : 0.008)));
     C.skinCount = nSkin;
+    const rig = buildRig(P, P.pose || 'apose'); this.rig = rig; poseCloud(C, rig);
+    this.pulseCenter = rig.pose([0.025,1.265,0.035]); this.breathCenter = rig.pose([0,1.46,-0.01]); this.divePoint = this.pulseCenter;
   }
 });
 
@@ -1531,11 +1632,13 @@ function updateRefine(lv, cam, now){
   const near = cam.dist < 0.8;
   if (!near){ if (lv.patch){ disposeLevel(lv.patch); lv.patch = null; } lv.pending = null; return; }
   const raw = [cam.target[0]*lv.radius + lv.center[0], cam.target[1]*lv.radius + lv.center[1], cam.target[2]*lv.radius + lv.center[2]];
+  const rawRest = lv.rig && lv.rig.active ? lv.rig.unpose(raw) : raw;
   const r = Math.max(0.16, Math.min(0.32, 0.12 + 0.35*cam.dist)) * lv.radius, size = Math.max(0.0014, Math.min(0.0026, 0.0017 * cam.dist/0.4)) * lv.radius;
   const pt = lv.patch, pend = lv.pending;
   if (pend){ // continue building the pending patch within a per-frame budget
     const it = pend.iters.find(x => !x.done); if (it) it.step(drag.active ? 4 : 12);
     if (pend.iters.every(x => x.done)){
+      if (lv.rig && lv.rig.active) poseCloud(pend.cloud, lv.rig);
       if (pt) disposeLevel(pt);
       const np = { id: lv.id + '-patch', isPatch:true, groups: lv.groups, center: lv.center, radius: lv.radius, flipY: lv.flipY, pulseCenter: lv.pulseCenter, breathCenter: lv.breathCenter, rawUnit: lv.rawUnit, groupWobble: lv.groupWobble, matNames: lv.matNames };
       uploadLevel(np, pend.cloud); np.alphas = lv.alphas; np.matArr = lv.matArr; np.detArr = lv.detArr; np.shadeArr = lv.shadeArr; np.sphere = pend.sphere; np.size = pend.size; np.count = pend.cloud.n;
@@ -1547,7 +1650,7 @@ function updateRefine(lv, cam, now){
   if (ref && Math.hypot(ref.sphere[0]-raw[0], ref.sphere[1]-raw[1], ref.sphere[2]-raw[2]) < ref.sphere[3]*0.35 && Math.abs(ref.size/size - 1) < 0.35) return;
   if (lv._lastRefine && now - lv._lastRefine < 500) return; lv._lastRefine = now;
   const toCam = V.norm([Math.cos(cam.phi)*Math.sin(cam.theta), Math.sin(cam.phi), Math.cos(cam.phi)*Math.cos(cam.theta)]);
-  const job = lv.refine(raw, r + 0.02*lv.radius, size, toCam);
+  const job = lv.refine(rawRest, r + 0.02*lv.radius, size, toCam);
   lv.pending = { cloud: job.cloud, iters: job.iters, sphere: [raw[0], raw[1], raw[2], r], size, t0: performance.now() };
 }
 let lastRefineMs = 0;
@@ -1696,6 +1799,9 @@ if (MOBILE){ $('card').classList.add('collapsed'); $('cardToggle').textContent =
 $('btnUp').addEventListener('click', () => goTo(state.cur-1)); $('btnDown').addEventListener('click', () => goTo(state.cur+1)); $('btnReset').addEventListener('click', resetView);
 document.querySelectorAll('.drawer .tabs button').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('.drawer .tabs button').forEach(x => x.classList.toggle('on', x === b)); document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.id === 'pane-' + b.dataset.pane)); }));
 $('rSize').addEventListener('input', (e) => state.splatScale = +e.target.value);
+$('fPose').addEventListener('change', (e) => { BODY_POSE = e.target.value; const lv = LEVELS.find(l => l.id === 'body'); if (lv && lv.ready){ setHint('Re-posing the figure…', true); setTimeout(() => { rebuildLevel(lv); if (STYLES.body) applyStyles(lv); setHint('Posed as ' + (BODY_POSE === 'david' ? 'David' : 'the anatomical A-pose')); }, 30); } });
+const MARBLE = { palette: [[0.66,0.64,0.61],[0.78,0.77,0.74],[0.86,0.85,0.83],[0.92,0.91,0.9],[0.95,0.95,0.94],[0.985,0.98,0.975]], gloss: 0.32, saturation: 0.02, detail: { amount: 0.05, freq: 1.6, stripe: 0 } };
+$('fMarble').addEventListener('change', (e) => { const lv = LEVELS.find(l => l.id === 'body'); if (!lv || !lv.cloud) return; if (e.target.checked){ for (const g of [0, 12]){ gradeLayer(lv, g, MARBLE, 0); lv.matArr.set([0.3, 34, 0.9, 0.25], g*4); } reuploadColors(lv); setHint('Carrara marble'); } else { for (const g of [0, 12]) resetLayerStyle(lv, g); } });
 // ---- engine controls
 const EBIND = { eExp:'exposure', eBloom:'bloom', eAp:'aperture', eFocus:'focusOff', eFog:'fog', eGrain:'grain', eVig:'vignette', eSat:'sat', eAO:'ao', eDetail:'detail', eSharp:'sharp', eKernel:'kernel' };
 for (const [id, key] of Object.entries(EBIND)) $(id).addEventListener('input', (e) => { ENGINE[key] = +e.target.value; $('looks').querySelectorAll('button').forEach(b => b.classList.remove('on')); });
@@ -1857,7 +1963,7 @@ function sampleFg(im, u, v){ // like sampleImg but snaps to the nearest foregrou
 function extent(im, y){ const s = im.segs[y]; return s.length ? [s[0][0], s[s.length-1][1]] : null; }
 // ---- body proportions from a front (and optional side) silhouette
 function fitBody(front, side, H){
-  const P = defaultBodyParams(); P.H = H; P.textured = true;
+  const P = defaultBodyParams(); P.H = H; P.textured = true; P.pose = 'apose'; P.physique = 'neutral';
   if (!front || !front.valid) return P;
   const top = front.top, rowsN = front.bottom - front.top, pxPerM = rowsN/H; P.pxPerM = pxPerM; P.top = top;
   const rowAt = (f) => Math.round(top + f*rowsN), fOf = (row) => (row-top)/rowsN, yOf = (row) => H*(1 - fOf(row)), mm = (px) => px/pxPerM;
