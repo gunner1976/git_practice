@@ -219,6 +219,8 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
       <div class="ctl"><label for="eBloom">Bloom</label><input id="eBloom" type="range" min="0" max="1" step="0.02" value="0.3"></div>
       <div class="ctl"><label for="eAp">Depth of field</label><input id="eAp" type="range" min="0" max="1.5" step="0.02" value="0.4"></div>
       <div class="ctl"><label for="eFocus">Focus (near ↔ far)</label><input id="eFocus" type="range" min="-0.6" max="0.8" step="0.02" value="0"></div>
+      <div class="ctl"><label for="eAO">Contact shadows</label><input id="eAO" type="range" min="0" max="1.5" step="0.05" value="0.6"></div>
+      <div class="ctl"><label for="eDetail">Micro-detail</label><input id="eDetail" type="range" min="0" max="2.5" step="0.05" value="1"></div>
       <div class="ctl"><label for="eFog">Atmosphere</label><input id="eFog" type="range" min="0" max="1" step="0.02" value="0.18"></div>
       <div class="ctl"><label for="eGrain">Film grain</label><input id="eGrain" type="range" min="0" max="0.3" step="0.01" value="0.05"></div>
       <div class="ctl"><label for="eVig">Vignette</label><input id="eVig" type="range" min="0" max="1" step="0.02" value="0.35"></div>
@@ -1028,10 +1030,10 @@ if (!gl){ $('loading').innerHTML = '<h1>Corpus <em>Descent</em></h1><p class="fa
 const VS = `#version 300 es
 precision highp float; precision highp int; precision highp usampler2D;
 uniform usampler2D uTex; uniform mat4 uView; uniform mat4 uProj; uniform vec2 uFocal; uniform vec2 uViewport;
-uniform float uSplatScale; uniform float uAlpha; uniform float uGroupAlpha[32]; uniform float uGroupPulse[32]; uniform float uGroupWobble[32]; uniform float uGroupShade[32]; uniform vec4 uGroupMat[32]; uniform float uFar;
+uniform float uSplatScale; uniform float uAlpha; uniform float uGroupAlpha[32]; uniform float uGroupPulse[32]; uniform float uGroupWobble[32]; uniform float uGroupShade[32]; uniform vec4 uGroupMat[32]; uniform vec4 uGroupDetail[32]; uniform float uFar; uniform float uDetailMul;
 uniform vec3 uCenter; uniform float uPulse; uniform float uTime; uniform float uShade;
 in vec2 aPos; in uint aIndex;
-out vec4 vColor; out vec2 vPos; out float vDepth;
+out vec4 vColor; out vec2 vPos; out float vDepth; out vec4 vDetail; out float vSeed;
 void main(){
   uint i = aIndex;
   ivec2 tc = ivec2(int((i & 1023u) << 1u), int(i >> 10u));
@@ -1085,23 +1087,30 @@ void main(){
              + lum * vec3(0.9, 0.45, 0.35) * pow(max(0.0, 1.0 - abs(nv.z)), 2.5) * 0.5 * Mt.z * (0.3 + 0.7*db)
              + vec3(1.0, 0.98, 0.95) * pow(max(dot(nv, normalize(L + vd)), 0.0), Mt.y) * Mt.x * (0.4 + 0.6 * wrap)
              + vec3(0.8, 0.86, 0.95) * fres * Mt.w * 0.35;
+    float irid = uGroupDetail[g].w;
+    if (irid > 0.0){ float tt = (1.0 - max(dot(nv, vd), 0.0)) * 9.0 + float(g); vec3 spec = vec3(sin(tt), sin(tt + 2.094), sin(tt + 4.189)) * 0.5 + 0.5; lit += spec * pow(fres, 1.5) * irid * 0.6 + spec * irid * 0.08; }
     vec3 shaded = sqrt(max(lit, 0.0));
     col.rgb = mix(col.rgb, shaded, flatness);
   }
   vColor = vec4(col.rgb, col.a * ga * uAlpha);
   vPos = aPos; vDepth = clamp(-cam.z / uFar, 0.0, 1.0);
+  vDetail = uGroupDetail[g] * vec4(uDetailMul * flatness, 1.0, uDetailMul * flatness, 1.0); vSeed = float(i & 1023u) * 0.618;
   vec2 ndc = pos2d.xy / pos2d.w;
   gl_Position = vec4(ndc + (aPos.x * major + aPos.y * minor) / uViewport * 2.0, 0.0, 1.0);
 }`;
 const FS = `#version 300 es
 precision highp float;
-in vec4 vColor; in vec2 vPos; in float vDepth; layout(location=0) out vec4 frag; layout(location=1) out vec4 fragD;
-void main(){ float A = -dot(vPos, vPos); if (A < -4.0) discard; float B = exp(A) * vColor.a; frag = vec4(B * vColor.rgb, B); fragD = vec4(B * vDepth, 0.0, 0.0, B); }`;
+in vec4 vColor; in vec2 vPos; in float vDepth; in vec4 vDetail; in float vSeed; layout(location=0) out vec4 frag; layout(location=1) out vec4 fragD;
+float h21(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+float vn2(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0 - 2.0*f); return mix(mix(h21(i), h21(i + vec2(1,0)), f.x), mix(h21(i + vec2(0,1)), h21(i + vec2(1,1)), f.x), f.y); }
+void main(){ float A = -dot(vPos, vPos); if (A < -4.0) discard; float B = exp(A) * vColor.a; vec3 c = vColor.rgb;
+  if (vDetail.x > 0.0 || vDetail.z > 0.0){ vec2 q = vPos * vDetail.y + vSeed; float n = vn2(q) * 0.65 + vn2(q * 2.7 + 3.1) * 0.35; float m = 1.0 + vDetail.x * (n - 0.5) * 2.0 + vDetail.z * sin(vPos.y * vDetail.y * 2.6 + vSeed); c *= clamp(m, 0.0, 2.0); }
+  frag = vec4(B * c, B); fragD = vec4(B * vDepth, 0.0, 0.0, B); }`;
 function compile(type, src){ const sh = gl.createShader(type); gl.shaderSource(sh, src); gl.compileShader(sh); if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh)); return sh; }
 const prog = gl.createProgram(); gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog);
 if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
 gl.useProgram(prog);
-const U = {}; for (const n of ['uTex','uView','uProj','uFocal','uViewport','uSplatScale','uAlpha','uGroupAlpha','uGroupPulse','uGroupWobble','uCenter','uPulse','uTime','uShade','uGroupShade','uGroupMat','uFar']) U[n] = gl.getUniformLocation(prog, n);
+const U = {}; for (const n of ['uTex','uView','uProj','uFocal','uViewport','uSplatScale','uAlpha','uGroupAlpha','uGroupPulse','uGroupWobble','uCenter','uPulse','uTime','uShade','uGroupShade','uGroupMat','uGroupDetail','uFar','uDetailMul']) U[n] = gl.getUniformLocation(prog, n);
 const A_POS = gl.getAttribLocation(prog, 'aPos'), A_IDX = gl.getAttribLocation(prog, 'aIndex');
 const quadBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-2,-2, 2,-2, -2,2, 2,2]), gl.STATIC_DRAW);
 gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFuncSeparate(gl.ONE_MINUS_DST_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
@@ -1146,7 +1155,7 @@ function uploadLevel(lv, cloud){
   lv.sortKey = null;
   if (!lv.alphas) lv.alphas = new Float32Array(32).fill(1);
   lv.pulseArr = new Float32Array(32); lv.wobbleArr = new Float32Array(32); if (!lv.shadeArr) lv.shadeArr = new Float32Array(32).fill(1);
-  if (!lv.matNames) lv.matNames = lv.groups.map(g => materialFor(g.name)); lv.matArr = new Float32Array(128); lv.matNames.forEach((m, i) => lv.matArr.set(MATERIALS[m] || MATERIALS.wet, i*4));
+  if (!lv.matNames) lv.matNames = lv.groups.map(g => materialFor(g.name)); lv.matArr = new Float32Array(128); lv.detArr = new Float32Array(128); lv.matNames.forEach((m, i) => { lv.matArr.set(MATERIALS[m] || MATERIALS.wet, i*4); lv.detArr.set(DETAILS[m] || DETAILS.wet, i*4); });
   lv.cloud = cloud; if (!cloud.col0) cloud.col0 = cloud.col.slice(0, cloud.n*4);
   lv.groups.forEach((g, i) => { lv.pulseArr[i] = g.pulse || 0; lv.wobbleArr[i] = (lv.groupWobble && lv.groupWobble[i]) || 0; });
   lv.ready = true;
@@ -1211,7 +1220,7 @@ function drawLevel(lv, alphaMul, cam, proj, focal){
   gl.uniformMatrix4fv(U.uView, false, M); gl.uniformMatrix4fv(U.uProj, false, proj);
   gl.uniform2f(U.uFocal, focal[0], focal[1]); gl.uniform2f(U.uViewport, W, H);
   gl.uniform1f(U.uSplatScale, state.splatScale); gl.uniform1f(U.uAlpha, alphaMul * state.alpha);
-  gl.uniform1fv(U.uGroupAlpha, lv.alphas); gl.uniform1fv(U.uGroupPulse, lv.pulseArr); gl.uniform1fv(U.uGroupWobble, state.live ? lv.wobbleArr : ZERO32); gl.uniform1fv(U.uGroupShade, lv.shadeArr || ONE32); gl.uniform4fv(U.uGroupMat, lv.matArr || DEFAULT_MAT); gl.uniform1f(U.uFar, FAR);
+  gl.uniform1fv(U.uGroupAlpha, lv.alphas); gl.uniform1fv(U.uGroupPulse, lv.pulseArr); gl.uniform1fv(U.uGroupWobble, state.live ? lv.wobbleArr : ZERO32); gl.uniform1fv(U.uGroupShade, lv.shadeArr || ONE32); gl.uniform4fv(U.uGroupMat, lv.matArr || DEFAULT_MAT); gl.uniform4fv(U.uGroupDetail, lv.detArr || ZERO128); gl.uniform1f(U.uFar, FAR); gl.uniform1f(U.uDetailMul, ENGINE.detail);
   const pc = lv.pulseCenter || [0,0,0]; gl.uniform3f(U.uCenter, pc[0], pc[1], pc[2]);
   const ph = (state.time * 1.15) % 1; const pulse = state.live ? -Math.exp(-Math.pow((ph-0.22)/0.11, 2)) : 0;
   gl.uniform1f(U.uPulse, pulse); gl.uniform1f(U.uTime, state.time); gl.uniform1f(U.uShade, lv.isScan ? 0 : state.shade);
@@ -1222,16 +1231,19 @@ const ZERO32 = new Float32Array(32), ONE32 = new Float32Array(32).fill(1), FAR =
 const MATERIALS = { skin:[0.14,42,1.0,0.15], wet:[0.55,80,0.5,0.6], bone:[0.08,28,0.25,0.05], muscle:[0.4,64,0.55,0.45], membrane:[0.3,50,0.3,0.7], matte:[0.05,20,0.2,0.0], glass:[0.8,120,0.1,0.9], nerve:[0.3,48,0.4,0.3] };
 function materialFor(name){ const n = name.toLowerCase(); if (/skin|integument/.test(n)) return 'skin'; if (/skelet|bone|histone/.test(n)) return 'bone'; if (/muscul|myofibril|cardiomyo|ventricle|atria|myocard/.test(n)) return 'muscle'; if (/nerv|neuron|dna|backbone|base pair/.test(n)) return 'nerve'; if (/membrane|sarcolemma|reticulum|cristae|boundary/.test(n)) return 'membrane'; if (/imaging|micrograph|echo|scan|fluct|quark|gluon|electron|nucleus \(|proton|neutron|pion|sea|water|virtual|topology/.test(n)) return 'matte'; return 'wet'; }
 const DEFAULT_MAT = new Float32Array(128); for (let i = 0; i < 32; i++) DEFAULT_MAT.set(MATERIALS.wet, i*4);
+const ZERO128 = new Float32Array(128);
+// micro-detail per material: amount, frequency, striation, iridescence
+const DETAILS = { skin:[0.11,3.6,0,0], wet:[0.07,2.6,0,0.06], bone:[0.06,4.2,0,0], muscle:[0.10,3.0,0.13,0], membrane:[0.04,2.0,0,0.55], matte:[0,0,0,0], glass:[0.02,2.0,0,0.35], nerve:[0.05,3.2,0.08,0] };
 
 // =====================================================================
 //  Visualization engine: MRT scene buffer (color + depth) -> bloom -> composite
 // =====================================================================
-const ENGINE = { on:true, exposure:0.95, bloom:0.3, aperture:0.4, focusOff:0, fog:0.18, grain:0.05, vignette:0.35, sat:1.06, contrast:1.04, fogColor:[0.055,0.07,0.10] };
+const ENGINE = { on:true, ao:0.6, detail:1.0, exposure:0.95, bloom:0.3, aperture:0.4, focusOff:0, fog:0.18, grain:0.05, vignette:0.35, sat:1.06, contrast:1.04, fogColor:[0.055,0.07,0.10] };
 const LOOKS = {
-  'Cinematic': { exposure:0.95, bloom:0.32, aperture:0.4, fog:0.2, grain:0.06, vignette:0.4, sat:1.08, contrast:1.06 },
-  'Clinical': { exposure:1.05, bloom:0.08, aperture:0.0, fog:0.0, grain:0.0, vignette:0.05, sat:1.0, contrast:1.0 },
-  'Specimen': { exposure:0.95, bloom:0.25, aperture:0.3, fog:0.05, grain:0.03, vignette:0.6, sat:1.12, contrast:1.1 },
-  'Micrograph': { exposure:1.1, bloom:0.15, aperture:0.75, fog:0.0, grain:0.12, vignette:0.25, sat:0.92, contrast:1.02 },
+  'Cinematic': { ao:0.7, detail:1.0, exposure:0.95, bloom:0.32, aperture:0.4, fog:0.2, grain:0.06, vignette:0.4, sat:1.08, contrast:1.06 },
+  'Clinical': { ao:0.35, detail:0.6, exposure:1.05, bloom:0.08, aperture:0.0, fog:0.0, grain:0.0, vignette:0.05, sat:1.0, contrast:1.0 },
+  'Specimen': { ao:1.0, detail:1.4, exposure:0.95, bloom:0.25, aperture:0.3, fog:0.05, grain:0.03, vignette:0.6, sat:1.12, contrast:1.1 },
+  'Micrograph': { ao:0.5, detail:1.2, exposure:1.1, bloom:0.15, aperture:0.75, fog:0.0, grain:0.12, vignette:0.25, sat:0.92, contrast:1.02 },
 };
 const extFloat = gl.getExtension('EXT_color_buffer_float');
 const RT_FMT = extFloat ? gl.RGBA16F : gl.RGBA8, RT_TYPE = extFloat ? gl.HALF_FLOAT : gl.UNSIGNED_BYTE;
@@ -1255,7 +1267,7 @@ void main(){ vec2 uv = gl_FragCoord.xy / uRes; vec4 acc = vec4(0.0); float ws[5]
   for (int i = -4; i <= 4; i++){ vec4 s = texture(uSrc, uv + uDir * float(i) / uRes); if (uThresh > 0.0){ float l = dot(s.rgb, vec3(0.299,0.587,0.114)); s.rgb *= smoothstep(uThresh, uThresh + 0.35, l); } acc += s * ws[abs(i)]; }
   frag = acc; }`;
 const POST_FS = `#version 300 es
-precision highp float; uniform sampler2D uColor, uDepth, uBloom; uniform vec2 uRes; uniform float uExposure, uSat, uContrast, uVignette, uGrain, uTime, uFocus, uAperture, uFog, uBloomAmt, uDpr; uniform vec3 uFogColor; out vec4 frag;
+precision highp float; uniform sampler2D uColor, uDepth, uBloom; uniform vec2 uRes; uniform float uExposure, uSat, uContrast, uVignette, uGrain, uTime, uFocus, uAperture, uFog, uBloomAmt, uDpr, uAO; uniform vec3 uFogColor; out vec4 frag;
 vec3 aces(vec3 x){ return clamp((x*(2.51*x + 0.03))/(x*(2.43*x + 0.59) + 0.14), 0.0, 1.0); }
 float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 float depthAt(vec2 uv){ vec4 d = texture(uDepth, uv); return d.a > 1e-4 ? d.r / d.a : 1.0; }
@@ -1271,6 +1283,11 @@ void main(){
     c = acc / ws;
   }
   float a = c.a; vec3 col = c.rgb;
+  if (uAO > 0.0 && a > 1e-3 && depth < 0.999){
+    float R = clamp(0.055 / max(depth, 0.02), 6.0, 42.0) * uDpr; float occ = 0.0; float ang = hash(gl_FragCoord.xy) * 6.2832;
+    for (int i = 0; i < 16; i++){ float t = (float(i) + 0.5) / 16.0; float rr = R * sqrt(t); float aa = ang + t * 15.7; vec2 o = vec2(cos(aa), sin(aa)) * rr / uRes; float dn = depthAt(uv + o); float diff = (depth - dn) * 40.0; occ += smoothstep(0.02, 0.35, diff) * (1.0 - smoothstep(0.8, 2.5, diff)); }
+    col *= 1.0 - clamp(occ / 16.0 * 1.6, 0.0, 0.75) * uAO;
+  }
   if (a > 1e-4){ float f = 1.0 - exp(-uFog * depth * 5.0); col = mix(col, uFogColor * a, f); }
   vec3 bl = texture(uBloom, uv).rgb * uBloomAmt; col += bl; a = min(1.0, a + dot(bl, vec3(0.333)) * 0.8);
   vec3 lin = a > 1e-4 ? col / a : col;
@@ -1286,7 +1303,7 @@ void main(){
 function mkProg(vs, fs){ const p = gl.createProgram(); gl.attachShader(p, compile(gl.VERTEX_SHADER, vs)); gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; }
 const blurProg = mkProg(FS_VS, BLUR_FS), postProg = mkProg(FS_VS, POST_FS);
 const BU = {}; for (const n of ['uSrc','uDir','uRes','uThresh']) BU[n] = gl.getUniformLocation(blurProg, n);
-const PU = {}; for (const n of ['uColor','uDepth','uBloom','uRes','uExposure','uSat','uContrast','uVignette','uGrain','uTime','uFocus','uAperture','uFog','uBloomAmt','uDpr','uFogColor']) PU[n] = gl.getUniformLocation(postProg, n);
+const PU = {}; for (const n of ['uColor','uDepth','uBloom','uRes','uExposure','uSat','uContrast','uVignette','uGrain','uTime','uFocus','uAperture','uFog','uBloomAmt','uDpr','uFogColor','uAO']) PU[n] = gl.getUniformLocation(postProg, n);
 const emptyVao = gl.createVertexArray();
 function postProcess(){
   gl.disable(gl.BLEND); gl.bindVertexArray(emptyVao);
@@ -1301,7 +1318,7 @@ function postProcess(){
   gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, RT.depth); gl.uniform1i(PU.uDepth, 1);
   gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, RT.bloomB); gl.uniform1i(PU.uBloom, 2);
   gl.uniform2f(PU.uRes, W, H); gl.uniform1f(PU.uExposure, ENGINE.exposure); gl.uniform1f(PU.uSat, ENGINE.sat); gl.uniform1f(PU.uContrast, ENGINE.contrast); gl.uniform1f(PU.uVignette, ENGINE.vignette); gl.uniform1f(PU.uGrain, ENGINE.grain); gl.uniform1f(PU.uTime, state.time);
-  const focusDist = state.trans ? DEFAULT_DIST : state.cam.dist; gl.uniform1f(PU.uFocus, Math.min(1, (focusDist * (1 + ENGINE.focusOff)) / FAR)); gl.uniform1f(PU.uAperture, ENGINE.aperture); gl.uniform1f(PU.uFog, ENGINE.fog); gl.uniform1f(PU.uBloomAmt, ENGINE.bloom); gl.uniform1f(PU.uDpr, DPR); gl.uniform3f(PU.uFogColor, ENGINE.fogColor[0], ENGINE.fogColor[1], ENGINE.fogColor[2]);
+  const focusDist = state.trans ? DEFAULT_DIST : state.cam.dist; gl.uniform1f(PU.uFocus, Math.min(1, (focusDist * (1 + ENGINE.focusOff)) / FAR)); gl.uniform1f(PU.uAperture, ENGINE.aperture); gl.uniform1f(PU.uFog, ENGINE.fog); gl.uniform1f(PU.uBloomAmt, ENGINE.bloom); gl.uniform1f(PU.uDpr, DPR); gl.uniform1f(PU.uAO, ENGINE.ao); gl.uniform3f(PU.uFogColor, ENGINE.fogColor[0], ENGINE.fogColor[1], ENGINE.fogColor[2]);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
   gl.bindVertexArray(null); gl.activeTexture(gl.TEXTURE0); gl.enable(gl.BLEND); gl.useProgram(prog);
 }
@@ -1447,7 +1464,7 @@ $('btnUp').addEventListener('click', () => goTo(state.cur-1)); $('btnDown').addE
 document.querySelectorAll('.drawer .tabs button').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('.drawer .tabs button').forEach(x => x.classList.toggle('on', x === b)); document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.id === 'pane-' + b.dataset.pane)); }));
 $('rSize').addEventListener('input', (e) => state.splatScale = +e.target.value);
 // ---- engine controls
-const EBIND = { eExp:'exposure', eBloom:'bloom', eAp:'aperture', eFocus:'focusOff', eFog:'fog', eGrain:'grain', eVig:'vignette', eSat:'sat' };
+const EBIND = { eExp:'exposure', eBloom:'bloom', eAp:'aperture', eFocus:'focusOff', eFog:'fog', eGrain:'grain', eVig:'vignette', eSat:'sat', eAO:'ao', eDetail:'detail' };
 for (const [id, key] of Object.entries(EBIND)) $(id).addEventListener('input', (e) => { ENGINE[key] = +e.target.value; $('looks').querySelectorAll('button').forEach(b => b.classList.remove('on')); });
 $('eOn').addEventListener('change', (e) => ENGINE.on = e.target.checked);
 (function(){ const box = $('looks'); for (const [name, look] of Object.entries(LOOKS)){ const b = document.createElement('button'); b.textContent = name; if (name === 'Cinematic') b.classList.add('on'); b.addEventListener('click', () => { Object.assign(ENGINE, look); for (const [id, key] of Object.entries(EBIND)) if (look[key] != null) $(id).value = look[key]; box.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); }); box.appendChild(b); } })();
@@ -1785,7 +1802,15 @@ function extractStyle(im){
   const lum = (c) => 0.299*c[0] + 0.587*c[1] + 0.114*c[2];
   cents.sort((a, b) => lum(a) - lum(b));
   let hi = 0, sat = 0; for (const p of px){ const l = lum(p); if (l > 0.9) hi++; sat += Math.max(p[0],p[1],p[2]) - Math.min(p[0],p[1],p[2]); }
-  return { palette: cents, gloss: Math.min(1, hi/px.length*12), saturation: sat/px.length };
+  // texture statistics on a 160-px luminance thumbnail: fine vs mid detail energy, anisotropy
+  const tw = 160, th = Math.max(8, Math.round(im.h/im.w*160)), L = new Float32Array(tw*th);
+  for (let y = 0; y < th; y++) for (let x = 0; x < tw; x++){ const sx = Math.floor(x/tw*im.w), sy = Math.floor(y/th*im.h), o = (sy*im.w + sx)*4; L[y*tw + x] = (0.299*im.data[o] + 0.587*im.data[o+1] + 0.114*im.data[o+2])/255; }
+  const box = (src, r) => { const out = new Float32Array(tw*th); for (let y = 0; y < th; y++) for (let x = 0; x < tw; x++){ let a = 0, n = 0; for (let dy = -r; dy <= r; dy++){ const yy = y+dy; if (yy < 0 || yy >= th) continue; for (let dx = -r; dx <= r; dx++){ const xx = x+dx; if (xx < 0 || xx >= tw) continue; a += src[yy*tw + xx]; n++; } } out[y*tw + x] = a/n; } return out; };
+  const b1 = box(L, 1), b3 = box(L, 4); let s1 = 0, s2 = 0, gx = 0, gy = 0;
+  for (let i = 0; i < L.length; i++){ s1 += (L[i]-b1[i])**2; s2 += (b1[i]-b3[i])**2; } for (let y = 1; y < th; y++) for (let x = 1; x < tw; x++){ gx += Math.abs(L[y*tw+x]-L[y*tw+x-1]); gy += Math.abs(L[y*tw+x]-L[(y-1)*tw+x]); }
+  s1 = Math.sqrt(s1/L.length); s2 = Math.sqrt(s2/L.length); const aniso = (Math.max(gx, gy)+1e-6)/(Math.min(gx, gy)+1e-6);
+  const detail = { amount: Math.min(0.35, s1*4 + s2*1.5), freq: s1 > s2 ? 4.5 : 2.4, stripe: aniso > 1.5 ? Math.min(0.25, (aniso-1.5)*0.15) : 0 };
+  return { palette: cents, gloss: Math.min(1, hi/px.length*12), saturation: sat/px.length, detail };
 }
 function paletteAt(pal, q){ const t = Math.max(0, Math.min(0.9999, q))*(pal.length-1), i = Math.floor(t), f = t-i; const a = pal[i], b = pal[Math.min(pal.length-1, i+1)]; return [a[0]+(b[0]-a[0])*f, a[1]+(b[1]-a[1])*f, a[2]+(b[2]-a[2])*f]; }
 function gradeLayer(lv, g, style, keep){
@@ -1795,6 +1820,7 @@ function gradeLayer(lv, g, style, keep){
   for (let i = 0; i < C.n; i++){ if (C.grp[i] !== g) continue; const o = i*4; const l = Math.round(0.299*C.col0[o] + 0.587*C.col0[o+1] + 0.114*C.col0[o+2]); const pc = paletteAt(style.palette, cdf[l]*0.92 + 0.04);
     C.col[o] = Math.round((pc[0]*(1-keep) + C.col0[o]/255*keep)*255); C.col[o+1] = Math.round((pc[1]*(1-keep) + C.col0[o+1]/255*keep)*255); C.col[o+2] = Math.round((pc[2]*(1-keep) + C.col0[o+2]/255*keep)*255); }
   const m = MATERIALS[lv.matNames[g]] || MATERIALS.wet; lv.matArr.set([Math.max(0.05, style.gloss*0.8), m[1], m[2], m[3]], g*4);
+  if (style.detail) lv.detArr.set([style.detail.amount, style.detail.freq, style.detail.stripe, lv.detArr[g*4+3]], g*4);
 }
 function reuploadColors(lv){
   const C = lv.cloud, n = C.n, rows = Math.max(1, Math.ceil(n/1024)); const data = new Uint32Array(2048*4*rows), f32 = new Float32Array(data.buffer);
@@ -1802,15 +1828,15 @@ function reuploadColors(lv){
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, lv.gpu.tex); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32UI, 2048, rows, 0, gl.RGBA_INTEGER, gl.UNSIGNED_INT, data);
 }
 const STYLE_STORE = 'cd.styles.v1'; let STYLES = {}; try { STYLES = JSON.parse(localStorage.getItem(STYLE_STORE) || '{}') || {}; } catch (e){}
-function applyStyles(lv){ const st = STYLES[lv.id]; if (!st || !lv.cloud) return; let any = false; for (const [g, rec] of Object.entries(st)){ if (rec.style){ gradeLayer(lv, +g, rec.style, rec.keep == null ? 0.25 : rec.keep); any = true; } if (rec.material && MATERIALS[rec.material]){ lv.matNames[+g] = rec.material; lv.matArr.set(MATERIALS[rec.material], (+g)*4); } } if (any) reuploadColors(lv); }
+function applyStyles(lv){ const st = STYLES[lv.id]; if (!st || !lv.cloud) return; let any = false; for (const [g, rec] of Object.entries(st)){ if (rec.style){ gradeLayer(lv, +g, rec.style, rec.keep == null ? 0.25 : rec.keep); any = true; } if (rec.material && MATERIALS[rec.material]){ lv.matNames[+g] = rec.material; lv.matArr.set(MATERIALS[rec.material], (+g)*4); lv.detArr.set(DETAILS[rec.material] || DETAILS.wet, (+g)*4); } if (rec.style && rec.style.detail) lv.detArr.set([rec.style.detail.amount, rec.style.detail.freq, rec.style.detail.stripe, lv.detArr[(+g)*4+3]], (+g)*4); } if (any) reuploadColors(lv); }
 async function styleLayerFromImage(lv, g, url, keep){
   const im = await decodeImage(url); const style = extractStyle(im); const thumb = await downscaleDataURL(url, 96, 0.7);
   STYLES[lv.id] = STYLES[lv.id] || {}; STYLES[lv.id][g] = Object.assign(STYLES[lv.id][g] || {}, { style, keep, thumb });
   try { localStorage.setItem(STYLE_STORE, JSON.stringify(STYLES)); } catch (e){}
   gradeLayer(lv, g, style, keep); reuploadColors(lv);
 }
-function setLayerMaterial(lv, g, mat){ STYLES[lv.id] = STYLES[lv.id] || {}; STYLES[lv.id][g] = Object.assign(STYLES[lv.id][g] || {}, { material: mat }); try { localStorage.setItem(STYLE_STORE, JSON.stringify(STYLES)); } catch (e){} lv.matNames[g] = mat; lv.matArr.set(MATERIALS[mat], g*4); }
-function resetLayerStyle(lv, g){ if (STYLES[lv.id]) delete STYLES[lv.id][g]; try { localStorage.setItem(STYLE_STORE, JSON.stringify(STYLES)); } catch (e){} const C = lv.cloud; if (C){ for (let i = 0; i < C.n; i++) if (C.grp[i] === g){ const o = i*4; C.col[o] = C.col0[o]; C.col[o+1] = C.col0[o+1]; C.col[o+2] = C.col0[o+2]; } reuploadColors(lv); } lv.matNames[g] = materialFor(lv.groups[g].name); lv.matArr.set(MATERIALS[lv.matNames[g]], g*4); }
+function setLayerMaterial(lv, g, mat){ STYLES[lv.id] = STYLES[lv.id] || {}; STYLES[lv.id][g] = Object.assign(STYLES[lv.id][g] || {}, { material: mat }); try { localStorage.setItem(STYLE_STORE, JSON.stringify(STYLES)); } catch (e){} lv.matNames[g] = mat; lv.matArr.set(MATERIALS[mat], g*4); lv.detArr.set(DETAILS[mat] || DETAILS.wet, g*4); }
+function resetLayerStyle(lv, g){ if (STYLES[lv.id]) delete STYLES[lv.id][g]; try { localStorage.setItem(STYLE_STORE, JSON.stringify(STYLES)); } catch (e){} const C = lv.cloud; if (C){ for (let i = 0; i < C.n; i++) if (C.grp[i] === g){ const o = i*4; C.col[o] = C.col0[o]; C.col[o+1] = C.col0[o+1]; C.col[o+2] = C.col0[o+2]; } reuploadColors(lv); } lv.matNames[g] = materialFor(lv.groups[g].name); lv.matArr.set(MATERIALS[lv.matNames[g]], g*4); lv.detArr.set(DETAILS[lv.matNames[g]] || DETAILS.wet, g*4); }
 // ---- storage and UI
 function downscaleDataURL(url, max, q){ return new Promise((res) => { const img = new Image(); img.onload = () => { const sc = Math.min(1, max/Math.max(img.width, img.height)); const cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(img.width*sc)); cv.height = Math.max(1, Math.round(img.height*sc)); cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); res(cv.toDataURL('image/jpeg', q)); }; img.onerror = () => res(url); img.src = url; }); }
 function saveImageryStore(){ try { const o = {}; for (const k of Object.keys(IMG)) if (IMG[k].stored) o[k] = IMG[k].stored; localStorage.setItem(IMG_STORE, JSON.stringify(o)); } catch (e){ setHint('Browser storage is full: this image will not survive a reload. Commit it to the repo instead.'); } }
