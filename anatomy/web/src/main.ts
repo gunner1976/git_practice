@@ -223,7 +223,7 @@ canvas.addEventListener('pointerup', (e) => {
   for (const s of systems.values()) if (s.group.visible) for (const m of s.meshes) if (m.visible) meshes.push(m);
   const hits = raycaster.intersectObjects(meshes, false);
   const hit = hits[0]?.object as OrganMesh | undefined;
-  if (hit && e.shiftKey) { hit.userData.hidden = true; hit.visible = false; if (selected === hit) select(null); return; }
+  if (hit && e.shiftKey) { for (const x of systems.get(hit.userData.system)!.meshes) if (x.userData.zid === hit.userData.zid) { x.userData.hidden = true; x.visible = false; } if (selected === hit) select(null); return; }
   select(hit ?? null, hits[0]?.point);
 });
 addEventListener('keydown', (e) => { if (e.key === 'Escape') select(null); if (e.key === 'u') { for (const s of systems.values()) for (const m of s.meshes) m.userData.hidden = false; applyVisibility(); } });
@@ -232,7 +232,7 @@ const callout = $('callout');
 let calloutAnchor: THREE.Vector3 | null = null;
 function select(m: OrganMesh | null, point?: THREE.Vector3) {
   selected = m;
-  outline.selectedObjects = m ? [m] : [];
+  outline.selectedObjects = m ? (systems.get(m.userData.system)?.meshes.filter((x) => x.userData.zid === m.userData.zid) ?? [m]) : [];   // every part of the organ
   const sel = $('selection');
   if (!m) { sel.innerHTML = '<p class="muted">Click an organ to identify it. Shift-click hides it, U unhides all.</p>'; callout.hidden = true; calloutAnchor = null; return; }
   const o = m.userData.organ;

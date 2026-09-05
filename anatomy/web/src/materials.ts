@@ -54,6 +54,7 @@ export function tissueMaterial(system: string, cls: string, p: TissueParams, bas
     uClipPlane: { value: new THREE.Vector4(0, 0, 0, 0) },   // xyz normal, w distance; zero = off
     uClipOn: { value: 0 },
     uCutColor: { value: new THREE.Color(p.color[0], p.color[1], p.color[2]).multiplyScalar(0.55) },   // flat interior colour for section caps
+    uTint: { value: new THREE.Vector3(1, 1, 1) },                                                      // per-organ variation, set in onBeforeRender
   };
   m.userData.uniforms = uniforms;
 
@@ -65,9 +66,9 @@ export function tissueMaterial(system: string, cls: string, p: TissueParams, bas
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>
         varying vec3 vWorldPos;
-        uniform vec3 uSSSColor; uniform float uSSSAmount; uniform float uSSS; uniform vec4 uClipPlane; uniform float uClipOn; uniform vec3 uCutColor;`)
-      // COLOR_0 is occlusion, not albedo: do not tint the base colour with it
-      .replace('#include <color_fragment>', '')
+        uniform vec3 uSSSColor; uniform float uSSSAmount; uniform float uSSS; uniform vec4 uClipPlane; uniform float uClipOn; uniform vec3 uCutColor; uniform vec3 uTint;`)
+      // COLOR_0 is occlusion, not albedo: do not tint the base colour with it; apply the per-organ tint instead
+      .replace('#include <color_fragment>', 'diffuseColor.rgb *= uTint;')
       // section planes: discard in front of the plane, and draw the cut faces flat so caps read as solid
       .replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>
         if (uClipOn > 0.5 && dot(vWorldPos, uClipPlane.xyz) - uClipPlane.w > 0.0) discard;`)
@@ -104,7 +105,7 @@ export function tissueMaterial(system: string, cls: string, p: TissueParams, bas
         }`)
       ;
   };
-  m.customProgramCacheKey = () => 'tissue-v6';
+  m.customProgramCacheKey = () => 'tissue-v7';
   cache.set(key, m);
   return m;
 }
@@ -144,4 +145,14 @@ export function applyMaskUniforms(mat: TissueMaterial) {
   const mu = mat.userData.uniforms!;
   u.uClipPlane.value.copy(mu.uClipPlane.value);
   u.uClipOn.value = mu.uClipOn.value;
+}
+
+/** Deterministic, subtle per-organ colour variation (value and warmth) from the organ id, like real specimens. */
+export function organTint(id: string): THREE.Vector3 {
+  let h = 2166136261;
+  for (let i = 0; i < id.length; i++) { h ^= id.charCodeAt(i); h = Math.imul(h, 16777619); }
+  const a = ((h >>> 0) % 1000) / 1000, b = ((h >>> 10) % 1000) / 1000;
+  const v = 0.9 + 0.18 * a;                 // 0.90 .. 1.08 brightness
+  const w = (b - 0.5) * 0.08;               // slight warm/cool shift
+  return new THREE.Vector3(v * (1 + w), v, v * (1 - w));
 }

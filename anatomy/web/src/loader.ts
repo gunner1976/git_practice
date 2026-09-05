@@ -3,7 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'three-mesh-bvh';
 import type { Manifest, OrganEntry } from './types';
-import { tissueMaterial, applyMaskUniforms, sssMaskMaterial, type TissueMaterial } from './materials';
+import { tissueMaterial, applyMaskUniforms, sssMaskMaterial, organTint, type TissueMaterial } from './materials';
 
 // three-mesh-bvh: fast raycasts over thousands of organ meshes
 (THREE.BufferGeometry.prototype as any).computeBoundsTree = computeBoundsTree;
@@ -57,9 +57,11 @@ export async function loadSystem(base: string, manifest: Manifest, name: string,
     const organ = zid ? manifest.organs[zid] : undefined;
     if (!organ) return;
     const geom = src.geometry;
-    const cls = organ.tissue;
+    // multi-material organs arrive as one primitive per material; the material name carries the tissue class
+    const srcMat = src.material as THREE.MeshStandardMaterial;
+    const cls = (srcMat?.name || '').replace(/^tissue_/, '').replace(/\.\d+$/, '') in manifest.tissue_classes ? (srcMat.name.replace(/^tissue_/, '').replace(/\.\d+$/, '')) : organ.tissue;
     const params = manifest.tissue_classes[cls] ?? manifest.tissue_classes['organ'];
-    const mat = tissueMaterial(name, cls, params, src.material as THREE.MeshStandardMaterial);
+    const mat = tissueMaterial(name, cls, params, srcMat);
     const mesh = new THREE.Mesh(geom, mat) as unknown as OrganMesh;
     // keep the node transform on the object: quantized (normalized int16) positions cannot hold metres if baked into the attribute
     mesh.applyMatrix4(src.matrixWorld);
@@ -69,7 +71,8 @@ export async function loadSystem(base: string, manifest: Manifest, name: string,
     mesh.receiveShadow = true;
     mesh.frustumCulled = true;
     // the SSS mask pass draws every organ with one override material; feed it this organ's tissue values
-    mesh.onBeforeRender = (_r, _s, _c, _g, material) => { if (material === sssMaskMaterial) applyMaskUniforms(mesh.material); };
+    const tint = organTint(zid!);
+    mesh.onBeforeRender = (_r, _s, _c, _g, material) => { if (material === sssMaskMaterial) applyMaskUniforms(mesh.material); else mesh.material.userData.uniforms!.uTint.value.copy(tint); };
     (geom as any).computeBoundsTree({ targetLeafSize: 8 });
     tris += (geom.index ? geom.index.count : geom.attributes.position.count) / 3;
     meshes.push(mesh);

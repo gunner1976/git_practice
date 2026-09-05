@@ -21,6 +21,7 @@ export interface OrganEntry {
   system: string;
   parents: string[];
   tissue: string;
+  tissues?: string[];
   source_material: string;
   optional: boolean;
   tris_source: number;

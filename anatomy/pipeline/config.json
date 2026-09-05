@@ -168,6 +168,11 @@
       "material": "^(Cartilage|Meniscus|Disc)"
     },
     {
+      "class": "tendon",
+      "material": "^(Tendon|Aponeurosis)",
+      "name": "(tendon|aponeurosis|tendinous)"
+    },
+    {
       "class": "ligament",
       "material": "^(Ligament|Articular capsule|Tendon)",
       "name": "(ligament|tendon|retinaculum|aponeurosis|capsule|raphe|annulus|membrane)"
@@ -349,24 +354,24 @@
     },
     "muscle": {
       "color": [
-        0.55,
-        0.15,
-        0.13
+        0.46,
+        0.12,
+        0.11
       ],
-      "roughness": 0.38,
-      "sss": 0.6,
+      "roughness": 0.3,
+      "sss": 0.5,
       "sss_color": [
-        0.8,
-        0.2,
+        0.75,
+        0.18,
         0.12
       ],
       "specular": 0.5,
       "sheen": 0.25,
-      "clearcoat": 0.45,
-      "coat_rough": 0.3,
-      "bump": 0.5,
-      "cavity": 0.5,
-      "fibrous": 1.0
+      "clearcoat": 0.5,
+      "coat_rough": 0.22,
+      "bump": 0.6,
+      "cavity": 0.55,
+      "fibrous": 1.2
     },
     "artery": {
       "color": [
@@ -410,11 +415,11 @@
     },
     "heart": {
       "color": [
-        0.62,
-        0.2,
-        0.16
+        0.52,
+        0.16,
+        0.14
       ],
-      "roughness": 0.36,
+      "roughness": 0.3,
       "sss": 0.6,
       "sss_color": [
         0.85,
@@ -609,6 +614,27 @@
       "coat_rough": 0.5,
       "bump": 0.3,
       "cavity": 0.3
+    },
+    "tendon": {
+      "color": [
+        0.86,
+        0.83,
+        0.74
+      ],
+      "roughness": 0.3,
+      "sss": 0.3,
+      "sss_color": [
+        0.92,
+        0.85,
+        0.7
+      ],
+      "specular": 0.5,
+      "sheen": 0.5,
+      "clearcoat": 0.25,
+      "coat_rough": 0.3,
+      "bump": 0.35,
+      "cavity": 0.25,
+      "fibrous": 1.2
     }
   },
   "tile_resolution": 1024,

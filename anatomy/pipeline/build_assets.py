@@ -498,18 +498,42 @@ def import_source(path):
         raise SystemExit('unsupported source: ' + path)
 
 
-def classify(obj, rules, default):
-    matname = obj.data.materials[0].name if obj.data.materials and obj.data.materials[0] else ''
-    matname = re.sub(r'\.\d{3}$', '', matname)
-    name, _, _ = strip_suffix(obj.name)
-    name = display_name(name)
-    # rules are ordered by priority; a rule matches on the source material name or on the anatomical name
+def classify_name(name, rules, default):
+    """Tissue class of a whole organ from its anatomical name (rules in priority order)."""
+    for r in rules:
+        if r.get('name') and re.search(r['name'], name, re.I):
+            return r['class']
+    return default
+
+
+def classify_material(matname, rules):
+    """Tissue class of one material slot from the source material name, or None if it says nothing."""
+    matname = re.sub(r'\.\d{3}$', '', matname or '')
     for r in rules:
         if r.get('material') and re.search(r['material'], matname, re.I):
-            return r['class'], matname
-        if r.get('name') and re.search(r['name'], name, re.I):
-            return r['class'], matname
-    return default, matname
+            return r['class']
+    return None
+
+
+def classify(obj, rules, default):
+    """Per-slot classes for a mesh (Z-Anatomy meshes mix e.g. a red belly slot and a white tendon slot),
+    plus the organ's dominant class (by face count). Slots that say nothing inherit the name-based class."""
+    name, _, _ = strip_suffix(obj.name)
+    name = display_name(name)
+    by_name = classify_name(name, rules, default)
+    slots = [(m.name if m else '') for m in obj.data.materials] or ['']
+    classes = [classify_material(mn, rules) or by_name for mn in slots]
+    # the muscle belly is the reference class when a muscle-named organ has muscle slots; tendon slots stay tendon
+    counts = [0] * len(slots)
+    if len(slots) > 1:
+        mi = np.empty(len(obj.data.polygons), dtype=np.int32)
+        obj.data.polygons.foreach_get('material_index', mi)
+        for i in range(len(slots)):
+            counts[i] = int((mi == i).sum())
+    else:
+        counts[0] = len(obj.data.polygons)
+    dominant = classes[max(range(len(slots)), key=lambda i: counts[i])] if slots else by_name
+    return dominant, slots, classes
 
 
 def build_system(sysname, spec, cfg, args, descriptions, manifest, out_dir, tiles_dir):
@@ -571,7 +595,7 @@ def build_system(sysname, spec, cfg, args, descriptions, manifest, out_dir, tile
         chain = ancestors(o)
         bare, side, role = strip_suffix(o.name)
         disp = display_name(bare)
-        cls, matname = classify(o, cfg['tissue_rules'], cfg['default_class'])
+        cls, slot_names, slot_classes = classify(o, cfg['tissue_rules'], cfg['default_class'])
         base_id = slug(disp) + (('-' + role) if role != 'organ' else '') + (('-' + side) if side else '')
         oid = base_id
         k = 2
@@ -583,7 +607,7 @@ def build_system(sysname, spec, cfg, args, descriptions, manifest, out_dir, tile
         entries[o.name] = {
             'id': oid, 'name': disp, 'source_name': o.name, 'side': side, 'role': role, 'system': sysname,
             'parents': [display_name(strip_suffix(c)[0]) for c in chain],
-            'tissue': cls, 'source_material': matname,
+            'tissue': cls, 'tissues': sorted(set(slot_classes)), 'source_material': ', '.join(re.sub(r'\.\d{3}$', '', n) for n in slot_names if n),
             'optional': bare.startswith('('),
             'tris_source': tri_count(o.data),
             'description': descriptions.get(disp.lower()),
@@ -612,9 +636,14 @@ def build_system(sysname, spec, cfg, args, descriptions, manifest, out_dir, tile
     matcache = {}
     for o in keep:
         box_uv(o.data, float(cfg['tile_scale_m']))
-        cls = entries[o.name]['tissue']
-        o.data.materials.clear()
-        o.data.materials.append(make_export_material(cls, cfg['tissue_classes'][cls], tiles_dir, matcache))
+        _, _, slot_classes = classify(o, cfg['tissue_rules'], cfg['default_class'])
+        # one exportable material per slot, keeping the per-face slot assignment (belly vs tendon, bone vs cartilage cap)
+        for i, c in enumerate(slot_classes):
+            mat = make_export_material(c, cfg['tissue_classes'][c], tiles_dir, matcache)
+            if i < len(o.data.materials):
+                o.data.materials[i] = mat
+            else:
+                o.data.materials.append(mat)
     if not args.no_bake:
         bake_vertex_ao(keep, int(cfg['ao_samples']), float(cfg['ao_distance']))
 
