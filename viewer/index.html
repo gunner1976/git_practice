@@ -503,6 +503,112 @@ function mix(a, b, t){ return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2
 const LEVELS = [];
 
 // ---------------------------------------------------------------- BODY
+// =====================================================================
+//  Blended signed-distance body: anatomical volumes smoothly unioned, sampled on the zero surface
+// =====================================================================
+const sdEll = (p, c, r) => { const x = (p[0]-c[0])/r[0], y = (p[1]-c[1])/r[1], z = (p[2]-c[2])/r[2]; const k0 = Math.sqrt(x*x+y*y+z*z); const k1 = Math.sqrt(x*x/(r[0]*r[0]) + y*y/(r[1]*r[1]) + z*z/(r[2]*r[2])); return k1 > 1e-9 ? k0*(k0-1)/k1 : -Math.min(r[0],r[1],r[2]); };
+const sdCap = (p, a, b, ra, rb) => { const abx = b[0]-a[0], aby = b[1]-a[1], abz = b[2]-a[2]; const L2 = abx*abx+aby*aby+abz*abz; let t = ((p[0]-a[0])*abx + (p[1]-a[1])*aby + (p[2]-a[2])*abz)/L2; t = t < 0 ? 0 : t > 1 ? 1 : t; const qx = a[0]+abx*t - p[0], qy = a[1]+aby*t - p[1], qz = a[2]+abz*t - p[2]; return Math.sqrt(qx*qx+qy*qy+qz*qz) - (ra + (rb-ra)*t); };
+const smin = (a, b, k) => { const h = Math.max(k - Math.abs(a-b), 0)/k; return Math.min(a, b) - h*h*k*0.25; };
+const smax = (a, b, k) => -smin(-a, -b, k);
+class BodySDF {
+  constructor(){ this.prims = []; this.subs = []; this.cell = 0.12; this.grid = new Map(); }
+  ell(c, r, k, opt){ const pr = Object.assign({ t:'e', c, r, k: k == null ? 0.03 : k, bc:c, br:Math.max(r[0],r[1],r[2]) }, opt||{}); (pr.sub ? this.subs : this.prims).push(pr); return pr; }
+  cap(a, b, ra, rb, k, opt){ const bc = V.lerp(a, b, 0.5), br = V.len(V.sub(b, a))/2 + Math.max(ra, rb); const pr = Object.assign({ t:'c', a, b, ra, rb, k: k == null ? 0.03 : k, bc, br }, opt||{}); (pr.sub ? this.subs : this.prims).push(pr); return pr; }
+  finish(){ const cs = this.cell; this.grid.clear(); for (const list of [this.prims, this.subs]) for (const pr of list){ const R = pr.br + pr.k*2 + 0.04; const lo = pr.bc.map(v => Math.floor((v-R)/cs)), hi = pr.bc.map(v => Math.floor((v+R)/cs)); for (let i = lo[0]; i <= hi[0]; i++) for (let j = lo[1]; j <= hi[1]; j++) for (let l = lo[2]; l <= hi[2]; l++){ const key = i*73856093 ^ j*19349663 ^ l*83492791; let cellList = this.grid.get(key); if (!cellList){ cellList = { a:[], s:[] }; this.grid.set(key, cellList); } (pr.sub ? cellList.s : cellList.a).push(pr); } } return this; }
+  sd(pr, p){ return pr.t === 'e' ? sdEll(p, pr.c, pr.r) : sdCap(p, pr.a, pr.b, pr.ra, pr.rb); }
+  F(p){ const cs = this.cell, key = Math.floor(p[0]/cs)*73856093 ^ Math.floor(p[1]/cs)*19349663 ^ Math.floor(p[2]/cs)*83492791; const cl = this.grid.get(key); if (!cl) return 1.0; let f = 1.0; for (const pr of cl.a){ const d = this.sd(pr, p); f = f >= 1.0 ? d : smin(f, d, pr.k); } for (const pr of cl.s){ const d = this.sd(pr, p); f = smax(f, -d, pr.k); } return f; }
+  grad(p){ const e = 0.0012; return V.norm([this.F([p[0]+e,p[1],p[2]]) - this.F([p[0]-e,p[1],p[2]]), this.F([p[0],p[1]+e,p[2]]) - this.F([p[0],p[1]-e,p[2]]), this.F([p[0],p[1],p[2]+e]) - this.F([p[0],p[1],p[2]-e])]); }
+  project(p){ for (let i = 0; i < 4; i++){ const f = this.F(p); if (Math.abs(f) < 0.0004) break; const g = this.grad(p); p = [p[0]-f*g[0], p[1]-f*g[1], p[2]-f*g[2]]; } return p; }
+  // uniform surface sampling: march a grid over the field, seed random points in cells the surface crosses, project onto the zero level
+  sample(o, emitFn){
+    let lo = [1e9,1e9,1e9], hi = [-1e9,-1e9,-1e9];
+    for (const pr of this.prims) for (let k = 0; k < 3; k++){ lo[k] = Math.min(lo[k], pr.bc[k]-pr.br-0.03); hi[k] = Math.max(hi[k], pr.bc[k]+pr.br+0.03); }
+    const cs = 0.015, perCell = Math.max(1, Math.round(cs*cs * (o.density || 1) * COVER / (o.size*o.size)));
+    const nx = Math.ceil((hi[0]-lo[0])/cs), ny = Math.ceil((hi[1]-lo[1])/cs), nz = Math.ceil((hi[2]-lo[2])/cs);
+    for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) for (let l = 0; l < nz; l++){
+      const c = [lo[0]+(i+0.5)*cs, lo[1]+(j+0.5)*cs, lo[2]+(l+0.5)*cs];
+      const fc = this.F(c); if (Math.abs(fc) > cs*0.95) continue;
+      for (let k = 0; k < perCell; k++){
+        let p = [c[0]+(rnd()-0.5)*cs, c[1]+(rnd()-0.5)*cs, c[2]+(rnd()-0.5)*cs];
+        p = this.project(p); if (Math.abs(this.F(p)) > 0.0025) continue;
+        if (Math.abs(p[0]-c[0]) > cs || Math.abs(p[1]-c[1]) > cs || Math.abs(p[2]-c[2]) > cs) continue;
+        emitFn(p, this.grad(p));
+      }
+    }
+  }
+}
+// Build the body surface from fitted parameters P (metres; +x is the person's left)
+function buildBodySDF(P){
+  const S = new BodySDF(), H = P.H, sc = H/1.75;
+  const hc = P.head.c, hr = P.head.r, kx = hr[0]/0.0775, ky = hr[1]/0.108, kz = hr[2]/0.094;
+  const hp = (dx, dy, dz) => [hc[0]+dx*kx, hc[1]+dy*ky, hc[2]+dz*kz], hs = (rx, ry, rz) => [rx*kx, ry*ky, rz*kz];
+  // ---- head
+  S.ell(hp(0, 0.018, -0.008), hs(0.074, 0.088, 0.086), 0.02);                          // cranium
+  S.ell(hp(0, 0.03, 0.05), hs(0.06, 0.038, 0.04), 0.03);                                 // frontal bone / forehead
+  S.ell(hp(0, -0.035, 0.046), hs(0.046, 0.04, 0.04), 0.03);                             // maxilla / midface
+  for (const s of [-1,1]){ S.ell(hp(s*0.045, -0.015, 0.06), hs(0.02, 0.017, 0.018), 0.03); S.ell(hp(s*0.056, 0.0, 0.028), hs(0.015, 0.03, 0.03), 0.035); S.ell(hp(s*0.038, -0.055, 0.052), hs(0.018, 0.018, 0.018), 0.03); }   // zygomatic, temporal, cheek
+  S.cap(hp(-0.056, -0.025, -0.002), hp(-0.012, -0.088, 0.05), 0.018, 0.017, 0.028); S.cap(hp(0.056, -0.025, -0.002), hp(0.012, -0.088, 0.05), 0.018, 0.017, 0.028);   // mandible
+  S.ell(hp(0, -0.09, 0.056), hs(0.019, 0.015, 0.016), 0.022);                            // chin
+  S.cap(hp(0, 0.014, 0.086), hp(0, -0.027, 0.106), 0.0085, 0.013, 0.01);                // nasal bridge to tip (tip ~2 cm proud of the face plane)
+  S.ell(hp(0, -0.031, 0.097), hs(0.017, 0.0095, 0.012), 0.008);                          // alae
+  S.ell(hp(0, -0.052, 0.088), hs(0.018, 0.0055, 0.009), 0.006, { lip:1 });               // upper lip
+  S.ell(hp(0, -0.062, 0.087), hs(0.016, 0.0055, 0.009), 0.006, { lip:1 });               // lower lip
+  S.ell(hp(0, -0.057, 0.093), hs(0.02, 0.0012, 0.005), 0.003, { sub:true });             // mouth line
+  for (const s of [-1,1]){ S.ell(hp(s*0.031, 0.004, 0.095), hs(0.015, 0.0068, 0.02), 0.006, { sub:true }); S.ell(hp(s*0.075, -0.002, -0.006), hs(0.008, 0.027, 0.018), 0.012); }   // palpebral apertures (carved), ears
+  // ---- neck and shoulders
+  S.cap(P.neck.a, [P.neck.b[0], P.neck.b[1]+0.02, P.neck.b[2]], P.neck.r[0], P.neck.r[1], 0.035);
+  const shY = P.torso[P.torso.length-2].y, shX = P.torso[P.torso.length-2].rx;
+  const delt = P.arm.r[0]*1.05;
+  for (const s of [-1,1]){ S.cap([s*0.02, P.neck.a[1]+0.04, -0.03], [s*(shX-delt*0.6), shY+0.005, -0.015], 0.028*sc, 0.026*sc, 0.05); }   // trapezius slope
+  // ---- torso from the fitted sections
+  const sec = (y) => loftAt(P.torso, y);
+  const yRib = shY - 0.13*sc, yAbd = shY - 0.31*sc, yPel = P.torso[1].y + 0.09*sc;
+  const rib = sec(yRib), abd = sec(yAbd), pel = sec(yPel);
+  S.ell([0, yRib, 0.004], [rib.rx*0.93, 0.16*sc, rib.rz*1.0], 0.06);                    // ribcage (skin 2 cm proud of the sternum)
+  S.ell([0, shY-0.045*sc, 0.015], [rib.rx*0.82, 0.075*sc, rib.rz*0.88], 0.06);          // upper thorax: barrel-shaped up to the clavicles
+  S.ell([0, yAbd, 0.0], [abd.rx*0.92, 0.12*sc, abd.rz*0.92], 0.06);                      // abdomen
+  S.ell([0, yPel, -0.012], [pel.rx*0.97, 0.105*sc, pel.rz*0.9], 0.055);                  // pelvis
+  S.ell([0, yRib-0.05*sc, -rib.rz*0.55], [rib.rx*0.85, 0.15*sc, 0.06*sc], 0.06);         // back / latissimus
+  for (const s of [-1,1]){
+    S.ell([s*0.075*sc, yRib+0.01, rib.rz*0.78], [0.075*sc, 0.05*sc, 0.018*sc], 0.06);    // pectoralis (flat plate)
+    S.ell([s*0.085*sc, yPel-0.03*sc, -pel.rz*0.75], [0.085*sc, 0.09*sc, 0.05*sc], 0.05); // gluteus
+    S.ell([s*(shX-delt*0.55), shY-0.02, 0.0], [delt, delt*1.1, delt], 0.045);            // deltoid
+    S.ell([s*0.03*sc, yAbd+0.02, abd.rz*0.85], [0.035*sc, 0.1*sc, 0.012*sc], 0.05);     // rectus abdominis plane
+  }
+  // ---- arms
+  const A = P.arm, mx = (p, s) => [s*p[0], p[1], p[2]];
+  for (const s of [-1,1]){
+    const sh = mx(A.pts[0], s), el = mx(A.pts[1], s), wr = mx(A.pts[2], s);
+    S.cap(sh, el, A.r[0]*0.92, A.r[1]*0.98, 0.035);
+    const mid = V.lerp(sh, el, 0.45); S.ell([mid[0], mid[1], mid[2]+0.02*sc], [A.r[0]*0.85, 0.075*sc, A.r[0]*0.8], 0.04);    // biceps
+    S.ell([mid[0], mid[1]-0.02, mid[2]-0.02*sc], [A.r[0]*0.8, 0.08*sc, A.r[0]*0.75], 0.04);                                     // triceps
+    S.ell(el, [A.r[1]*1.02, A.r[1]*1.02, A.r[1]*1.02], 0.03);                                                                     // elbow
+    S.cap(el, wr, A.r[1]*0.98, A.r[2]*1.0, 0.035);
+    const fm = V.lerp(el, wr, 0.3); S.ell(fm, [A.r[1]*1.0, 0.07*sc, A.r[1]*0.95], 0.04);                                         // forearm flexor mass
+    S.ell([wr[0], wr[1]-0.01, wr[2]], [A.r[2]*1.15, 0.02*sc, A.r[2]*0.9], 0.02);                                                  // wrist, flattened
+    // hand: palm + 5 fingers with three phalanges and a slight curl
+    const hcn = mx(P.hand.c, s), hrr = P.hand.r; S.ell(hcn, [hrr[0], hrr[1]*0.8, hrr[2]], 0.02);
+    for (let k = 0; k < 4; k++){ const bx = hcn[0] + s*(-0.027 + k*0.018)*(hrr[0]/0.042), by = hcn[1] - hrr[1]*0.75, bz = hcn[2] + 0.004; const len = (0.075 - Math.abs(k-1.2)*0.008)*sc, r0 = 0.0085*sc; let a = [bx, by, bz]; for (let ph = 0; ph < 3; ph++){ const L = len*[0.42,0.32,0.26][ph]; const b = [a[0] + s*0.0015*ph, a[1] - L*Math.cos(0.15*ph), a[2] + L*Math.sin(0.15*ph) + 0.002]; S.cap(a, b, r0*(1-0.1*ph), r0*(1-0.1*(ph+1)), 0.006); a = b; } }
+    const tb0 = [hcn[0] - s*hrr[0]*0.85, hcn[1] - 0.005, hcn[2] + 0.012], tb1 = [hcn[0] - s*hrr[0]*1.3, hcn[1] - 0.05*sc, hcn[2] + 0.035], tb2 = [hcn[0] - s*hrr[0]*1.45, hcn[1] - 0.085*sc, hcn[2] + 0.045];
+    S.cap(tb0, tb1, 0.011*sc, 0.009*sc, 0.008); S.cap(tb1, tb2, 0.009*sc, 0.007*sc, 0.006);
+  }
+  // ---- legs
+  const Lg = P.leg;
+  for (const s of [-1,1]){
+    const hip = mx(Lg.pts[0], s), kn = mx(Lg.pts[1], s), an = mx(Lg.pts[2], s);
+    S.cap([hip[0], hip[1]+0.02, hip[2]], kn, Lg.r[0]*0.95, Lg.r[1]*0.95, 0.05);
+    const th = V.lerp(hip, kn, 0.5); S.ell([th[0], th[1]+0.02, th[2]+0.025*sc], [Lg.r[0]*0.8, 0.17*sc, Lg.r[0]*0.7], 0.05);       // quadriceps
+    S.ell([th[0], th[1], th[2]-0.03*sc], [Lg.r[0]*0.75, 0.16*sc, Lg.r[0]*0.6], 0.05);                                             // hamstrings
+    S.ell(kn, [Lg.r[1]*0.95, Lg.r[1]*1.05, Lg.r[1]*0.95], 0.03); S.ell([kn[0], kn[1]+0.005, kn[2]+Lg.r[1]*0.75], [0.022*sc, 0.026*sc, 0.012*sc], 0.02);   // knee, patella
+    S.cap(kn, an, Lg.r[1]*0.95, Lg.r[2]*1.0, 0.04);
+    const cf = V.lerp(kn, an, 0.28); S.ell([cf[0], cf[1], cf[2]-0.03*sc], [Lg.r[1]*0.85, 0.09*sc, Lg.r[1]*0.8], 0.045);           // gastrocnemius
+    S.ell(an, [Lg.r[2]*1.05, Lg.r[2]*0.9, Lg.r[2]*0.9], 0.02);
+    const fc = mx(P.foot.c, s), fr = P.foot.r; S.ell([fc[0], fc[1], fc[2]+fr[2]*0.1], [fr[0], fr[1], fr[2]*0.95], 0.025); S.ell([fc[0], fc[1]+0.008, fc[2]-fr[2]*0.65], [fr[0]*0.8, fr[1]*1.2, fr[0]*0.8], 0.025);   // foot, heel
+    for (let k = 0; k < 5; k++){ const tx = fc[0] + s*(-0.032 + k*0.016)*(fr[0]/0.048), tz = fc[2] + fr[2]*0.9 - k*0.006; S.cap([tx, fc[1]-0.008, tz], [tx, fc[1]-0.01, tz+0.025*sc*(1-k*0.08)], 0.0085*sc*(1-k*0.08), 0.007*sc*(1-k*0.08), 0.006); }
+  }
+  return S.finish();
+}
+
 // Default proportions (metres, y up, facing +z). A silhouette fit overrides these.
 function defaultBodyParams(){
   return {
@@ -551,61 +657,39 @@ LEVELS.push({
     const headC = P.head.c, headR = P.head.r, TORSO = P.torso;
     const warm = [[0.05,1.62,0.075,0.032,1],[-0.05,1.62,0.075,0.032,1],[0,1.605,0.105,0.02,1.2],[0.086,1.63,-0.008,0.02,0.8],[-0.086,1.63,-0.008,0.02,0.8],[0.29,0.735,0.05,0.035,0.8],[-0.29,0.735,0.05,0.035,0.8],[0.265,1.16,-0.07,0.045,0.6],[-0.265,1.16,-0.07,0.045,0.6],[0.09,0.5,0.065,0.05,0.5],[-0.09,0.5,0.065,0.05,0.5],[0.19,1.44,0.0,0.06,0.35],[-0.19,1.44,0.0,0.06,0.35],[0,1.55,0.05,0.04,0.4]];
     const zone = (x,y,z) => { let r = 0; for (const w of warm){ const d2 = (x-w[0])*(x-w[0]) + (y-w[1])*(y-w[1]) + (z-w[2])*(z-w[2]); r += w[4]*Math.exp(-d2/(w[3]*w[3])); } return Math.min(1, r); };
-    const skinCol = (x,y,z) => { const k = (1 + 0.07*(fbm(x*14,y*14,z*14,3)-0.5)) * (1 + 0.05*(vnoise(x*420,y*420,z*420)-0.5)); const flush = 0.03*fbm(x*5,y*5,z*5,2), zn = zone(x,y,z); return [skinBase[0]*k + flush + 0.07*zn, skinBase[1]*k - 0.03*zn, skinBase[2]*k - 0.03*zn]; };
-    const skinTop = {size:0.0038, color:skinCol, group:G.skin, thick:0.18, jitter:0.5, density:1.25};
+    const skinCol = (x,y,z) => { const k = (1 + 0.07*(fbm(x*14,y*14,z*14,3)-0.5)) * (1 + 0.05*(vnoise(x*420,y*420,z*420)-0.5)); const flush = 0.03*fbm(x*5,y*5,z*5,2), zn = zone(x,y,z); const ar = Math.exp(-(Math.pow(Math.abs(x)-0.078,2) + Math.pow(y-1.29,2))/0.00012) * (z > 0.08 ? 1 : 0); const nav = Math.exp(-(x*x + Math.pow(y-1.045,2))/0.00003) * (z > 0.08 ? 1 : 0); return [(skinBase[0]*k + flush + 0.07*zn)*(1-0.25*ar)*(1-0.3*nav), (skinBase[1]*k - 0.03*zn)*(1-0.4*ar)*(1-0.3*nav), (skinBase[2]*k - 0.03*zn)*(1-0.4*ar)*(1-0.3*nav)]; };
+    const skinTop = {size:0.0038, color:skinCol, group:G.skin, thick:0.18, jitter:0.5, density:1.0};
     const A = P.arm, Lg = P.leg;
-    const inCap = (p, a, b, r0, r1, m) => { const ab = V.sub(b, a), L2 = V.dot(ab, ab); let t = V.dot(V.sub(p, a), ab)/L2; t = Math.max(0, Math.min(1, t)); const q = V.add(a, V.mul(ab, t)); return V.len(V.sub(p, q)) < r0 + (r1-r0)*t - m; };
-    const inEll = (p, c, r, m) => { const d = [(p[0]-c[0])/(r[0]-m), (p[1]-c[1])/(r[1]-m), (p[2]-c[2])/(r[2]-m)]; return V.dot(d, d) < 1; };
-    const mx = (p, s) => [s*p[0], p[1], p[2]];
-    const fingers = (s) => { const out = []; const hc = P.hand.c, hr = P.hand.r; for (let k = 0; k < 4; k++) out.push([[s*(hc[0]-0.026+k*0.018), hc[1]-hr[1]+0.01, hc[2]+0.005],[s*(hc[0]-0.03+k*0.02), hc[1]-hr[1]-0.065-Math.abs(k-1.3)*0.012, hc[2]+0.01], 0.0085, 0.007]); out.push([[s*(hc[0]-0.036), hc[1]-0.01, hc[2]+0.017],[s*(hc[0]-0.06), hc[1]-0.065, hc[2]+0.04], 0.01, 0.0075]); return out; };
-    const bodyInside = (p, m) => {
-      const [x,y,z] = p;
-      if (y > TORSO[0].y && y < TORSO[TORSO.length-1].y){ const sc = loftAt(TORSO, y); const dx = (x-sc.cx)/(sc.rx-m), dz = (z-sc.cz)/(sc.rz-m); if (dx*dx + dz*dz < 1) return true; }
-      if (inEll(p, headC, headR, m) || inEll(p, P.jaw.c, P.jaw.r, m) || inCap(p, P.neck.a, P.neck.b, P.neck.r[0], P.neck.r[1], m)) return true;
-      for (const s of [-1,1]){
-        if (inCap(p, mx(A.pts[0],s), mx(A.pts[1],s), A.r[0], A.r[1], m) || inCap(p, mx(A.pts[1],s), mx(A.pts[2],s), A.r[1], A.r[2], m)) return true;
-        if (inEll(p, mx(P.hand.c,s), P.hand.r, m*0.5)) return true;
-        if (inCap(p, mx(Lg.pts[0],s), mx(Lg.pts[1],s), Lg.r[0], Lg.r[1], m) || inCap(p, mx(Lg.pts[1],s), mx(Lg.pts[2],s), Lg.r[1], Lg.r[2], m)) return true;
-        if (inEll(p, mx(P.foot.c,s), P.foot.r, m*0.5)) return true;
-        for (const f of fingers(s)) if (inCap(p, f[0], f[1], f[2], f[3], m*0.3)) return true;
-      }
-      return false;
-    };
+    const SDF = buildBodySDF(P);
+    const bodyInside = (p, m) => SDF.F(p) < -m;
     const textured = !!P.textured;
-    const skinPass = (skin, inner) => {
-      ellipsoid(C, Object.assign({}, skin, {color:(x,y,z)=>{
-        const dy = (y-headC[1])/headR[1], dz = (z-headC[2])/headR[2];
-        if (!textured && (dy > 0.32 || (dz < -0.35 && dy > -0.55) || (dy > -0.05 && dz < 0.05 && Math.abs(x) > 0.07))) return null;
-        return skin.color(x,y,z); }}), headC, headR);
-      if (!inner && !textured) ellipsoid(C, Object.assign({}, skin, {size:0.0045, aspect:3.2, thick:0.15, tangent:(x,y,z,nx,ny,nz)=>[ -nx*ny*0.2, -1, -nz*ny*0.2 ], color:(x,y,z)=>{
-        const dy = (y-headC[1])/headR[1], dz = (z-headC[2])/headR[2];
-        if (!(dy > 0.30 || (dz < -0.33 && dy > -0.58) || (dy > -0.07 && dz < 0.07 && Math.abs(x) > 0.068))) return null;
-        const k = 0.7 + 0.6*fbm(x*90,y*90,z*90,2); return [0.17*k, 0.11*k, 0.07*k]; }}), headC, [headR[0]+0.004, headR[1]+0.005, headR[2]+0.005]);
-      if (!inner && !textured){
-        ellipsoid(C, Object.assign({}, skin, {size:0.003}), [0,headC[1]-0.019,headR[2]-0.002], [0.015,0.026,0.018]);
-        for (const sx of [-1,1]){
-          ellipsoid(C, Object.assign({}, skin, {size:0.003}), [sx*(headR[0]+0.003),headC[1]-0.005,-0.008], [0.007,0.026,0.018]);
-          const ez = headR[2]*Math.sqrt(Math.max(0, 1 - Math.pow(0.031/headR[0],2) - Math.pow(0.012/headR[1],2)));
-          ellipsoid(C, {size:0.002, color:flat([0.93,0.92,0.9]), group:G.skin}, [sx*0.031,headC[1]+0.012,ez-0.0035], [0.014,0.0075,0.006]);
-          ellipsoid(C, {size:0.0016, color:flat([0.22,0.14,0.09]), group:G.skin}, [sx*0.031,headC[1]+0.012,ez+0.002], [0.0058,0.0058,0.0025]);
-          ellipsoid(C, {size:0.0012, color:flat([0.02,0.02,0.02]), group:G.skin}, [sx*0.031,headC[1]+0.012,ez+0.004], [0.0026,0.0026,0.0015]);
-          capsule(C, {size:0.0025, aspect:2.5, color:flat([0.2,0.13,0.09]), group:G.skin}, [sx*0.016,headC[1]+0.032,ez+0.002],[sx*0.047,headC[1]+0.029,ez-0.006], 0.003, 0.002);
+    const kx = headR[0]/0.0775, ky = headR[1]/0.108, kz = headR[2]/0.094;
+    const hp = (dx, dy, dz) => [headC[0]+dx*kx, headC[1]+dy*ky, headC[2]+dz*kz];
+    const cranC = hp(0, 0.018, -0.008);
+    const hairRegion = (p) => { const dy = (p[1]-cranC[1])/(0.088*ky), dz = (p[2]-cranC[2])/(0.086*kz), dx = Math.abs(p[0]-cranC[0])/(0.074*kx); return dy > 0.36 || (dz < -0.3 && dy > -0.5) || (dy > 0.0 && dz < 0.15 && dx > 0.8); };
+    const lipTint = (c, p) => { const d = Math.hypot((p[0]-headC[0])/0.02, (p[1]-hp(0,-0.057,0)[1])/0.009); const w = Math.exp(-d*d)*1.3; return [c[0]+0.02*w, c[1]-0.22*w, c[2]-0.16*w]; };
+    const skinSample = (skin, inner) => {
+      const mouthY = hp(0,-0.057,0)[1], faceZ = headC[2] + 0.07*kz;
+      SDF.sample(skin, (p, n) => {
+        if (!inner && !textured && p[1] > P.neck.b[1] + 0.01 && hairRegion(p)){
+          const k = 0.7 + 0.6*fbm(p[0]*90,p[1]*90,p[2]*90,2); const t = [-n[0]*n[1]*0.2, -1, -n[2]*n[1]*0.2];
+          emit(C, Object.assign({}, skin, {size:0.0042, aspect:3.4, thick:0.15, inset:-0.003, color:()=>[0.17*k,0.11*k,0.07*k]}), p, n, t, 0, 0); return;
         }
-      }
-      ellipsoid(C, Object.assign({}, skin, {size:0.0035, color:(x,y,z)=>{ if (textured) return skin.color(x,y,z); const lips = Math.exp(-((x*x)/0.0006 + Math.pow(y-(P.jaw.c[1]+0.02),2)/0.00004 + Math.pow(z-(P.jaw.c[2]+0.066),2)/0.0002)); const c = skin.color(x,y,z); return [c[0]+0.06*lips, c[1]-0.16*lips, c[2]-0.12*lips]; }}), P.jaw.c, P.jaw.r);
-      capsule(C, skin, P.neck.a, P.neck.b, P.neck.r[0], P.neck.r[1]);
-      loft(C, skin, TORSO);
-      for (const s of [-1,1]){
-        limb(C, skin, [mx(A.pts[0],s), mx(A.pts[1],s), mx(A.pts[2],s)], A.r);
-        ellipsoid(C, Object.assign({}, skin, {size:0.0035}), mx(P.hand.c,s), P.hand.r);
-        for (const f of fingers(s)) capsule(C, Object.assign({}, skin, {size:0.0028}), f[0], f[1], f[2], f[3]);
-        limb(C, skin, [mx(Lg.pts[0],s), mx(Lg.pts[1],s), mx(Lg.pts[2],s)], Lg.r);
-        ellipsoid(C, Object.assign({}, skin, {size:0.004}), mx(P.foot.c,s), P.foot.r);
-      }
+        if (!inner && !textured && Math.abs(p[0]-headC[0]) < 0.026*kx && Math.abs(p[1]-mouthY) < 0.014*ky && p[2] > faceZ){ emit(C, Object.assign({}, skin, {color:(x,y,z)=>lipTint(skin.color(x,y,z), [x,y,z])}), p, n, null, 0, 0); return; }
+        emit(C, skin, p, n, null, 0, 0);
+      });
     };
-    skinPass(skinTop, false);
-    skinPass({size:0.008, inset:0.0055, thick:0.35, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const k = 0.86 + 0.1*(fbm(x*10,y*10,z*10,2)-0.5); return [skinBase[0]*k, skinBase[1]*k*0.96, skinBase[2]*k*0.95]; }}, true);
-    skinPass({size:0.013, inset:0.011, thick:0.4, jitter:0.25, group:G.skin, color:()=>[skinBase[0]*0.7, skinBase[1]*0.62, skinBase[2]*0.6]}, true);
+    skinSample(skinTop, false);
+    if (!textured){
+      for (const sx of [-1,1]){   // eyes: sclera, iris, pupil, and a brow of oriented strands
+        const ec = hp(sx*0.031, 0.004, 0.079);
+        ellipsoid(C, {size:0.0014, color:(x,y,z)=>{ const k = 0.93 + 0.06*fbm(x*500,y*500,z*500,2); return [0.95*k, 0.93*k, 0.91*k]; }, group:G.skin, jitter:0.2}, ec, [0.012*kx, 0.012*ky, 0.012*kz]);
+        ellipsoid(C, {size:0.0009, color:(x,y,z)=>{ const r = Math.hypot(x-ec[0], y-ec[1])/(0.0058*kx); const k = 0.55 + 0.6*fbm(x*1400,y*1400,z*1400,2); return r > 0.42 ? [0.32*k,0.2*k,0.1*k] : [0.02,0.02,0.02]; }, group:G.skin, jitter:0.2}, [ec[0], ec[1], ec[2]+0.0108*kz], [0.0058*kx, 0.0058*ky, 0.0014]);
+        for (let i = 0; i < 38; i++){ const t = i/37; const q = SDF.project(hp(sx*(0.014 + 0.034*t), 0.024 + 0.006*Math.sin(t*3.1) - 0.004*t, 0.095)); const n = SDF.grad(q); emit(C, {size:0.0011, aspect:3.2, thick:0.15, color:flat([0.19,0.12,0.08]), group:G.skin, inset:-0.0005, jitter:0.3}, q, n, [sx, 0.35 - 0.7*t, 0], 0, 0); }
+      }
+    }
+    skinSample({size:0.0062, inset:0.0028, thick:0.3, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const k = 0.94 + 0.08*(fbm(x*12,y*12,z*12,2)-0.5); return [skinBase[0]*k, skinBase[1]*k*0.98, skinBase[2]*k*0.97]; }}, true);
+    skinSample({size:0.008, inset:0.0055, thick:0.35, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const k = 0.86 + 0.1*(fbm(x*10,y*10,z*10,2)-0.5); return [skinBase[0]*k, skinBase[1]*k*0.96, skinBase[2]*k*0.95]; }}, true);
     const nSkin = C.n;
     // ================= internal anatomy, built at default proportions then scaled to the fitted body
     // Coordinates: +x is the person's LEFT (they face +z). Positions and sizes follow standard adult reference values.
@@ -643,9 +727,9 @@ LEVELS.push({
       ellipsoid(C, musc, [s*0.195,1.40,0.0], [0.05,0.06,0.048]);                                          // deltoid
       ellipsoid(C, musc, [s*0.095,0.96,-0.075], [0.075,0.085,0.035]);                                     // gluteus maximus
       for (let k = 0; k < 4; k++) ellipsoid(C, musc, [s*0.035,1.20-k*0.06,0.074], [0.03,0.026,0.012]);   // rectus abdominis
-      limb(C, musc, [[s*0.20,1.40,0],[s*0.243,1.10,-0.02],[s*0.263,0.86,0.03]], [0.045,0.036,0.023]);
-      limb(C, musc, [[s*0.092,0.90,0],[s*0.09,0.50,0.005],[s*0.086,0.10,-0.01]], [0.074,0.05,0.03]);
-      capsule(C, musc, [s*0.09,0.49,-0.02],[s*0.09,0.15,-0.025], 0.036, 0.016);                          // gastrocnemius
+      limb(C, musc, [[s*0.20,1.40,0],[s*0.243,1.10,-0.02],[s*0.263,0.86,0.03]], [0.038,0.029,0.019]);
+      limb(C, musc, [[s*0.092,0.90,0],[s*0.09,0.50,0.005],[s*0.086,0.10,-0.01]], [0.068,0.046,0.026]);
+      capsule(C, musc, [s*0.09,0.47,-0.02],[s*0.09,0.17,-0.025], 0.03, 0.014);                           // gastrocnemius
     }
     // ---- nervous: brain ~14 x 17 x 9 cm, cerebellum, brainstem, cord to L1/L2, plexuses
     const brainCol = (x,y,z) => { const s = fbm(x*140,y*140,z*140,3); const k = 0.7 + 0.5*Math.pow(s,1.5); return [0.86*k, 0.7*k, 0.68*k]; };
@@ -747,7 +831,7 @@ LEVELS.push({
     // scale the internal anatomy to the fitted body, then keep it inside the skin envelope
     if (P.fitted){ const sx = P.scaleX || 1, sy = P.H/1.75, sz = P.scaleZ || 1; for (let i = nSkin; i < C.n; i++){ C.pos[i*3] *= sx; C.pos[i*3+1] *= sy; C.pos[i*3+2] *= sz; } }
     const deep = new Set([G.nerv, G.card, G.lymph, G.endo]);
-    C.filter((x,y,z,g) => g === G.skin || g === 11 || bodyInside([x,y,z], deep.has(g) ? 0.016 : (g === G.musc ? 0.0105 : 0.007)));
+    C.filter((x,y,z,g) => g === G.skin || g === 11 || bodyInside([x,y,z], deep.has(g) ? 0.016 : (g === G.musc ? 0.013 : 0.008)));
     C.skinCount = nSkin;
   }
 });
