@@ -40,7 +40,9 @@ cd ../web && npm install && npm run optimize # Meshopt-compressed *.opt.glb
 What the script does, per system (see the docstring for the full list):
 import, keep names and the `.g` group hierarchy, drop helper objects and the
 meshes whose upstream license is not open-source compatible, classify tissue
-from source material + name, decimate to the per-system budget (proportional
+per material slot (Z-Anatomy meshes mix a red belly slot and a white tendon
+slot, or bone with cartilage caps) from the slot's material name with the
+anatomical name as fallback, decimate to the per-system budget (proportional
 share with a per-mesh floor), box-project UVs at a physical scale, bake
 per-organ ambient occlusion into `COLOR_0` with only that system present,
 assign one baked PBR tissue material per class, export `.glb` with the organ id
@@ -66,6 +68,13 @@ the pipeline structure supports adding them for hero organs.
   wrapped/back-scatter diffuse term in the material for thin tissue.
 - Lighting: CC0 Poly Haven HDRI through PMREM, one shadowed key light, a rim.
 - Post: GTAO, bloom, ACES (OutputPass), SMAA, outline for selection.
+
+Z-Anatomy naming conventions handled: `.l/.r` sides, `.j/.i` label anchors
+(exported as landmarks, not meshes), `.ol/.or/.el/.er` (and numbered `.o2l`)
+muscle origin/insertion footprints (kept with a `role`, hidden by default),
+`?`-named placeholders dropped. The whole-body fascial envelope in the
+muscular file is split into its own `fascia` system so the muscles are visible
+when the muscular system is shown alone.
 
 ## Phase 3: interaction
 
