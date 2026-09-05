@@ -50,6 +50,7 @@ Required attribution, shown in the app's About panel and in this file:
 | `@gltf-transform/cli`, `core`, `functions`, `extensions` | 4.5.0 | MIT | Yes | glTF optimisation, Meshopt/Draco compression, texture resizing |
 | `meshoptimizer` (JS) | 1.2.0 | MIT | Yes | Meshopt compression (encoder in the pipeline, decoder in the browser) |
 | `draco3dgltf` | 1.5.7 | Apache-2.0 | Yes | Optional alternative compression |
+| `sharp` (with prebuilt libvips) | 0.35.4 | Apache-2.0 (sharp), LGPL-3.0-or-later (libvips binaries) | Yes (build tool only; nothing links into the shipped app) | WebP encoding of the tissue texture tiles in `optimize.mjs` |
 | Vite | 8.2.2 | MIT | Yes | Dev server and bundler |
 | TypeScript | 7.0.2 | Apache-2.0 | Yes | App language |
 

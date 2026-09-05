@@ -38,8 +38,8 @@ controls.maxDistance = 6;
 const pmrem = new THREE.PMREMGenerator(renderer);
 pmrem.compileEquirectangularShader();
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;   // until the HDRI arrives
-scene.environmentIntensity = 0.9;
-const key = new THREE.DirectionalLight(0xfff2e6, 2.6);
+scene.environmentIntensity = 0.55;
+const key = new THREE.DirectionalLight(0xfff2e6, 1.5);
 key.position.set(1.6, 2.8, 2.2);
 key.castShadow = true;
 key.shadow.mapSize.set(2048, 2048);
@@ -50,7 +50,7 @@ const cam = key.shadow.camera as THREE.OrthographicCamera;
 cam.left = -1.2; cam.right = 1.2; cam.top = 1.4; cam.bottom = -1.4; cam.near = 0.5; cam.far = 8;
 scene.add(key, key.target);
 key.target.position.set(0, 0.9, 0);
-const rim = new THREE.DirectionalLight(0xbcd4ff, 0.5);
+const rim = new THREE.DirectionalLight(0xbcd4ff, 0.35);
 rim.position.set(-2.2, 1.8, -2.0);
 scene.add(rim);
 
@@ -88,10 +88,10 @@ gtao.blendIntensity = 0.85;
 const outline = new OutlinePass(size, scene, camera);
 outline.edgeStrength = 4; outline.edgeGlow = 0.25; outline.edgeThickness = 1.5; outline.pulsePeriod = 0;
 outline.visibleEdgeColor.set(0x7fc4ff); outline.hiddenEdgeColor.set(0x1e4a6f);
-const bloom = new UnrealBloomPass(size, 0.18, 0.6, 0.92);
+const bloom = new UnrealBloomPass(size, 0.12, 0.45, 1.25);   // only true highlights bloom: threshold above white
 const output = new OutputPass();
 renderer.toneMapping = THREE.ACESFilmicToneMapping;   // OutputPass reads the renderer's tone mapping
-renderer.toneMappingExposure = 1.0;
+renderer.toneMappingExposure = 0.72;
 const smaa = new SMAAPass();
 composer.addPass(sssPass);
 composer.addPass(gtao);

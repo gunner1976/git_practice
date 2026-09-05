@@ -503,10 +503,10 @@ def classify(obj, rules, default):
     matname = re.sub(r'\.\d{3}$', '', matname)
     name, _, _ = strip_suffix(obj.name)
     name = display_name(name)
+    # rules are ordered by priority; a rule matches on the source material name or on the anatomical name
     for r in rules:
         if r.get('material') and re.search(r['material'], matname, re.I):
             return r['class'], matname
-    for r in rules:
         if r.get('name') and re.search(r['name'], name, re.I):
             return r['class'], matname
     return default, matname

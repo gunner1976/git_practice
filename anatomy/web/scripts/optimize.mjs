@@ -5,7 +5,8 @@
 //   node optimize.mjs [--draco] [systems...]
 import { NodeIO } from '@gltf-transform/core';
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
-import { dedup, prune, quantize, reorder, flatten, join, weld } from '@gltf-transform/functions';
+import { dedup, prune, quantize, reorder, weld, textureCompress } from '@gltf-transform/functions';
+import sharp from 'sharp';
 import { MeshoptEncoder } from 'meshoptimizer';
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -36,6 +37,8 @@ for (const f of files) {
     prune(),
     quantize({ quantizePosition: 14, quantizeNormal: 10, quantizeTexcoord: 12, quantizeColor: 8 }),
     reorder({ encoder: MeshoptEncoder }),
+    // tissue tiles: WebP keeps the 1024 px detail at a fraction of the PNG size (sharp, Apache-2.0)
+    textureCompress({ encoder: sharp, targetFormat: 'webp', quality: 88, resize: [1024, 1024] }),
   );
   if (useDraco) {
     doc.createExtension((await import('@gltf-transform/extensions')).KHRDracoMeshCompression).setRequired(true).setEncoderOptions({ method: 'edgebreaker' });
