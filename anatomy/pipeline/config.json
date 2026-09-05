@@ -1,0 +1,86 @@
+{
+  "input_dir": "/home/user/lluisv/z-anatomy/Resources/Models/FBX",
+  "descriptions_dir": "/home/user/lluisv/z-anatomy/Resources/Descriptions/OriginalDescriptions",
+  "output_dir": "../web/public/assets",
+  "scale": 1.0,
+
+  "systems": {
+    "skeletal":      { "file": "SkeletalSystem100.fbx",       "budget": 420000, "order": 0 },
+    "joints":        { "file": "Joints100.fbx",               "budget": 120000, "order": 1 },
+    "muscular":      { "file": "MuscularSystem100.fbx",       "budget": 520000, "order": 2 },
+    "cardiovascular":{ "file": "CardioVascular41.fbx",        "budget": 360000, "order": 3 },
+    "nervous":       { "file": "NervousSystem100.fbx",        "budget": 360000, "order": 4 },
+    "respiratory":   { "file": "VisceralSystem100.fbx", "roots": ["Respiratory system.g", "Thoracic cavity.g"], "budget": 110000, "order": 5 },
+    "digestive":     { "file": "VisceralSystem100.fbx", "roots": ["Digestive system.g", "Abdominopelvic cavity.g"], "budget": 130000, "order": 6 },
+    "urinary":       { "file": "VisceralSystem100.fbx", "roots": ["Urinary system.g"], "budget": 40000, "order": 7 },
+    "endocrine":     { "file": "VisceralSystem100.fbx", "roots": ["Endocrine glands.g"], "budget": 30000, "order": 8 },
+    "reproductive":  { "file": "VisceralSystem100.fbx", "roots": ["Genital systems.g"], "budget": 40000, "order": 9 },
+    "lymphatic":     { "file": "LymphoidOrgans100.fbx",       "budget": 60000, "order": 10 },
+    "integumentary": { "file": "Regions of human body100.fbx", "budget": 60000, "order": 11 }
+  },
+
+  "peel_order": ["integumentary", "muscular", "joints", "cardiovascular", "lymphatic", "nervous", "respiratory", "digestive", "urinary", "reproductive", "endocrine", "skeletal"],
+
+  "exclude_name_patterns": [
+    "^Cross Section [XYZ]", "^Medulla-path$"
+  ],
+  "exclude_licensed": {
+    "CC-BY-NC 4.0 (Kidney by lissiecowley)": ["^Kidney\\.[lr]$"],
+    "CC-BY-NC-SA 4.0 (Anatomy of the Inner Ear, University of Dundee)": [
+      "^Cochlea", "^Cochlear (cupula|duct|aqueduct)", "^Semicircular", "^Vestibule", "^Vestibular (aqueduct|labyrinth)", "^Membranous labyrinth", "^Bony labyrinth", "^Utricle", "^Saccule", "^Endolymphatic", "^Ampulla of", "^Osseous spiral", "^Modiolus", "^Scala ", "^Organ of Corti", "^Spiral (organ|ganglion|ligament|lamina)", "^Tectorial", "^Basilar membrane", "^Helicotrema", "^Perilymphatic", "^Round window", "^Oval window", "^Crista ampullaris", "^Macula of (utricle|saccule)"
+    ],
+    "Unverified license (Brainder / White matter, University of Washington)": [
+      "^White matter", "^Brainder", "^Cerebral white matter"
+    ]
+  },
+
+  "tissue_rules": [
+    { "class": "tooth",      "material": "^(Dentine|Enamel|Pulp|Cementum|Tooth)", "name": "(incisor|canine|premolar|molar|tooth)" },
+    { "class": "cartilage",  "material": "^(Cartilage|Suture|Meniscus|Disc)", "name": "(cartilage|meniscus|labrum|intervertebral disc|disc\\b|symphysis)" },
+    { "class": "bone",       "material": "^Bone", "name": "\\b(bone|vertebra|vertebrae|rib\\b|sternum|clavicle|scapula|humerus|radius|ulna|femur|tibia|fibula|patella|sacrum|coccyx|mandible|maxilla|skull|cranium|phalanx|metacarpal|metatarsal|carpal|tarsal|talus|calcaneus|hyoid|atlas|axis|incus|malleus|stapes|ossicle|process of|sinus of|fossa of|foramen)" },
+    { "class": "ligament",   "material": "^(Ligament|Articular capsule|Tendon)", "name": "(ligament|tendon|retinaculum|aponeurosis|capsule|raphe|annulus|membrane)" },
+    { "class": "fascia",     "material": "^(Fascia|Bursa|Fat)", "name": "(fascia|bursa|fat pad|sheath|septum)" },
+    { "class": "muscle",     "material": "^(Abductor|Adductor|Biarticular|Depressor|Diaphragm|Extension|Extensor|External rotation|Flexion|Flexor|Internal rotation|Elevator|Levator|Rotator|Supinator|Pronator|Muscle|Trapezius)", "name": "(muscle|muscular|head of|belly of|diaphragm|sphincter)" },
+    { "class": "artery",     "material": "^(Artery|Pulmonary artery|Aorta)", "name": "(arter|aorta|trunk|arch of aorta)" },
+    { "class": "vein",       "material": "^(Vein|Pulmonary vein)", "name": "(vein|vena|venous|sinus\\b)" },
+    { "class": "heart",      "material": "^(Heart|Myocardium|Endocardium)", "name": "(ventricle|atrium|heart|myocardium|papillary|valve|septum of heart)" },
+    { "class": "nerve",      "material": "^(Nerve|Ganglion|Plexus|Cranial)", "name": "(nerve|ganglion|plexus|ramus|rami|root of|trunk of|spinal cord|cauda equina)" },
+    { "class": "brain",      "material": "^(Brain|Cerebellum|Frontal lobe|Insula|Interlobar|Parietal|Temporal|Occipital|Gyrus)", "name": "(brain|cerebr|cerebell|lobe|gyrus|sulcus|thalamus|hypothalamus|pons|medulla|midbrain|hippocampus|amygdala|corpus callosum|basal ganglia|putamen|caudate|pallidus)" },
+    { "class": "eye",        "material": "^(Eye|Cornea|Lens|Iris|Sclera|Retina)", "name": "(eyeball|cornea|lens\\b|iris|sclera|retina|choroid|vitreous|pupil)" },
+    { "class": "lung",       "material": "^(Lung|Bronch|Trachea|Pleura)", "name": "(lung|bronch|trachea|pleura|larynx|alveol)" },
+    { "class": "mucosa",     "material": "^(Stomach|Intestine|Colon|Oesophagus|Bowel|Mucosa|Ductus|Bladder|Ureter|Urethra)", "name": "(stomach|intestine|jejunum|ileum|duodenum|colon|rectum|anal|oesophag|esophag|bladder|ureter|urethra|pharynx|tongue|palate|uvula|cheek)" },
+    { "class": "liver",      "material": "^(Liver|Gallbladder)", "name": "(liver|hepat|gallbladder|segment of liver)" },
+    { "class": "gland",      "material": "^(Gland|Pancreas|Thyroid|Adrenal|Spleen|Thymus|Lymph)", "name": "(gland|pancrea|thyroid|adrenal|suprarenal|spleen|thymus|lymph|tonsil|node|pituitary|pineal|ovary|testis|prostate|kidney|renal)" },
+    { "class": "organ",      "material": "^(Organ|Uterus|Genital|Genital)", "name": "(uterus|vagina|penis|scrotum|ovary|fallopian|uterine|seminal|epididymis|vas deferens|ductus deferens|clitoris|labia)" },
+    { "class": "skin",       "material": "^(Skin|Nail|Black|Hair)", "name": "(skin|region|nail|hair|eyebrow|eyelash|areola|nipple|umbilicus|auricle|lip\\b)" }
+  ],
+  "default_class": "organ",
+
+  "tissue_classes": {
+    "bone":      { "color": [0.86, 0.80, 0.69], "roughness": 0.62, "sss": 0.25, "sss_color": [0.9, 0.75, 0.55], "specular": 0.35, "sheen": 0.0,  "clearcoat": 0.0,  "coat_rough": 0.4, "bump": 0.35, "cavity": 0.6 },
+    "cartilage": { "color": [0.80, 0.82, 0.78], "roughness": 0.35, "sss": 0.55, "sss_color": [0.85, 0.85, 0.75], "specular": 0.5,  "sheen": 0.0,  "clearcoat": 0.35, "coat_rough": 0.25, "bump": 0.15, "cavity": 0.3 },
+    "tooth":     { "color": [0.90, 0.87, 0.78], "roughness": 0.18, "sss": 0.3,  "sss_color": [0.95, 0.9, 0.8],   "specular": 0.6,  "sheen": 0.0,  "clearcoat": 0.6,  "coat_rough": 0.1, "bump": 0.08, "cavity": 0.2 },
+    "ligament":  { "color": [0.83, 0.80, 0.72], "roughness": 0.45, "sss": 0.35, "sss_color": [0.9, 0.8, 0.65],   "specular": 0.45, "sheen": 0.35, "clearcoat": 0.1,  "coat_rough": 0.4, "bump": 0.4, "cavity": 0.4, "fibrous": 1.0 },
+    "fascia":    { "color": [0.86, 0.84, 0.78], "roughness": 0.4,  "sss": 0.4,  "sss_color": [0.95, 0.85, 0.7],  "specular": 0.45, "sheen": 0.5,  "clearcoat": 0.0,  "coat_rough": 0.5, "bump": 0.2, "cavity": 0.3, "fibrous": 0.6 },
+    "muscle":    { "color": [0.55, 0.15, 0.13], "roughness": 0.38, "sss": 0.6,  "sss_color": [0.8, 0.2, 0.12],   "specular": 0.5,  "sheen": 0.25, "clearcoat": 0.45, "coat_rough": 0.3, "bump": 0.5, "cavity": 0.5, "fibrous": 1.0 },
+    "artery":    { "color": [0.72, 0.16, 0.14], "roughness": 0.32, "sss": 0.5,  "sss_color": [0.9, 0.25, 0.15],  "specular": 0.5,  "sheen": 0.1,  "clearcoat": 0.5,  "coat_rough": 0.2, "bump": 0.15, "cavity": 0.3 },
+    "vein":      { "color": [0.30, 0.28, 0.55], "roughness": 0.34, "sss": 0.5,  "sss_color": [0.5, 0.35, 0.6],   "specular": 0.5,  "sheen": 0.1,  "clearcoat": 0.5,  "coat_rough": 0.2, "bump": 0.15, "cavity": 0.3 },
+    "heart":     { "color": [0.62, 0.20, 0.16], "roughness": 0.36, "sss": 0.6,  "sss_color": [0.85, 0.25, 0.15], "specular": 0.5,  "sheen": 0.2,  "clearcoat": 0.5,  "coat_rough": 0.25, "bump": 0.35, "cavity": 0.45, "fibrous": 0.7 },
+    "nerve":     { "color": [0.93, 0.86, 0.55], "roughness": 0.42, "sss": 0.45, "sss_color": [0.95, 0.9, 0.6],   "specular": 0.4,  "sheen": 0.3,  "clearcoat": 0.15, "coat_rough": 0.4, "bump": 0.25, "cavity": 0.3, "fibrous": 0.8 },
+    "brain":     { "color": [0.80, 0.62, 0.58], "roughness": 0.30, "sss": 0.7,  "sss_color": [0.9, 0.6, 0.55],   "specular": 0.5,  "sheen": 0.1,  "clearcoat": 0.55, "coat_rough": 0.2, "bump": 0.25, "cavity": 0.6 },
+    "eye":       { "color": [0.92, 0.90, 0.88], "roughness": 0.12, "sss": 0.2,  "sss_color": [0.95, 0.8, 0.75],  "specular": 0.7,  "sheen": 0.0,  "clearcoat": 0.9,  "coat_rough": 0.05, "bump": 0.05, "cavity": 0.1 },
+    "lung":      { "color": [0.78, 0.50, 0.50], "roughness": 0.45, "sss": 0.55, "sss_color": [0.9, 0.5, 0.45],   "specular": 0.4,  "sheen": 0.3,  "clearcoat": 0.2,  "coat_rough": 0.4, "bump": 0.3, "cavity": 0.5 },
+    "mucosa":    { "color": [0.76, 0.42, 0.40], "roughness": 0.28, "sss": 0.65, "sss_color": [0.9, 0.45, 0.35],  "specular": 0.55, "sheen": 0.1,  "clearcoat": 0.6,  "coat_rough": 0.15, "bump": 0.3, "cavity": 0.4 },
+    "liver":     { "color": [0.45, 0.16, 0.12], "roughness": 0.30, "sss": 0.55, "sss_color": [0.7, 0.2, 0.12],   "specular": 0.5,  "sheen": 0.1,  "clearcoat": 0.6,  "coat_rough": 0.15, "bump": 0.2, "cavity": 0.4 },
+    "gland":     { "color": [0.78, 0.52, 0.45], "roughness": 0.35, "sss": 0.6,  "sss_color": [0.9, 0.55, 0.45],  "specular": 0.5,  "sheen": 0.15, "clearcoat": 0.45, "coat_rough": 0.25, "bump": 0.35, "cavity": 0.5 },
+    "organ":     { "color": [0.74, 0.44, 0.42], "roughness": 0.36, "sss": 0.6,  "sss_color": [0.9, 0.5, 0.4],    "specular": 0.5,  "sheen": 0.15, "clearcoat": 0.4,  "coat_rough": 0.25, "bump": 0.3, "cavity": 0.45 },
+    "skin":      { "color": [0.80, 0.60, 0.50], "roughness": 0.48, "sss": 0.7,  "sss_color": [0.9, 0.5, 0.4],    "specular": 0.4,  "sheen": 0.2,  "clearcoat": 0.0,  "coat_rough": 0.5, "bump": 0.3, "cavity": 0.3 }
+  },
+
+  "tile_resolution": 1024,
+  "tile_scale_m": 0.06,
+  "ao_samples": 24,
+  "ao_distance": 0.08,
+  "min_tris_per_mesh": 120,
+  "decimate_floor_ratio": 0.08
+}

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Anatomy Explorer</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <canvas id="view"></canvas>
+  <aside id="panel">
+    <header>
+      <h1>Anatomy Explorer</h1>
+      <p class="sub" id="status">loading manifest…</p>
+    </header>
+    <section id="systems"></section>
+    <section id="peel-section">
+      <label for="peel">Peel <span id="peel-label"></span></label>
+      <input id="peel" type="range" min="0" max="1" step="0.001" value="0" />
+    </section>
+    <section id="clip-section">
+      <label>Section</label>
+      <div class="row">
+        <select id="clip-axis"><option value="none">none</option><option value="sagittal">sagittal</option><option value="coronal">coronal</option><option value="transverse">transverse</option></select>
+        <input id="clip-pos" type="range" min="-1" max="1" step="0.001" value="0" />
+        <button id="clip-flip" title="flip side">⇄</button>
+      </div>
+    </section>
+    <section id="render-section">
+      <label>Look</label>
+      <div class="row"><label class="chk"><input id="opt-sss" type="checkbox" checked /> subsurface</label><label class="chk"><input id="opt-ao" type="checkbox" checked /> ambient occlusion</label><label class="chk"><input id="opt-bloom" type="checkbox" checked /> bloom</label></div>
+      <div class="row"><label for="hdri">environment</label><select id="hdri"></select></div>
+    </section>
+    <section id="selection"><p class="muted">Click an organ to identify it. Shift-click hides it.</p></section>
+    <footer id="about"></footer>
+  </aside>
+  <div id="callout" hidden><b id="callout-name"></b><span id="callout-meta"></span></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
