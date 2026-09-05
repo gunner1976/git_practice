@@ -7,9 +7,9 @@ import type { TissueParams } from './types';
  * what glTF cannot express: the subsurface term, specular occlusion from the
  * per-organ AO (COLOR_0), and the tint the manifest asks for.
  *
- * Subsurface: the screen-space pass (sss.ts) blurs the lit colour; this material
- * writes the per-pixel subsurface strength and tint into a second render target
- * when `sssOutput` is on, and adds a cheap wrapped, back-scattered diffuse term so
+ * Subsurface: the screen-space pass (sss.ts) blurs the lit colour where a mask
+ * pass (one flat colour per organ, see `sssMaskMaterial`) says the tissue
+ * scatters; this material adds a cheap wrapped, back-scattered diffuse term so
  * thin tissue (ears, membranes, vessels) transmits light even without the blur.
  */
 export interface TissueMaterial extends THREE.MeshPhysicalMaterial {
@@ -64,8 +64,7 @@ export function tissueMaterial(system: string, cls: string, p: TissueParams, bas
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>
         varying vec3 vWorldPos;
-        uniform vec3 uSSSColor; uniform float uSSSAmount; uniform float uSSS; uniform vec4 uClipPlane; uniform float uClipOn;
-        layout(location = 1) out vec4 gSSS;`)
+        uniform vec3 uSSSColor; uniform float uSSSAmount; uniform float uSSS; uniform vec4 uClipPlane; uniform float uClipOn;`)
       // COLOR_0 is occlusion, not albedo: do not tint the base colour with it
       .replace('#include <color_fragment>', '')
       // section planes: discard in front of the plane, and draw the cut faces flat so caps read as solid
@@ -97,12 +96,11 @@ export function tissueMaterial(system: string, cls: string, p: TissueParams, bas
             reflectedLight.directDiffuse += directionalLights[i].color * diffuseColor.rgb * uSSSColor * (w * 0.8 + back);
           }
           #endif
-          reflectedLight.indirectDiffuse += diffuseColor.rgb * uSSSColor * 0.06 * uSSSAmount * uSSS * ambientOcclusion;
+          reflectedLight.indirectDiffuse += diffuseColor.rgb * uSSSColor * 0.06 * uSSSAmount * uSSS * vColor.r;   // vColor.r = baked AO (aomap chunk comes later)
         }`)
-      .replace('#include <dithering_fragment>', `#include <dithering_fragment>
-        gSSS = vec4(uSSSColor * uSSSAmount * uSSS, 1.0);`);
+      ;
   };
-  m.customProgramCacheKey = () => 'tissue-v3';
+  m.customProgramCacheKey = () => 'tissue-v5';
   cache.set(key, m);
   return m;
 }
@@ -123,4 +121,21 @@ export function setClipPlane(normal: THREE.Vector3 | null, distance = 0) {
       u.uClipOn.value = 1;
     }
   }
+}
+
+/** Flat per-organ subsurface colour/strength, rendered by the SSS pass with scene.overrideMaterial.
+ *  Each organ mesh sets `uSSSColor` in onBeforeRender from its tissue material. Honors the section plane. */
+export const sssMaskMaterial = new THREE.ShaderMaterial({
+  uniforms: { uSSSColor: { value: new THREE.Vector3() }, uClipPlane: { value: new THREE.Vector4() }, uClipOn: { value: 0 } },
+  vertexShader: `varying vec3 vWorldPos; void main(){ vec4 wp = modelMatrix * vec4(position, 1.0); vWorldPos = wp.xyz; gl_Position = projectionMatrix * viewMatrix * wp; }`,
+  fragmentShader: `uniform vec3 uSSSColor; uniform vec4 uClipPlane; uniform float uClipOn; varying vec3 vWorldPos;
+    void main(){ if (uClipOn > 0.5 && dot(vWorldPos, uClipPlane.xyz) - uClipPlane.w > 0.0) discard; gl_FragColor = vec4(uSSSColor, 1.0); }`,
+});
+export function applyMaskUniforms(mat: TissueMaterial) {
+  const u = sssMaskMaterial.uniforms;
+  const strength = mat.userData.sss * sssUniforms.uSSS.value * (mat.opacity ?? 1);
+  u.uSSSColor.value.set(mat.userData.sssColor.r * strength, mat.userData.sssColor.g * strength, mat.userData.sssColor.b * strength);
+  const mu = mat.userData.uniforms!;
+  u.uClipPlane.value.copy(mu.uClipPlane.value);
+  u.uClipOn.value = mu.uClipOn.value;
 }

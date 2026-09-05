@@ -17,6 +17,7 @@ export interface OrganEntry {
   name: string;
   source_name: string;
   side: 'l' | 'r' | null;
+  role: 'organ' | 'origin' | 'insertion';
   system: string;
   parents: string[];
   tissue: string;
@@ -37,6 +38,7 @@ export interface SystemEntry {
   tris: number;
   bytes: number;
   excluded: { name: string; reason: string }[];
+  landmarks: { name: string; side: 'l' | 'r' | null; system: string; parents: string[]; position: [number, number, number] }[];
 }
 
 export interface Manifest {

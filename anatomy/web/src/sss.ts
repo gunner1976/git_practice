@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import { Pass, FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
+import { sssMaskMaterial } from './materials';
 
 /**
  * Screen-space subsurface scattering, after Jimenez et al. (separable SSS):
- * the scene is rendered once into two targets (lit colour, subsurface tint/strength),
- * then the lit colour is blurred with a depth-aware, per-channel kernel whose
+ * the scene is rendered into a lit-colour target, then once more with a flat override
+ * material into a subsurface tint/strength mask, then the lit colour is blurred with a depth-aware, per-channel kernel whose
  * width is a physical scattering radius projected to pixels, and blended back in
  * where the strength buffer says the surface scatters. Red travels the farthest,
  * which is what gives flesh its warm bleeding edges.
@@ -12,7 +13,8 @@ import { Pass, FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 export class SSSPass extends Pass {
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
-  private mrt: THREE.WebGLRenderTarget;
+  private colorRT: THREE.WebGLRenderTarget;
+  private maskRT: THREE.WebGLRenderTarget;
   private tmpA: THREE.WebGLRenderTarget;
   private tmpB: THREE.WebGLRenderTarget;
   private blur: THREE.ShaderMaterial;
@@ -28,9 +30,8 @@ export class SSSPass extends Pass {
     this.scene = scene;
     this.camera = camera;
     const depth = new THREE.DepthTexture(width, height, THREE.UnsignedIntType);
-    this.mrt = new THREE.WebGLRenderTarget(width, height, { count: 2, type: THREE.HalfFloatType, depthTexture: depth, samples: 0 });
-    this.mrt.textures[0].name = 'color';
-    this.mrt.textures[1].name = 'sss';
+    this.colorRT = new THREE.WebGLRenderTarget(width, height, { type: THREE.HalfFloatType, depthTexture: depth });
+    this.maskRT = new THREE.WebGLRenderTarget(width, height, { type: THREE.UnsignedByteType });
     this.tmpA = new THREE.WebGLRenderTarget(width, height, { type: THREE.HalfFloatType });
     this.tmpB = new THREE.WebGLRenderTarget(width, height, { type: THREE.HalfFloatType });
 
@@ -96,52 +97,62 @@ export class SSSPass extends Pass {
   }
 
   setSize(w: number, h: number) {
-    this.mrt.setSize(w, h);
+    this.colorRT.setSize(w, h);
+    this.maskRT.setSize(w, h);
     this.tmpA.setSize(w, h);
     this.tmpB.setSize(w, h);
     this.blur.uniforms.uTexel.value.set(1 / w, 1 / h);
   }
 
   render(renderer: THREE.WebGLRenderer, writeBuffer: THREE.WebGLRenderTarget) {
-    // 1. scene to colour + subsurface targets
-    renderer.setRenderTarget(this.mrt);
+    // 1. lit scene
+    renderer.setRenderTarget(this.colorRT);
     renderer.clear();
     renderer.render(this.scene, this.camera);
     const out = this.renderToScreen ? null : writeBuffer;
     if (!this.enabledSSS) {
       this.composite.uniforms.uStrength.value = 0;
-      this.composite.uniforms.tColor.value = this.mrt.textures[0];
-      this.composite.uniforms.tBlur.value = this.mrt.textures[0];
-      this.composite.uniforms.tSSS.value = this.mrt.textures[1];
+      this.composite.uniforms.tColor.value = this.colorRT.texture;
+      this.composite.uniforms.tBlur.value = this.colorRT.texture;
+      this.composite.uniforms.tSSS.value = this.colorRT.texture;
       this.quad.material = this.composite;
       renderer.setRenderTarget(out);
       this.quad.render(renderer);
       return;
     }
-    const h = this.mrt.height;
+    // 2. subsurface mask: flat tissue transmission colour per organ
+    const prevOverride = this.scene.overrideMaterial, prevBg = this.scene.background;
+    this.scene.overrideMaterial = sssMaskMaterial;
+    this.scene.background = null;
+    renderer.setRenderTarget(this.maskRT);
+    renderer.setClearColor(0x000000, 0);
+    renderer.clear();
+    renderer.render(this.scene, this.camera);
+    this.scene.overrideMaterial = prevOverride;
+    this.scene.background = prevBg;
+    const h = this.colorRT.height;
     const focalPx = 0.5 * h / Math.tan(THREE.MathUtils.degToRad(this.camera.fov) * 0.5);
     const u = this.blur.uniforms;
     u.uNear.value = this.camera.near; u.uFar.value = this.camera.far; u.uProjScale.value = focalPx; u.uRadius.value = this.radius;
-    u.tSSS.value = this.mrt.textures[1]; u.tDepth.value = this.mrt.depthTexture;
-    // 2. horizontal
-    u.tColor.value = this.mrt.textures[0]; u.uDir.value.set(1, 0);
+    u.tSSS.value = this.maskRT.texture; u.tDepth.value = this.colorRT.depthTexture;
+    // 3. horizontal
+    u.tColor.value = this.colorRT.texture; u.uDir.value.set(1, 0);
     this.quad.material = this.blur;
     renderer.setRenderTarget(this.tmpA); this.quad.render(renderer);
-    // 3. vertical
+    // 4. vertical
     u.tColor.value = this.tmpA.texture; u.uDir.value.set(0, 1);
     renderer.setRenderTarget(this.tmpB); this.quad.render(renderer);
-    // 4. composite
+    // 5. composite
     const c = this.composite.uniforms;
-    c.tColor.value = this.mrt.textures[0]; c.tBlur.value = this.tmpB.texture; c.tSSS.value = this.mrt.textures[1]; c.uStrength.value = this.strength;
+    c.tColor.value = this.colorRT.texture; c.tBlur.value = this.tmpB.texture; c.tSSS.value = this.maskRT.texture; c.uStrength.value = this.strength;
     this.quad.material = this.composite;
     renderer.setRenderTarget(out);
     this.quad.render(renderer);
   }
 
-  /** depth + normal-free targets other passes may want */
-  get depthTexture() { return this.mrt.depthTexture!; }
+  get depthTexture() { return this.colorRT.depthTexture!; }
 
   dispose() {
-    this.mrt.dispose(); this.tmpA.dispose(); this.tmpB.dispose(); this.blur.dispose(); this.composite.dispose(); this.quad.dispose();
+    this.colorRT.dispose(); this.maskRT.dispose(); this.tmpA.dispose(); this.tmpB.dispose(); this.blur.dispose(); this.composite.dispose(); this.quad.dispose();
   }
 }

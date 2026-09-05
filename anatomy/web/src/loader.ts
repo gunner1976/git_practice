@@ -3,7 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'three-mesh-bvh';
 import type { Manifest, OrganEntry } from './types';
-import { tissueMaterial, type TissueMaterial } from './materials';
+import { tissueMaterial, applyMaskUniforms, sssMaskMaterial, type TissueMaterial } from './materials';
 
 // three-mesh-bvh: fast raycasts over thousands of organ meshes
 (THREE.BufferGeometry.prototype as any).computeBoundsTree = computeBoundsTree;
@@ -67,7 +67,9 @@ export async function loadSystem(base: string, manifest: Manifest, name: string,
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     mesh.frustumCulled = true;
-    (geom as any).computeBoundsTree({ maxLeafTris: 8 });
+    // the SSS mask pass draws every organ with one override material; feed it this organ's tissue values
+    mesh.onBeforeRender = (_r, _s, _c, _g, material) => { if (material === sssMaskMaterial) applyMaskUniforms(mesh.material); };
+    (geom as any).computeBoundsTree({ targetLeafSize: 8 });
     tris += (geom.index ? geom.index.count : geom.attributes.position.count) / 3;
     meshes.push(mesh);
     group.add(mesh);

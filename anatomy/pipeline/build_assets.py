@@ -47,14 +47,28 @@ def slug(s):
     return s or 'x'
 
 
+# Z-Anatomy name suffixes: .l/.r side; .j and .i are 6-triangle label anchors (landmarks);
+# .ol/.or and .el/.er are muscle origin and insertion footprints (left/right).
+ROLE_SUFFIX = {'j': 'landmark', 'i': 'landmark', 'ol': 'origin', 'or': 'origin', 'el': 'insertion', 'er': 'insertion'}
+
+
 def strip_suffix(name):
-    """'Deltoid muscle.l' -> ('Deltoid muscle', 'l'); '.001'-style Blender suffixes are removed."""
+    """'Deltoid muscle.l' -> ('Deltoid muscle', 'l', 'organ'); 'Deltoid muscle.ol' -> (..., 'l', 'origin')."""
     name = re.sub(r'\.\d{3}$', '', name)
-    side = None
-    m = re.match(r'^(.*)\.([lrLR])$', name)
-    if m:
-        name, side = m.group(1), m.group(2).lower()
-    return name, side
+    side, role = None, 'organ'
+    m = re.match(r'^(.*)\.([a-zA-Z]{1,2})$', name)
+    if m and (m.group(2).lower() in ('l', 'r') or m.group(2).lower() in ROLE_SUFFIX):
+        suf = m.group(2).lower()
+        name = m.group(1)
+        if suf in ('l', 'r'):
+            side = suf
+        else:
+            role = ROLE_SUFFIX[suf]
+            if suf in ('ol', 'el'):
+                side = 'l'
+            elif suf in ('or', 'er'):
+                side = 'r'
+    return name, side, role
 
 
 def display_name(name):
@@ -373,9 +387,19 @@ def box_uv(mesh, scale):
         l.active_render = (l.name == 'box')
 
 
+def tri_count(mesh):
+    """Triangle count after triangulation (the source has quads and n-gons)."""
+    n = len(mesh.polygons)
+    if n == 0:
+        return 0
+    lt = np.empty(n, dtype=np.int32)
+    mesh.polygons.foreach_get('loop_total', lt)
+    return int((lt - 2).sum())
+
+
 def plan_decimation(objs, budget, min_tris, floor_ratio):
     """Distribute the system budget over meshes proportionally to their size, with a floor per mesh."""
-    counts = {o.name: len(o.data.polygons) for o in objs}
+    counts = {o.name: tri_count(o.data) for o in objs}
     total = sum(counts.values())
     if total <= budget:
         return {}
@@ -395,29 +419,34 @@ def plan_decimation(objs, budget, min_tris, floor_ratio):
     return ratios
 
 
-def apply_decimation(objs, ratios):
+def apply_decimation(names, ratios):
+    """Works by object name: removing data-blocks invalidates Python handles to other objects."""
     if not ratios:
         return
-    for o in objs:
-        r = ratios.get(o.name)
+    for nm in names:
+        r = ratios.get(nm)
         if r is None or r >= 0.999:
             continue
-        mod = o.modifiers.new('dec', 'DECIMATE')
+        mod = bpy.data.objects[nm].modifiers.new('dec', 'DECIMATE')
         mod.decimate_type = 'COLLAPSE'
         mod.ratio = r
         mod.use_collapse_triangulate = True
         mod.use_symmetry = False
     dg = bpy.context.evaluated_depsgraph_get()
-    for o in objs:
+    old_meshes = []
+    for nm in names:
+        o = bpy.data.objects[nm]
         if not o.modifiers:
             continue
         ev = o.evaluated_get(dg)
         newm = bpy.data.meshes.new_from_object(ev, preserve_all_data_layers=True, depsgraph=dg)
-        old = o.data
+        old_meshes.append(o.data.name)
         o.modifiers.clear()
         o.data = newm
-        newm.name = old.name
-        bpy.data.meshes.remove(old)
+    for mn in old_meshes:
+        m = bpy.data.meshes.get(mn)
+        if m is not None and m.users == 0:
+            bpy.data.meshes.remove(m)
 
 
 def bake_vertex_ao(objs, samples, distance):
@@ -457,7 +486,7 @@ def import_source(path):
 def classify(obj, rules, default):
     matname = obj.data.materials[0].name if obj.data.materials and obj.data.materials[0] else ''
     matname = re.sub(r'\.\d{3}$', '', matname)
-    name, _ = strip_suffix(obj.name)
+    name, _, _ = strip_suffix(obj.name)
     name = display_name(name)
     for r in rules:
         if r.get('material') and re.search(r['material'], matname, re.I):
@@ -482,13 +511,19 @@ def build_system(sysname, spec, cfg, args, descriptions, manifest, out_dir, tile
     roots = spec.get('roots')
     excl_pat = [re.compile(p) for p in cfg.get('exclude_name_patterns', [])]
     excl_lic = [(why, [re.compile(p) for p in pats]) for why, pats in cfg.get('exclude_licensed', {}).items()]
-    keep, excluded = [], []
+    keep, excluded, landmarks = [], [], []
     for o in objs:
         chain = ancestors(o)
         root = chain[-1] if chain else o.name
         if roots and root not in roots:
             continue                                  # belongs to another system of the same file
-        bare, _ = strip_suffix(o.name)
+        bare, _, role = strip_suffix(o.name)
+        if '?' in o.name:
+            excluded.append({'name': o.name, 'reason': 'unnamed placeholder'})
+            continue
+        if role == 'landmark':
+            landmarks.append(o)
+            continue
         if any(p.search(o.name) for p in excl_pat):
             excluded.append({'name': o.name, 'reason': 'helper object'})
             continue
@@ -496,23 +531,30 @@ def build_system(sysname, spec, cfg, args, descriptions, manifest, out_dir, tile
         if why:
             excluded.append({'name': o.name, 'reason': why})
             continue
-        if len(o.data.polygons) == 0:
+        if tri_count(o.data) == 0:
             excluded.append({'name': o.name, 'reason': 'empty mesh'})
             continue
         keep.append(o)
     if args.limit:
         keep = keep[:args.limit]
-    log(f'{sysname}: {len(keep)} meshes kept, {len(excluded)} excluded, {sum(len(o.data.polygons) for o in keep)} tris')
+    lm_entries = []
+    for o in landmarks:
+        bare, side, _ = strip_suffix(o.name)
+        chain = ancestors(o)
+        pts = [o.matrix_world @ Vector(c) for c in o.bound_box]
+        c = [round(sum(p[i] for p in pts) / 8.0, 4) for i in range(3)]
+        lm_entries.append({'name': display_name(bare), 'side': side, 'system': sysname, 'parents': [display_name(strip_suffix(x)[0]) for x in chain], 'position': c})
+    log(f'{sysname}: {len(keep)} meshes kept, {len(landmarks)} landmarks, {len(excluded)} excluded, {sum(tri_count(o.data) for o in keep)} tris')
 
     # metadata before geometry is touched
     entries = {}
     used_ids = set()
     for o in keep:
         chain = ancestors(o)
-        bare, side = strip_suffix(o.name)
+        bare, side, role = strip_suffix(o.name)
         disp = display_name(bare)
         cls, matname = classify(o, cfg['tissue_rules'], cfg['default_class'])
-        base_id = slug(disp) + (('-' + side) if side else '')
+        base_id = slug(disp) + (('-' + role) if role != 'organ' else '') + (('-' + side) if side else '')
         oid = base_id
         k = 2
         while oid in used_ids or oid in manifest['organs']:
@@ -521,11 +563,11 @@ def build_system(sysname, spec, cfg, args, descriptions, manifest, out_dir, tile
         used_ids.add(oid)
         o['zid'] = oid
         entries[o.name] = {
-            'id': oid, 'name': disp, 'source_name': o.name, 'side': side, 'system': sysname,
+            'id': oid, 'name': disp, 'source_name': o.name, 'side': side, 'role': role, 'system': sysname,
             'parents': [display_name(strip_suffix(c)[0]) for c in chain],
             'tissue': cls, 'source_material': matname,
             'optional': bare.startswith('('),
-            'tris_source': len(o.data.polygons),
+            'tris_source': tri_count(o.data),
             'description': descriptions.get(disp.lower()),
         }
 
@@ -544,8 +586,10 @@ def build_system(sysname, spec, cfg, args, descriptions, manifest, out_dir, tile
     if not args.no_decimate:
         ratios = plan_decimation(keep, int(spec['budget']), int(cfg['min_tris_per_mesh']), float(cfg['decimate_floor_ratio']))
         t = time.time()
-        apply_decimation(keep, ratios)
-        log(f'{sysname}: decimated {len(ratios)} meshes -> {sum(len(o.data.polygons) for o in keep)} tris ({time.time()-t:.0f}s)')
+        keep_names = [o.name for o in keep]
+        apply_decimation(keep_names, ratios)
+        keep = [bpy.data.objects[n] for n in keep_names]     # fresh handles: data-block removal invalidates the old ones
+        log(f'{sysname}: decimated {len(ratios)} meshes -> {sum(tri_count(o.data) for o in keep)} tris ({time.time()-t:.0f}s)')
 
     # UVs, materials, per-organ AO
     matcache = {}
@@ -564,7 +608,7 @@ def build_system(sysname, spec, cfg, args, descriptions, manifest, out_dir, tile
         lo = [min(v[i] for v in bb) for i in range(3)]
         hi = [max(v[i] for v in bb) for i in range(3)]
         e['bbox'] = {'min': [round(x, 4) for x in lo], 'max': [round(x, 4) for x in hi]}
-        e['tris'] = len(o.data.polygons)
+        e['tris'] = tri_count(o.data)
         o.name = e['id']
 
     # export
@@ -584,7 +628,7 @@ def build_system(sysname, spec, cfg, args, descriptions, manifest, out_dir, tile
     manifest['systems'][sysname] = {
         'file': f'{sysname}.glb', 'order': spec.get('order', 0), 'budget': spec['budget'],
         'source': os.path.basename(src), 'meshes': len(keep), 'tris': tris, 'bytes': size,
-        'excluded': excluded,
+        'excluded': excluded, 'landmarks': lm_entries,
     }
     for e in entries.values():
         manifest['organs'][e['id']] = e

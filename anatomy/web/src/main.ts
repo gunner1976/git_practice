@@ -117,6 +117,7 @@ const systems = new Map<string, LoadedSystem>();
 const sysOpacity = new Map<string, number>();
 const sysVisible = new Map<string, boolean>();
 let peel = 0;
+let showAttachments = false;   // muscle origin/insertion footprints (Z-Anatomy .ol/.or/.el/.er) are hidden until asked for
 let selected: OrganMesh | null = null;
 const status = $('status');
 
@@ -129,7 +130,7 @@ function applyVisibility() {
     const vis = (sysVisible.get(name) ?? true) && op > 0.002;
     sys.group.visible = vis;
     for (const m of sys.meshes) {
-      m.visible = vis && !m.userData.hidden;
+      m.visible = vis && !m.userData.hidden && (showAttachments || (m.userData.organ.role ?? 'organ') === 'organ');
       const mat = m.material;
       mat.transparent = op < 0.999;
       mat.opacity = op;
@@ -145,7 +146,7 @@ function systemRow(name: string) {
   row.className = 'sys loading';
   row.dataset.name = name;
   row.innerHTML = `<input type="checkbox" checked title="visible" /><div class="name">${name}<small>${sys.meshes} parts · ${(sys.tris / 1000).toFixed(0)}k tris</small></div><input type="range" min="0" max="1" step="0.01" value="1" title="opacity" /><button class="solo" title="show only this system">solo</button>`;
-  const [chk, , rng] = [...row.querySelectorAll('input')] as HTMLInputElement[];
+  const [chk, rng] = [...row.querySelectorAll('input')] as HTMLInputElement[];
   chk.onchange = () => { sysVisible.set(name, chk.checked); ensureLoaded(name); applyVisibility(); };
   rng.oninput = () => { sysOpacity.set(name, +rng.value); ensureLoaded(name); applyVisibility(); };
   (row.querySelector('.solo') as HTMLButtonElement).onclick = () => {
@@ -199,6 +200,7 @@ clipPos.oninput = updateClip;
 $<HTMLInputElement>('opt-sss').onchange = (e) => { const on = (e.target as HTMLInputElement).checked; sssPass.enabledSSS = on; sssUniforms.uSSS.value = on ? 1 : 0; };
 $<HTMLInputElement>('opt-ao').onchange = (e) => { gtao.enabled = (e.target as HTMLInputElement).checked; };
 $<HTMLInputElement>('opt-bloom').onchange = (e) => { bloom.enabled = (e.target as HTMLInputElement).checked; };
+$<HTMLInputElement>('opt-attach').onchange = (e) => { showAttachments = (e.target as HTMLInputElement).checked; applyVisibility(); };
 
 function sceneBounds() {
   const box = new THREE.Box3();
@@ -236,7 +238,7 @@ function select(m: OrganMesh | null, point?: THREE.Vector3) {
   const o = m.userData.organ;
   const side = o.side === 'l' ? 'left' : o.side === 'r' ? 'right' : '';
   sel.innerHTML = `<h2>${o.name}${side ? ` <small class="muted">(${side})</small>` : ''}</h2>
-    <div class="meta">${o.system} · ${o.tissue}${o.optional ? ' · variant structure' : ''} · ${o.tris.toLocaleString()} tris</div>
+    <div class="meta">${o.system} · ${o.tissue}${o.role !== 'organ' ? ` · muscle ${o.role}` : ''}${o.optional ? ' · variant structure' : ''} · ${o.tris.toLocaleString()} tris</div>
     <div class="path">${[...o.parents].reverse().join(' › ')}</div>
     ${o.description ? `<div class="desc">${o.description}</div>` : ''}`;
   $('callout-name').textContent = o.name + (side ? ` (${side})` : '');
