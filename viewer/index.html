@@ -650,7 +650,7 @@ function buildBodySDF(P){
     const hk = P.physique === 'david' ? 1.12 : 1.0;
     const hcn = mx(P.hand.c, s), hrr = P.hand.r.map(v => v*hk); S.ell(hcn, [hrr[0], hrr[1]*0.8, hrr[2]], 0.02);
     for (let k = 0; k < 4; k++){ const bx = hcn[0] + s*(-0.029 + k*0.0195)*(hrr[0]/0.042), by = hcn[1] - hrr[1]*0.75, bz = hcn[2] + 0.004; const len = (0.075 - Math.abs(k-1.2)*0.008)*sc*hk, r0 = 0.0078*sc*hk; let a = [bx, by, bz]; for (let ph = 0; ph < 3; ph++){ const L = len*[0.42,0.32,0.26][ph]; const b = [a[0] + s*0.002*ph*(k-1.5), a[1] - L*Math.cos(0.15*ph), a[2] + L*Math.sin(0.15*ph) + 0.002]; S.cap(a, b, r0*(1-0.1*ph), r0*(1-0.1*(ph+1)), ph === 0 ? 0.006 : 0.0035); a = b; } }
-    const tb0 = [hcn[0] - s*hrr[0]*0.85, hcn[1] - 0.005, hcn[2] + 0.012], tb1 = [hcn[0] - s*hrr[0]*1.3, hcn[1] - 0.05*sc, hcn[2] + 0.035], tb2 = [hcn[0] - s*hrr[0]*1.45, hcn[1] - 0.085*sc, hcn[2] + 0.045];
+    const tb0 = [hcn[0] - s*hrr[0]*0.55, hcn[1] - 0.005, hcn[2] + hrr[0]*0.8], tb1 = [hcn[0] - s*hrr[0]*0.75, hcn[1] - 0.045*sc, hcn[2] + hrr[0]*1.5], tb2 = [hcn[0] - s*hrr[0]*0.85, hcn[1] - 0.075*sc, hcn[2] + hrr[0]*2.0];   // palm faces the thigh, thumb forward
     S.cap(tb0, tb1, 0.011*sc, 0.009*sc, 0.008); S.cap(tb1, tb2, 0.009*sc, 0.007*sc, 0.006);
     for (let i = armFrom; i < S.prims.length; i++) S.prims[i].part = s > 0 ? 'armL' : 'armR';
   }
@@ -790,6 +790,7 @@ function poseCloud(C, rig){
   const lbs = (p, w, sum) => { let x = 0, y = 0, z = 0; for (let k = 0; k < rig.list.length; k++){ if (w[k] < 1e-4) continue; const b = rig.list[k]; let q = V.add(b.a, V.m3v(b.R, V.sub(p, b.a))); let par = b.par; while (par){ const pb = rig.bones[par]; q = V.add(pb.a, V.m3v(pb.R, V.sub(q, pb.a))); par = pb.par; } q = V.add(q, rig.bones.pelvis.T || [0,0,0]); const kk = w[k]/sum; x += q[0]*kk; y += q[1]*kk; z += q[2]*kk; } return [x, y, z]; };
   const at = (p) => { const r = rig.weights(p, false); return lbs(p, r.w, r.sum); };
   C.rest = C.pos.slice(0, C.n*3);   // rest-pose positions, kept for diagnostics and refinement
+  const extra = [];
   for (let i = 0; i < C.n; i++){
     const i3 = i*3, i4 = i*4, p = [C.pos[i3], C.pos[i3+1], C.pos[i3+2]];
     const grp = C.grp[i]; let { w, sum, dom } = rig.weights(p, false);
@@ -798,10 +799,14 @@ function poseCloud(C, rig){
     const q0 = [C.rot[i4], C.rot[i4+1], C.rot[i4+2], C.rot[i4+3]];
     // where two bones blend the surface stretches (outside of a bend) or bunches; let the splat follow so no gaps open over a flexed joint
     let mixed = 0; for (let k = 0; k < w.length; k++) if (w[k] > 0.02*sum) mixed++;
-    if (mixed > 1 && grp === 0){ const eps = 0.006; for (const ax of [0, 1]){ const d = qrot(q0, ax === 0 ? [1,0,0] : [0,1,0]); const a = at([p[0]+d[0]*eps, p[1]+d[1]*eps, p[2]+d[2]*eps]), b = at([p[0]-d[0]*eps, p[1]-d[1]*eps, p[2]-d[2]*eps]); const st = Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2])/(2*eps); C.scl[i3+ax] *= Math.max(1, Math.min(C.scl[i3+1] > 0.0045 ? 1.9 : 1.4, st)); } }   // the inset dermis may grow more: it cannot poke out
+    const qw = rig.list[dom].qw; const qr = qmul(qw, q0);
+    if (mixed > 1 && grp === 0 && extra.length < 240000){ const eps = 0.006; for (const ax of [0, 1]){ const d = qrot(q0, ax === 0 ? [1,0,0] : [0,1,0]); const a = at([p[0]+d[0]*eps, p[1]+d[1]*eps, p[2]+d[2]*eps]), b = at([p[0]-d[0]*eps, p[1]-d[1]*eps, p[2]-d[2]*eps]); const st = Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2])/(2*eps);
+      if (st > 1.12){ C.scl[i3+ax] *= Math.min(1.25, st); const dp = qrot(qr, ax === 0 ? [1,0,0] : [0,1,0]), off = C.scl[i3+ax]*Math.min(1.6, st - 1)*0.9;   // and fill the stretched gap with copies rather than one huge splat
+        for (const sgn of [-1, 1]) extra.push([x + dp[0]*off*sgn, y + dp[1]*off*sgn, z + dp[2]*off*sgn, i, qr]); } } }
     C.pos[i3] = x; C.pos[i3+1] = y; C.pos[i3+2] = z;
-    const qw = rig.list[dom].qw; const qr = qmul(qw, q0); C.rot[i4] = qr[0]; C.rot[i4+1] = qr[1]; C.rot[i4+2] = qr[2]; C.rot[i4+3] = qr[3];
+    C.rot[i4] = qr[0]; C.rot[i4+1] = qr[1]; C.rot[i4+2] = qr[2]; C.rot[i4+3] = qr[3];
   }
+  for (const e of extra){ const j = e[3], j3 = j*3, j4 = j*4; C.add(e[0], e[1], e[2], C.scl[j3], C.scl[j3+1], C.scl[j3+2], e[4], C.col[j4]/255, C.col[j4+1]/255, C.col[j4+2]/255, C.col[j4+3]/255, C.grp[j]); }
 }
 const qrot = (q, v) => { const u = [q[0], q[1], q[2]], w = q[3]; const c1 = V.cross(u, v), c2 = V.cross(u, c1); return [v[0] + 2*(w*c1[0] + c2[0]), v[1] + 2*(w*c1[1] + c2[1]), v[2] + 2*(w*c1[2] + c2[2])]; };
 
@@ -858,7 +863,7 @@ LEVELS.push({
     const skinCol = (x,y,z) => { let k = (1 + 0.028*(fbm(x*14,y*14,z*14,3)-0.5)) * (1 + 0.04*(vnoise(x*420,y*420,z*420)-0.5)) * (1 + 0.012*(fbm(x*45+11,y*45,z*45,2)-0.5)); const flush = 0.03*fbm(x*5,y*5,z*5,2) + 0.02*(fbm(x*9+3,y*9,z*9,2)-0.5), zn = zone(x,y,z);
       const palm = (Math.abs(x) > P.hand.c[0]-0.045 && y < 0.8 && z > 0.05) ? 1 : 0; k *= 1 + 0.08*palm;
       const veinReg = (Math.abs(x) > P.arm.pts[1][0]-0.03 && y > 0.62 && y < 1.1 && z > -0.01) ? 1 : 0; const vv = Math.max(0, 0.03 - Math.abs(fbm(x*70,y*70,z*70,2)-0.5))/0.03; const vein = veinReg*vv*(P.physique === 'david' && y < 0.82 ? 1.0 : 0.6);
-      const mole = vnoise(x*260+3.7, y*260, z*260) > 0.9982 ? 1 : 0; const ar = Math.exp(-(Math.pow(Math.abs(x)-0.078,2) + Math.pow(y-1.29,2))/0.00012) * (z > 0.08 ? 1 : 0); const nav = Math.exp(-(x*x + Math.pow(y-1.045,2))/0.00003) * (z > 0.08 ? 1 : 0); let c = [(skinBase[0]*k + flush + 0.07*zn)*(1-0.25*ar)*(1-0.3*nav), (skinBase[1]*k - 0.03*zn)*(1-0.4*ar)*(1-0.3*nav), (skinBase[2]*k - 0.03*zn)*(1-0.4*ar)*(1-0.3*nav)];
+      const mole = 0; /* lattice-noise moles lined up into columns of spots */ const ar = Math.exp(-(Math.pow(Math.abs(x)-0.078,2) + Math.pow(y-1.29,2))/0.00012) * (z > 0.08 ? 1 : 0); const nav = Math.exp(-(x*x + Math.pow(y-1.045,2))/0.00003) * (z > 0.08 ? 1 : 0); let c = [(skinBase[0]*k + flush + 0.07*zn)*(1-0.25*ar)*(1-0.3*nav), (skinBase[1]*k - 0.03*zn)*(1-0.4*ar)*(1-0.3*nav), (skinBase[2]*k - 0.03*zn)*(1-0.4*ar)*(1-0.3*nav)];
       if (vein > 0) c = [c[0]*(1-0.12*vein), c[1]*(1-0.05*vein), c[2]*(1+0.04*vein)]; if (mole) c = [c[0]*0.45, c[1]*0.35, c[2]*0.32]; return c; };
     const skinTop = {size:0.0032, color:skinCol, group:G.skin, thick:0.18, jitter:0.5, density:1.0};
     const A = P.arm, Lg = P.leg;
@@ -908,7 +913,7 @@ LEVELS.push({
       ellipsoid(C0, {size:0.0006, color:nailCol, group:G.skin, jitter:0.2}, [hcn[0] - s*hrr[0]*1.45, hcn[1] - 0.085*sc + 0.006, hcn[2] + 0.045 - 0.006], [0.0045, 0.0055, 0.0012]);
       const fc = [s*P.foot.c[0], P.foot.c[1], P.foot.c[2]], fr = P.foot.r; for (let k = 0; k < 5; k++){ const tx = fc[0] + s*(-0.032 + k*0.016)*(fr[0]/0.048), tz = fc[2] + fr[2]*0.9 - k*0.006 + 0.02*sc*(1-k*0.08); ellipsoid(C0, {size:0.0006, color:nailCol, group:G.skin, jitter:0.2}, [tx, fc[1] - 0.01 + 0.0085*sc*(1-k*0.08)*0.9, tz], [0.0045*(1-k*0.1), 0.0012, 0.005*(1-k*0.1)]); }
     }
-    skinSample({size:0.0062, inset:0.0028, thick:0.3, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const c = skinCol(x,y,z); return [c[0]*0.985, c[1]*0.98, c[2]*0.98]; }}, true);   // same tone as the surface so it never reads as a stain where the top layer thins
+    skinSample({size:0.0062, inset:0.0028, thick:0.18, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const c = skinCol(x,y,z); return [c[0]*0.985, c[1]*0.98, c[2]*0.98]; }}, true);   // same tone as the surface so it never reads as a stain where the top layer thins
     skinSample({size:0.008, inset:0.0055, thick:0.35, jitter:0.25, group:G.skin, color:(x,y,z)=>{ const k = 0.86 + 0.1*(fbm(x*10,y*10,z*10,2)-0.5); return [skinBase[0]*k, skinBase[1]*k*0.96, skinBase[2]*k*0.95]; }}, true);
     const nSkin = C.n;
     // ================= internal anatomy, built at default proportions then scaled to the fitted body
