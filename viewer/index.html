@@ -55,6 +55,9 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
 
 /* level card */
 .card{position:absolute;left:18px;bottom:18px;width:min(380px,calc(100vw - 36px));z-index:4;padding:16px 18px 14px;background:var(--panel);border:1px solid var(--line);border-radius:6px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.card .cardtoggle{display:none;position:absolute;right:10px;top:10px;padding:2px 8px;font-size:14px;line-height:1;border-color:var(--line)}
+.card.collapsed p,.card.collapsed .scale,.card.collapsed .vitals,.card.collapsed .imgs,.card.collapsed .note{display:none}
+.card.collapsed h2{font-size:20px;margin-bottom:8px}
 .card h2{margin:4px 0 2px;font-family:var(--serif);font-weight:400;font-style:italic;font-size:30px;line-height:1.05;text-wrap:balance}
 .card .scale{font-family:var(--mono);font-size:11.5px;color:var(--hema2);margin-bottom:8px;font-variant-numeric:tabular-nums}
 .card p{margin:0 0 12px;color:#C9C4B8;max-width:60ch}
@@ -158,7 +161,9 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
   .card h2{font-size:24px}
   .card p{font-size:12px}
   .drawer{right:10px;top:56px;bottom:64px;width:calc(100vw - 20px)}
-  .scalebar{bottom:auto;top:96px}
+  .scalebar{bottom:auto;top:auto;position:absolute;right:10px;top:56px;transform:none;text-align:right}
+  .scalebar .bar{margin:0 0 4px auto}
+  .card .cardtoggle{display:inline-block}
   .hint{top:52px;font-size:10px}
 }
 @media (max-height:760px) and (min-width:821px){
@@ -188,6 +193,7 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
   <nav class="ladder" id="ladder" aria-label="Scale ladder"></nav>
 
   <aside class="card" id="card">
+    <button class="cardtoggle" id="cardToggle" aria-label="Collapse details" title="Collapse details">▾</button>
     <div class="eyebrow" id="cEyebrow">Level 0 · Organism</div>
     <h2 id="cTitle">The whole body</h2>
     <div class="scale" id="cScale"></div>
@@ -222,6 +228,7 @@ button[disabled]{opacity:.35;cursor:default;border-color:var(--line)}
       <div class="ctl"><label for="eBloom">Bloom</label><input id="eBloom" type="range" min="0" max="1" step="0.02" value="0.14"></div>
       <div class="ctl"><label for="eAp">Depth of field</label><input id="eAp" type="range" min="0" max="1.5" step="0.02" value="0.3"></div>
       <div class="ctl"><label for="eFocus">Focus (near ↔ far)</label><input id="eFocus" type="range" min="-0.6" max="0.8" step="0.02" value="0"></div>
+      <div class="ctl"><label for="eKernel">Splat edge crispness</label><input id="eKernel" type="range" min="1" max="2.5" step="0.05" value="1.6"></div>
       <div class="ctl"><label for="eSharp">Sharpness</label><input id="eSharp" type="range" min="0" max="1.5" step="0.05" value="0.7"></div>
       <div class="ctl"><label for="eAO">Contact shadows</label><input id="eAO" type="range" min="0" max="1.5" step="0.05" value="0.6"></div>
       <div class="ctl"><label for="eDetail">Micro-detail</label><input id="eDetail" type="range" min="0" max="2.5" step="0.05" value="1.3"></div>
@@ -712,7 +719,7 @@ LEVELS.push({
       const mouthY = hp(0,-0.0615,0)[1], faceZ = headC[2] + 0.07*kz;
       return SDF[iter ? 'sampleIter' : 'sample'](skin, (p, n) => {
         if (!inner && !textured && p[1] > P.neck.b[1] + 0.01 && hairRegion(p)){
-          const k = 0.6 + 0.8*fbm(p[0]*140,p[1]*140,p[2]*140,2), part = Math.exp(-Math.pow((p[0]-headC[0]-0.02)/0.006, 2)) * (p[2] > headC[2] - 0.03 ? 1 : 0); const t = [-n[0]*n[1]*0.2 + (p[0] > headC[0]+0.02 ? 0.35 : -0.35), -1, -n[2]*n[1]*0.2];
+          const k = 0.6 + 0.8*fbm(p[0]*140,p[1]*140,p[2]*140,2), part = Math.exp(-Math.pow((p[0]-headC[0]-0.02)/0.006, 2)) * (p[2] > headC[2] - 0.03 ? 1 : 0); const front = Math.max(0, (p[2]-headC[2])/(0.086*kz)); const t = [-n[0]*n[1]*0.2 + (p[0] > headC[0]+0.02 ? 0.35 : -0.35), -1 + 1.5*front, -n[2]*n[1]*0.2 - 1.2*front];
           emit(C, Object.assign({}, skin, {size:0.0036, aspect:4.5, thick:0.12, inset:-0.003 - 0.004*fbm(p[0]*200,p[1]*200,p[2]*200,1), color:()=>[0.19*k + 0.1*part, 0.12*k + 0.06*part, 0.075*k + 0.04*part]}), p, n, t, 0, 0); return;
         }
         if (!inner && !textured && Math.abs(p[0]-headC[0]) < 0.026*kx && Math.abs(p[1]-mouthY) < 0.014*ky && p[2] > faceZ){ emit(C, Object.assign({}, skin, {color:(x,y,z)=>{ const c = skin.color(x,y,z); return c ? lipTint(c, [x,y,z]) : null; }}), p, n, null, 0, 0); return; }
@@ -1205,7 +1212,7 @@ uniform float uSplatScale; uniform float uAlpha; uniform float uGroupAlpha[32]; 
 uniform float uGroupPulseA[32]; uniform float uGroupBreath[32]; uniform float uGroupSizePulse[32]; uniform vec3 uCenterB; uniform float uPulseA, uBreath, uPWV, uPeriod; uniform vec4 uHole; uniform int uHoleMask;
 uniform vec3 uCenter; uniform float uPulse; uniform float uTime; uniform float uShade;
 in vec2 aPos; in uint aIndex;
-out vec4 vColor; out vec2 vPos; out float vDepth; out vec4 vDetail; out float vSeed;
+out vec4 vColor; out vec2 vPos; out float vDepth; out vec4 vDetail; out float vSeed; out float vFlat;
 void main(){
   uint i = aIndex;
   ivec2 tc = ivec2(int((i & 1023u) << 1u), int(i >> 10u));
@@ -1270,23 +1277,23 @@ void main(){
   }
   vColor = vec4(col.rgb, col.a * ga * uAlpha);
   vPos = aPos; vDepth = clamp(-cam.z / uFar, 0.0, 1.0);
-  vDetail = uGroupDetail[g] * vec4(uDetailMul * flatness, 1.0, uDetailMul * flatness, 1.0); vSeed = float(i & 1023u) * 0.618;
+  vDetail = uGroupDetail[g] * vec4(uDetailMul * flatness, 1.0, uDetailMul * flatness, 1.0); vSeed = float(i & 1023u) * 0.618; vFlat = clamp(1.0 - s.z / max(1e-9, min(s.x, s.y)), 0.0, 1.0);
   vec2 ndc = pos2d.xy / pos2d.w;
   gl_Position = vec4(ndc + (aPos.x * major + aPos.y * minor) / uViewport * 2.0, 0.0, 1.0);
 }`;
 const FS = `#version 300 es
 precision highp float;
-in vec4 vColor; in vec2 vPos; in float vDepth; in vec4 vDetail; in float vSeed; layout(location=0) out vec4 frag; layout(location=1) out vec4 fragD;
+in vec4 vColor; in vec2 vPos; in float vDepth; in vec4 vDetail; in float vSeed; in float vFlat; uniform float uKernel; layout(location=0) out vec4 frag; layout(location=1) out vec4 fragD;
 float h21(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 float vn2(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0 - 2.0*f); return mix(mix(h21(i), h21(i + vec2(1,0)), f.x), mix(h21(i + vec2(0,1)), h21(i + vec2(1,1)), f.x), f.y); }
-void main(){ float A = -dot(vPos, vPos); if (A < -4.0) discard; float B = exp(A) * vColor.a; vec3 c = vColor.rgb;
+void main(){ float r2 = dot(vPos, vPos); if (r2 > 4.0) discard; float A = -pow(r2, mix(1.0, uKernel, vFlat)); float B = exp(A) * vColor.a; vec3 c = vColor.rgb;
   if (vDetail.x > 0.0 || vDetail.z > 0.0){ vec2 q = vPos * vDetail.y + vSeed; float n = vn2(q) * 0.65 + vn2(q * 2.7 + 3.1) * 0.35; float m = 1.0 + vDetail.x * (n - 0.5) * 2.0 + vDetail.z * sin(vPos.y * vDetail.y * 2.6 + vSeed); c *= clamp(m, 0.0, 2.0); }
   frag = vec4(B * c, B); fragD = vec4(B * vDepth, 0.0, 0.0, B); }`;
 function compile(type, src){ const sh = gl.createShader(type); gl.shaderSource(sh, src); gl.compileShader(sh); if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh)); return sh; }
 const prog = gl.createProgram(); gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog);
 if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
 gl.useProgram(prog);
-const U = {}; for (const n of ['uTex','uView','uProj','uFocal','uViewport','uSplatScale','uAlpha','uGroupAlpha','uGroupPulse','uGroupWobble','uCenter','uPulse','uTime','uShade','uGroupShade','uGroupMat','uGroupDetail','uFar','uDetailMul','uGroupPulseA','uGroupBreath','uGroupSizePulse','uCenterB','uPulseA','uBreath','uPWV','uPeriod','uHole','uHoleMask']) U[n] = gl.getUniformLocation(prog, n);
+const U = {}; for (const n of ['uTex','uView','uProj','uFocal','uViewport','uSplatScale','uAlpha','uGroupAlpha','uGroupPulse','uGroupWobble','uCenter','uPulse','uTime','uShade','uGroupShade','uGroupMat','uGroupDetail','uFar','uDetailMul','uGroupPulseA','uGroupBreath','uGroupSizePulse','uCenterB','uPulseA','uBreath','uPWV','uPeriod','uHole','uHoleMask','uKernel']) U[n] = gl.getUniformLocation(prog, n);
 const A_POS = gl.getAttribLocation(prog, 'aPos'), A_IDX = gl.getAttribLocation(prog, 'aIndex');
 const quadBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-2,-2, 2,-2, -2,2, 2,2]), gl.STATIC_DRAW);
 gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFuncSeparate(gl.ONE_MINUS_DST_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE);
@@ -1404,7 +1411,7 @@ function drawLevel(lv, alphaMul, cam, proj, focal){
   gl.uniform1fv(U.uGroupPulseA, lv.pulseAArr || ZERO32); gl.uniform1fv(U.uGroupBreath, lv.breathArr || ZERO32); gl.uniform1fv(U.uGroupSizePulse, state.live ? (lv.sizePulseArr || ZERO32) : ZERO32);
   const bc = lv.breathCenter || [0,0,0]; gl.uniform3f(U.uCenterB, bc[0], bc[1], bc[2]); gl.uniform1f(U.uPWV, lv.rawUnit ? PHYS.pwv / lv.rawUnit : 0); gl.uniform1f(U.uPeriod, 60 / PHYS.hr);
   gl.uniform1f(U.uTime, state.time); gl.uniform1f(U.uShade, lv.isScan ? 0 : state.shade);
-  const hole = (!lv.isPatch && lv.patch && lv.patch.ready) ? lv.patch.sphere : null; gl.uniform4f(U.uHole, hole ? hole[0] : 0, hole ? hole[1] : 0, hole ? hole[2] : 0, hole ? hole[3] : 0); gl.uniform1i(U.uHoleMask, (1<<0) | (1<<12));
+  const hole = (!lv.isPatch && lv.patch && lv.patch.ready) ? lv.patch.sphere : null; gl.uniform4f(U.uHole, hole ? hole[0] : 0, hole ? hole[1] : 0, hole ? hole[2] : 0, hole ? hole[3] : 0); gl.uniform1i(U.uHoleMask, (1<<0) | (1<<12)); gl.uniform1f(U.uKernel, ENGINE.kernel);
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, lv.gpu.tex);
   gl.bindVertexArray(lv.gpu.vao); gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, lv.count); gl.bindVertexArray(null);
 }
@@ -1430,7 +1437,8 @@ const DETAILS = { eye:[0,0,0,0], skin:[0.11,3.6,0,0], wet:[0.07,2.6,0,0.06], bon
 // =====================================================================
 //  Visualization engine: MRT scene buffer (color + depth) -> bloom -> composite
 // =====================================================================
-const ENGINE = { on:true, ao:0.6, detail:1.3, sharp:0.7, exposure:0.95, bloom:0.14, aperture:0.3, focusOff:0, fog:0.14, grain:0.02, vignette:0.3, sat:1.06, contrast:1.05, fogColor:[0.055,0.07,0.10] };
+const MOBILE = (navigator.maxTouchPoints > 0) && Math.min(screen.width, screen.height) < 820;
+const ENGINE = { on:true, kernel: 1.6, ao: MOBILE ? 0.4 : 0.6, detail:1.3, sharp: MOBILE ? 1.0 : 0.7, exposure:0.95, bloom: MOBILE ? 0.08 : 0.14, aperture: MOBILE ? 0.12 : 0.3, focusOff:0, fog: MOBILE ? 0.06 : 0.14, grain: MOBILE ? 0 : 0.02, vignette:0.3, sat:1.06, contrast:1.05, fogColor:[0.055,0.07,0.10] };
 const LOOKS = {
   'Cinematic': { ao:0.7, detail:1.3, sharp:0.7, exposure:0.95, bloom:0.16, aperture:0.35, fog:0.16, grain:0.025, vignette:0.35, sat:1.08, contrast:1.06 },
   'Clinical': { ao:0.35, detail:0.9, sharp:0.9, exposure:1.05, bloom:0.08, aperture:0.0, fog:0.0, grain:0.0, vignette:0.05, sat:1.0, contrast:1.0 },
@@ -1682,14 +1690,17 @@ function buildLayers(lv){
 function updateVitals(){ const lv = LEVELS[state.cur]; const el = $('cVitals'); if (!lv.vitals){ el.textContent = ''; return; } const v = PHYS.vitals(); el.textContent = PHYS.hr + ' bpm · SV ' + Math.round(v.sv) + ' mL · CO ' + v.co.toFixed(1) + ' L/min · EF ' + Math.round(v.ef*100) + ' % · BP ' + v.sys + '/' + v.dia + ' · ' + PHYS.rr + ' breaths/min · TV ' + Math.round(v.tv*1000) + ' mL · PWV ' + PHYS.pwv + ' m/s'; }
 function toggleDrawer(){ state.drawer = !state.drawer; $('drawer').classList.toggle('hidden', !state.drawer); $('btnDrawer').setAttribute('aria-pressed', String(state.drawer)); }
 $('btnDrawer').addEventListener('click', toggleDrawer);
+$('cardToggle').addEventListener('click', () => { const c = $('card'); c.classList.toggle('collapsed'); $('cardToggle').textContent = c.classList.contains('collapsed') ? '▴' : '▾'; });
+if (MOBILE){ $('card').classList.add('collapsed'); $('cardToggle').textContent = '▴'; state.drawer = false; $('drawer').classList.add('hidden'); $('btnDrawer').setAttribute('aria-pressed', 'false'); }
 $('btnUp').addEventListener('click', () => goTo(state.cur-1)); $('btnDown').addEventListener('click', () => goTo(state.cur+1)); $('btnReset').addEventListener('click', resetView);
 document.querySelectorAll('.drawer .tabs button').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('.drawer .tabs button').forEach(x => x.classList.toggle('on', x === b)); document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.id === 'pane-' + b.dataset.pane)); }));
 $('rSize').addEventListener('input', (e) => state.splatScale = +e.target.value);
 // ---- engine controls
-const EBIND = { eExp:'exposure', eBloom:'bloom', eAp:'aperture', eFocus:'focusOff', eFog:'fog', eGrain:'grain', eVig:'vignette', eSat:'sat', eAO:'ao', eDetail:'detail', eSharp:'sharp' };
+const EBIND = { eExp:'exposure', eBloom:'bloom', eAp:'aperture', eFocus:'focusOff', eFog:'fog', eGrain:'grain', eVig:'vignette', eSat:'sat', eAO:'ao', eDetail:'detail', eSharp:'sharp', eKernel:'kernel' };
 for (const [id, key] of Object.entries(EBIND)) $(id).addEventListener('input', (e) => { ENGINE[key] = +e.target.value; $('looks').querySelectorAll('button').forEach(b => b.classList.remove('on')); });
 $('eOn').addEventListener('change', (e) => ENGINE.on = e.target.checked);
 (function(){ const box = $('looks'); for (const [name, look] of Object.entries(LOOKS)){ const b = document.createElement('button'); b.textContent = name; if (name === 'Cinematic') b.classList.add('on'); b.addEventListener('click', () => { Object.assign(ENGINE, look); for (const [id, key] of Object.entries(EBIND)) if (look[key] != null) $(id).value = look[key]; box.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); }); box.appendChild(b); } })();
+for (const [id, key] of Object.entries(EBIND)) if (ENGINE[key] != null) $(id).value = ENGINE[key];
 if (!extFloat) setHint('Half-float render targets are unavailable here; the engine runs in 8-bit.');
 function refreshMaterialUI(){
   const lv = LEVELS[state.cur], sel = $('mLayer'); const prev = sel.value; sel.innerHTML = '';
