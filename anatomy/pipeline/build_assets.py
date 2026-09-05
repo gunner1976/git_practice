@@ -362,6 +362,9 @@ def bake_world_transforms(objs):
     bpy.context.view_layer.update()
     mats = {o.name: o.matrix_world.copy() for o in objs}
     for o in objs:
+        if o.data.users > 1:                 # mirrored pairs share one mesh in the FBX; each side needs its own copy
+            o.data = o.data.copy()
+    for o in objs:
         m = mats[o.name]
         o.parent = None
         o.matrix_world = Matrix.Identity(4)
