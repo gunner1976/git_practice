@@ -100,6 +100,7 @@ slide("11. New sources read in the second pass: CNH polygon, CMI fractures", [
     "CNH annual filings: 16.1 kbbl (2020, both wells, Apr-Jun shut in), 17.4 kbbl (2021, TEC-10 only, GOR 859 scf/bbl, 29.3 API); field shut in from Jul 2022, restarted late Nov 2022 on TEC-10.",
     "TEC-10 core (only rock data): recrystallised grainstone, 2-8 % porosity, 0.01-0.5 mD at stress, 14-59 % PV residual oil; no electrical properties.",
     "CMI (right): no open fracture in the TEC-12 window or the perforated 10 m; open fractures start below 2,320 mSS in the produced, water-bearing interval. TEC-10 is matrix flow (G-09 closed).",
+    "Sw sensitivity (72 cases, anchored to the aquifer and the producing interval): the window is water at TEC-10 on the core-supported density porosity, Sw >= 1.1 vs 0.6-1.0 in the perforations; N-D crossover flips sign at 2,311 mSS. Base case on 2,311-2,332 mSS; the window is upside only if TEC-12 logs it cleaner (docs/14).",
     "2025 reform: contract fiscal terms preserved per secondary sources; regulator now CNE; contract-to-assignment substitution clause to be checked by counsel (G-49)."], "figures/14_cmi_fractures.png", 6.6)
 slide("12. Decisions and the gap register", [
     "Before sanction: (1) core-calibrated petrophysics of TEC-10's upper zone (G-47); (2) static gradient on TEC-10 after the multi-year shut-in; (3) confirm AFE currency and re-index escalation (G-44, G-45); (4) pull the ten large-file binaries into data/raw (G-52; their text was read, docs/12).",
