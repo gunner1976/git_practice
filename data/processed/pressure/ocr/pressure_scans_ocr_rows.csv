@@ -1,0 +1,202 @@
+file,page,engine,depth_m,pressure_kgcm2,line
+"Tecolutla-2 Static Gradient Dec 5, 1964.pdf",1,rapidocr,250,61.6,0.0K | 250 61.6 20.8 0.0832 | 82-1 NIVELACEITE | 500 20.5 0
+"Tecolutla-2 Static Gradient Dec 5, 1964.pdf",1,rapidocr,1000,122.0,AGUA | 1000 122.0 6-6E 0.0798 3165.0 | TIEMPO CERRADO | 1500 
+"Tecolutla-2 Static Gradient Dec 5, 1964.pdf",1,rapidocr,1500,168.6,RADO | 1500 168.6 46.6 0.0932 75dan | TEMPERATURA BOCAPOZO | 
+"Tecolutla-2 Static Gradient Dec 5, 1964.pdf",1,rapidocr,2000,218.5,POZO | 2000 218.5 49.9 0.0999 15 | 241-9 TEM.MAX.DE FONDO 1
+"Tecolutla-2 Static Gradient Dec 5, 1964.pdf",1,rapidocr,2285,246.6,0995 | 2285 246.6 64 0.0980 ELEV.MESA ROTARIA 3.80 | 4.9 FE
+"Tecolutla-2 Static Gradient Dec 5, 1964.pdf",1,rapidocr,2335,251.7,REG. | 2335 251.7 0.0930 | 0.19 PRESION ULTIMO REG. | 2337 25
+"Tecolutla-2 Static Gradient Dec 5, 1964.pdf",1,rapidocr,2337,251.89,REG. | 2337 251.89 Hivol Hodio Perf 0.0980 VARIACION PRES.
+"Tecolutla-2 Static Gradient Dec 5, 1964.pdf",1,rapidocr,2335,251.7,20-N | 2335 251.70 | -212 128 PROFUNDIDADESSUB-ROTARIA | 2313.
+"Tecolutla-2 Static Gradient May 24, 1956.pdf",1,rapidocr,0,187.8,MTS. | 0 187.8 PRESION T.R. S/0 | 250 193.8 6-0 0.02/0 P
+"Tecolutla-2 Static Gradient May 24, 1956.pdf",1,rapidocr,250,193.8, S/0 | 250 193.8 6-0 0.02/0 PRESION T.P. 187.8Kp/2 | 500 2
+"Tecolutla-2 Static Gradient May 24, 1956.pdf",1,rapidocr,500,200.0,Kp/2 | 500 200.0 62 0.0218 NIVEL ACEITE 2210.0 | 750 206.2
+"Tecolutla-2 Static Gradient May 24, 1956.pdf",1,rapidocr,750,206.2,10.0 | 750 206.2 62 0.0248 NIVEL AGUA | 1060 212.4 62 0.02
+"Tecolutla-2 Static Gradient May 24, 1956.pdf",1,rapidocr,1060,212.4,AGUA | 1060 212.4 62 0.0248 HORAS CERRADO 2con5min | 1250 2
+"Tecolutla-2 Static Gradient May 24, 1956.pdf",1,rapidocr,1250,218.6,5min | 1250 218.6 6-2 0.0248 TEMPERATURA MAXIMA 1O2P0 | 150
+"Tecolutla-2 Static Gradient May 24, 1956.pdf",1,rapidocr,1500,225.4,O2P0 | 1500 225.4 6-8 0.0272 ELEVACION M.8.3.0 | 1750 232.2
+"Tecolutla-2 Static Gradient May 24, 1956.pdf",1,rapidocr,1750,232.2,.3.0 | 1750 232.2 6-8 0.0272 FECHA ULTIMO REG. | 2000 239.0
+"Tecolutla-2 Static Gradient May 24, 1956.pdf",1,rapidocr,2000,239.0,REG. | 2000 239.0 6.8 0-0272 PRESION ULTIMO REG | 2210 215.
+"Tecolutla-2 Static Gradient May 24, 1956.pdf",1,rapidocr,2210,215.0, REG | 2210 215.0 6.0 0.0286 VARIACION PRES.FONDO | 2260 24
+"Tecolutla-2 Static Gradient May 24, 1956.pdf",1,rapidocr,2260,248.5,ONDO | 2260 248.5 3.5 0.0700 PERDIDA DIB. | 2300 252.0 35 0
+"Tecolutla-2 Static Gradient May 24, 1956.pdf",1,rapidocr,2300,252.0,"DIB. | 2300 252.0 35 0,0700 INSTRUMENTO AM8014 12778 | DIST"
+"Tecolutla-6 Static Gradient Aug 12, 1971.pdf",1,tesseract,374,79.2,"m) | 0 374 79.2 PRESICIN T, P, T9062 kgicmi | 250 | 383 |"
+"Tecolutla-6 Static Gradient Aug 12, 1971.pdf",1,tesseract,427,90.4," | 500 427 90.4 9.3 20372 NIVEL ACEITE 1000  ,, | 1000 | "
+"Tecolutla-6 Static Gradient Aug 12, 1971.pdf",1,tesseract,2337,248.0,0 Ta | 2337 248.0 NIV.MED.PERF. 1.1005 GRADIENTE YACIMIEN
+"Tecolutla-6 Static Gradient Aug 12, 1971.pdf",1,rapidocr,374,79.2,/m | 0 374 79.2 79.2 Kg/cm2 | PRESIONT.P | 250 383 81.1 1.9
+"Tecolutla-6 Static Gradient Aug 12, 1971.pdf",1,rapidocr,383,81.1, | 250 383 81.1 1.9 0076 SIN CONBX | PRESIONT.R Kg/cm? | 50
+"Tecolutla-6 Static Gradient Aug 12, 1971.pdf",1,rapidocr,427,90.4, | 500 427 90.4 9.3 0372 1000 | NIVELACEITE mi | 1000 615 1
+"Tecolutla-6 Static Gradient Aug 12, 1971.pdf",1,rapidocr,615,130.2,1000 615 130.2 12.8 .0256 1786 | NIVEL AGUA m | 1500 798 1
+"Tecolutla-6 Static Gradient Aug 12, 1971.pdf",1,rapidocr,798,168.9,1500 798 168.9 38.7 0774 10 DIAS | TIEMPOCERRADO | 1930 97
+"Tecolutla-6 Static Gradient Aug 12, 1971.pdf",1,rapidocr,971,205.6,1930 971 205.6 36.7 0853 32C | TEMPERATURABOCAPOZO | 2130 
+"Tecolutla-6 Static Gradient Aug 12, 1971.pdf",1,rapidocr,1067,225.9,2130 1067 225.9 20.3 .1015 66 | TEMPERATURA MAXIMA | 2330 1
+"Tecolutla-6 Static Gradient Aug 12, 1971.pdf",1,rapidocr,1162,246.0,2330 1162 246.0 20.1 .1005 19359-N | INSTRUMENTO | .21170 K
+"Tecolutla-6 Static Gradient Aug 12, 1971.pdf",1,rapidocr,2337,248.0,ENTO | 2337 248.0 NIV.MSD.PERF..IOO5 | GRADIENTE YACIMIENTO
+"Tecolutla-6 Static Gradient Aug 17, 1971.pdf",1,tesseract,447,94.6, | 500 447 94.6 11.6 eO464 | nivetacerre 368 ” | 1000 | 6
+"Tecolutla-6 Static Gradient Aug 17, 1971.pdf",1,tesseract,2337,248.6,"""-*s | 2337 248.6 |NIV.MED.PERF. |.1015 | SRADIENTE YACIM"
+"Tecolutla-6 Static Gradient Aug 17, 1971.pdf",1,rapidocr,381,80.7,m/m) | 381 80.7 B0.7 Kg/cm? | PRESION T.P. | 250 392 83.0 2
+"Tecolutla-6 Static Gradient Aug 17, 1971.pdf",1,rapidocr,392,83.0, | 250 392 83.0 2.3 .0092 XTNOO NIS Kg/cm? | PRESION T.R.
+"Tecolutla-6 Static Gradient Aug 17, 1971.pdf",1,rapidocr,447,94.6, | 500 447 94.6 11.6 .0464 NIVEL ACEITE 368 | m | 1000 635 
+"Tecolutla-6 Static Gradient Aug 17, 1971.pdf",1,rapidocr,635,134.4,1000 635 134.4 39.8 .0796 NIVEL AGUA 1930 | m | 1500 816 1
+"Tecolutla-6 Static Gradient Aug 17, 1971.pdf",1,rapidocr,816,172.7,1500 816 172.7 38.3 .0766 TIEMPO CERRADO 15 DIAS | 1930 
+"Tecolutla-6 Static Gradient Aug 17, 1971.pdf",1,rapidocr,978,207.0,1930 978 207.0 34.3 .0798 TEMPERATURABOCAPOZO 36C | 2130
+"Tecolutla-6 Static Gradient Aug 17, 1971.pdf",1,rapidocr,1075,227.6,2130 1075 227.6 20.6 .1030 TEMPERATURA MAXIMA 94℃ | 2330 
+"Tecolutla-6 Static Gradient Aug 17, 1971.pdf",1,rapidocr,1171,247.9,2330 1171 247.9 20.3 .1015 INSTRUMENTO 19359- | Kg/cm? | MO
+"Tecolutla-6 Static Gradient Aug 24, 1971.pdf",1,tesseract,402,65.1, | 250 402 65.1 ‘ 2.1 20084 PRESION TR SIN CONEX Kagem?
+"Tecolutla-6 Static Gradient Aug 24, 1971.pdf",1,tesseract,2337,249.7,CAEN | 2337 249.7 |NIV.MED.PERP. | «1010 | crapiente YACI
+"Tecolutla-6 Static Gradient Aug 24, 1971.pdf",1,rapidocr,392,83.0,m/m] | 392 83.0 83.0 | PRESION T.P. Kg/cm? | 250 402 85.1 2
+"Tecolutla-6 Static Gradient Aug 24, 1971.pdf",1,rapidocr,402,85.1, | 250 402 85.1 2.1 .0084 SIN CONEK | PRESION T.R. Kg/cm?
+"Tecolutla-6 Static Gradient Aug 24, 1971.pdf",1,rapidocr,465,98.4, | 500 465 98.4 13.3 .0532 342 | NIVEL ACEITE m | 1000 652 
+"Tecolutla-6 Static Gradient Aug 24, 1971.pdf",1,rapidocr,652,138.0,1000 652 138.0 39.6 .0792 1930 | NIVEL AGUA m | OO5T 833 1
+"Tecolutla-6 Static Gradient Aug 24, 1971.pdf",1,rapidocr,833,176.3,OO5T 833 176.3 38.3 .0766 22 DTAS | TIEMPO CERRADO | 1930 
+"Tecolutla-6 Static Gradient Aug 24, 1971.pdf",1,rapidocr,985,208.5,1930 985 208.5 32.2 .0891 32 | TEMPERATURA BOCAPOZO C | 21
+"Tecolutla-6 Static Gradient Aug 24, 1971.pdf",1,rapidocr,1081,228.8,2130 1081 228.8 20.3 .1015 94 | TEMPERATURA MAXIMA C | 2330
+"Tecolutla-6 Static Gradient Aug 24, 1971.pdf",1,rapidocr,1176,249.0,2330 1176 249.0 20.2 .1010 19359-N | INSTRUMENTO | Kq/cm? | M
+"Tecolutla-6 Static Gradient Aug 28, 1971.pdf",1,tesseract,2337,250.1,""" eu | 2337 250.1 | RIV.MEDLPERF. (,1005 | orabiente YACI"
+"Tecolutla-6 Static Gradient Aug 28, 1971.pdf",1,rapidocr,393,83.2,m） | 0 393 83.2 PRESION T.P. 83.2 Kg/cm? | 250 403 85.3 2
+"Tecolutla-6 Static Gradient Aug 28, 1971.pdf",1,rapidocr,403,85.3, | 250 403 85.3 2.1 .0084 SIN CONEX Kg/cm? | PRESION T.R.
+"Tecolutla-6 Static Gradient Aug 28, 1971.pdf",1,rapidocr,658,139.3,1000 658 139.3 39.4 .0788 NIVEL AGUA 1945m | 1500 839 17
+"Tecolutla-6 Static Gradient Aug 28, 1971.pdf",1,rapidocr,839,177.6,1500 839 177.6 38.3 0766 TIEMPO CERRADO 26 DIAS | 1930 9
+"Tecolutla-6 Static Gradient Aug 28, 1971.pdf",1,rapidocr,990,209.6,1930 990 209.6 32.0 0744 TEMPERATURA BOCAPOZO | 2130 108
+"Tecolutla-6 Static Gradient Aug 28, 1971.pdf",1,rapidocr,1083,229.3,2130 1083 229.3 19.7 .0985 TEMPERATURA MAXIMA 94℃ | 2330 
+"Tecolutla-6 Static Gradient Aug 28, 1971.pdf",1,rapidocr,1178,249.4,2330 1178 249.4 2011 1005 INSTRUMENTO 19359-N | Kg/cm | MOD
+"Tecolutla-6 Static Gradient Aug 28, 1971.pdf",1,rapidocr,2337,250.1,·plg | 2337 250.1 NIV.MEDIPERF. 1005 Kg/cm²/m | GRADIENTE Y
+"Tecolutla-6 Static Gradient Aug 6, 1971.pdf",1,tesseract,350,74.1, | O | 350 74.1 PRESION T. P. Thel Kg/em? | 250 359 76.0|
+"Tecolutla-6 Static Gradient Aug 6, 1971.pdf",1,tesseract,359,76.0," | 250 359 76.0| . 1,9 00076 | presion 2° SIN CONEX kg/"
+"Tecolutla-6 Static Gradient Aug 6, 1971.pdf",1,tesseract,2337,240.3,70 o | 2337 240.3 /HIV.MED.PERF. | -1005 GRADIENTE YACIMI
+"Tecolutla-6 Static Gradient Aug 6, 1971.pdf",1,rapidocr,350,74.1,m） | 0 350 74.1 74.1 | PRESIONT.P. Kg/cm? | 250 359 76.0 1.
+"Tecolutla-6 Static Gradient Aug 6, 1971.pdf",1,rapidocr,359,76.0, | 250 359 76.0 1.9 .0076 | PRESIONT.R SIN CONEX Kg/cm? | 5
+"Tecolutla-6 Static Gradient Aug 6, 1971.pdf",1,rapidocr,378,80.0, | 500 378 80.0 4.0 0160 471m | NIVEL ACEITE | 1000 568 120
+"Tecolutla-6 Static Gradient Aug 6, 1971.pdf",1,rapidocr,568,120.2,1000 568 120.2 40.2 0804 1722m | NIVEL AGUA | 1500 751 159
+"Tecolutla-6 Static Gradient Aug 6, 1971.pdf",1,rapidocr,751,159.0,1500 751 159.0 38.8 .0776 4DIAS | TIEMPO CERRADO | 1930 94
+"Tecolutla-6 Static Gradient Aug 6, 1971.pdf",1,rapidocr,942,199.4,1930 942 199.4 40.4 0940 30℃ | TEMPERATURA BOCAPOZO | 2130
+"Tecolutla-6 Static Gradient Aug 6, 1971.pdf",1,rapidocr,1037,219.5,2130 1037 219.5 20.1 .1005 94℃ | TEMPERATURA MAXIMA | 2330 
+"Tecolutla-6 Static Gradient Aug 6, 1971.pdf",1,rapidocr,1132,239.6,2330 1132 239.6 20.1 .1005 | INSTRUMENTO 19359-N | Kg/cm2 | M
+"Tecolutla-6 Static Gradient Aug 6, 1971.pdf",1,rapidocr,2337,240.3,-plg | 2337 240.3 NIV.MED.PERF. .1005 | GRADIENTEYACIMIENTO
+"Tecolutla-6 Static Gradient Aug 9, 1971.pdf",1,tesseract,469,77.3,"} |  | 0 469 77.3 PRESION T, P, 1.3 Cate | 250 375 79.4 : 2"
+"Tecolutla-6 Static Gradient Aug 9, 1971.pdf",1,tesseract,375,79.4, | 250 375 79.4 : 2.1 0084 | PRESION T. Rk. SIN ocomex 
+"Tecolutla-6 Static Gradient Aug 9, 1971.pdf",1,tesseract,406,86.0, | 500 406 86.0 6.6 90264 | NIVEL ACEITE 431 7 |  | 1000 59
+"Tecolutla-6 Static Gradient Aug 9, 1971.pdf",1,tesseract,178,164.7,1500 178 164.7 38.5 sO7T70 TIEMPO CERRADO: 7 DIAS | 1930
+"Tecolutla-6 Static Gradient Aug 9, 1971.pdf",1,tesseract,2337,244.6," plg | 2337 244.6 |NIY.MED. PERF, +1015 | SRADIENTE YACIM"
+"Tecolutla-6 Static Gradient Aug 9, 1971.pdf",1,rapidocr,369,77.3,2/m） | 369 77.3 PRESION T.P. 77.3 Kg/cm2 | 250 375 79.4 2
+"Tecolutla-6 Static Gradient Aug 9, 1971.pdf",1,rapidocr,375,79.4, | 250 375 79.4 2.1 0084 PRESION T.R. SIH 0onxKg/cm2 | 50
+"Tecolutla-6 Static Gradient Aug 9, 1971.pdf",1,rapidocr,406,86.0, | 500 406 86.0 6.6 .0264 NIVELACEITE 437 m | 1000 596 12
+"Tecolutla-6 Static Gradient Aug 9, 1971.pdf",1,rapidocr,596,126.2,1000 596 126.2 40.2 .804 NIVEL AGUA 1696 m | 1500 778 16
+"Tecolutla-6 Static Gradient Aug 9, 1971.pdf",1,rapidocr,778,164.7,1500 778 164.7 38.5 .0770 TIEMPOCERRADO 7DIAS | 1930 961
+"Tecolutla-6 Static Gradient Aug 9, 1971.pdf",1,rapidocr,4,38.7, 203-4 38.7 0900 TEMPERATURABOCAPOZO 29 | 2130 1056 2
+"Tecolutla-6 Static Gradient Aug 9, 1971.pdf",1,rapidocr,1056,223.6,2130 1056 223.6 20.2 .1010 TEMPERATURA MAXIMA 95 °C | 233
+"Tecolutla-6 Static Gradient Aug 9, 1971.pdf",1,rapidocr,1152,243.9,2330 1152 243.9 20.3 2015 INSTRUMENTO 19359- | Kg/cm? | MOD
+"Tecolutla-6 Static Gradient Aug 9, 1971.pdf",1,rapidocr,2337,244.6,70 . | 2337 244.6 NZV.NED.PERF. .1015 GRADIENTE YACIMIENT
+"Tecolutla-6 Static Gradient Dec 2, 1964.pdf",1,rapidocr,500,65.2,s/a. | 500 65.2 23.0 0.0460 PRESIONT.P.42.2K/2 | 1000 95.
+"Tecolutla-6 Static Gradient Dec 2, 1964.pdf",1,rapidocr,1000,95.8,2K/2 | 1000 95.8 30.6 0.0612 NIVEL ACEITE | 1500 131-1 35.
+"Tecolutla-6 Static Gradient Dec 2, 1964.pdf",1,rapidocr,1,35.3, 131-1 35.3 0.0796 NIVELAGUA | 2000 158.1 70 0.0740 T
+"Tecolutla-6 Static Gradient Dec 2, 1964.pdf",1,rapidocr,2000,158.1,AGUA | 2000 158.1 70 0.0740 TIEMPO CERRADO | 2230 185.5 27.
+"Tecolutla-6 Static Gradient Dec 2, 1964.pdf",1,rapidocr,2230,185.5,RADO | 2230 185.5 27.4 0.0756 TEMPERATURA BOCA POZO | 2280 
+"Tecolutla-6 Static Gradient Dec 2, 1964.pdf",1,rapidocr,2280,189.3,POZO | 2280 189.3 3.8 0.0760 TEM.MAX.DE FONDO 100° | 193.1 
+"Tecolutla-6 Static Gradient Dec 2, 1964.pdf",1,rapidocr,2337,293.63,REG. | 2337 293.63 Rivol Hedio Perf 0.0760 PRESION ULTIMO 
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,tesseract,1194,169.1,"35 - 1194 169.1 - FLUYENDO ESPONTANEO | lo. "" 14:55 - 120"
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,tesseract,1206,170.8,"55 - 1206 170.8 1.7 "" "" | to. "" 15:00 0:00 1219 172.6 - C"
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,tesseract,1219,172.6,0:00 1219 172.6 - CERRADO | lo. * 21:00 5100 1348 190.9 1
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,tesseract,1348,190.9,"5100 1348 190.9 19.3 "" | Zo. "" 3;00 12100 1424 20106 10<7"
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,tesseract,1474,208.7,"8:00 1474 208.7 Fel "" | EL 15:00 24:00 1506 213.2 hs "" | 2s"
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,tesseract,1506,213.2,"4:00 1506 213.2 hs "" | 2s 21100 30:00 1527 216.2 3.0 "" | 3 "
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,tesseract,1527,216.2,"0:00 1527 216.2 3.0 "" | 3 « 3:00 36:00 1546 219.9 3.7 "" | 3"
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,tesseract,1546,219.9,"6:00 1546 219.9 3.7 "" | 3 ” 9:00 42:00 1566 221.7 1.8 $“ | "
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,tesseract,1566,221.7,"2:00 1566 221.7 1.8 $“ | 3 "" 15:00 48:00 1585 22464 2.7 $"
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,tesseract,1605,227.3,"4100 1605 227.3 2.9 "" | Bb oon 3:00 60:00 1620 22964 201 "
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,tesseract,1535,231.5,"6:00 1535 231.5 2.1 u | h on 11:30 66330 1640 232.2 0-7 """
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,tesseract,1640,232.2,"6330 1640 232.2 0-7 "" | "
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,rapidocr,1194,169.1,4:35 1194 169.1 FLUYENDO ESPONTANEO | 10. 14:55 1206 170.
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,rapidocr,1206,170.8,4:55 1206 170.8 1.7 I1 | 10. 15:00 0:00 1219 172.6 CERRAD
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,rapidocr,1219,172.6,0:00 1219 172.6 CERRADO | 10 21:00 6:00 1348 190.9 18.3 | 2
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,rapidocr,1348,190.9,6:00 1348 190.9 18.3 | 20 12:00 1424 201.6 10.? | 2 9:00 18
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,rapidocr,1424,201.6,2:00 1424 201.6 10.? | 2 9:00 18:00 1474 208.7 7.1 | 2 15:0
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,rapidocr,1474,208.7,8:00 1474 208.7 7.1 | 2 15:00 24:00 1506 213.2 4。5 | 2 21:0
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,rapidocr,1506,213.2,4:00 1506 213.2 4。5 | 2 21:00 30:00 1527 216.2 3.0 | 3 3:00
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,rapidocr,1527,216.2,0:00 1527 216.2 3.0 | 3 3:00 36:00 1546 219.9 3.7 | 3 00:6 
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,rapidocr,1546,219.9,6:00 1546 219.9 3.7 | 3 00:6 42:00 1566 221.7 1:8 H | 3 15:
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,rapidocr,1566,221.7,2:00 1566 221.7 1:8 H | 3 15:00 48:00 1585 224.4 2.7 | 3 # 
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,rapidocr,1585,224.4,8:00 1585 224.4 2.7 | 3 # 21:00 54:00 1605 227.3 2.9 | 4 3:
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,rapidocr,1605,227.3,4:00 1605 227.3 2.9 | 4 3:00 60:00 1620 229.4 2.1 | 4 9:00 
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,rapidocr,1620,229.4,0:00 1620 229.4 2.1 | 4 9:00 66:00 1635 231.5 2.1 慧 | 4 11:
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,rapidocr,1635,231.5,6:00 1635 231.5 2.1 慧 | 4 11:30 68:30 1640 232.2 0.7
+"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",1,rapidocr,1640,232.2,8:30 1640 232.2 0.7
+"Tecolutla-6 Static Gradient Oct 18, 1971.pdf",1,tesseract,373,79.0,e: | 0 373 79.0 PRESION T. P. 79.0 kg/cm? | 250 | 383 | 8
+"Tecolutla-6 Static Gradient Oct 18, 1971.pdf",1,tesseract,2337,251.6,"""Pla | 2337 251.6 INIV.MED.PERP, («1005 | SRADIENTE YACIM"
+"Tecolutla-6 Static Gradient Oct 18, 1971.pdf",1,rapidocr,373,79.0,m） | 0 373 79.0 PRESION T.P. 79.0 Kg/cm7 | 250 383 81.1 2
+"Tecolutla-6 Static Gradient Oct 18, 1971.pdf",1,rapidocr,383,81.1, | 250 383 81.1 2.1 .0084 PRESIONT.R. SIN CONEX Kg/cm? | 
+"Tecolutla-6 Static Gradient Oct 18, 1971.pdf",1,rapidocr,500,100.3,/cm? | 500 100.3 19.2 0768 NIVEL ACEITE 217 | m | 1000 659 1
+"Tecolutla-6 Static Gradient Oct 18, 1971.pdf",1,rapidocr,659,139.5,1000 659 139.5 39.2 .0784 NIVEL AGUA 1930 | m | 1500 842 1
+"Tecolutla-6 Static Gradient Oct 18, 1971.pdf",1,rapidocr,842,188.3,1500 842 188.3 38.8 0776 | TIEMPO CERRADO 74DIAS | 1930 99
+"Tecolutla-6 Static Gradient Oct 18, 1971.pdf",1,rapidocr,994,210.4,1930 994 210.4 32.1 .0747 TEMPERATURA BOCAPOZO 25°℃ | 21
+"Tecolutla-6 Static Gradient Oct 18, 1971.pdf",1,rapidocr,1090,230.4,2130 1090 230.4 20.4 .1020 TEMPERATURA MAXIMA 100℃ | 2330
+"Tecolutla-6 Static Gradient Oct 18, 1971.pdf",1,rapidocr,1185,250.9,2330 1185 250.9 20.4 .1005 INSTRUMENTO 19359-N | Kg/cm? | M
+"Tecolutla-6 Static Gradient Oct 18, 1971.pdf",1,rapidocr,2337,251.6,-plg | 2337 251.6 NIV.MED.PERF. .1005 GRADIENTEYACIMIENTO
+"Tecolutla-6 Static Gradient Sep 11, 1971.pdf",1,tesseract,402,85.1," | re) 402 85.1 PRESION T. P, 85.1 Kgvem? | 250 | 423 | 8"
+"Tecolutla-6 Static Gradient Sep 11, 1971.pdf",1,tesseract,485,102.7,"00 | 485 102.7 13.2 ""0580 —|— 9 E-AcETE 366 "" | 1000 | 7"
+"Tecolutla-6 Static Gradient Sep 11, 1971.pdf",1,tesseract,2337,252.7," ""=P | 2337 252.7 | NIV.MED.PERF. 1090 GRADIENT EST ACIMI"
+"Tecolutla-6 Static Gradient Sep 11, 1971.pdf",1,rapidocr,402,85.1,m） | 0 402 85.1 PRESION T.P. 85.1 Kg/cm2 | 250 423 89.5 4
+"Tecolutla-6 Static Gradient Sep 11, 1971.pdf",1,rapidocr,423,89.5, | 250 423 89.5 4.4 .0176 PRESION T.R. SIN CONEK. Kg/cm
+"Tecolutla-6 Static Gradient Sep 11, 1971.pdf",1,rapidocr,485,102.7, | 500 485 102.7 13.2 .0528 NIVEL ACEITE 366 m | 1000 700 
+"Tecolutla-6 Static Gradient Sep 11, 1971.pdf",1,rapidocr,700,148.2,1000 700 148.2 45.5 .0910 NIVEL AGUA 2130 m | 1500 862 1
+"Tecolutla-6 Static Gradient Sep 11, 1971.pdf",1,rapidocr,862,182.5,1500 862 182.5 34.3 .0686 TIEMPO CERRADO 40 DIAS | 1930 
+"Tecolutla-6 Static Gradient Sep 11, 1971.pdf",1,rapidocr,1020,215.9,1930 1020 215.9 37.2 .0865 TEMPERATURA BOCAPOZO 29 ℃ | 21
+"Tecolutla-6 Static Gradient Sep 11, 1971.pdf",1,rapidocr,1087,230.1,2130 1087 230.1 14.2 .0710 TEMPERATURA MAXIMA 94 C | 2330
+"Tecolutla-6 Static Gradient Sep 11, 1971.pdf",1,rapidocr,1190,251.9,2330 1190 251.9 21.8 .1090 INSTRUMENTO 19359-N | Kg/cm? | M
+"Tecolutla-6 Static Gradient Sep 11, 1971.pdf",1,rapidocr,2337,252.7,-plg | 2337 252.7 NIV.MED.PERP..1O9O GRADIENTE YACIMIENTO
+"Tecolutla-6 Static Gradient Sep 3, 1971.pdf",1,rapidocr,386,81.7,m) | 0 386 81.7 PRESIONT.P 81.7 Kg/cm2 | 250 403 85.3 3.6
+"Tecolutla-6 Static Gradient Sep 3, 1971.pdf",1,rapidocr,403,85.3, | 250 403 85.3 3.6 .0144 PRESIONT.R Kg/cm² | SIN CONEX. | 
+"Tecolutla-6 Static Gradient Sep 3, 1971.pdf",1,rapidocr,473,100.1, | 500 473 100.1 14.8 .0592 NIVELACEITE m | 329 | 1000 662 1
+"Tecolutla-6 Static Gradient Sep 3, 1971.pdf",1,rapidocr,662,140.1,1000 662 140.1 40.0 0800 NIVEL AGUA 1930 m. | 1500 841 1
+"Tecolutla-6 Static Gradient Sep 3, 1971.pdf",1,rapidocr,841,178.0,1500 841 178.0 37.9 .0758 TIEMPO CERRADO | 32 DIAS | 1930 
+"Tecolutla-6 Static Gradient Sep 3, 1971.pdf",1,rapidocr,992,210.0,1930 992 210.0 32.0 TEMPERATURA BOCAPOZO | 32 | 2130 1084 
+"Tecolutla-6 Static Gradient Sep 3, 1971.pdf",1,rapidocr,1084,229.5,2130 1084 229.5 19.5 .0975 TEMPERATURA MAXIMA 94 | 2330 1
+"Tecolutla-6 Static Gradient Sep 3, 1971.pdf",1,rapidocr,1179,249.6,2330 1179 249.6 201 1005 INSTRUMENTO 19359-N | Kg/cmn | MOD
+"Tecolutla-6 Static Gradient Sep 3, 1971.pdf",1,rapidocr,2337,250.3,-plg | 2337 250.3 NIV.MED.PERP. 1005 TUB.PROD.DE 00MB.233
+"Tecolutla-6 Static Gradient Sep 6, 1971.pdf",1,tesseract,2337,250.7,"mire | 2337 250.7 |NIV.MED, PERP., | .1015 | SRADIENTE YA"
+"Tecolutla-6 Static Gradient Sep 6, 1971.pdf",1,rapidocr,391,82.8,²/m） | 391 82.8 PRESIONT.P 82.8Kg/cm² | 250 403 85.3 2.5 
+"Tecolutla-6 Static Gradient Sep 6, 1971.pdf",1,rapidocr,403,85.3, | 250 403 85.3 2.5 .0100 PRESION T.R. SINCONEX. Kg/cm?
+"Tecolutla-6 Static Gradient Sep 6, 1971.pdf",1,rapidocr,473,100.1, | 500 473 100.1 14.8 .0592 NIVEL ACEITE 322 m | 1000 662 
+"Tecolutla-6 Static Gradient Sep 6, 1971.pdf",1,rapidocr,662,140.1,1000 662 140.1 40.0 0800 NIVELAGUA 1930 m | 1500 842 178
+"Tecolutla-6 Static Gradient Sep 6, 1971.pdf",1,rapidocr,842,178.3,1500 842 178.3 38.2 .0763 TIEMPO CERRADO 35 DIAS | 1930 
+"Tecolutla-6 Static Gradient Sep 6, 1971.pdf",1,rapidocr,997,211.1,1930 997 211.1 32.8 .0763 TEMPERATURA BOCAPOZO 32 ℃ | 21
+"Tecolutla-6 Static Gradient Sep 6, 1971.pdf",1,rapidocr,1085,229.7,2130 1085 229.7 18.6 .0930 TEMPERATURA MAXIMA 6 C | 2330 
+"Tecolutla-6 Static Gradient Sep 6, 1971.pdf",1,rapidocr,1181,250.0,2330 1181 250.0 20.3 .1015 INSTRUMENTO 19359-N | Kg/cm? | M
+"Tecolutla-6 Static Gradient Sep 8, 1971.pdf",1,tesseract,2337,252.0, plg | 2337 252.0 | NIV.MED.PERP.|.1025 | SRADIENTE YACIM
+"Tecolutla-6 Static Gradient Sep 8, 1971.pdf",1,rapidocr,393,83.2,²/m) | 393 83.2 PRESIONT.P. 83.2 Kg/cm? | 88.1 4.9 .0196 
+"Tecolutla-6 Static Gradient Sep 8, 1971.pdf",1,rapidocr,476,100.8, | 500 476 100.8 12.7 .0508 NIVEL ACEITE 383 m | 1000 679 
+"Tecolutla-6 Static Gradient Sep 8, 1971.pdf",1,rapidocr,679,143.7,1000 679 143.7 42.9 .0858 NIVELAGUA 2063 m | 1500 851 18
+"Tecolutla-6 Static Gradient Sep 8, 1971.pdf",1,rapidocr,851,180.2,1500 851 180.2 32.2 .0644 TIEMPO CERRADO 37afas | 1930 1
+"Tecolutla-6 Static Gradient Sep 8, 1971.pdf",1,rapidocr,1009,213.6,1930 1009 213.6 33.4 0776 TEMPERATURA BOCA POZO 29 °C | 2
+"Tecolutla-6 Static Gradient Sep 8, 1971.pdf",1,rapidocr,1090,230.8,2130 1090 230.8 17.2 .0860 TEMPERATURA MAXIMA 294℃ | 2330
+"Tecolutla-6 Static Gradient Sep 8, 1971.pdf",1,rapidocr,1187,251.3,2330 1187 251.3 20.5 .1025 INSTRUMENTO N-65565 | Kg/cm? | M
+"Tecolutla-6 Static Gradient Sep 8, 1971.pdf",1,rapidocr,2337,252.0,.plg | 2337 252.0 .1025 GRADIENTEYACIMIENTO Kg/cm2/m | NIV.
+"Tecolutla-7 Static Gradient Dec 8, 1964.pdf",1,rapidocr,0,60.9,M2/M | 0 60.9 PRESIONT.R 60.04E/cmd | 250 81.8 20.9 0.0
+"Tecolutla-7 Static Gradient Dec 8, 1964.pdf",1,rapidocr,250,81.8,/cmd | 250 81.8 20.9 0.0330 PRESION T.P. 5'09 18/0r2 | 50
+"Tecolutla-7 Static Gradient Dec 8, 1964.pdf",1,rapidocr,500,102.4,/0r2 | 500 102.4 20.6 0.0824 NIVEL ACEITE | 145.3 40.9 BTF
+"Tecolutla-7 Static Gradient Dec 8, 1964.pdf",1,rapidocr,1500,182.9,O 95 | 1500 182.9 | 221.8 18.9 1390. | 2000 0.0778 TEMPERATUR
+"Tecolutla-7 Static Gradient Dec 8, 1964.pdf",1,rapidocr,2336,253.78,REG. | 2336 253.78 iy..o.ar 0.0530 VARIACION PRES.FONDO | 0.
+"Tecolutla-7 Static Gradient Dec 8, 1964.pdf",1,rapidocr,2310,252.0,314. | 2310 252.00 0.0840 T.R. | CIMA FORMACION PROD. | BASE F
+"Tecolutla-7 Static Gradient Dec 8, 1964.pdf",3,rapidocr,0,60.9,M2/M | 0 60.9 PRESION T.R 2.5/m2 | 250 A1.8 20.9 0.0836
+"Tecolutla-7 Static Gradient Dec 8, 1964.pdf",3,rapidocr,1000,143.3,0.0m | 1000 143.3 40N9 0.0518 NIVELAGUA 2045.0 | 1500 182.9
+"Tecolutla-7 Static Gradient Dec 8, 1964.pdf",3,rapidocr,1500,182.9,45.0 | 1500 182.9 59.6 0.0742 TTEMPOCERRADO72di | 2000 221.
+"Tecolutla-7 Static Gradient Dec 8, 1964.pdf",3,rapidocr,2000,221.8,72di | 2000 221.8 36.9 0.0278 TEMPERATURA BOCAPOZO 2590. | 
+"Tecolutla-7 Static Gradient Dec 8, 1964.pdf",3,rapidocr,2230,243.3,590. | 2230 243.3 0.0939 TEM.MAX.DEFONDO 1000 | 21:6 | 2280 2
+"Tecolutla-7 Static Gradient Dec 8, 1964.pdf",3,rapidocr,2280,248.3,21:6 | 2280 248.3 4号 0.0980 ELEV.MESA ROTARIA 4.30m. | 2330
+"Tecolutla-7 Static Gradient Dec 8, 1964.pdf",3,rapidocr,2335,253.69,/DIA | 2335 253.69 slv.Sup. Perf 0.0940 INSTRUMENT0-1812O-
+"Tecolutla-7 Static Gradient Dec 8, 1964.pdf",3,rapidocr,2310,252.0,37.0 | 2310 252.00 0.0840 | T.R 6-5/92306.65m | CIMAFORMACIONP
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,tesseract,236,49.523,"mi | 0 236 49.523 0,000 0.0000 ue | 500 312 65,471 15,948 0"
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,tesseract,312,65.471," | 500 312 65,471 15,948 0,0315 pd | 1000 558 117.093 51.52"
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,tesseract,558,117.093,1000 558 117.093 51.521 0.1032 e | 1500 738 167.455 50-362
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,tesseract,738,167.455,"1500 738 167.455 50-362 0.1007 , j | 2125 1103 231.457 64."
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,tesseract,1103,231.457,2125 1103 231.457 64.002 0.1974 E | 3225 1152 241.740 10-28
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,tesseract,1152,241.74,"3225 1152 241.740 10-282 0,1028 | 2325 1202 252.232 10,492 "
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,tesseract,1202,252.232,"2325 1202 252.232 10,492 0,1049 | a | am Wy Mi “Bi oo | 2311.5 "
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,tesseract,0,250.534,"11.5 0 250.534 8,894 0.1028 y ' | REGISTRO : ENRIQUE DOR"
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,rapidocr,236,49.523,w/b) | 236 49.523 0.000 00000 | 500 312 65.471 15.948 0.031
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,rapidocr,312,65.471, | 500 312 65.471 15.948 0.0319 | 1000 558 117.093 51.621 0
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,rapidocr,558,117.093,1000 558 117.093 51.621 0.1032 | 1500 798 167.455 50.362 0
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,rapidocr,798,167.455,1500 798 167.455 50.362 0.1007 | 2125 1103 231.457 64.002 
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,rapidocr,1103,231.457,2125 1103 231.457 64.002 V2010 | 2225 1152 241.740 10.282 8
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,rapidocr,1152,241.74,2225 1152 241.740 10.282 82010 | 2325 1202 252.232 10.492 0
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,rapidocr,1202,252.232,2325 1202 252.232 10.492 0.1049 | N.M.P. | 2311.5 0 250.534 8
+"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",1,rapidocr,0,250.534,11.5 0 250.534 8.894 0.1028 | REGISTRO ENRIQUE DORANTES 

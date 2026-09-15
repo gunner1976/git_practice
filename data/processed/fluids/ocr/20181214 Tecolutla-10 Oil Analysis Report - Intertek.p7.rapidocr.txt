@@ -1,0 +1,47 @@
+nterte
+Total Quality. Assured.
+REPORTEDEANALISIS
+Fecha de Reporte DICIEMBRE14DEL2018
+No. Referencia Intertek MX01146-0001007
+Nombre del Barco NOAPLICA
+Puerto / Termlnal NOAPLICA
+Numero de Reporte LAC-1851/18
+No. Referencia del Cliente SINDATO
+Nombredel Cliente TONALLIENERGIA,SAPIDEC.V
+Direccion del Cliente BOSQUEDERADIATAS34,BOSQUEDELASLOMAS,CUAJIMALPADEMORELOS,CIUDADDE
+MEXICOC.P.05120,MEXICO
+Descripclbn delaMuestradel Cliente CRUDEOIL
+Lugar de Muestreo TECOLUTLA,VERACRUZ
+Muestreado por INTERTEK
+Analizadopor INTERTEK
+Atestiguado por(*) NO APLICA
+Presentado por NOAPLICA
+Identificacion de la Muestra(Segunel Cllente) SHORETANKTC-10
+Numero de Muestra (Secuencia deMuestras) MX01146-0001007-A
+Fechay Hora de Muestreo DICIEMBRE11DEL2018 De: 15:40 A16:20
+FechayHora deRecepcion DICIEMBRE12DEL2018 18:20
+Fechay Hora de Analisis DICIEMBRE13AL14DEL2018 De: 10:00 A:14:19
+No. Descripcibn de la Prueba Metodo Especificacion Unidad Resultado
+1 Gravedad API(60 °F)(+) ASTM D4052-18 AREPORTAR 30.78
+2 Densidad a (60 °F) (+) ASTMD4052-18 AREPORTAR g/cm3 0.8717
+3 Sal en crudo (+) ASTM D3230-13 AREPORTAR Ib/1000bbls 15.0
+4 (+)enz ASTM D-4294-16 AREPORTAR 8% 1.08
+5 Presion de vapor Reid ASTMD323-15a AREPORTAR psi 7.30
+9 Numero Acido (+) ASTM D664-17a AREPORTAR mg/gKOH <0.1
+Cloruros Organicos(+) ASTM D-4929-15 AREPORTAR 6/6n <1
+8 Silicio(+) ASTMD-5184-B-00(2011) AREPORTAR mg/kg <10**
+9 Aluminio (+) ASTMD-5184-B-00(2011) AREPORTAR mg/kg <5**
+10 Agua y sedimento (+) ASTMD-4007-11(2016) AREPORTAR %VN 4.0
+Observaciones:**A solicitud del clienteIosvaloresobtenidosson;Silicio=7.11mg/kgyAlumlnlo=No detectado
+Este reporte de analisis no puede serreproducido en parte sin el permiso escrito de Intertek.
+Acreditacl6n EMANo.Q-148-039/09.Fechainlcial de acreditaclon:Septiembre 08 del 2009.Los metodos acreitados se denotan por(+).
+Intertek () Para los casos de atestiguamiento de analisis nuestra responsabilidad se limita a atestiguar que las pruebas que se esten practicando a la(s) muestra(s) correcta(s). El cliente esta de
+acuerdoqueIntertek
+NayelyLopetMartinez NataliaAleidaDelaCruzFlores
+Analista Autorizadopor
+Nombre yFlrma Nombre y Firma
+Laboratorio: CarreteraCoatzacoalcos-VllahermosaKm6+130ma100mdeladesviaclonaNanchitalCoalzacoalcos,Ver.CP96384Tel.01-921-21-18183
+Oficina Matriz: Poniente134#680Col.IndustrialVallejo.Delegaci6nAzcapotzalco,MexicoD.F.CP02300Tel.01-55-59980900
+Rev.07,15-Marz0-2017 ICBQ-018A
+Intertek Testing Services de Mexico, S.A. de C.V.
+1/1

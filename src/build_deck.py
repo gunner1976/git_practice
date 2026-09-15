@@ -38,11 +38,11 @@ slide("1. What changed from version 3", [
 slide("2. Production database: 1,341 tidy rows, six sources, no interpolation", [
     "CNH monthly 1966-2016 (four wells), CNH field level 1960-65, Tonalli tests, TEC-10 daily 2018-19, trucking tickets, PEMEX statements.",
     "Recorded 1.72 MMbbl to Dec 2022; 0.48 MMbbl of the March 2020 By Zone total is wellfile allocation.",
-    "GOR: cumulative 565 scf/bbl 1966-92 (the source of IFR's 552); anomalies are allocation artefacts plus a local TEC-10 rise at low tubing pressure.",
+    "GOR: cumulative 565 scf/bbl 1966-92 (the source of IFR's 552); PEMEX measured 685 on TEC-6 in 1964. Stock-tank oil 30-31 API (Intertek 2018-19, OCR). No lab Rs or Pb exists.",
     "No per-well data after Nov 2019: sales are commingled (G-32).",
     "66 runs of missing months in the CNH record cannot be told from shut-ins (G-34)."], "figures/04_production_history.png", 8.0)
 slide("3. Pressure at one datum: strong aquifer, measurable decline", [
-    "21 surveys 1956-2018 restated at 2,300 mSS; four PEMEX scans read by eye against the transcription.",
+    "21 surveys 1956-2018 restated at 2,300 mSS; all 16 PEMEX scans OCR-verified (Tesseract + RapidOCR), one transcription error corrected.",
     "Initial 24.65 MPa is a 2 h 45 min reading on a new well; 1964 statics after 75-95 days agree.",
     "1971 TEC-6: 23.24 to 24.35 MPa between 4 and 74 days shut-in. Short shut-ins understate.",
     "2018: 24.14-24.16 MPa in three wells after ~2 MMbbl. Expansion alone would supply 11 kbbl.",

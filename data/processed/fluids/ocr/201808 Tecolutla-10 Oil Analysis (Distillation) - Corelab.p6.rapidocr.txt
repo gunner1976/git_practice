@@ -1,0 +1,40 @@
+201DeerwoodGlenDr
+DeerPark,TX 77536
+281-478-1300Telephone
+Saybolt
+281-467-9209Facsimile HighTemp-SimulatedDistillation
+LaboratoryID:14273-6994578
+Client ID:Tecolutla-10Zona C
+Carbon No. Incremental Cumulative
+Percent Percent
+C5-C10 17.2 17.2
+C10-C20 28.9 46.1
+CarbonNumberDistribution
+C20-C30 16.7 62.8
+C30-C40 9.9 72.7
+35
+C40-C50 6.1 78.8
+30
+C50-C60 4.2 83.0
+C60-C70 3.4 86.4 25
+C70-C80 3.1 89.5 Percent 20
+C80-C90 2.3 91.8 15
+C90-C100 2.8 94.6 10
+C100+ 5.4 100.0
+5
+0
+C5-C10 C10-C20 C20-C30 C30-C40 C40-C50 C50-C60 C60-C70 C70-C80 C80-C90 C90-C100
+CarbonRange
+CumulativePercent
+100.0
+90.0
+80.0
+70.0
+60.0
+50.0
+40.0
+30.0
+20.0
+10.0
+0.0 C100+
+C10-C20 C30-C40 C40-C50 C60-C70 C70-C80 C80-C90 C90-C100

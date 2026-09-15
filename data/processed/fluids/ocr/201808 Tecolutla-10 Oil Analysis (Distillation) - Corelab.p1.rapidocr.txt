@@ -1,0 +1,50 @@
+SayboltPetroleumServices
+ACoreLaboratoriesCompany
+201 Deerwood Glen Dr
+DeerPark,TX 77536
+281-478-1300
+Saybolt
+A CORELABORATORIES COMPANY
+InternationalFrontierResources ReportNumber:13071-14273
+Kevin Gunning Date Reported: 8/16/2018
+DateReceived: 8/10/2018
+Analytical Report
+SampleNo.:6994578 Sample ID Tecolutla-10 Zona C Date Sampled
+Test Result Units Method Date Analyst
+LightHydrocarbonsinCrudeOil
+Methane See Attached LV% ASTMD-7900M 8/13/2018 JT
+SimulatedDistillation
+C5-C10 17.2 % OFF ASTMD-7169 8/13/2018 JT
+C10-C20 28.9 %OFF
+C20-C30 16.7 %OFF
+C30-C40 9.9 % OFF
+C40-C50 6.1 %OFF
+C50-C60 4.2 % OFF
+C60-C70 3.4 % OFF
+C70-C80 3.1 %OFF
+C80-C90 2.3 %OFF
+C90-C100 2.8 %OFF
+C100+ 5.4 %OFF
+SimulatedDistillation
+IBP 42 Deg F ASTMD-7169 8/14/2018 JT
+5% 221 Deg F
+10% 263 Deg F
+15% 320 Deg F
+20% 378 Deg F
+25% 431 Deg F
+30% 485 Deg F
+35% 536 Deg F
+40% 587 Deg F
+45% 638 Deg F
+50% 695 Deg F
+55% 753 Deg F
+60% 808 DegF
+65% 867 Deg F
+70% 933 Deg F
+75% 1006 Deg F
+80% 1087 Deg F
+85% 1174 Deg F
+90% 1255 Deg F
+reultsnaliwayt
+expresslydislaimssamewithwhichsuchreportisusedorrelieduponforanyreasonwhatsoeverAnypersonrelinguponthisreportshouldbeawarethatissuersactivitiesarecarriedoutunderthergeneraltemsand
+conditions. Page1of2

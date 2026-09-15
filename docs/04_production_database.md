@@ -83,6 +83,7 @@ Reference values:
 |---|---|---|
 | PEMEX PVT, RGA 59.9 m³/m³, Pb 132 kg/cm² (1,877 psi) | 336 | `6 -Resumen Campo Tecolutla.docx` table 5 |
 | Initial well tests 1956–1973 | 431–765 | By Zone "Test Info" |
+| TEC-6 flowing survey, 2 Dec 1964 (OCR of the PEMEX form) | 685 (RGA 122 m³/m³ at 9 m³/d oil) | `pressures/Tecolutla-6 Static Gradient Dec 2, 1964.pdf` |
 | Cumulative produced GOR 1966–1992 | 565 | this database |
 | IFR "possible solution GOR" | 552 | `PVT Calculator (Tecolutla).xlsx` Oil!C7, an assumed input, which gives Pb 2,849 psi |
 | TEC-10 initial test Oct 2018 | 762 | By Zone |

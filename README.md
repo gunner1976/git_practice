@@ -59,3 +59,7 @@ See `docs/task_queue.md`. Work is committed after each task.
 | 10 | `docs/10_econ_rebuild.md`, `docs/Tecolutla_Field_History_and_TEC12_Review_v4.md`, `docs/Tecolutla_TEC12_Handover.pptx` | `data/processed/econ_rebuild/` | `figures/10_econ_rebuild.png` |
 
 Gap register: `docs/gaps.md`. Rerun everything with the scripts in `src/` in task order; each script reads only `data/raw/` and earlier `data/processed/` outputs.
+
+## OCR
+
+Scanned PDFs (the 18 PEMEX pressure forms, the 1956-2019 fluid analyses) have no text layer. Two engines are set up: Tesseract 5 with the Spanish pack (`apt-get install tesseract-ocr tesseract-ocr-spa`) and RapidOCR (pip, ONNX, no system dependency). `src/ocr_pressure_scans.py` and `src/ocr_fluids.py` render pages at 300 dpi with PyMuPDF, run both engines, keep the raw text under `data/processed/*/ocr/`, and parse the numbers that matter. RapidOCR reads the typewritten PEMEX forms reliably; Tesseract is kept as the cross-check. OCR output is always compared against a transcription or read by eye before it changes a dataset.

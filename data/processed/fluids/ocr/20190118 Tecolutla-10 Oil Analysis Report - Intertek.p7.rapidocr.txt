@@ -1,0 +1,47 @@
+IntertekMexicoCoatzacoalcos
+Carretera Coatzacoalcos a Villahermosa
+intertek
+Km6+130ma100mdeladesviaciona
+caleb brett Nanchital,
+Coatzacoalcos,Ver.CP96400
+Tel.:+52(921)211-8180
+Reporte de Analisis Email:
+coatzacoalcos.reportesglims@intertek.com
+No.Reporte deIntertekLab:3302548
+No.ReferenciaIntertek:2019-COTZ-000027
+Cliente:TONALLI ENERGIASAPIDECV Referencia del Cliente:
+Contacto:FranciscoJavierCossioRodriguez N/A
+Direccion:BosqueDeRadiatas
+BosquesDe LasLomas
+Cuajimalpa DeMorelos,DIF05120
+Mexico
+IDMuestra:2019-COTZ-000027-001 Fechayhora demuestreo:15-Enero-201914:25
+Producto:CRUDO Fechayhoraderecepcion:16-Enero-2019 17:00
+Muestreadopor:Intertek Fechayhoradeiniciodeanalisis:17-Enero-2019 00:60
+Embarcacion/Localizacion:Tecolutla,Veracruz,Mexico Fechayhoradefindeanalisis:18-Enero-2019 15:39
+Muestra designada como:Tanque10
+Metodo Prueba Resultado Unidad Limite de
+especificacion
+ASTMD4052-18 AGravedadAPI 30.1 °API AReportar
+AGravedadEspecifica20°C/4°℃ 0.8681 AReportar
+ASTMD3230-13 AContenidodesal(Cloruroelectrometrico) 71.9 Ib/1000bbl AReportar
+ASTMD4294-16 AAzufretotal 1.57 %masa A Reportar
+ASTMD323-15a PresiondeVaporReid 7.00 !sd AReportar
+ASTMD664-17a AProcedimiento usado A A Reportar
+ANumeroAcido <0.10 mgKOH/g A Reportar
+ASTMD4929-15 Procedimiento ProcedimientoB A Reportar
+ContenidodeCloruros <1 μg/g AReportar
+ASTMD5184B-12 ASilicio <10 mg/kg AReportar
+AAluminio <5 mg/kg A Reportar
+ASTMD4007-11(2006) AAgua y Sedimento 0.30 Vol% AReportar
+Condiciondela muestra(Recepcion)Bueno(Sello Intacto)
+Procedimientodemuestreo:A-(ASTMD4057-12)ManualSamplingofPetroleumandPetroleumProducts
+NumerodeAcreditaci6ndelaEMAQ-148-039/09.Fechainicialdeacreditacion:Septiembre08,2009.PruebaAcreditadadenotadaporlaA.
+Estereportedeanalisisnopuedeserreproducidoenpartesinel permisoescritodeIntertek.
+ElASTMD5184B-12elalcanceesde10a250mg/kg,arequerimientodel clienteelvalorexactoobtenidofuede2mg/kg.
+Analizadopor: Fecha:18-Enero-201916:27
+LuzAdrianaforresLopez,CoordinadordeLaboratorio
+Autorizadopor: Fecha:18-Enero-201916:27
+NataliaAleidaDeLaCruzFlores,Supervisor
+Rev.0025-Oct-2017 FGS-228
+Pagina 1de1 MX01146-0001043 18-Enero-201916:27

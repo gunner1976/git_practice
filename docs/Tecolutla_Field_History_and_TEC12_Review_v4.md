@@ -1,6 +1,6 @@
 # Tecolutla Field History Review & TEC-12 Opportunity Analysis
 
-**Version:** 4 — rebuilt on the reconciled data in this repository (tasks 1–10). Version 3 is kept unchanged as `Tecolutla_Field_History_and_TEC12_Review.md`; every number below traces to a file, sheet and cell through the task notes in `docs/0*_*.md`, the processed tables in `data/processed/` and the gap register `docs/gaps.md` (G-01 to G-50).
+**Version:** 4 — rebuilt on the reconciled data in this repository (tasks 1–10). Version 3 is kept unchanged as `Tecolutla_Field_History_and_TEC12_Review.md`; every number below traces to a file, sheet and cell through the task notes in `docs/0*_*.md`, the processed tables in `data/processed/` and the gap register `docs/gaps.md` (G-01 to G-51).
 **Prepared for:** the incoming operator's technical team. **Author of record:** Kevin Gunning, P.Eng. **Units:** depths in mMD or mSS as stated; volumes in bbl; money in USD unless labelled CAD; pressures in MPa at 2,300 mSS.
 
 ---
@@ -44,7 +44,7 @@ The economic-model file dates in v3 ("Sept 2023 — final work program, Petrel R
 
 Field-level CNH data exist for 1960–65 (182 kbbl); nothing monthly exists before 1960 or for TEC-2 and TEC-7 before 1972 (G-30, G-34). After November 2019 no per-well volumes exist; sales are commingled and fell from ~70 bbl/d (2019–20) to ~50 (2021) and ~25 bbl/d (2022) (G-32).
 
-**GOR.** Cumulative produced GOR 1966–1992 was 565 scf/bbl, which is where IFR's "solution GOR 552" comes from; PEMEX's PVT table (336 scf/bbl, Pb 1,877 psi, 20 °API) does not describe this fluid (G-31). The anomalies are field-allocated gas in 24 months, a 1993–99 allocation artefact at low rates, TEC-2's 2013–16 tail (8 bbl/d oil against the field's gas), and a real but local rise on TEC-10 to 1,800–2,500 scf/bbl as tubing pressure fell below 500 psi. None indicates a gas cap or reservoir-wide gas liberation.
+**GOR and fluid.** Cumulative produced GOR 1966–1992 was 565 scf/bbl, which is where IFR's "solution GOR 552" comes from, and PEMEX measured 685 scf/bbl on TEC-6 in December 1964; PEMEX's PVT table (336 scf/bbl, Pb 1,877 psi, 20 °API) does not describe this fluid. OCR of the Intertek 2018–19 reports gives the measured stock-tank oil as 30.1–30.8 °API, 1.6 % sulphur; no laboratory Rs or bubble point exists in the files (G-31). The anomalies are field-allocated gas in 24 months, a 1993–99 allocation artefact at low rates, TEC-2's 2013–16 tail (8 bbl/d oil against the field's gas), and a real but local rise on TEC-10 to 1,800–2,500 scf/bbl as tubing pressure fell below 500 psi. None indicates a gas cap or reservoir-wide gas liberation.
 
 ### 2.3 Reservoir, facies and volumetrics (tasks 7 and 9)
 
@@ -66,7 +66,7 @@ Tecolutla holds 2.5 MMbbl/km² against a reef-rim median of 8.3. On the CNH volu
 |---|---|---|---|
 | 24 May 1956 | TEC-2 | 2 h 45 min | 24.65 (PEMEX "initial", 252 kg/cm²) |
 | Dec 1964 | TEC-2 / TEC-7 | 75–95 d | 24.36–24.66 |
-| Aug–Oct 1971 | TEC-6 | 4 → 74 d | 23.24 → 24.35 (a 74-day build-up; short shut-ins understate by up to 1 MPa) |
+| Aug–Oct 1971 | TEC-6 | 4 → 74 d | 23.24 → 24.35 (a 74-day build-up; short shut-ins understate by up to 1 MPa; all 16 PEMEX scans OCR-verified, one transcription error corrected) |
 | Oct 1998 | TEC-7 | — | 24.52 |
 | Mar–Aug 2018 | TEC-2 (SG), TEC-2 (build-up), TEC-10 (build-up) | 2 y, 13 d, 25 d | 24.16, 24.14, 24.15 |
 

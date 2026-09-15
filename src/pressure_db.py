@@ -41,6 +41,14 @@ for x in recs:
     if x["well"] == "TEC-7" and x["date"] == pd.Timestamp("1998-10-06"):
         x["p_gauge_kpa"] = 252.232 * KPA_PER_KGCM2; x["gauge_depth_mkb"] = 2325; x["gauge_depth_mss"] = 2325 - 4.8
         x["p_gauge_source"] = "scan read: 252.232 kg/cm2 at 2325 m (below perfs), 250.634 at 2311.5 m; gradient 0.1028-0.1049 kg/cm2/m (water)"
+    if x["well"] == "TEC-6" and x["date"] == pd.Timestamp("1971-08-09"):
+        x["p_gauge_kpa"] = 244.6 * KPA_PER_KGCM2   # scan (OCR + eye) reads 244.6 kg/cm2 at 2337 m after 7 days; the IFR transcription repeated the 12 Aug value (248.0)
+        x["p_gauge_source"] = "scan read (OCR, RapidOCR/Tesseract, and by eye): 244.6 kg/cm2 at 2337 m, 7 days shut-in; transcription error corrected"
+        x["quality_flag"] = "transcription corrected from scan"
+    if x["well"] == "TEC-6" and x["date"] == pd.Timestamp("1964-12-02"):
+        x["p_gauge_source"] = "scan read: 193.63 kg/cm2 at 2337 m flowing on a 3 mm choke, 9 m3/d oil, 1100 m3/d gas, RGA 122 m3/m3 (685 scf/bbl), 3 % water; KB 5.67 m on the form"
+# OCR verification of the 16 scanned surveys (src/ocr_pressure_scans.py): all readings at the gauge depth agree with the
+# transcription except 9 Aug 1971 (corrected above); the 2 Dec 1964 RapidOCR value (293.63) is an OCR 1/2 confusion, the scan reads 193.63.
 # 2018 build-ups (IHS PTA reports)
 recs += [
     dict(date=pd.Timestamp("2018-05-30"), well="TEC-2", kind="build-up, extrapolated p*", shut_in_days=311 / 24, gauge_depth_mkb=2309.0, gauge_depth_mss=2305.2,
@@ -69,7 +77,7 @@ u = p[p.usable_static]
 init = p[(p.well == "TEC-2") & (p.date.dt.year == 1956)].iloc[0]
 first_static = u.iloc[0]; last = u[u.date.dt.year == 2018]
 summary = dict(
-    datum="2300 mSS", gradient_kpa_per_m=GRAD, kb_m=KB,
+    datum="2300 mSS", gradient_kpa_per_m=GRAD, kb_m=KB, kb_note="TEC-6 form of 2 Dec 1964 states Elev. Mesa Rotaria 5.67 m; header CSV 6.0 m; 0.33 m ignored",
     p_1956_tec2_2300mss_mpa=round(float(init.p_2300mss_mpa), 2), p_1956_note="2 h 45 min shut-in on a new well; taken as initial by PEMEX (252 kg/cm2)",
     p_1964_mpa={w: round(float(v), 2) for w, v in u[u.date.dt.year == 1964].set_index("well").p_2300mss_mpa.items()},
     p_1971_tec6_final_74d_mpa=round(float(u[(u.well == "TEC-6") & (u.date == "1971-10-18")].p_2300mss_mpa.iloc[0]), 2),

@@ -4,7 +4,7 @@ Script: `src/pressure_db.py`. Outputs: `data/processed/pressure/tecolutla_pressu
 
 Sources:
 - `geology/Tecolutla Pressure Summary.xlsx` sheet `all`: IFR's transcription of 20 PEMEX bottom-hole pressure surveys 1956–1998 plus the Tonalli March 2018 static gradient, with IFR's own datum correction to 2,300 m below KB.
-- `pressures/*.pdf`: the 18 PEMEX survey forms. They are image scans with no text layer and no OCR is available in this environment; four were read visually against the transcription (TEC-2 24 May 1956, TEC-2 5 Dec 1964, TEC-6 18 Oct 1971, TEC-7 6 Oct 1998) and agree to the last digit.
+- `pressures/*.pdf`: the 18 PEMEX survey forms, image scans with no text layer. All were OCR'd with two engines (Tesseract 5 spa+eng and RapidOCR; `src/ocr_pressure_scans.py`, text in `data/processed/pressure/ocr/`) and the reading at each survey's gauge depth compared with the IFR transcription (`pressure_scans_ocr_check.csv`): 15 of 16 agree to the last digit; the 9 Aug 1971 TEC-6 value in the transcription (248.0 kg/cm²) repeats the 12 Aug reading, and the form reads 244.6 kg/cm², which is what the dataset now carries. Four forms were also read by eye. The 8 Dec 1964 TEC-2 survey has no scan in the folder.
 - `development_plan/Tecolutla 2 Final Report (IHS PTA) Spanish.pdf` and `Tecolutla 10 Final Report (IHS PTA) Spanish.pdf`: 2018 build-up interpretations (WellTest, IHS, June and October 2018).
 - Cumulative oil at each survey date from task 4 (`tecolutla_field_monthly.csv`, plus the 0.43 MMbbl of wellfile block totals that predate the 1960 series).
 
@@ -23,7 +23,7 @@ Sources:
 | 1964-12-05 | TEC-2 | static gradient | 75 d | 2,331 | 24,683 | 24.36 | yes |
 | 1964-12-08 | TEC-2 | static gradient | 78 d | 2,331 | 24,713 | 24.39 | yes |
 | 1964-12-08 | TEC-7 | static gradient | 95 d | 2,305 | 24,713 | 24.66 | yes |
-| 1971-08-06 → 10-18 | TEC-6 | static gradients, 11 runs | 4 → 74 d | 2,331 | 23,565 → 24,674 | 23.24 → 24.35 | yes; a 74-day build-up |
+| 1971-08-06 → 10-18 | TEC-6 | static gradients, 11 runs (9 Aug corrected from the scan) | 4 → 74 d | 2,331 | 23,565 → 24,674 | 23.24 → 24.35 | yes; a 74-day build-up |
 | 1973-06-04 | TEC-6 | flowing before shut-in | — | 2,309 | 22,771 | 22.68 | flowing, excluded |
 | 1998-10-06 | TEC-7 | static gradient | not stated | 2,320 | 24,736 (252.2 kg/cm²) | 24.52 | yes |
 | 2018-03-27 | TEC-2 | static gradient | 2 years+ (field shut in since Jan 2016) | 2,246 (gauge stopped above perfs) | 23,591 | 24.16 | yes, extrapolated 54 m at a water gradient by IFR |

@@ -1,0 +1,20 @@
+date,well,scan,gauge_depth_mkb,transcription_kgcm2,tesseract_rows_read,rapidocr_depth,rapidocr_kgcm2,rapidocr_diff_kgcm2,rapidocr_rows_read,tesseract_depth,tesseract_kgcm2,tesseract_diff_kgcm2
+1956-05-24,TEC-2,"Tecolutla-2 Static Gradient May 24, 1956.pdf",2310.0,252.0,0,2300.0,252.0,0.0,12,,,
+1964-12-02,TEC-6,"Tecolutla-6 Static Gradient Dec 2, 1964.pdf",2337.0,193.63,0,2337.0,293.63,100.0,7,,,
+1964-12-05,TEC-2,"Tecolutla-2 Static Gradient Dec 5, 1964.pdf",2335.0,251.7,0,2335.0,251.7,0.0,8,,,
+1964-12-08,TEC-2,no scan (2018 xlsx),2335.0,252.0,0,,,,0,,,
+1964-12-08,TEC-7,"Tecolutla-7 Static Gradient Dec 8, 1964.pdf",2310.0,252.0,0,2310.0,252.0,0.0,14,,,
+1971-08-06,TEC-6,"Tecolutla-6 Static Gradient Aug 6, 1971.pdf",2337.0,240.3,3,2337.0,240.3,0.0,9,2337.0,240.3,0.0
+1971-08-09,TEC-6,"Tecolutla-6 Static Gradient Aug 9, 1971.pdf",2337.0,248.0,5,2337.0,244.6,-3.4,9,2337.0,244.6,-3.4
+1971-08-12,TEC-6,"Tecolutla-6 Static Gradient Aug 12, 1971.pdf",2337.0,248.0,3,2337.0,248.0,0.0,9,2337.0,248.0,0.0
+1971-08-17,TEC-6,"Tecolutla-6 Static Gradient Aug 17, 1971.pdf",2337.0,248.6,2,1171.0,247.9,-0.7,8,2337.0,248.6,0.0
+1971-08-24,TEC-6,"Tecolutla-6 Static Gradient Aug 24, 1971.pdf",2337.0,249.7,2,1176.0,249.0,-0.7,8,2337.0,249.7,0.0
+1971-08-28,TEC-6,"Tecolutla-6 Static Gradient Aug 28, 1971.pdf",2337.0,250.1,1,2337.0,250.1,0.0,8,2337.0,250.1,0.0
+1971-09-03,TEC-6,"Tecolutla-6 Static Gradient Sep 3, 1971.pdf",2337.0,250.3,0,2337.0,250.3,0.0,9,,,
+1971-09-06,TEC-6,"Tecolutla-6 Static Gradient Sep 6, 1971.pdf",2337.0,250.7,1,1181.0,250.0,-0.7,8,2337.0,250.7,0.0
+1971-09-08,TEC-6,"Tecolutla-6 Static Gradient Sep 8, 1971.pdf",2337.0,252.0,1,2337.0,252.0,0.0,8,2337.0,252.0,0.0
+1971-09-11,TEC-6,"Tecolutla-6 Static Gradient Sep 11, 1971.pdf",2337.0,252.7,3,2337.0,252.7,0.0,9,2337.0,252.7,0.0
+1971-10-18,TEC-6,"Tecolutla-6 Static Gradient Oct 18, 1971.pdf",2337.0,251.6,2,2337.0,251.6,0.0,9,2337.0,251.6,0.0
+1973-06-04,TEC-6,"Tecolutla-6 Static Gradient Jun 4, 1973.pdf",2315.0,232.2,12,1640.0,232.2,0.0,15,1640.0,232.2,0.0
+1998-10-06,TEC-7,"Tecolutla-7 Static Gradient Oct 6, 1998.pdf",2325.0,252.23,8,1202.0,252.232,0.0,8,1202.0,252.232,0.0
+2018-03-27,TEC-2,no scan (2018 xlsx),2250.0,240.56,0,,,,0,,,

@@ -1,0 +1,35 @@
+ETROLEOS MEXICANOS
+DEPARTAMENTO DEINGENIERIA PETROLERA
+LABORATORIO
+POZARICADEHGO.VER
+POZO FECHA:
+TRAMORROBAD0:2307-211 FORMACION:
+P.LE.
+Temperatura Maxima
+5%Degtilado: °℃ Total Destilado:
+%
+227 43.0
+10%Destlado: ℃ Residuo:
+%
+15%Destilado: 244 Perdida:
+%
+20%Destilado:
+163
+25%Destilndo: O℃ Corte a 175°℃
+18J
+205 ℃
+30%Destilado: Cortea-205℃
+35%Deslilado:
+40%Destilado: 250 Densidada20/4°℃
+45%Destilado: °℃
+50%Destilado: OC
+Viscosidada SSU
+325 ℃ Viscosidada 50 OC 39
+55%Destilado: nss
+60%Destilado: °℃ OC
+Viscosidada nsS
+65%Destllado: C Viscosidada nss
+OC
+70%Destilado:
+75%Destilado: OC
+ANALIZO: JEFESECCIONLABORATORIO

@@ -7,6 +7,7 @@
   "TEC-7": 4.8,
   "TEC-10": 7.1
  },
+ "kb_note": "TEC-6 form of 2 Dec 1964 states Elev. Mesa Rotaria 5.67 m; header CSV 6.0 m; 0.33 m ignored",
  "p_1956_tec2_2300mss_mpa": 24.65,
  "p_1956_note": "2 h 45 min shut-in on a new well; taken as initial by PEMEX (252 kg/cm2)",
  "p_1964_mpa": {
