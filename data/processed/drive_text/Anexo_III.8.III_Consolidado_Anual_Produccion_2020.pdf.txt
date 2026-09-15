@@ -1,0 +1,16 @@
+[Connector text extraction of Drive file 17UZUZ-68OHV5EfE3Hl9IJc0MdlhMi55C "Anexo III.8.III Consolidado Anual de Produccion de hidrocarburos 2020.pdf" (525,545 B, modified 2022-08-26). Tonalli filing to CNH.]
+PRODUCCION ANUAL DE HIDROCARBUROS ENERO-DICIEMBRE 2020, AREA CONTRACTUAL 24 "CAMPO TECOLUTLA". Columns: Area, Mes, Volumen bruto extraido de Petroleo [bls], Volumen extraido de Agua [bls], Calidad (°API), Volumen extraido de Gas [MMPC], Poder calorifico (MMBTU), Origen, Destino, Transporte.
+Origen: Pozos Tecolutla 2 y Tecolutla 10. Destino: BSB Ezequiel Ordoñez PEMEX. Transporte: Terrestre UPV.
+CNH-R01-L03-A24/2016 Enero 2841 8209.882 28.9 1.843 1.843x10^9
+Febrero 2262.189 7321.297 29.9 1.478 1.478x10^9
+Marzo 1803.337 4062.555 28.4 0.368 0.368x10^9
+Abril 0 0 0 0 0
+Mayo 0 0 0 0 0
+Junio 0 0 0 0 0
+Julio 1474.22 5616.98 28.1 3.1 3.1x10^9
+Agosto 2315.137 7363.497 29.5 7.797 7.797x10^9
+Septiembre 2426.123 6195.103 29.8 2.87 2.87x10^9
+Octubre 2210.234 2020.419 29.3 1.55 1.55x10^9
+Noviembre 1898.139 3545.264 29.3 1.5 1.5x10^9
+Diciembre 1742.914 3397.277 29.7 1.45 1.45x10^9
+Produccion Total: Volumen bruto extraido de petroleo 63,864.56 bls; Volumen neto de petroleo 16,132.29 bls; Volumen extraido de agua 47,732.27 bls; Calidad 262.9 [sum of monthly API]; Gas 21.956 MMPC.

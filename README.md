@@ -59,12 +59,13 @@ See `docs/task_queue.md`. Work is committed after each task.
 | 10 | `docs/10_econ_rebuild.md`, `docs/Tecolutla_Field_History_and_TEC12_Review_v4.md`, `docs/Tecolutla_TEC12_Handover.pptx` | `data/processed/econ_rebuild/` | `figures/10_econ_rebuild.png` |
 | 11 (OCR) | `docs/11_ocr.md` | `data/processed/pressure/ocr/`, `data/processed/fluids/ocr/` | — |
 | 12 (large files) | `docs/12_drive_large_files.md` | `data/processed/drive_text/`, `data/processed/tec10/`, `data/processed/welltest/`, `data/processed/pressure/tec2_2018/` | — |
+| 13 (CNH filings, GIS, CMI) | `docs/13_cnh_filings_gis_cmi.md` | `data/processed/cnh/`, `data/processed/petrophysics/tec10_cmi_*.csv`, `data/raw/cnh_gis/` | `figures/13_cnh_polygon.png`, `figures/14_cmi_fractures.png` |
 
 Gap register: `docs/gaps.md`. Rerun everything with the scripts in `src/` in task order; each script reads only `data/raw/` and earlier `data/processed/` outputs.
 
 ## Large Drive files (text route)
 
-The connector refuses raw downloads above roughly 7–10 MB (G-13), but its `read_file_content` call returns a text rendering of any file the account can see. The ten large files (Work Program, GLJ YE2020 detail, core report, mud-log reports, masterlog, CMI image, two 2018 gauge workbooks, two decks) were read that way on 15 Sep 2026; the renderings live in `data/processed/drive_text/` and are listed in `data/manifest.csv` with `source_kind = drive-connector-text`. Figures and images are not captured and the two gauge workbooks are truncated at about 1 MB (G-52), so the binaries still belong in `data/raw/` when a Drive API pull (`src/pull_drive.py`) or a manual download is possible. Parsers on the renderings: `src/tec10_mudlog.py`, `src/welltest_2018_extract.py`, `src/tec2_2018_survey.py`.
+The connector refuses raw downloads above roughly 7–10 MB (G-13), but its `read_file_content` call returns a text rendering of any file the account can see. The ten large files (Work Program, GLJ YE2020 detail, core report, mud-log reports, masterlog, CMI image, two 2018 gauge workbooks, two decks) were read that way on 15 Sep 2026; the renderings live in `data/processed/drive_text/` and are listed in `data/manifest.csv` with `source_kind = drive-connector-text`. Figures and images are not captured and the two gauge workbooks are truncated at about 1 MB (G-52), so the binaries still belong in `data/raw/` when a Drive API pull (`src/pull_drive.py`) or a manual download is possible. Parsers on the renderings: `src/tec10_mudlog.py`, `src/welltest_2018_extract.py`, `src/tec2_2018_survey.py`. Small binaries (the CNH shapefile) download normally. GIS and image-log scripts: `src/cnh_polygon.py` (pyshp, pyproj), `src/cmi_fractures.py`.
 
 ## OCR
 

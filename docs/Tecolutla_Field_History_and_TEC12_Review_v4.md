@@ -42,7 +42,7 @@ The economic-model file dates in v3 ("Sept 2023 — final work program, Petrel R
 | TEC-10 | 2349.5–2353 (2314–2318) | Jul 2018 – | ~48 kbbl to Mar 2020, ~80 kbbl to 2022 | daily sheet to Nov 2019; commingled sales after |
 | **Field** | | | **1.72 MMbbl recorded; 1.94 MMbbl with allocations (Mar 2020); ~1.98 MMbbl to end-2022** | |
 
-Field-level CNH data exist for 1960–65 (182 kbbl); nothing monthly exists before 1960 or for TEC-2 and TEC-7 before 1972 (G-30, G-34). After November 2019 no per-well volumes exist; sales are commingled and fell from ~70 bbl/d (2019–20) to ~50 (2021) and ~25 bbl/d (2022) (G-32).
+Field-level CNH data exist for 1960–65 (182 kbbl); nothing monthly exists before 1960 or for TEC-2 and TEC-7 before 1972 (G-30, G-34). After November 2019 no per-well volumes exist in the pulled files; the CNH annual filings give the field 16.1 kbbl net in 2020 (both wells, April–June shut in) and 17.4 kbbl in 2021 with TEC-10 named as the only origin, and the 2022 monthly reports show the field effectively shut in from July 2022 (238 bbl net in four months) (G-32, `docs/13_cnh_filings_gis_cmi.md`).
 
 **GOR and fluid.** Cumulative produced GOR 1966–1992 was 565 scf/bbl, which is where IFR's "solution GOR 552" comes from, PEMEX measured 685 scf/bbl on TEC-6 in December 1964, and the TEC-10 flowback of Jul–Aug 2018 metered a median 767 scf/bbl (Weatherford daily reports, `docs/12_drive_large_files.md` §7); PEMEX's PVT table (336 scf/bbl, Pb 1,877 psi, 20 °API) does not describe this fluid. OCR of the Intertek 2018–19 reports gives the measured stock-tank oil as 30.1–30.8 °API, 1.6 % sulphur; no laboratory Rs or bubble point exists in the files (G-31). The anomalies are field-allocated gas in 24 months, a 1993–99 allocation artefact at low rates, TEC-2's 2013–16 tail (8 bbl/d oil against the field's gas), and a real but local rise on TEC-10 to 1,800–2,500 scf/bbl as tubing pressure fell below 500 psi. None indicates a gas cap or reservoir-wide gas liberation.
 
@@ -55,6 +55,7 @@ The GR trap in v3 is confirmed quantitatively: GR rises with porosity in every w
 | CNH / PEMEX booked | 7.8 | 3.1 | — | — | — |
 | Petrel Robertson, TEC-2/9/10 vintage-log petrophysics | 7.6 | 2.55 | 0.35 | 0.047 | 0.21 |
 | IFR Summary (GLJ) sheet | 11.2 | 2.55 | 0.40 | 0.070 | 0.30 |
+| CNH field polygon, 2015 data room (G-43) | — | 3.14 (all nine wells inside; administrative outline) | — | — | — |
 | Petrel Robertson, TEC-10 logs | 12.0 | 2.55 | 0.42 | 0.062 | 0.19 |
 | **Monte Carlo P90 / P50 / P10** | **8.1 / 10.0 / 12.2** | | | | |
 
@@ -82,7 +83,7 @@ The IFR curve (qi 342, b 1.7, Di 3.5/yr; 401 kbbl over 417 months; "345 kbbl" is
 
 - Perforations 2,349.5–2,353 mMD = **2,314–2,318 mSS on the survey** (2,311.5 in the By Zone sheet; G-46). 2.5 m perforated in a 5–6 % porosity, 15–50 ohm·m interval.
 - 181 bbl/d in the first full month, 78 bbl/d at 12 months, ~45 at 33 months, ~21 at 45 months; water cut 42 % → 67 % in year one; 44.5 kbbl in the first 431 days.
-- The 41 m of 9–11 % porosity above the perforations (2,270–2,311 mSS) reads 4–5 ohm·m with neutron > density porosity and PE 3.8. Tonalli logged it with a modern suite and did not perforate it. The Weatherford image log is a CMI, not an FMI (G-09).
+- The 41 m of 9–11 % porosity above the perforations (2,270–2,311 mSS) reads 4–5 ohm·m with neutron > density porosity and PE 3.8. The CMI sees no open fracture in it (3 mixed, 6 cemented picks over 17 m) and none in the perforated 10 m; open fractures start below 2,320 mSS, in the produced and water-bearing interval (`docs/13_cnh_filings_gis_cmi.md` §4). Tonalli logged it with a modern suite and did not perforate it. The Weatherford image log is a CMI, not an FMI (G-09).
 - GLJ's YE2020 forecast for TEC-10 (80 bbl/d through 2021) was overtaken within a year (G-39). GLJ's TEC-12 parameters are now read from the detail report: 200/225/275 bbl/d, b 0.5/0.6/0.7, EUR 250/400/600 kbbl, NPV10 2.2/4.1/6.0 MM at 42 $/bbl. The Work Program itself files 345,000 bbl as the vertical type-curve volume and 75 ac as the TEC-12 drainage polygon at the 2,315 mSS contour.
 
 ## 4. Modern drilling performance (unchanged from v3; costs verified)
@@ -149,12 +150,12 @@ The v3 overhead finding is unchanged: USD 1.05 MM/yr of corporate and regulatory
 | Facies | Low relative to TEC-11 (bracketed by TEC-6 and TEC-9), but the TEC-10 build-up needed a no-flow boundary at 125 m |
 | Water | Every well water-limited within a year; the aquifer that holds pressure also delivers the water |
 | Cost | AFE on 2018 rates, no contingency; 25 % escalation assumed |
-| Price and fiscal | 44 % royalty burden at WTI 70; 2025 fiscal reform not reviewed (G-49) |
+| Price and fiscal | 44 % royalty burden at WTI 70; the March 2025 Ley del Sector Hidrocarburos leaves existing contract terms under the LISH per secondary sources, but its Reglamento allows substitution of contracts by assignments and the regulator is now the Comisión Nacional de Energía; counsel to confirm (G-49) |
 | Depth control | TEC-10 came in low against prognosis; 3 m offset between survey and By Zone depths (G-46) |
 
 ## 7. Beyond TEC-12 (unchanged from v3)
 
-TEC-2 skin +196 (workover), TEC-13 now structurally lower on the reprocessed 3D, the CNH 500 kbbl-per-well figure in the Decline sheet (G-22).
+TEC-2 skin +196 (workover), TEC-13 now structurally lower on the reprocessed 3D, the CNH 500 kbbl-per-well figure in the Decline sheet, which the filed forecast tables do not use: they carry the IFR 2020 curve for TEC-12 and TEC-13 (G-22 resolved).
 
 ## 8. Verification list — status
 
@@ -168,7 +169,7 @@ TEC-2 skin +196 (workover), TEC-13 now structurally lower on the reprocessed 3D,
 | 6 GLJ YE2020 | Included, task 6 |
 | 7 Current reservoir pressure | Done, task 5: 24.15 MPa in 2018, 2 % below initial |
 | 8 Static gradient at reopening | Still the highest-value cheap measurement; add the TEC-10 petrophysical evaluation |
-| New | Resolve G-47 before sanction; confirm the AFE currency (G-44) and which well the 2023 model priced (G-17); pull the ten large-file binaries into `data/raw/` (G-52). 17 of 52 logged gaps remain open |
+| New | Resolve G-47 before sanction; confirm the AFE currency (G-44) and which well the 2023 model priced (G-17); pull the ten large-file binaries into `data/raw/` (G-52). 15 of 53 logged gaps remain open |
 
 ## 9. What the presentation says
 

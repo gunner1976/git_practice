@@ -16,3 +16,5 @@ google-auth==2.58.0
 google-auth-oauthlib==1.4.1
 pytesseract==0.3.13
 rapidocr-onnxruntime==1.4.4
+pyshp
+pyproj

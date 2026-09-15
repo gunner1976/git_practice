@@ -98,5 +98,5 @@ slide("11. Decisions and the gap register", [
     "If the window is water: move the target to 2,311-2,332 mSS (the produced interval in every well) and re-run the base case.",
     "Quote volumes as: recorded 1.72 MMbbl; OOIP 8-10-12; TEC-12 65/218/366 kbbl; AFE USD 1.57 MM (2020) / ~2.0 MM (2026).",
     "Wording fixes for any external document: CMI not FMI; 'wackestone to grainstone, compact'; 'within 2 % of initial pressure'; Simmons volumes are two wells.",
-    "52 gaps logged in docs/gaps.md with status; 17 remain open. Kevin: the Aug-2025 re-saves (G-03), which well the 2023 model priced (G-17), AFE currency (G-44), CNH polygon (G-43), a Drive API pull or manual download of the ten large binaries (G-52)."])
+    "53 gaps logged in docs/gaps.md with status; 15 remain open. Kevin: the Aug-2025 re-saves (G-03), which well the 2023 model priced (G-17), AFE currency (G-44), the 2020 CNH filing gross-vs-net oil (G-53), a Drive API pull or manual download of the ten large binaries (G-52)."])
 prs.save("docs/Tecolutla_TEC12_Handover.pptx"); print("deck saved", len(prs.slides), "slides")

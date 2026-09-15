@@ -1,0 +1,13 @@
+[Connector text extraction of Drive files 1V-37AfBAvUOXDliYHHk7ehaRKRMJo6cl "Tabla Producción 2021.xlsx" (118,720 B, modified 2020-10-01) and 1Ei6mp7yvGY8b5igbodWjaCV5z9_3Hiql "Tabla Producción 2022.xlsx" (118,795 B, modified 2022-08-31). CNH Plan de Desarrollo production-forecast format: Asignación o Contrato, Campo, Yacimiento, Pozo, Fluido, Perfil, Mes 1..12 (average daily rate per month).]
+2021 table (CNH-R01-L03-A24/2016, TECOLUTLA, EL ABRA):
+Tecolutla-2 Aceite (bbl/d) BASE: 23.6 23.3 23.0 22.8 22.5 22.2 21.9 21.7 21.4 21.1 20.9 20.6
+Tecolutla-2 Gas (mcf/d) BASE: 13.0 12.9 12.7 12.6 12.4 12.3 12.1 12.0 11.8 11.7 11.5 11.4
+Tecolutla-2 Agua (bbl/d) BASE: 76.4 76.7 77.0 77.2 77.5 77.8 78.1 78.3 78.6 78.9 79.1 79.4
+Tecolutla-10DES Aceite (bbl/d) BASE: 47.3 46.7 46.1 45.5 45.0 44.4 43.8 43.3 42.8 42.2 41.7 41.2
+Tecolutla-10DES Gas (mcf/d) BASE: 26.1 25.8 25.5 25.1 24.8 24.5 24.2 23.9 23.6 23.3 23.0 22.7
+Tecolutla-10DES Agua (bbl/d) BASE: 147.7 148.3 148.9 149.5 150.0 150.6 151.2 151.7 152.2 152.8 153.3 153.8
+Tecolutla-12DES Aceite (bbl/d) INCREMENTAL: 0.0 0.0 300.2 246.5 212.7 189.1 171.4 157.6 146.4 137.2 129.3 122.6
+Tecolutla-12DES Gas (mcf/d) INCREMENTAL: 0.0 0.0 8.2 6.8 5.8 5.2 4.7 4.3 4.0 3.8 3.5 3.4
+Tecolutla-12DES Agua (bbl/d) INCREMENTAL: 0.0 0.0 30.0 34.4 38.2 41.4 44.4 47.0 49.5 51.8 54.0 56.1
+2022 table: same Tecolutla-2 and Tecolutla-10DES BASE rows; Tecolutla-12DES INCREMENTAL starts in Mes 5 (300.2 246.5 212.7 189.1 171.4 157.6 146.4 137.2), Tecolutla-13DES INCREMENTAL starts in Mes 8 (300.2 246.5 212.7 189.1 171.4), gas 8.2 6.8 5.8 5.2 4.7 mcf/d, water 30.0 34.4 38.2 41.4 44.4 bbl/d.
+Instructivo: forecasts must be consistent with 2P or 3P reserves; monthly to contract limit or economic limit; base and incremental profiles per well.

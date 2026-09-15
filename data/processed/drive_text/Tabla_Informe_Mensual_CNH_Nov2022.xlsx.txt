@@ -1,0 +1,16 @@
+[Connector text extraction of Drive file 1wDcqX4kqn-QhdLG81zcSpsLd_MFS0gLl "Tabla Informe Mensual de actividades e inversiones Contratos para la Exploración y Extracción.xlsx" (252,104 B, modified 2022-11-18), Tonalli monthly report to CNH under contract obligation 4.1, covering Jul-Oct 2022. Extract of the numeric content only.]
+PRESUPUESTO (USD, LISH categories, Evaluación plan): monthly approved vs actual, identical for Jul, Aug, Sep, Oct 2022:
+  Personal de Administracion del Proyecto: actual 11,000
+  Cuota por la Administracion anual del contrato: approved 5,900, actual 8,103.94
+  Honorarios consultoría operaciones geofísica y geología: approved 5,000
+  Seguros: approved 20,800, actual 0
+  Personal de administracion del proyecto: approved 9,335, actual 7,870.45
+  Gastos de administracion, renta de oficinas: approved 13,280, actual 6,101.23
+  Personal de administracion de la informacion: approved 13,280, actual 6,101.23
+  Transporte de hidrocarburo (construccion y tendido de ductos line): approved 123,000, actual blank
+  Total approved 190,595 per month; total actual 39,176.85 per month.
+PRODUCCIÓN (net monthly production, "produccion mensual neta"; the sheet labels units bpd but the values are monthly volumes):
+  Aceite: Aprobado 1419 1400 1400 1400; Reportado 0 189 49 0   (Jul, Aug, Sep, Oct 2022)
+  Gas (mmpc): Aprobado 0.9 0.9 0.9 0.9; Reportado 0 0.3 0.3 0
+  Agua: Aprobado 4431 4450 4450 4450; Reportado 0 2218 511 0
+MEDICIÓN: punto de medición CAB Poza Rica; lugar de entrega Estación de Bombeo Ezequiel Ordóñez, La Guasima, Papantla; punto de venta CAB Poza Rica 100 %.
