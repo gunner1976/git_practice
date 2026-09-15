@@ -5,7 +5,7 @@ Work in order. Commit after each. Status is updated here as tasks close.
 | # | Task | Inputs | Outputs | Status |
 |---|---|---|---|---|
 | 0 | Repo scaffold, access plan, working set, review v3 read | — | this repo, `docs/access_plan.md`, `data/working_set.csv`, `docs/review_v3_reading_notes.md` | Done — 140 files pulled via connector; 10 large files await API credentials (G-13) |
-| 1 | Parse the 2023 economics | `2023-09-29 Tec-12 Economics.xlsm` | `data/processed/econ_2023_*.csv`, `docs/01_econ_2023.md` | Ready |
+| 1 | Parse the 2023 economics | `2023-09-29 Tec-12 Economics.xlsm` | `data/processed/econ_2023/`, `docs/01_econ_2023.md` | Done — parsed from cached values, pandas cross-check in place of LibreOffice (G-16); G-17..G-20 raised |
 | 2 | Reconcile the nine Feb 2022 models (+ Aug 2020 predecessor, + 2023) | ten `.xlsm` | diff matrix, lineage chart, recommendation | Ready |
 | 3 | TEC-11 facies vs trajectory figure | mud log, directional survey | `figures/03_tec11_lateral_facies.png`, metres in grainstone vs mud/wackestone | Ready |
 | 4 | Production database | all production workbooks | `data/processed/tecolutla_production.parquet` + CSV, GOR anomaly note | Ready |

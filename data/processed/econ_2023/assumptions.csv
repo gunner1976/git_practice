@@ -1,0 +1,40 @@
+item,value,unit,source,formula,note
+Evaluation start date,2024-01-01,date,Model (Tec-10 & Tec-12)!B8,,
+Economic start date,2024-01-01,date,Model (Tec-10 & Tec-12)!B9,,
+Depreciation rate,0.25,fraction/yr,Model (Tec-10 & Tec-12)!B10,,
+Income tax rate,0.3,fraction,Model (Tec-10 & Tec-12)!B11,,
+Inflation,0.0,fraction,Model (Tec-10 & Tec-12)!B12,,0 => flat real pricing
+Discount rate,0.1,fraction,Model (Tec-10 & Tec-12)!B13,,
+Contract duration,35.0,years,Model (Tec-10 & Tec-12)!B14,,
+Oil offset (legacy),-7.46,USD/bbl,Model (Tec-10 & Tec-12)!B16,,superseded by the 90% of WTI field-price factor in K428
+Gas offset,-0.45,USD/mmbtu,Model (Tec-10 & Tec-12)!B17,,
+Abandonment fund,-150000.0,USD,Model (Tec-10 & Tec-12)!B21,,
+Block area,7.2,km2,Model (Tec-10 & Tec-12)!B4,,
+API gravity (model),40.0,deg,Model (Tec-10 & Tec-12)!B5,,note in C5: set to 40 only so the price formula avoids a discount; true 28-30
+Bid round royalty,0.3122,fraction of revenue,Model (Tec-10 & Tec-12)!E9,=outputs!B3,
+Surface land royalty,0.01,fraction of revenue,Model (Tec-10 & Tec-12)!H9,,
+Community royalty,0.0,fraction,Model (Tec-10 & Tec-12)!H10,,
+GORR,0.0,fraction,Model (Tec-10 & Tec-12)!H11,,
+Battery fixed cost,-10000.0,USD/month,Model (Tec-10 & Tec-12)!E15,,
+Oil well fixed cost,-2500.0,USD/well/month,Model (Tec-10 & Tec-12)!E16,,
+Gas well fixed cost,-2500.0,USD/well/month,Model (Tec-10 & Tec-12)!E17,,
+Disposal well fixed cost,-1500.0,USD/month,Model (Tec-10 & Tec-12)!E18,,
+Block fee <=60 months,-1150,peso/km2/month,Model (Tec-10 & Tec-12)!E19,=-1150,
+Block fee >60 months,-2750,peso/km2/month,Model (Tec-10 & Tec-12)!E20,=-2750,
+Oil variable cost,-7.25,USD/bbl,Model (Tec-10 & Tec-12)!H15,=-(5+2.25),trucking/handling
+Water disposal,-3.25,USD/bbl,Model (Tec-10 & Tec-12)!H16,=-2.25-1,
+Sales gas processing,-0.25,USD/mcf,Model (Tec-10 & Tec-12)!H17,,
+Extraction area share,1.0,fraction of block,Model (Tec-10 & Tec-12)!H21,,
+WTI price (flat),85.0,USD/bbl,Model (Tec-10 & Tec-12)!K412,,row 412 'Oil (US$/bbl) LLS flat'
+Field price factor,0.9,fraction of WTI,Model (Tec-10 & Tec-12)!D428,,PEMEX price at Ezequiel Ordonez
+Field price,76.5,USD/bbl,Model (Tec-10 & Tec-12)!K428,=K427*$D$428,= WTI x factor
+Gas contractual price,2.5,USD/mmbtu,Model (Tec-10 & Tec-12)!K414,,
+FX CAD/USD,1.3,CAD per USD,Model (Tec-10 & Tec-12)!K74,,labelled 'Not Used'
+FX MXN/USD,18.0,peso per USD,Model (Tec-10 & Tec-12)!K75,,block fees only
+Basic royalty A0 threshold,48.0,USD/bbl,Model (Tec-10 & Tec-12)!E458,,"Mexican basic royalty, oil"
+Basic royalty B0 slope,0.00125,fraction per USD,Model (Tec-10 & Tec-12)!E459,,
+Basic oil royalty rate at model price,0.12125,fraction,Model (Tec-10 & Tec-12)!K460,"=(IF(K415<K458,$F$460,IF(K415>=K458,IF(K459*K415+1.5%>$G$460,$G$460,K459*K415+1.5%))))*(1+outputs!$B$9)",= B0 x price + 1.5%
+Economic life (check3),10.91666667,years,Model (Tec-10 & Tec-12)!I505,=SUM(K505:PT505)/12,months with positive trailing netback
+TEC-10 forecast start,2024-01-01,date,Model (Tec-10 & Tec-12)!E26,,"well #2, chance of success G26"
+TEC-12 forecast start,2024-01-01,date,Model (Tec-10 & Tec-12)!E28,,"well #4 'Tecolutla 12 HZ', chance of success G28"
+TEC-12 chance of success,1.0,fraction,Model (Tec-10 & Tec-12)!G28,,

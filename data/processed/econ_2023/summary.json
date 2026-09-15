@@ -1,0 +1,136 @@
+{
+  "tec10": {
+    "sheet": "Model (Tec-10)",
+    "econ_life_years": 5.25,
+    "oil_econ_bbl": 100395.1647,
+    "oil_total_bbl": 100395.1647,
+    "water_econ_bbl": 243655.0353,
+    "revenue_econ_usd": 7680230.1,
+    "royalties_econ_usd": -3514708.08,
+    "opex_econ_usd": -2419503.809,
+    "netback_econ_usd": 1746018.211,
+    "capital_total_usd": -156473.8099,
+    "noi_btax_adj_usd": 1589544.401,
+    "irr_btax": -0.8270312617,
+    "payout_months": 0,
+    "npv10_btax_usd": 1355679.182,
+    "tax_usd": -543029.4632,
+    "noi_atax_usd": 1046514.937,
+    "irr_atax": -0.7566036163,
+    "npv10_atax_usd": 895908.3567,
+    "tec10_oil_total_bbl": 100395.1647,
+    "tec12_oil_econ_bbl": 0,
+    "tec12_oil_total_bbl": 0,
+    "tec12_water_total_bbl": 0,
+    "crosscheck": {
+      "npv10_btax_recalc_usd": 1355679.1817575784,
+      "revenue_max_abs_diff_usd": 7.650000043213367e-05,
+      "royalties_max_abs_diff_usd": 600.0,
+      "opex_max_abs_diff_usd": 12600.0,
+      "netback_max_abs_diff_usd": 13200.0,
+      "noi_max_abs_diff_usd": 13200.0
+    }
+  },
+  "tec10_tec12": {
+    "sheet": "Model (Tec-10 & Tec-12)",
+    "econ_life_years": 10.91666667,
+    "oil_econ_bbl": 335024.1104,
+    "oil_total_bbl": 503611.7595,
+    "water_econ_bbl": 682428.5664,
+    "revenue_econ_usd": 25629344.44,
+    "royalties_econ_usd": -11568642.4,
+    "opex_econ_usd": -6730877.641,
+    "netback_econ_usd": 7329824.402,
+    "capital_total_usd": -1965774.27,
+    "noi_btax_adj_usd": 5412425.729,
+    "irr_btax": 4.15302713,
+    "payout_months": 6,
+    "npv10_btax_usd": 4192547.238,
+    "tax_usd": -1364884.002,
+    "noi_atax_usd": 4047541.728,
+    "irr_atax": 1.81744073,
+    "npv10_atax_usd": 2983951.905,
+    "tec10_oil_total_bbl": 100395.1647,
+    "tec12_oil_econ_bbl": 355677.9481,
+    "tec12_oil_total_bbl": 403216.5948,
+    "tec12_water_total_bbl": 2169775.421,
+    "crosscheck": {
+      "npv10_btax_recalc_usd": 4192547.23882431,
+      "revenue_max_abs_diff_usd": 27423.4900104,
+      "royalties_max_abs_diff_usd": 5691.84718137,
+      "opex_max_abs_diff_usd": 37242.24108,
+      "netback_max_abs_diff_usd": 15768.402819819996,
+      "noi_max_abs_diff_usd": 24235.029178100005
+    }
+  },
+  "tec12_incremental": {
+    "npv10_btax_usd": 2836868.056,
+    "npv10_atax_usd": 2088043.5483,
+    "noi_btax_adj_usd": 3822881.328,
+    "oil_econ_bbl": 234628.9457,
+    "capital_total_usd": -1809300.4601
+  },
+  "tec12_2020_profile": {
+    "first_month": "2021-06-01",
+    "ip_bpd": 300.151473319778,
+    "cum_at_row_J21_bbl": 345981.34304894326,
+    "cum_to_end_of_sheet_bbl": 400253.67621182796,
+    "months_in_sheet": 417
+  },
+  "volumetrics_sheet": {
+    "field": {
+      "area_km2": 2.549519546,
+      "area_formula": "=630*0.0040468564224",
+      "gross_m": 42.26947048,
+      "ntg": 0.4,
+      "phi": 0.07,
+      "sw": 0.3,
+      "bo": 1.19,
+      "ooip_mmbbl": 11.16428975
+    },
+    "tec12_drainage": {
+      "area_km2": 0.92093,
+      "ntg": 0.118,
+      "net_pay_m": 4.987797516,
+      "phi": 0.07,
+      "sw": 0.3,
+      "ooip_mmbbl": 1.189655975,
+      "rf": 0.29,
+      "reserves_bbl": 345000.2327,
+      "target_reserves_bbl": 345000.0
+    },
+    "alt1": {
+      "area_km2": 0.5,
+      "net_pay_m": 8.0,
+      "phi": 0.1,
+      "sw": 0.2,
+      "rf": 0.3,
+      "reserves_bbl": 313722.4882
+    },
+    "alt2": {
+      "area_km2": 0.305,
+      "net_pay_m": 10,
+      "phi": 0.1,
+      "sw": 0.2,
+      "rf": 0.3,
+      "reserves_bbl": 383677.8
+    }
+  },
+  "output_sheet": {
+    "updated": "Updated: 2023-10-24",
+    "cases": {
+      "wti80": {
+        "tec10_noi_per_month": 47090.09079135802,
+        "combined_noi_per_month": 213690.73030096153,
+        "royalty_share": 0.43741171928706807,
+        "opex_per_bbl": -11.7624787437881
+      },
+      "wti85": {
+        "tec10_noi_per_month": 51787.16325240452,
+        "combined_noi_per_month": 229142.78484858293,
+        "royalty_share": 0.4433354710937112,
+        "opex_per_bbl": -11.7624787437881
+      }
+    }
+  }
+}

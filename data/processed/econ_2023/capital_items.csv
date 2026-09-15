@@ -1,0 +1,36 @@
+row,description,group,location,total_usd,start,in_2024_model,source
+509,Oil Facility Phase #1,Facilities,Field,-15900000.0,#N/A,False,Model (Tec-10 & Tec-12)!C509:G509
+510,Oil Facility Phase #2,Facilities,Field,-5100000.0,#N/A,False,Model (Tec-10 & Tec-12)!C510:G510
+511,Gas Facility Phase #1,Facilities,Field,-11800000.0,#N/A,False,Model (Tec-10 & Tec-12)!C511:G511
+512,Gas Facility Phase #2,Facilities,Field,-700000.0,#N/A,False,Model (Tec-10 & Tec-12)!C512:G512
+513,Gas Facility Phase #3,Facilities,Field,-2900000.0,#N/A,False,Model (Tec-10 & Tec-12)!C513:G513
+514,Gas Facility Phase #4,Facilities,Field,-700000.0,#N/A,False,Model (Tec-10 & Tec-12)!C514:G514
+515,Gas Facility Compression Phase #1,Facilities,Field,-5000000.0,#N/A,False,Model (Tec-10 & Tec-12)!C515:G515
+516,Gas Facility Compression Phase #2,Facilities,Field,-5000000.0,#N/A,False,Model (Tec-10 & Tec-12)!C516:G516
+517,Gas Facility Compression Phase #3,Facilities,Field,-5000000.0,#N/A,False,Model (Tec-10 & Tec-12)!C517:G517
+518,Gas Facility Compression Phase #4,Facilities,Field,-5000000.0,#N/A,False,Model (Tec-10 & Tec-12)!C518:G518
+519,Pipeline (Gas),Facilities,Field,-4100000.0,#N/A,False,Model (Tec-10 & Tec-12)!C519:G519
+520,Pipeline (Oil),Facilities,Field,-3800000.0,#N/A,False,Model (Tec-10 & Tec-12)!C520:G520
+523,Engineering and Facility Design,Engineering,Field,-30000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C523:G523
+524,Road Upgrades (Tec-2 WO & Tec-10 Drill),Drill,Field,-15000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C524:G524
+525,Road Upgrades (Tec-11 Drill +),Drill,Field,-77000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C525:G525
+526,Tec-2 Survey,Workover,Field,-5000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C526:G526
+527,Tec-10 VT Survey,Drill,Field,-25000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C527:G527
+528,Field Surveying,Engineering,Field,-20000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C528:G528
+529,Tec-2 Wellhead Maintenance,Workover,Tecolutla-2,-10000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C529:G529
+530,Tec-2 Site Prep,Workover,Tecolutla-2,-10000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C530:G530
+531,Tec-2 Workover Basic (no rods or tubing; or pump; short test),Workover,Tecolutla-2,-260000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C531:G531
+534,Tec-10 VT Permit,Drill,Tecolutla-10,-15000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C534:G534
+535,Tec-10 VT Site Construction,Workover,Tecolutla-10,-150000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C535:G535
+536,Tec-10 VT Drill,Drill,Tecolutla-10,-1800000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C536:G536
+537,Tec-10 VT Complete,Drill,Tecolutla-10,-450000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C537:G537
+538,Tec-10 Core Study,Drill,Tecolutla-10,-25500.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C538:G538
+539,Tec-11 HZ Permit,Drill,Tecolutla-11,-25000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C539:G539
+540,Tec-2 Site Expansion (for Tec 11 Driil),Drill,Tecolutla-11,-200000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C540:G540
+541,Tec-11 HZ Drill,Drill,Tecolutla-11,-3100000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C541:G541
+542,Tec-11 HZ Complete,Drill,Tecolutla-11,-800000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C542:G542
+546,Tec-12 HZ Drill *Tec-10 Re-Entry,Drill,Tecolutla-12,-1500000.0,2024-01-01,True,Model (Tec-10 & Tec-12)!C546:G546
+547,"Tec-12 HZ Complete, Equip *Tec-10 Re-Entry",Drill,Tecolutla-12,-250000.0,2024-01-01,True,Model (Tec-10 & Tec-12)!C547:G547
+548,Tec-12 HZ Equip (jack),Facility,Tecolutla-12,-50000.0,2024-01-01,True,Model (Tec-10 & Tec-12)!C548:G548
+553,Tec-7 Workover Basic (no rods or tubing; or pump; short test),Workover,Tecolutla-7,-260000.0,2019-01-01,False,Model (Tec-10 & Tec-12)!C553:G553
+558,2020 START UP CAPITAL,Facility,Battery,-65000.0,2020-09-01,False,Model (Tec-10 & Tec-12)!C558:G558
