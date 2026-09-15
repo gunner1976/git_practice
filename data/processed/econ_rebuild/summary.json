@@ -1,0 +1,186 @@
+{
+ "parameters": {
+  "field_price_factor": 0.9,
+  "bid_royalty": 0.3122,
+  "basic_b0": 0.00125,
+  "basic_add": 0.015,
+  "basic_a0": 48.0,
+  "surface": 0.01,
+  "hc_tax_peso_km2_m": [
+   1150.0,
+   2750.0
+  ],
+  "block_km2": 7.2,
+  "mxn_usd": 18.0,
+  "battery_fixed": 10000.0,
+  "well_fixed": 2500.0,
+  "disposal_fixed": 1500.0,
+  "oil_var": 7.25,
+  "water_var": 3.25,
+  "tax": 0.3,
+  "depr": 0.25,
+  "disc": 0.1,
+  "abandon": 150000.0,
+  "start": "2027-01-01"
+ },
+ "capex_usd": {
+  "low": 1808632,
+  "base": 1965904,
+  "high": 2201813
+ },
+ "base_case": {
+  "profile": "base_bpd",
+  "wti": 70,
+  "field_price": 63.0,
+  "capex": 1965904.0,
+  "price_factor": 0.9,
+  "incremental": false,
+  "econ_months": 69,
+  "oil_econ_bbl": 142069,
+  "revenue": 8950376,
+  "royalties": 3732466,
+  "opex": 3020941,
+  "noi_btax": 81065,
+  "npv10_btax": -85206,
+  "npv10_atax": -355098,
+  "tax": -288039,
+  "payout_months": 35,
+  "irr_btax": null,
+  "royalty_share": 0.417,
+  "opex_per_bbl": 21.26
+ },
+ "npv10_btax_grid_base_capex": {
+  "50": {
+   "base_bpd": -1122678.0,
+   "high_bpd": -659638.0,
+   "low_bpd": -1774734.0
+  },
+  "60": {
+   "base_bpd": -615383.0,
+   "high_bpd": 33600.0,
+   "low_bpd": -1573079.0
+  },
+  "70": {
+   "base_bpd": -85206.0,
+   "high_bpd": 766982.0,
+   "low_bpd": -1361554.0
+  },
+  "80": {
+   "base_bpd": 456620.0,
+   "high_bpd": 1532389.0,
+   "low_bpd": -1147724.0
+  },
+  "90": {
+   "base_bpd": 1002104.0,
+   "high_bpd": 2315548.0,
+   "low_bpd": -935140.0
+  },
+  "100": {
+   "base_bpd": 1543005.0,
+   "high_bpd": 3097090.0,
+   "low_bpd": -725563.0
+  }
+ },
+ "npv10_atax_grid_base_capex": {
+  "50": {
+   "base_bpd": -1190104.0,
+   "high_bpd": -832670.0,
+   "low_bpd": -1774734.0
+  },
+  "60": {
+   "base_bpd": -773213.0,
+   "high_bpd": -282900.0,
+   "low_bpd": -1582966.0
+  },
+  "70": {
+   "base_bpd": -355098.0,
+   "high_bpd": 281334.0,
+   "low_bpd": -1395005.0
+  },
+  "80": {
+   "base_bpd": 60422.0,
+   "high_bpd": 857854.0,
+   "low_bpd": -1213285.0
+  },
+  "90": {
+   "base_bpd": 470171.0,
+   "high_bpd": 1435815.0,
+   "low_bpd": -1038269.0
+  },
+  "100": {
+   "base_bpd": 870621.0,
+   "high_bpd": 1995714.0,
+   "low_bpd": -869600.0
+  }
+ },
+ "npv10_btax_grid_incremental": {
+  "50": {
+   "base_bpd": -595712.0,
+   "high_bpd": -82107.0,
+   "low_bpd": -1407907.0
+  },
+  "60": {
+   "base_bpd": 64546.0,
+   "high_bpd": 851043.0,
+   "low_bpd": -1137175.0
+  },
+  "70": {
+   "base_bpd": 755738.0,
+   "high_bpd": 1812398.0,
+   "low_bpd": -875478.0
+  },
+  "80": {
+   "base_bpd": 1412858.0,
+   "high_bpd": 2723905.0,
+   "low_bpd": -625112.0
+  },
+  "90": {
+   "base_bpd": 2039683.0,
+   "high_bpd": 3594161.0,
+   "low_bpd": -386076.0
+  },
+  "100": {
+   "base_bpd": 2636795.0,
+   "high_bpd": 4423166.0,
+   "low_bpd": -158371.0
+  }
+ },
+ "npv10_atax_grid_incremental": {
+  "50": {
+   "base_bpd": -719837.0,
+   "high_bpd": -329996.0,
+   "low_bpd": -1415327.0
+  },
+  "60": {
+   "base_bpd": -184816.0,
+   "high_bpd": 413954.0,
+   "low_bpd": -1171381.0
+  },
+  "70": {
+   "base_bpd": 354777.0,
+   "high_bpd": 1106858.0,
+   "low_bpd": -948616.0
+  },
+  "80": {
+   "base_bpd": 820927.0,
+   "high_bpd": 1744913.0,
+   "low_bpd": -744581.0
+  },
+  "90": {
+   "base_bpd": 1259705.0,
+   "high_bpd": 2354092.0,
+   "low_bpd": -556363.0
+  },
+  "100": {
+   "base_bpd": 1677684.0,
+   "high_bpd": 2934395.0,
+   "low_bpd": -382015.0
+  }
+ },
+ "notes": [
+  "fiscal terms and opex from the 2023 IFR workbook; no corporate G&A, no Simmons carry, 100 % WI",
+  "water cut assumed to follow TEC-10 (0.40 -> 0.85)",
+  "flat real prices, no inflation, 10 % discount, start Jan 2027",
+  "post-2025 fiscal reform not checked (G-49)"
+ ]
+}

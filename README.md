@@ -41,3 +41,21 @@ LibreOffice (`soffice`) is required for the headless recalculation pass on `.xls
 ## Task queue
 
 See `docs/task_queue.md`. Work is committed after each task.
+
+
+## Outputs by task (September 2026)
+
+| Task | Note | Data | Figure |
+|---|---|---|---|
+| 1 | `docs/01_econ_2023.md` | `data/processed/econ_2023/` | — |
+| 2 | `docs/02_econ_lineage.md` | `data/processed/econ_lineage/` | `figures/02_econ_model_lineage.png` |
+| 3 | `docs/03_tec11_facies.md` | `data/processed/tec11/` | `figures/03_tec11_lateral_facies.png` |
+| 4 | `docs/04_production_database.md` | `data/processed/tecolutla_production.parquet` (+ CSV, gaps, allocations) | `figures/04_production_history.png` |
+| 5 | `docs/05_pressure.md` | `data/processed/pressure/` | `figures/05_pressure_depletion.png` |
+| 6 | `docs/06_forecast.md` | `data/processed/forecast/` | `figures/06_type_curve_forecast.png` |
+| 7 | `docs/07_volumetrics.md` | `data/processed/volumetrics/` | `figures/07_volumetrics.png` |
+| 8 | `docs/08_afe.md` | `data/processed/afe/` | `figures/08_afe.png` |
+| 9 | `docs/09_log_panel.md` | `data/processed/petrophysics/` | `figures/09_log_panel.png` |
+| 10 | `docs/10_econ_rebuild.md`, `docs/Tecolutla_Field_History_and_TEC12_Review_v4.md`, `docs/Tecolutla_TEC12_Handover.pptx` | `data/processed/econ_rebuild/` | `figures/10_econ_rebuild.png` |
+
+Gap register: `docs/gaps.md`. Rerun everything with the scripts in `src/` in task order; each script reads only `data/raw/` and earlier `data/processed/` outputs.
