@@ -93,7 +93,15 @@ slide("10. Economics rebuilt on the 2023 structure", [
     "Royalty burden 42-44 % of revenue; fixed costs end the stand-alone base case at 69 months with 142 of 218 kbbl produced.",
     "WTI ~USD 100 in mid-Sep 2026 on a supply disruption; long-term decks 70-80. 2025 fiscal reform not reviewed (G-49).",
     "v3's overhead finding stands: the well works for an operator that already carries the field, not for a single-asset company."], "figures/10_econ_rebuild.png", 8.2)
-slide("11. Decisions and the gap register", [
+slide("11. New sources read in the second pass: CNH polygon, CMI fractures", [
+    "Ten large Drive files read through the connector's text rendering (Work Program, GLJ detail, core report, mud logs, gauge data): docs/12.",
+    "CNH field polygon (2015 data room): 3.14 km2, all nine wells inside; IFR's 630 ac = 2.55 km2 is 81 % of it. An administrative outline, the upper bound of the OOIP range (G-43 closed).",
+    "CNH forecast tables filed for 2021 and 2022 carry the IFR 2020 TEC-12 curve (300 bbl/d first month), not 500 kbbl (G-22 closed).",
+    "CNH annual filings: 16.1 kbbl (2020, both wells, Apr-Jun shut in), 17.4 kbbl (2021, TEC-10 only, GOR 859 scf/bbl, 29.3 API); field shut in from Jul 2022, restarted late Nov 2022 on TEC-10.",
+    "TEC-10 core (only rock data): recrystallised grainstone, 2-8 % porosity, 0.01-0.5 mD at stress, 14-59 % PV residual oil; no electrical properties.",
+    "CMI (right): no open fracture in the TEC-12 window or the perforated 10 m; open fractures start below 2,320 mSS in the produced, water-bearing interval. TEC-10 is matrix flow (G-09 closed).",
+    "2025 reform: contract fiscal terms preserved per secondary sources; regulator now CNE; contract-to-assignment substitution clause to be checked by counsel (G-49)."], "figures/14_cmi_fractures.png", 6.6)
+slide("12. Decisions and the gap register", [
     "Before sanction: (1) core-calibrated petrophysics of TEC-10's upper zone (G-47); (2) static gradient on TEC-10 after the multi-year shut-in; (3) confirm AFE currency and re-index escalation (G-44, G-45); (4) pull the ten large-file binaries into data/raw (G-52; their text was read, docs/12).",
     "If the window is water: move the target to 2,311-2,332 mSS (the produced interval in every well) and re-run the base case.",
     "Quote volumes as: recorded 1.72 MMbbl; OOIP 8-10-12; TEC-12 65/218/366 kbbl; AFE USD 1.57 MM (2020) / ~2.0 MM (2026).",

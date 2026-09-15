@@ -59,7 +59,7 @@ See `docs/task_queue.md`. Work is committed after each task.
 | 10 | `docs/10_econ_rebuild.md`, `docs/Tecolutla_Field_History_and_TEC12_Review_v4.md`, `docs/Tecolutla_TEC12_Handover.pptx` | `data/processed/econ_rebuild/` | `figures/10_econ_rebuild.png` |
 | 11 (OCR) | `docs/11_ocr.md` | `data/processed/pressure/ocr/`, `data/processed/fluids/ocr/` | — |
 | 12 (large files) | `docs/12_drive_large_files.md` | `data/processed/drive_text/`, `data/processed/tec10/`, `data/processed/welltest/`, `data/processed/pressure/tec2_2018/` | — |
-| 13 (CNH filings, GIS, CMI) | `docs/13_cnh_filings_gis_cmi.md` | `data/processed/cnh/`, `data/processed/petrophysics/tec10_cmi_*.csv`, `data/raw/cnh_gis/` | `figures/13_cnh_polygon.png`, `figures/14_cmi_fractures.png` |
+| 13 (CNH filings, GIS, CMI) | `docs/13_cnh_filings_gis_cmi.md` | `data/processed/cnh/`, `data/processed/petrophysics/tec10_cmi_*.csv`, `data/raw/cnh_gis/`, `data/raw/cnh_reports/` | `figures/13_cnh_polygon.png`, `figures/14_cmi_fractures.png` |
 
 Gap register: `docs/gaps.md`. Rerun everything with the scripts in `src/` in task order; each script reads only `data/raw/` and earlier `data/processed/` outputs.
 

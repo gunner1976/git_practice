@@ -173,7 +173,7 @@ TEC-2 skin +196 (workover), TEC-13 now structurally lower on the reprocessed 3D,
 
 ## 9. What the presentation says
 
-Ten slides, one figure each, in `docs/Tecolutla_TEC12_Handover.pptx`: the reconciled field history; the eleven economic models on one basis; TEC-11 metres by facies; the production database; pressure at one datum; the type curve and the range; OOIP by source; the AFE; the log panel and the target window; the rebuilt economics; and the gap register.
+Thirteen slides in `docs/Tecolutla_TEC12_Handover.pptx`: the reconciled field history; the eleven economic models on one basis; TEC-11 metres by facies; the production database; pressure at one datum; the type curve and the range; OOIP by source; the AFE; the log panel and the target window; the rebuilt economics; the second-pass sources (CNH polygon, CMI fractures, core, CNH filings); and the gap register.
 
 ## 10. Sources
 
