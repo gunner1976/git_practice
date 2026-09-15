@@ -1,0 +1,198 @@
+{
+ "afe_total_usd_2020": 1572723.52,
+ "discrepancy": {
+  "version_A_sub_total": 1572723.5199999998,
+  "version_B_sub_total": 1567723.5199999998,
+  "cumulative_row_end": 1572723.52,
+  "sum_of_all_daily_cells": 1572723.52,
+  "lines_where_B_sub_blank": [
+   "Drilling Pad Maintenance"
+  ],
+  "B_sub_formulas_not_starting_at_H": [
+   "Conductor Hammering",
+   "Rig move Trucking in/out"
+  ],
+  "explanation": "Version B (Sep 2021): the SUB formula in AB12 (Drilling Pad Maintenance, 5,000) was deleted, so the SUB column totals 1,567,724 while the daily totals and cumulative row still include the 5,000 and end at 1,572,724. Two other SUB formulas (rows 14, 15) start at column I/J instead of H but lose nothing because H is blank there. Version A (Apr 2021) is internally consistent at 1,572,724."
+ },
+ "days": {
+  "pre_spud": 6,
+  "drilling_and_completion": 14,
+  "first_date": "2020-11-09",
+  "last_date": "2020-12-08"
+ },
+ "currency": "no label in either workbook; USD by evidence (see docs)",
+ "usdcad_spot_2026_09_15": 1.3915,
+ "usdcad_glj_jan22": 1.2658,
+ "afe_2020_in_cad_at_spot": 2188445,
+ "afe_2020_in_cad_at_glj": 1990789,
+ "escalation": [
+  {
+   "case": "low",
+   "escalation_factor": 1.15,
+   "usd": 1808632,
+   "cad_at_spot": 2516711,
+   "cad_at_glj_0p79": 2289408
+  },
+  {
+   "case": "base",
+   "escalation_factor": 1.25,
+   "usd": 1965904,
+   "cad_at_spot": 2735556,
+   "cad_at_glj_0p79": 2488487
+  },
+  {
+   "case": "high",
+   "escalation_factor": 1.4,
+   "usd": 2201813,
+   "cad_at_spot": 3063823,
+   "cad_at_glj_0p79": 2787105
+  }
+ ],
+ "tec11_drilling_actual_over_budget": 1.088,
+ "tec11": [
+  {
+   "project": "Tec 11",
+   "item": "Drilling Costs",
+   "date": "2018-12-01 00:00:00",
+   "actual_usd": 3105308.405911247,
+   "budget_usd": 2853870,
+   "over_under": 251438.40591124678
+  },
+  {
+   "project": "Tec 11",
+   "item": "Cement Bond Log/Wellbore Cleanup",
+   "date": "2019-01-01 00:00:00",
+   "actual_usd": 129359.76999999999,
+   "budget_usd": 100000,
+   "over_under": 29359.76999999999
+  },
+  {
+   "project": "Tec 11",
+   "item": "Completion",
+   "date": "May/June 2019",
+   "actual_usd": 962850.0,
+   "budget_usd": 831000,
+   "over_under": 131850.0
+  },
+  {
+   "project": "Tec 11",
+   "item": "Tantayuca",
+   "date": "2019-08-01 00:00:00",
+   "actual_usd": 206225.0,
+   "budget_usd": 150000,
+   "over_under": 56225.0
+  },
+  {
+   "project": "Total",
+   "item": NaN,
+   "date": null,
+   "actual_usd": 4403743.175911247,
+   "budget_usd": 3934870,
+   "over_under": 468873.1759112468
+  }
+ ],
+ "categories": [
+  {
+   "category": "rig & rig move",
+   "usd_2020": 424162.5,
+   "share": 0.27
+  },
+  {
+   "category": "tubulars & wellhead",
+   "usd_2020": 365233.0,
+   "share": 0.232
+  },
+  {
+   "category": "mud, fluids & disposal",
+   "usd_2020": 277823.3,
+   "share": 0.177
+  },
+  {
+   "category": "downhole tools & directional",
+   "usd_2020": 141500.0,
+   "share": 0.09
+  },
+  {
+   "category": "logging, perforating & completion",
+   "usd_2020": 118000.0,
+   "share": 0.075
+  },
+  {
+   "category": "supervision, engineering & HSE",
+   "usd_2020": 96725.0,
+   "share": 0.062
+  },
+  {
+   "category": "cementing",
+   "usd_2020": 94279.72,
+   "share": 0.06
+  },
+  {
+   "category": "site & civil",
+   "usd_2020": 55000.0,
+   "share": 0.035
+  }
+ ],
+ "top_lines": [
+  {
+   "description": "Mud and chemicals (includes centiguge & trucking)",
+   "vendor": "WFT/Check with CES",
+   "usd_2020": 260323.0
+  },
+  {
+   "description": "Drilling Rig",
+   "vendor": "Simmons",
+   "usd_2020": 203362.0
+  },
+  {
+   "description": "Rig move Trucking in/out",
+   "vendor": "Simmons",
+   "usd_2020": 190000.0
+  },
+  {
+   "description": "Intermediate Casing and Accessories",
+   "vendor": "TENARIS TAMSA",
+   "usd_2020": 187384.0
+  },
+  {
+   "description": "Directional Tools",
+   "vendor": "TIDSA/IGNIS/WFT/HAL/SINOPEC",
+   "usd_2020": 70000.0
+  },
+  {
+   "description": "Production Tubing",
+   "vendor": "TENARIS TAMSA",
+   "usd_2020": 60962.0
+  },
+  {
+   "description": "Cement - Production Casing",
+   "vendor": "HAL / WFT / Check smaller companies",
+   "usd_2020": 58825.0
+  },
+  {
+   "description": "Wireline Logging Services",
+   "vendor": "HIGHBURY / WFT",
+   "usd_2020": 50000.0
+  },
+  {
+   "description": "Wellhead",
+   "vendor": "EMRA / WFT / ZAO",
+   "usd_2020": 42000.0
+  },
+  {
+   "description": "Surface Casing and Accessories",
+   "vendor": "TENARIS TAMSA",
+   "usd_2020": 40895.0
+  },
+  {
+   "description": "Perforating Guns",
+   "vendor": "HIGHBURY",
+   "usd_2020": 40000.0
+  },
+  {
+   "description": "Engineering and Consulting",
+   "vendor": "SINS",
+   "usd_2020": 39500.0
+  }
+ ]
+}

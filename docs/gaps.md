@@ -48,10 +48,13 @@ Anything unreadable, missing, unsubstantiated or inconsistent is logged here rat
 | G-41 | 2026-09-15 | **7.8 vs 11.2 MMbbl resolved as a petrophysics difference, not an error.** 7.8 is PEMEX's booked original volume filed with CNH (El Abra trend table, PEMEX field summary); 11.2 is IFR's volumetric (630 ac, N/G 0.40, φ 7 %). Petrel Robertson's geomodel gives 7.6 with TEC-2/9 vintage-log petrophysics and 12.0 with TEC-10's logs on the same rock volume. Monte Carlo P90/P50/P10 8.1 / 10.0 / 12.2 MMbbl. | Resolved — `docs/07_volumetrics.md` |
 | G-42 | 2026-09-15 | The review's "1.2 MMbbl remaining at 29 %" uses the IFR OOIP; on the P50 volume it is 0.9 MMbbl and on the CNH volume 0.3 MMbbl. The 29 % is the production-weighted reef-rim RF to Apr 2015 (median 30 %, 3P median 31 %). | Resolved — wording for task 10 |
 | G-43 | 2026-09-15 | CNH lists the Tecolutla surface as 3.1 km² against IFR's 630-acre (2.55 km²) polygon; the boundary of the 3.1 km² is not in the pulled files. Area contributes −0.6/+2.3 MMbbl to the OOIP range. | Open — needs the CNH field polygon |
+| G-44 | 2026-09-15 | **AFE currency.** Neither AFE workbook is labelled. USD by evidence: the Tonalli cost format is headed "Dólares", TEC-11 tracker rates are identical, and every economic model carries the capital as US$. Confirmation from the AFE author still required before the CAD figures are quoted externally. The $5,000 discrepancy is a deleted SUB formula in the Sep 2021 copy; the AFE is USD 1,572,724. | Resolved (currency by evidence) — confirm with Kevin |
+| G-45 | 2026-09-15 | **Escalation index not retrievable.** FRED, BLS API, ycharts and tradingeconomics are blocked by the session proxy, so the Nov-2020 base value of the US drilling PPI could not be read. Escalation factors 1.15 / 1.25 / 1.40 are stated assumptions in `docs/08_afe.md` §4; replace with the indexed value when the PPI series can be downloaded. | Open |
+| G-10 | 2026-09-15 | (update) The two AFE versions differ only in three SUB formulas; all cost cells are identical. | Resolved |
 
 ## Known data gaps carried in from the kickoff
 
 - No production data pre-1960; none for 1965–1972. → Task 4: field-level monthly exists for 1960–65; TEC-6 monthly from 1966; TEC-2 and TEC-7 monthly only from 1972 (G-30, G-34).
 - OOIP stated as 11.2 MMbbl (volumetrics) and 7.8 MMbbl (El Abra analogue table) in the same deck — task 7: resolved, G-41.
-- AFE sheet: $5,000 internal arithmetic discrepancy, no currency label — task 8.
+- AFE sheet: $5,000 internal arithmetic discrepancy, no currency label — task 8: resolved, G-44/G-45.
 - Forecast basis differs by roughly a factor of two between Petrel Robertson (100 bbl/d base) and IFR (250 bbl/d; 345 mbbl type curve) — task 6.

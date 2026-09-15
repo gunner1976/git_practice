@@ -1,0 +1,39 @@
+row,code,description,vendor,sum_of_days,sub_cell,sub_formula,sub_cell_B,sub_formula_B,sum_of_days_B,category,usd_2020
+11,007,Surveys / Pre-Site Assessment / EFR / Road Repairs,"Jose's Architect, Topographer or Kefren",7500.0,7500.0,=SUM(H11:AA11),7500.0,=SUM(H11:AA11),7500.0,site & civil,7500.0
+12,011,Drilling Pad Maintenance,Kefren / Locals through José,5000.0,5000.0,=SUM(H12:AA12),,,5000.0,site & civil,5000.0
+13,012,Cellar Construction,Kefren / Locals through José,7500.0,7500.0,=SUM(H13:AA13),7500.0,=SUM(H13:AA13),7500.0,site & civil,7500.0
+14,022,Conductor Hammering,VYCSA (As in Tec-11),30000.0,30000.0,=SUM(H14:AA14),30000.0,=SUM(I14:AA14),30000.0,site & civil,30000.0
+15,026,Rig move Trucking in/out,Simmons,190000.0,190000.0,=SUM(H15:AA15),190000.0,=SUM(J15:AA15),190000.0,rig & rig move,190000.0
+16,038,Drilling Rig,Simmons,203362.5,203362.5,=SUM(H16:AA16),203362.5,=SUM(H16:AA16),203362.5,rig & rig move,203362.5
+17,040,Camp / Subsistence (includes potable water),Simmons,28000.0,28000.0,=SUM(H17:AA17),28000.0,=SUM(H17:AA17),28000.0,rig & rig move,28000.0
+18,,Campers for Co Man & Guests,ASSA,2800.0,2800.0,=SUM(H18:AA18),2800.0,=SUM(H18:AA18),2800.0,rig & rig move,2800.0
+19,,"Special Tools (X-Overs, Jars, Stabilizers, Scrappers, etc )",TIDSA/IGNIS/WFT/HAL/SINOPEC,33000.0,33000.0,=SUM(H19:AA19),33000.0,=SUM(H19:AA19),33000.0,downhole tools & directional,33000.0
+20,,Directional Tools,TIDSA/IGNIS/WFT/HAL/SINOPEC,70000.0,70000.0,=SUM(H20:AA20),70000.0,=SUM(H20:AA20),70000.0,downhole tools & directional,70000.0
+21,062,Drill bits,Ulterra,23500.0,23500.0,=SUM(H21:AA21),23500.0,=SUM(H21:AA21),23500.0,downhole tools & directional,23500.0
+22,048,Mud and chemicals (includes centiguge & trucking),WFT/Check with CES,260323.29999999996,260323.29999999996,=SUM(H22:AA22),260323.29999999996,=SUM(H22:AA22),260323.29999999996,"mud, fluids & disposal",260323.29999999996
+23,,Drill Cuttings disposals,COSL,5500.0,5500.0,=SUM(H23:AA23),5500.0,=SUM(H23:AA23),5500.0,"mud, fluids & disposal",5500.0
+24,067,"Trucking  (equipment, shack, drill string and BHA)",Gonzalez / ORO NEGRO,2000.0,2000.0,=SUM(H24:AA24),2000.0,=SUM(H24:AA24),2000.0,"mud, fluids & disposal",2000.0
+25,,Conductor Casing,TENARIS TAMSA,4992.0,4992.0,=SUM(H25:AA25),4992.0,=SUM(H25:AA25),4992.0,tubulars & wellhead,4992.0
+26,069,Surface Casing and Accessories,TENARIS TAMSA,40895.0,40895.0,=SUM(H26:AA26),40895.0,=SUM(H26:AA26),40895.0,tubulars & wellhead,40895.0
+27,072,Power Tongs - Surface Casing,CP LATINA/SAN ANTONIO,5000.0,5000.0,=SUM(H27:AA27),5000.0,=SUM(H27:AA27),5000.0,tubulars & wellhead,5000.0
+28,075,Cement - Surface,HAL / WFT / Check smaller companies,35455.09,35455.09,=SUM(H28:AA28),35455.09,=SUM(H28:AA28),35455.09,cementing,35455.09
+29,085,Intermediate Casing and Accessories,TENARIS TAMSA,187384.0,187384.0,=SUM(H29:AA29),187384.0,=SUM(H29:AA29),187384.0,tubulars & wellhead,187384.0
+30,,Power Tongs - Production Casing,CP LATINA/SAN ANTONIO,5000.0,5000.0,=SUM(H30:AA30),5000.0,=SUM(H30:AA30),5000.0,tubulars & wellhead,5000.0
+31,090,Cement - Production Casing,HAL / WFT / Check smaller companies,58824.63,58824.63,=SUM(H31:AA31),58824.63,=SUM(H31:AA31),58824.63,cementing,58824.63
+32,079,Welding services and pressure testing,PROPESA / TOP OIL,7000.0,7000.0,=SUM(H32:AA32),7000.0,=SUM(H32:AA32),7000.0,tubulars & wellhead,7000.0
+33,099,Wireline Logging Services,HIGHBURY / WFT,50000.0,50000.0,=SUM(H33:AA33),50000.0,=SUM(H33:AA33),50000.0,"logging, perforating & completion",50000.0
+34,120,Communication,PASON/TIDSA/IGNIS,5500.0,5500.0,=SUM(H34:AA34),5500.0,=SUM(H34:AA34),5500.0,"supervision, engineering & HSE",5500.0
+35,105,Fluid Hauling and Disposal,Kefren,5000.0,5000.0,=SUM(H35:AA35),5000.0,=SUM(H35:AA35),5000.0,"mud, fluids & disposal",5000.0
+36,112,Solids Cleaning and Disposal,ASSA,5000.0,5000.0,=SUM(H36:AA36),5000.0,=SUM(H36:AA36),5000.0,"mud, fluids & disposal",5000.0
+37,114,Wellsite Geologist/Mudlogging,RISE/SINOPEC,11000.0,11000.0,=SUM(H37:AA37),11000.0,=SUM(H37:AA37),11000.0,"supervision, engineering & HSE",11000.0
+38,117,Wellsite & RIG Supervision,SINS,37800.0,37800.0,=SUM(H38:AA38),37800.0,=SUM(H38:AA38),37800.0,"supervision, engineering & HSE",37800.0
+39,130,Safety and First Aid,PARAMEDICALL,2925.0,2925.0,=SUM(H39:AA39),2925.0,=SUM(H39:AA39),2925.0,"supervision, engineering & HSE",2925.0
+40,152,Drill Pipe Inspection,SIMMONS,15000.0,15000.0,=SUM(H40:AA40),15000.0,=SUM(H40:AA40),15000.0,downhole tools & directional,15000.0
+41,092,Engineering and Consulting,SINS,39500.0,39500.0,=SUM(H41:AA41),39500.0,=SUM(H41:AA41),39500.0,"supervision, engineering & HSE",39500.0
+42,144,Location and Road Cleanup,Kefren / ASSA,5000.0,5000.0,=SUM(H42:AA42),5000.0,=SUM(H42:AA42),5000.0,site & civil,5000.0
+43,,Wellhead,EMRA / WFT / ZAO,42000.0,42000.0,=SUM(H43:AA43),42000.0,=SUM(H43:AA43),42000.0,tubulars & wellhead,42000.0
+44,,Perforating Guns,HIGHBURY,40000.0,40000.0,=SUM(H44:AA44),40000.0,=SUM(H44:AA44),40000.0,"logging, perforating & completion",40000.0
+45,,Production Tubing,TENARIS TAMSA,60962.0,60962.0,=SUM(H45:AA45),60962.0,=SUM(H45:AA45),60962.0,tubulars & wellhead,60962.0
+46,,Tubing packer,BOSS,12000.0,12000.0,=SUM(H46:AA46),12000.0,=SUM(H46:AA46),12000.0,tubulars & wellhead,12000.0
+47,,Stimulation,STIMWRX / ALVEG,8000.0,8000.0,=SUM(H47:AA47),8000.0,=SUM(H47:AA47),8000.0,"logging, perforating & completion",8000.0
+48,,Induction Swabbing / Initial Testing,TAMABRA,20000.0,20000.0,=SUM(H48:AA48),20000.0,=SUM(H48:AA48),20000.0,"logging, perforating & completion",20000.0
