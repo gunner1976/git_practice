@@ -13,7 +13,7 @@ SUM = "data/raw/geology/Tecolutla Pressure Summary.xlsx"
 OUT = "data/processed/pressure/"
 KPA_PER_KGCM2 = 98.0665
 GRAD = 10.5; GRAD_OIL = 8.7   # kPa/m
-KB = {"TEC-2": 3.8, "TEC-6": 4.0, "TEC-7": 4.8, "TEC-10": 7.1}   # m; TEC-6 KB is not recorded anywhere pulled (assumed 4.0, flagged)
+KB = {"TEC-2": 3.8, "TEC-6": 6.0, "TEC-7": 4.8, "TEC-10": 7.1}   # m; TEC-2/7 from the PEMEX survey forms, TEC-6 from Tecolutla Well Header Information.csv (ELEV_KB), TEC-10 from the IHS report
 
 wb = openpyxl.load_workbook(SUM, read_only=True, data_only=True); rows = list(wb["all"].iter_rows(values_only=True, max_col=14)); wb.close()
 hi = next(i for i, r in enumerate(rows) if r[0] == "Date"); hdr = rows[hi]; s = pd.DataFrame(rows[hi + 1:], columns=[str(h) for h in hdr]).dropna(subset=["Date"])

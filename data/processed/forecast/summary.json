@@ -1,0 +1,97 @@
+{
+ "avg_check_max_abs_diff_bpd": 24.951,
+ "fits": {
+  "pemex_avg": {
+   "qi": 279.0409615975188,
+   "di_per_month": 0.15944309621692407,
+   "b": 1.33695869763333,
+   "n": 240
+  },
+  "tec10": {
+   "qi": 159.42020406181769,
+   "di_per_month": 0.07998938611570414,
+   "b": 0.6053519139953861,
+   "n": 15
+  },
+  "tec10_with_late": {
+   "qi": 151.69791977778482,
+   "di_per_month": 0.06583095602110049,
+   "b": 0.494100460537427,
+   "n": 18
+  },
+  "ifr_2020": {
+   "qi": 342.0,
+   "di_per_month": 0.29227521773780774,
+   "b": 1.7
+  }
+ },
+ "late_constraint": [
+  {
+   "year": 2020,
+   "field_bpd": 67.6,
+   "tec10_est_bpd": 60.8,
+   "month_on_prod": 21.4
+  },
+  {
+   "year": 2021,
+   "field_bpd": 49.2,
+   "tec10_est_bpd": 44.3,
+   "month_on_prod": 33.4
+  },
+  {
+   "year": 2022,
+   "field_bpd": 22.9,
+   "tec10_est_bpd": 20.6,
+   "month_on_prod": 45.4
+  }
+ ],
+ "glj_tec12_totals_mbbl": {
+  "p1": 203.03,
+  "p2": 342.94,
+  "p3": 501.78
+ },
+ "recommended": {
+  "low (P90)": {
+   "first_month_bpd": 100.0,
+   "di_per_yr": 0.7899714722532059,
+   "b": 0.494100460537427,
+   "ip_first_month_bpd": 100.0,
+   "month12_bpd": 54.3,
+   "month36_bpd": 21.8,
+   "cum_1yr_bbl": 27021,
+   "cum_5yr_bbl": 63206,
+   "cum_10yr_bbl": 65489,
+   "cum_20yr_bbl": 65489,
+   "eur_bbl_at_10bpd": 65489,
+   "months_above_10bpd": 67
+  },
+  "base (P50)": {
+   "first_month_bpd": 180.0,
+   "di_per_yr": 0.7899714722532059,
+   "b": 0.9,
+   "ip_first_month_bpd": 180.0,
+   "month12_bpd": 104.4,
+   "month36_bpd": 52.8,
+   "cum_1yr_bbl": 49760,
+   "cum_5yr_bbl": 133194,
+   "cum_10yr_bbl": 178266,
+   "cum_20yr_bbl": 217613,
+   "eur_bbl_at_10bpd": 217613,
+   "months_above_10bpd": 217
+  },
+  "high (P10)": {
+   "first_month_bpd": 300.0,
+   "di_per_yr": 1.9133171546030887,
+   "b": 1.33695869763333,
+   "ip_first_month_bpd": 300.0,
+   "month12_bpd": 128.1,
+   "month36_bpd": 64.9,
+   "cum_1yr_bbl": 69013,
+   "cum_5yr_bbl": 171687,
+   "cum_10yr_bbl": 235531,
+   "cum_20yr_bbl": 313097,
+   "eur_bbl_at_10bpd": 365618,
+   "months_above_10bpd": 360
+  }
+ }
+}
