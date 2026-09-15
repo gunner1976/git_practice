@@ -22,6 +22,10 @@ The connector's download tool returns base64 which can be decoded in the contain
 
 Either A or B drives `src/pull_drive.py`, which recurses folders, skips files already present with a matching Drive md5, exports Google-native files to Office formats, and writes `data/manifest.csv` (file ID, path, size, modified time, Drive md5, SHA256, pulled-at).
 
+## What was actually done (2026-09-15)
+
+Kevin gave the go-ahead to ingest before credentials were set up, so option C was used: the session connector, file by file. Two harness behaviours made it workable: results above roughly 45 KB are spooled to a file on disk rather than returned inline, and the session transcript retains every inline result, so `src/ingest_all.py` decodes both sources into `data/raw/` with SHA256 manifest rows and never passes file content through the conversation. The connector's limits are recorded in `docs/gaps.md` G-13: a hard 10 MB refusal and session drops from about 7 MB. 140 files (141 MB) were pulled this way; the ten files above the ceiling wait on option A or B.
+
 ## Working-set additions beyond the kickoff list
 
 Listing the folders surfaced files the tasks need that were not in the kickoff table. They are in `data/working_set.csv` marked "Added": the GLJ Oct-2020 and Jan-2022 price decks, the Tonalli contractual fee / exploration tax sheet, the two Simmons payout comparisons and the Durum–Simmons participation sheet (tasks 1, 2, 8), the Aug 2020 economic model and three Simmons v1–v3 workbooks in `OLD` (lineage for task 2), TEC-11 actual-versus-budget costs (task 8 escalation anchor), the TEC-2 and TEC-10 IHS pressure-transient reports (task 5), the TEC-10 core descriptions (task 9), and the Transition Plan production chapter and Spanish field summary (task 4 cross-check).

@@ -82,3 +82,6 @@ id,kind,local_dir,name,priority,size_bytes_observed,modified_time_observed,notes
 1ayn5ddE5ioD9MIIhMfieHz0185OUCU4x,file,tec12_2020,Tec-12 Back-up Slides.pptx,medium,14509963,2020-08-27T19:44:11Z,Aug 2020 back-up slides (14.5 MB).
 1DZ-xeQ7n5EAFFl-QipOJPe9ju9J6iuP5,file,tec12_2020,TEC-12 Proposed S-Shaped Well Design.pptx,low,54289,2020-08-25T02:30:06Z,
 1_mSzgoCZN5ol48Iv7Plr_Wt03H4pMNyc,file,tec12_2020,ElAbra Depth Tec12.pptx,medium,985447,2020-12-26T18:21:26Z,El Abra depth prognosis at TEC-12 - depth-risk section.
+1NVoaGiQc8n21gIwVWGn3-5UUKlg0FN2y,file,geology/Tec-11 DES Sample Descriptions,Tecolutla-11Des Columna Litologica 40-3283 MD.pdf,highest,536192,2018-12-04T13:45:58Z,Rise Energy mud log - task 3. Row restored so the connector ingest can place it; folder recursion covers the API route.
+1OKpQuvjCMGuKX7_-9eZNOTV0-gWbXPYi,file,geology/Directional Survey,TECOLUTLA DIRECTIONAL SURVEY DATA.CSV,high,21847,2019-01-27T18:08:15Z,"TEC-11DES, TEC-9 and TEC-10 surveys (MD, TVD, offsets, inc, azi, TVDSS). Task 3."
+1drqIuDi_2PVZZSHV3li5cwtPi4XyoW2k,file,geology/Tecolutla Perforations,Tecolutla Perforations  Informaiton.csv,high,1216,2019-01-27T17:23:20Z,Source filename typo preserved. Perf tops/bases and status by well.
