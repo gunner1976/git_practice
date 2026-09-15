@@ -1,0 +1,77 @@
+well,gap_start,gap_end,months,kind,source
+FIELD,1956-06,1959-12,43,no field-level record; CNH field series starts 1960-01,Tecolutla Production to Dec 2018.xlsx DATA
+FIELD,2016-02,2018-06,29,field shut in between PEMEX handover and Tonalli restart; no production,context
+FIELD,2020-04,2020-06,3,no sales tickets or PEMEX statements (COVID shut-in?),Tracking workbook
+FIELD,2022-03,2022-10,8,no sales tickets,Tracking workbook
+TEC-10,2019-12,2022-12,37,no well-level record after the daily sheet ends 2019-11-24; only commingled field sales (CAMPO TECO) exist,Tracking workbook
+TEC-2,1956-06,1971-12,187,"no monthly record; wellfile summary gives 40,885 bbl for interval 2335-2339 mMD (zone 2), and the 2345-2349 mMD test only",By Zone / Table sheets
+TEC-2,1974-10,1975-04,7,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,1975-10,1975-10,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,1977-12,1977-12,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,1978-06,1979-09,16,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,1979-11,1979-11,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,1980-02,1980-03,2,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,1980-09,1980-12,4,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,1981-07,1981-11,5,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,1982-02,1982-08,7,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,1982-10,1983-09,12,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,1988-05,1990-01,21,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,1990-04,1990-04,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,1990-08,1990-08,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,1999-02,2006-08,91,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,2008-05,2008-05,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,2011-05,2011-06,2,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,2011-09,2011-09,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,2011-12,2012-01,2,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,2014-11,2014-11,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-2,2019-09,2022-12,40,"no well-level record; By Zone gives 7,812 bbl for 2019-06 to 2020-03; commingled thereafter",By Zone / Tracking
+TEC-6,1956-10,1965-12,111,"no monthly record; wellfile summary gives 509,993 bbl for 1956-10 to 1972-02 of which 117,394 bbl is in CNH monthly data, i.e. 392,599 bbl unrecorded monthly",By Zone sheet comment
+TEC-6,1966-10,1967-01,4,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1970-08,1970-09,2,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1971-09,1971-10,2,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1971-12,1972-01,2,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1973-11,1974-04,6,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1974-10,1975-04,7,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1975-07,1975-10,4,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1976-02,1976-02,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1976-05,1976-07,3,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1978-06,1979-09,16,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1979-11,1979-11,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1980-01,1980-03,3,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1980-05,1980-05,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1980-07,1981-01,7,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1981-07,1983-09,27,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1984-02,1984-08,7,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1990-04,1990-04,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1990-08,1990-08,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,1999-02,2003-07,54,no monthly record inside producing life,derived from CNH monthly table
+TEC-6,2006-07,2006-10,4,no monthly record inside producing life,derived from CNH monthly table
+TEC-7,1957-01,1968-05,137,no data ('?'); initial test 352 bbl/d,By Zone sheet
+TEC-7,1968-07,1971-09,39,no monthly record inside producing life,derived from CNH monthly table
+TEC-7,1973-10,1975-04,19,no monthly record inside producing life,derived from CNH monthly table
+TEC-7,1975-07,1975-10,4,no monthly record inside producing life,derived from CNH monthly table
+TEC-7,1976-01,1976-03,3,no monthly record inside producing life,derived from CNH monthly table
+TEC-7,1976-05,1977-12,20,no monthly record inside producing life,derived from CNH monthly table
+TEC-7,1978-05,1979-09,17,no monthly record inside producing life,derived from CNH monthly table
+TEC-7,1979-11,1979-11,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-7,1980-02,1980-03,2,no monthly record inside producing life,derived from CNH monthly table
+TEC-7,1980-06,1980-06,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-7,1980-08,1980-12,5,no monthly record inside producing life,derived from CNH monthly table
+TEC-7,1981-07,1981-11,5,no monthly record inside producing life,derived from CNH monthly table
+TEC-7,1982-02,1983-06,17,no monthly record inside producing life,derived from CNH monthly table
+TEC-7,1990-02,2006-09,200,no monthly record inside producing life,derived from CNH monthly table
+TEC-9,1974-10,1975-04,7,no monthly record inside producing life,derived from CNH monthly table
+TEC-9,1975-10,1975-10,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-9,1978-02,1978-03,2,no monthly record inside producing life,derived from CNH monthly table
+TEC-9,1978-06,1979-09,16,no monthly record inside producing life,derived from CNH monthly table
+TEC-9,1979-11,1979-11,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-9,1980-02,1980-03,2,no monthly record inside producing life,derived from CNH monthly table
+TEC-9,1980-09,1980-12,4,no monthly record inside producing life,derived from CNH monthly table
+TEC-9,1981-07,1982-08,14,no monthly record inside producing life,derived from CNH monthly table
+TEC-9,1982-10,1983-06,9,no monthly record inside producing life,derived from CNH monthly table
+TEC-9,1990-04,1990-04,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-9,1990-08,1990-08,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-9,1999-02,2003-05,52,no monthly record inside producing life,derived from CNH monthly table
+TEC-9,2008-05,2008-05,1,no monthly record inside producing life,derived from CNH monthly table
+TEC-9,2011-06,2011-07,2,no monthly record inside producing life,derived from CNH monthly table
+TEC-9,2011-09,2012-01,5,no monthly record inside producing life,derived from CNH monthly table
