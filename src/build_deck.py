@@ -30,7 +30,7 @@ slide("1. What changed from version 3", [
     "Field cumulative: 1.72 MMbbl recorded + 0.43 MMbbl PEMEX wellfile allocations = the '2.0'. v3 table omitted TEC-7 (267 kbbl).",
     "Pressure: 24.65 MPa (1956, 2 h 45 min) to 24.15 MPa (2018, three wells) at 2,300 mSS: 2 % in 62 years; >99 % of voidage replaced by influx.",
     "Type curve: the 345-400 kbbl curve embeds PEMEX recompletions; TEC-10 declines with b 0.49 to ~100 kbbl. Range 65 / 218 / 366 kbbl.",
-    "Target window 2,294-2,311 mSS reads 4-5 ohm.m in TEC-9 and TEC-10; every barrel produced came from 2,303-2,332 mSS. Decisive open item (G-47).",
+    "Target window 2,294-2,311 mSS: water at TEC-10 on core-supported porosity (Sw >= 1.1, no open fractures); at parity with the 353-kbbl producer at TEC-9 on an uncorrected 1973 sonic. Every barrel produced came from 2,303-2,332 mSS. Log and test the window at TEC-12 before completing (G-47).",
     "OOIP 7.8 (CNH) vs 11.2 (IFR) is petrophysics, not geometry: P90/P50/P10 8.1 / 10.0 / 12.2 MMbbl.",
     "AFE is USD 1,572,724 (deleted formula explains the 5,000); escalated base USD 1.97 MM / CAD 2.74 MM.",
     "Every IFR model since 2020 costs TEC-12 as a TEC-10 re-entry, not the S-shape AFE well.",
