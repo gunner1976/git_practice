@@ -1,0 +1,20 @@
+# environment
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# raw source files are pulled from the shared drive, never edited, and are
+# too large / too sensitive for git. The manifest (data/manifest.csv) is tracked.
+data/raw/*
+!data/raw/.gitkeep
+
+# credentials — never commit
+secrets/
+*.json.key
+service_account*.json
+token*.json
+client_secret*.json
+
+# LibreOffice recalc scratch
+*.~lock.*

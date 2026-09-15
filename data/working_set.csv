@@ -1,0 +1,61 @@
+id,kind,local_dir,name,priority,size_bytes_observed,modified_time_observed,notes
+1RjSZUq4t8TQQWcoJJT_22gbVyufKuGH4,file,tec12_drill,2023-09-29 Tec-12 Economics.xlsm,highest,4017136,2025-08-18T17:53:20Z,Never parsed. Drive modifiedTime is Aug 2025 - later than the date in the filename; confirm nothing changed after Sept 2023.
+1FY4O-cKf7cINcYyidWWQmVOeh4xOyfrR,file,tec12_drill,Tecolutla Work Program - Tec-12 Drill.pdf,high,14487956,2023-09-29T15:38:20Z,Re-extract figures and tables.
+1h9rLxnpQemUlPl_yZGnUoUXDRjcCazIl,file,tec12_drill,Petrel Robertson Tec-12 Assessment.pdf,high,159613,2023-09-29T15:37:26Z,
+1b3DRPagxiPj9T_iJK31sQySMXa1R6YeN,file,tec12_drill,Tec 12 Seismic images.pptx,high,5173134,2023-09-29T15:38:32Z,Unopened.
+1a3MvVcryjl3TnZ-Js45WO9mR8L9UofjL,file,tec12_drill,TEC-12 Build&Hold Well Design.pdf,medium,243995,2023-09-29T15:37:47Z,
+1Uz55PMIH68jU9xtmowolvBaQQ_Fy7s6I,file,tec12_drill,TEC-12 S-Shape Deviation Plan.pdf,high,418799,2023-09-29T15:37:55Z,Full survey listing.
+1OZOfd3wCVZq708P5wE9mFBcYsjF7lvD6,file,tec12_drill,TEC-12 Rough Drilling & Completion Cost Estimate (2).xlsx,high,43103,2023-09-29T15:36:56Z,AFE - $5k discrepancy and currency label (task 8).
+16RMFRj4lk_n_m4FD--Z2gnrFRD4r9pb9,file,tec12_drill,Simmons Scenarios - Tec 12 and Tec 13.xlsx,high,73185,2023-09-29T15:38:10Z,
+11GIzxACj0ZFeS8VETnHkcm4B0kFo6TV-,file,tec12_drill,Tecolutla Type Curve.xlsx,medium,146818,2021-03-03T19:17:15Z,A second file of the same name (different ID and date) sits in Appraisal Plan - see 1EGvc6_3ASOq3d5HsS7KEipxvSpjL_MsA.
+1WnmrcP4TC7kiRVEJwsiaYXDeVf8hNyxQ,file,tec12_drill,Tec-12 Time vs Depth.pdf,medium,130100,2023-09-29T15:37:13Z,Unopened.
+1--GXlHahL7msz7IRq-43bw5ms0CqD1uW,file,tec12_drill,GLJ Price Deck - oct20.xlsx,medium,91367,2020-11-11T18:25:24Z,Added - price deck behind the Simmons proforma (task 1/2).
+1gwOn0TkaeNTLatCnRbjGe-woMF4HUHy6,file,tec12_drill,Oil Price History and Forecast - 11-11-2020.csv,medium,25719,2020-11-11T18:54:17Z,Added.
+13aGhnQvH2jiV5AbpCIlh1n_-3Y22Yf6e,file,tec12_drill,Tonalli Contractual Fee and Exploration Tax.xlsx,medium,15265,2020-11-12T20:23:37Z,Added - fiscal terms.
+1YtfHcgJJHgNb_k1ewSJT5p_efdXjbdWm,file,tec12_drill,Simmons Payout Comparison (2).xlsx,medium,541677,2020-11-10T16:11:13Z,Added - four-case payout source.
+1qos6gyTYXCZX6dnqxdaAFNaoYMSl8S66,file,tec12_drill,Simmons Payout Comparison.xlsx,low,441415,2020-11-10T14:32:39Z,Added - earlier version of the above.
+1rDRffIIJIpcLEkw4HZ4il79xAFu1fEaO,file,tec12_drill,20201112 Durum-Simmons Tecolutla Participation.xlsx,low,334433,2020-11-24T20:31:05Z,Added - participation / cost-structure context.
+1mrlr7QOgXJtbyaOMeHwv-UwtPqrpmWL0,file,tec12_drill/OLD,Economic Model (Tecolutla August 2020) - FOR TRANS PLAN (TEC-12 Drill Econ).xlsm,medium,2675750,2025-08-18T18:49:24Z,Added - tenth economic model; predecessor of the Feb 2022 lineage. modifiedTime Aug 2025.
+1uooDwPBw_7nOK2Q7PVteI-0m7KTV7MIr,file,tec12_drill/OLD,20201110 Tecolutla Economics (Simmons) v3.xlsx,low,361262,2020-11-12T20:52:08Z,Added - Simmons v1/v2/v3 lineage.
+1YkMK3_VVBiQg14yndJsuHUjwbECFr1ZI,file,tec12_drill/OLD,20201110 Tecolutla Economics (Simmons) v2.xlsx,low,989782,2020-11-12T16:07:12Z,Added.
+1u3yMe7q2i8fbazdvJ5Ica1ISN7CwFEyk,file,tec12_drill/OLD,20201110 Tecolutla Economics (Simmons).xlsx,low,394330,2020-11-11T23:32:59Z,Added.
+1MUV4h1iC9cz2zYYUkqu2jyCdB9Oa2bGu,folder,geology,Tecolutla Well Logs,high,,,100+ LAS/LIS/TIF - wells 2 3 5 6 7 9 10 11 101. Recursed.
+1b7dINYCGMxcc4o4L7IfiK6tCVPfvyGOK,folder,geology,Directional Survey,high,,,Folder containing TECOLUTLA DIRECTIONAL SURVEY DATA.CSV (1OKpQuvjCMGuKX7_-9eZNOTV0-gWbXPYi).
+1eS4NV3LT1NF-Hcwjz31owwkv34LTxnI6,folder,geology,Tecolutla Perforations,high,,,Folder containing Tecolutla Perforations Information.csv (1drqIuDi_2PVZZSHV3li5cwtPi4XyoW2k).
+1Utf__mkt3m3KPT-3J0ZnFcAH_5VwiHRZ,folder,geology,Tecolutla Well header Information,high,,,Folder containing Tecolutla Well Header Information.csv (1hyjTjReFgeJSvJJOdidHYIso2AGevDZK).
+1BbEeSgFaxmNewRXhAbOLWa0mYozlRCsM,folder,geology,Tec-11 DES Sample Descriptions,highest,,,Mud log / lithology column for task 3.
+1NVoaGiQc8n21gIwVWGn3-5UUKlg0FN2y,file,geology,Tecolutla-11Des Columna Litologica 40-3283 MD,highest,,,Rise Energy mud log - task 3.
+1dxjw4IG13Fq6kTP8i5HkkGrQHD0aZkrM,folder,geology,Tecolutla-10 Core and Sample Descriptions,medium,,,Added - facies control for the correlation panel.
+1enIT7tkiG6sbDkTJlWcE7GjrX2XLuB65,folder,geology,Petrophysics,high,,,Incl. LAS subfolder. Not seen under the Geology folder listing - parent to be confirmed.
+1FivwQDgxkzEufcVJj42AUUValzaPLKyC,folder,geology,Pressures,high,,,Not seen under the Geology folder listing - parent to be confirmed.
+17bxvH7xAYe9wfLEj8JYn_Kz31MVgqDrL,file,geology,Tecolutla Pressure Summary.xlsx,high,,,Task 5.
+1E4f1NeV8pqDDuOV1h073jIbhctbPTN1R,folder,geology,Fluid Analyzes,medium,,,Not seen under the Geology folder listing - parent to be confirmed.
+19DHG8n7BhFErTQaJJg81vigJMYuaVW7Y,file,appraisal_plan,Production (Tecolutla).xlsx,high,1159966,2022-05-27T01:49:55Z,
+1oIBQTtf-P11dBhIcxmhTp71nRJ_IU3p5,file,appraisal_plan,Tecolutla Production to Dec 2018.xlsx,high,687388,2022-05-27T01:48:32Z,
+1snFP_ndmVOQuqzmY0jK5UWy6WtoO5px_,file,appraisal_plan,Tecolutla Production History (Possible Solution GOR).xlsx,high,782586,2022-05-27T01:28:46Z,GOR anomaly - task 4.
+1ZsG6QWY_IzEVnh7qpOthApjVWq0XncUL,file,appraisal_plan,Tecolutla Production Summary (by well by perf interval).xlsx,high,14818,2021-01-27T19:52:08Z,
+1ONhREcEViJJogCAgiQOlT2tAU8xAzaFC,file,appraisal_plan,Tecolutla Type Curve Calculation for CNH.xlsx,high,94412,2022-06-04T18:00:53Z,
+1EGvc6_3ASOq3d5HsS7KEipxvSpjL_MsA,file,appraisal_plan,Tecolutla Type Curve.xlsx,medium,139055,2022-03-15T16:59:07Z,Added - later-dated duplicate of the TEC-12 Drill copy.
+1jRu2e3W-WSNDa_nn9d94iFaX2PROOAIa,file,appraisal_plan,PVT Calculator (Tecolutla).xlsx,medium,64344,2022-03-08T20:20:54Z,
+1xVMk3sM2k8bP6SJ37SXxNvnGv-DcYChA,file,appraisal_plan,201807 Tecolutla-10 Welltest Data.xlsx,medium,9594784,2022-06-28T05:00:10Z,9.6 MB.
+1dbCNk_hXp_bVi6N5Xh9-_vDJSDlH6zjL,file,appraisal_plan,HWrates (TEC-11).xls,medium,218624,2022-06-21T18:11:40Z,Legacy .xls - read with xlrd.
+1HN97MVigKiamt_6JRA_eo6Hb8Oe3wHOT,file,appraisal_plan,Petrel Robertson Volumetrics.xlsx,high,10535,2022-05-25T16:23:15Z,Task 7.
+1eln5w1CtJgTptaIKe3_vQNnG3XEFVklk,file,appraisal_plan,El Abra Trend Field Analogies.xlsx,high,51524,2022-03-08T20:10:10Z,7.8 MMbbl OOIP figure - task 7.
+1NXsHrHiXEJZduOtjvW_zLFDuU4DSiY9s,file,appraisal_plan,20180726 Tec-10 Quick IPR2.xlsx,low,41331,2022-06-28T17:05:59Z,Added.
+1UBkJfd1yyn1fprYrNw6mBq9CWt4l_RAI,file,appraisal_plan,Transition plan-Production chapter.docx,medium,286371,2022-06-28T16:48:45Z,Added - narrative to check the production database against.
+1yT2Ty8M-x_QVU1xQXGZOyPUejSpFfQZl,file,appraisal_plan,6 -Resumen Campo Tecolutla.docx,medium,2520212,2022-03-08T20:28:51Z,Added - Spanish field summary.
+1UsBhsPiZxl0Y2dvtpSbZ9PkFzhS7dqBK,file,appraisal_plan,GLJ jan22.xlsx,medium,61757,2022-02-17T16:14:40Z,Added - price deck for the Feb 2022 models.
+12DotAhpv-KqCr0MjcJreEDUNiNkIY9KB,file,appraisal_plan,Economic Model (Tecolutla Feb 2022).xlsm,high,3340446,2022-04-11T18:11:51Z,Feb 2022 model v1.
+1VOEB-dUwA09jvs6wbQSKf8RKk8wzfzlI,file,appraisal_plan,Economic Model (Tecolutla Feb 2022)2.xlsm,high,3340638,2022-04-11T18:10:15Z,v2.
+1ypfeJBmQ6E5PlpDp9pYbWpGlBe6cS8gp,file,appraisal_plan,Economic Model (Tecolutla Feb 2022)3.xlsm,high,3541927,2022-04-11T18:08:24Z,v3.
+1ot-v1ZrauI5EEACfa0pKQT5c6QwMBq-x,file,appraisal_plan,Economic Model (Tecolutla Feb 2022)4 (Tec12 & Tec13).xlsm,high,3621892,2022-06-17T00:37:10Z,v4.
+1AbvVow3BUfBiosuUY6ecTiFhP21YWg29,file,appraisal_plan,Economic Model (Tecolutla Feb 2022)5 (HZ).xlsm,high,3493335,2022-04-12T01:35:16Z,v5.
+1eRA1FGuueEBv1veIv1N8LWQa_CDCsm6y,file,development_plan,Economic Model (Tecolutla Feb 2022)6 (Tec12 13 14 & 15).xlsm,high,3175749,2022-06-17T21:26:10Z,v6.
+1OH71zEL3zrTF1-6c9OZf9SsKYVX2tsT6,file,development_plan,Economic Model (Tecolutla Feb 2022)7 (Tec12 13 14 & 15).xlsm,high,3148039,2022-06-20T17:13:40Z,v7.
+1Cwq8D9VjigXse-XaDDCJIy0bj3tVGg1C,file,development_plan,Economic Model (Tecolutla Feb 2022)8 (Tec14 HZ).xlsm,high,3122660,2022-06-21T14:45:50Z,v8.
+1mO2mEyp0foWocV8rn9zajx4oyz-rTbGc,file,development_plan,Economic Model (Tecolutla Feb 2022)9 (Tec14 HZ).xlsm,high,3118408,2022-06-21T18:17:43Z,v9 - latest by date.
+1kNxlMUGvtTW9RpxueOyN7jxNupXjOtbu,file,development_plan,Tecolutla Production Tracking.xlsx,high,,,To Dec 2022. Not seen in the Development Plan top-level listing - may sit in a subfolder.
+1WcyXVxWDCfVTA0LfjZ9Z4Phww76HTa-v,file,development_plan,Tec 11 Summary of Costs (Actual and Budgeted).xlsx,medium,66817,2022-04-11T18:05:27Z,Added - actual TEC-11 cost as an AFE escalation anchor (task 8).
+1quHZ4SrFQyExvhEOUHRnv6v1Zrj-VxWV,file,development_plan,Tecolutla 10 Final Report (IHS PTA) Spanish.pdf,medium,4523092,2018-10-25T20:21:58Z,Added - TEC-10 pressure transient analysis (task 5).
+1eY7X3dpGL9OpJDn8C8UBsLdIz7jnR-9_,file,development_plan,Tecolutla 2 Final Report (IHS PTA) Spanish.pdf,medium,5711721,2018-10-25T20:21:48Z,Added - TEC-2 pressure transient analysis (task 5).
+1lFm12tBuBaiV0-22mRvxP3rVg4KD2fOZ,file,development_plan,pvtdoc.pdf,low,22542,2022-03-11T17:00:12Z,Added.
