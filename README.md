@@ -60,7 +60,7 @@ See `docs/task_queue.md`. Work is committed after each task.
 | 11 (OCR) | `docs/11_ocr.md` | `data/processed/pressure/ocr/`, `data/processed/fluids/ocr/` | — |
 | 12 (large files) | `docs/12_drive_large_files.md` | `data/processed/drive_text/`, `data/processed/tec10/`, `data/processed/welltest/`, `data/processed/pressure/tec2_2018/` | — |
 | 13 (CNH filings, GIS, CMI) | `docs/13_cnh_filings_gis_cmi.md` | `data/processed/cnh/`, `data/processed/petrophysics/tec10_cmi_*.csv`, `data/raw/cnh_gis/`, `data/raw/cnh_reports/` | `figures/13_cnh_polygon.png`, `figures/14_cmi_fractures.png` |
-| 14 (Sw sensitivity) | `docs/14_sw_sensitivity.md` | `data/processed/petrophysics/tec10_sw_sensitivity_*.csv` | `figures/15_sw_sensitivity.png` |
+| 14 (Sw sensitivity) | `docs/14_sw_sensitivity.md` | `data/processed/petrophysics/tec10_sw_sensitivity_*.csv`, `tec9_sw_sensitivity_zones.csv` | `figures/15_sw_sensitivity.png`, `figures/16_tec9_rwa.png` |
 
 Gap register: `docs/gaps.md`. Rerun everything with the scripts in `src/` in task order; each script reads only `data/raw/` and earlier `data/processed/` outputs.
 
