@@ -1,0 +1,14 @@
+[Connector text extraction of Drive file 1duCrOXVk6NdKZZgnHhig45KjWvmDFjXl (6,954,825 bytes, modified 2018-05-02). Weatherford SLS masterlog 1:500, TECOLUTLA 10, 470-2490 m. Text captured: header, legend, lithology annotations, drilling parameters, gas notes. The tabular lithology percentages and gas curves are graphical. The 10-m interval descriptions with percentages and gas units are in Litologia_Tecolutla_10.pdf.txt.]
+Header: Operator Diavaz Trinidad [rig contractor]; Well Tecolutla 10; UWID W00301B48693CP750CC; GL 1.00; KB 5.13; Rig DTM-638; Spud Monday April 16, 2018; Print Wednesday May 02, 2018; Scale 1:500. Personnel: Miguel A. Lopez, Juan Jose Lopez, Jose Pico.
+Coordenadas superficiales X 707,554.956 Y 2,262,437.068; Objetivo X 707,589.60 Y 2,262,253.10 [m, UTM].
+Casing: 13 3/8" 0-40 m; 9 5/8" 0-470 m; 7" 0-2282.72 m. Hole: 17 1/2" 0-40; 12 1/4" 40-470; 8 3/4" 470-2288 m. Mud: 0-40 m 1.05-1.10; 40-470 m 1.10-1.26; 471-2288 m 1.32-1.36; 2288-TD 1.05-1.15 g/cm3.
+Weatherford SLS started mud logging at 470 m on 17 April 2018.
+470-~2200 m: Lutita arenosa gris claro, semidura (a dura), calcárea, with Arenisca gris claro a gris oscuro de grano fino a medio, bien consolidada, cementada en material calcáreo y arcilloso [Tantoyuca/Chicontepec clastics]. Mud density 1.32-1.35 g/cm3. Gas increases noted at ~690, ~1000, ~1550-1600 m (C1 and CO2 increase; mud raised 1.33 to 1.35). Connection gas 1850-2080 m: 5627, 5876, 3385, 3035, 4543, 3610, 3496, 8984, 7091, 4698, 2623, 1367 U. Bit 1: 8 3/4" Ulterra CF515, 1817 m in 98 h.
+2110-2200 m: Lutita gris claro, semidura, ligeramente calcárea; Arenisca gris oscuro; traces of Mudstone blanco y crema compacto, en partes de aspecto cretoso/brechoide. Mud 1.36 g/cm3.
+2220-2280 m: Lutita gris claro y gris verdoso, semidura, calcárea de aspecto bentonítico; Mudstone blanco y crema compacto de aspecto brechoide; traces of arenisca; traces of bentonita.
+2280 m: 7" casing point (2282.72 m); bit 2 8 1/8" Ulterra CF613 [text reads "1/8""]. Mud changed to 1.05-1.15 g/cm3 for the El Abra section.
+2310-2340 m: 70% Mudstone blanco a crema, compacto; Mudstone a Wackestone café claro a café oscuro, compacto, en partes recristalizado; 30% Lutita gris claro, suave, calcárea; traces of arenisca. [El Abra top ~2310 m log-based; cf. 2,303 mSS]
+2340-2360 m: Mudstone blanco a crema, compacto; Mudstone a Wackestone café claro a café oscuro, compacto, en partes recristalizado. Núcleo #1 (core) 28-30 April 2018 at ~2352 m. PSB 15 ton, RPM 58, PB 871 psi, Q 162 gpm.
+2360-2490 m: Mudstone blanco a crema/crema a café claro, compacto; Mudstone a Wackestone gris claro y café oscuro, compacto, en partes recristalizado; esporádicos fragmentos de bentonita verde claro de aspecto lustroso. Mud 1.12 g/cm3.
+Gas de formación @ 2422 m: TG 5172.3 ppm; C1 2083.4; C2 193.9; C3 178.8; iC4 180.6; nC4 144.3; iC5 121.2; nC5 72.9; CO2 2196.7 ppm.
+01/05/2018: TD 2490 mMD reached.

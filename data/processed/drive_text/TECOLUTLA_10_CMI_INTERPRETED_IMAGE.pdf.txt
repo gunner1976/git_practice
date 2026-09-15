@@ -1,0 +1,4 @@
+[Connector text extraction of Drive file 12qxiAXyUnaskmNKfcihB7bYruJAVpQPM (14,128,242 bytes, modified 2021-02-06). Weatherford Compact Micro-Imager interpreted image, TECOLUTLA 10, 2487.00-2280.5 m. The file is a rendered image log; only track headers and the depth scale are text.]
+Company TONALLI; Well TECOLUTLA 10; Field TECOLUTLA; Veracruz. COMPACT MICRO-IMAGER INTERPRETED IMAGE.
+Tracks: Auxiliary Curves (Hole Deviation 0-60 dega, BIT 4-14 in, Calipers 1-5/2-6/3-7/4-8 4-14 in, GRGM 0-150 gAPI); CMI Static Conductivity Image (CMI_STAT -2.2 to 8.8 mmho, orientation N E S W N); CMI Dynamic Conductivity Image (CMI_DYN 0-260 mmho); Interactive Dips (Dip_TRU 0-90 dega; classification: Bedding Cross-, Bedding Deformed, Bedding General, Fracture Conductive, Fracture Mixed, Fracture Resistive).
+Depth scale in text: 2297 to 2477 m (1 m ticks).

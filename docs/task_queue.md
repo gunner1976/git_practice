@@ -4,7 +4,7 @@ Work in order. Commit after each. Status is updated here as tasks close.
 
 | # | Task | Inputs | Outputs | Status |
 |---|---|---|---|---|
-| 0 | Repo scaffold, access plan, working set, review v3 read | — | this repo, `docs/access_plan.md`, `data/working_set.csv`, `docs/review_v3_reading_notes.md` | Done — 140 files pulled via connector; 10 large files await API credentials (G-13) |
+| 0 | Repo scaffold, access plan, working set, review v3 read | — | this repo, `docs/access_plan.md`, `data/working_set.csv`, `docs/review_v3_reading_notes.md` | Done — 140 files pulled via connector; the 10 large files read through the connector's text rendering (G-13 resolved, `docs/12_drive_large_files.md`) |
 | 1 | Parse the 2023 economics | `2023-09-29 Tec-12 Economics.xlsm` | `data/processed/econ_2023/`, `docs/01_econ_2023.md` | Done — parsed from cached values, pandas cross-check in place of LibreOffice (G-16); G-17..G-20 raised |
 | 2 | Reconcile the nine Feb 2022 models (+ Aug 2020 predecessor, + 2023) | eleven `.xlsm` | `data/processed/econ_lineage/diff_matrix.md`, `figures/02_econ_model_lineage.png`, `docs/02_econ_lineage.md` | Done — 2023 structure recommended as base with capital, price and profile to be replaced (tasks 6, 8); G-21..G-26 raised |
 | 3 | TEC-11 facies vs trajectory figure | mud log, directional survey | `figures/03_tec11_lateral_facies.png`, `data/processed/tec11/`, `docs/03_tec11_facies.md` | Done — lateral 720 m: 240 m grainstone-bearing (mixed textures only), 419 m mudstone-wackestone; G-27..G-29 |

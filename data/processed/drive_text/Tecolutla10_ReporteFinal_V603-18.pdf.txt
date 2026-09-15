@@ -1,0 +1,1455 @@
+Microsoft Word - Tecolutla10 ReporteFinal V603-18 
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+REPORTE FINAL
+
+PARA
+
+TONALLI ENERGÍA S.A.P.I DE C.V.
+
+Pozo: TECOLUTLA-10 Estudios de Núcleo 1 (2352 – 2353 m)
+
+Stratascan México SA de CV Cerrada Avenida Universidad \# 102 Villahermosa – Tabasco – México +52 993 1420612
+
+Señores: Tonalli Energía S.A.P.I DE C.V. Atención: Ingeniero Curtis Hess
+
+Referencia: Reporte Final Pozo: Tecolutla-10 Archivo de Lab.: V603-18
+
+Sírvase encontrar a continuación el resumen y los resultados de los servicios solicitados del pozo en referencia ya que se concluyeron todos los servicios.
+
+Las pruebas ordenadas fueron terminadas con éxito, a tiempo y con la calidad esperada. Los resultados de las pruebas fueron entregados en forma preliminar tan pronto se terminaron y pasaron la debida verificación y certificación establecida en el SGC vía correo electrónico.
+
+La información contenida en este reporte final ha sido generada por Stratascan México SA de CV, para uso exclusivo de nuestro cliente Tonalli Energía, y no puede ser divulgada, utilizada, ni reproducida, sin el debido consentimiento, permiso expreso y/o autorización del Cliente.
+
+Stratascan, una empresa del Grupo Petricore, les agradece la oportunidad de brindarles nuestros servicios y queda a su disposición si llegara a surgir alguna duda, comentario, o requerir algún servicio adicional.
+
+Atentamente,
+
+Ing. Eloy Rubio Almaraz Gerente de Laboratorio Stratascan México S.A de C.V.
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+I N D I C E
+
+Página
+
+Resumen……………………………………………………………………….………………………………..………………………..….. 1
+
+1.- Servicios Iniciales de Campo y Laboratorio…………………………………………...…………………………..….…. 3
+
+1.1 Preservación en campo…………………….…………………………………………………………………………….…. 3
+
+1.2 Servicios iniciales en laboratorio…………………………………………………………………………………….…. 4
+
+Núcleo 1……………………………………………………………………………………………………………………………. 4
+
+1.3 Registro de Rayos Gamma Espectral……………………………………………………..……………………………. 8
+
+2.- Servicios Geológicos………………………………………………………………………….………………………….…..…….. 9
+
+2.1 Descripción petrográfica en lámina delgada………………………………………………………………..….… 9
+
+3.- Servicios Petrofísicos Convencionales Básicos………………….…………………………………………..…………. 11
+
+3.1 Medición de porosidad, permeabilidad y densidad de la roca a condiciones ambientales y presión de sobrecarga………………………………………………………………………..…………………………………… 11
+
+Procedimientos…………..………….………………………….………………………….…………………………………………….. 15
+
+Anexos: Resultados de Análisis
+
+1
+
+RESUMEN
+
+Personal y equipo de Stratascan fueron movilizados al pozo Tecolutla-10 ubicado en Veracruz para realizar la preservación y empaque del Núcleo 1. Una vez preservado el núcleo fue transportado vía terrestre al laboratorio de Villahermosa-Tabasco.
+
+La siguiente tabla muestra el resumen del material recibo.
+
+RESUMEN DE LAS MUESTRAS DEL POZO TECOLUTLA-10
+
+MUESTRAS INTERVALO (m) RECUPERACIÓN (m)
+
+Núcleo 1 2352 – 2353 1.30
+
+Los servicios y análisis fueron terminados con éxito, a tiempo y con la calidad esperada. Los resultados de las pruebas fueron entregados en forma preliminar tan pronto los resultados pasaron la debida verificación y certificación establecida en el SGC vía correo electrónico directamente a personal de Tonalli Energía.
+
+Todos los procesos básicos fueron realizados de acuerdo a las normas recomendadas de API-40 “American Petroleum Institute”, además de estándares internos de Stratascan. Un resumen de estos procedimientos se encuentra en la parte final de este reporte.
+
+Los servicios y cantidades realizadas en el núcleo 1 se resumen en la siguiente tabla:
+
+Descripción de Servicios Núcleo 1
+
+1 Personal y Preservación en pozo (días) 1
+
+2 Servicios Iniciales (metros) 1.3
+
+3 Registro de Rayos Gamma Espectral (metros) 1.3
+
+4 Fotografía Diámetro Completo Luz Blanca (metros) 1.3
+
+5 Fotografía Diámetro Completo Luz Ultravioleta (metros) 1.3
+
+6 Fotografía Tapones Luz Blanca (muestra) 3
+
+7 Fotografía Tapones Luz Ultravioleta (muestra) 3
+
+8 Petrografía en Lámina Delgada (muestra) 3
+
+9 Petrofísica Básica Tapón (muestra) 3
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+2
+
+Se presenta a continuación el detalle de los estudios realizados en el Núcleos 1.
+
+TECOLUTLA-10 NÚCLEO 1 (2352 - 2353 m)
+
+Fragmento No Muestra Profundidad (m) Petrofísica Básica Saturación Fluidos Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+de
+
+Petrografía (LD)
+
+T1 N1PS 2352.15 X T1 N1H1 2352.25 X X X T1 N1PM 2352.38 X T1 N1H2 2352.70 X X X T1 N1H3 2352.89 X X X T1 N1PI 2353.24 X
+
+3
+
+1.- SERVICIOS INICIALES DE CAMPO Y LABORATORIO
+
+1.1 PRESERVACIÓN EN CAMPO
+
+El principal objetivo de la preservación de núcleos es minimizar la exposición del mismo a las condiciones atmosféricas para evitar la evaporación y la migración de fluidos. Adicionalmente reducir la alteración física de la roca durante el manejo y transporte adecuado del núcleo para obtener análisis confiables.
+
+Las actividades principales que se realizaron incluyen recibir el núcleo en la rampa de perforación, marcar cima y base en las fundas de acuerdo con los procedimientos, supervisar el corte de los tubos de aluminio en tramos de 1.00 metro, así como realizar la preservación adecuada de acuerdo al tipo de roca la cual solo consistió en colocar tapas de goma en el extremo del núcleo. Debido a la poca recuperación, solo se obtuvo un tramo (tubo) de 1.00 metro de longitud.
+
+El núcleo fue colocado en una caja especial para su traslado vía terrestre hasta el Laboratorio de Stratascan en Villahermosa, Tabasco.
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+4
+
+1.2 SERVICIOS INICIALES EN LABORATORIO
+
+Observado el espacio anular entre la funda y los fragmentos de ambos núcleos se procedió a sacarlos de las mismas con la precaución de conservarlos sin causar daño.
+
+Una vez fuera de las fundas, se colocaron los fragmentos en mesas especialmente diseñadas, se eliminaron los residuos de lodo y se orientaron los fragmentos, posteriormente se realizó el correspondiente inventario resultando 1.30 metros de recuperación y se tomaron imágenes de evidencia con el objeto de registrar las condiciones y características físicas, además de contar con un registro de los núcleos a través de tiempo y como ayuda visual para interpretación de datos petrofísicos.
+
+NÚCLEO 1 (2352 – 2353 m)
+
+DESCRIPCIÓN LITOLÓGICA MEGASCÓPICA.
+
+Parte Superior (5352.00 – 5352.38m). Grainstone de foraminíferos bentónicos y bioclastos, café muy claro, fuertemente recristalizado, con buena microporosidad intercristalina por recristalización, regular microporosidad vugular y en escasas microfracturas, con posibles trazas de aceite.
+
+Parte Media (5352.38 – 5352.61m). Wackestone a packstone de foraminíferos bentónicos, gris verdoso, arcilloso, finamente recristalizado, sin porosidad visual en la matriz.
+
+Parte Inferior (5352.61 – 5353.30m). Grainstone de foraminíferos bentónicos y bioclastos, café muy claro, fuertemente recristalizado, con buena microporosidad intercristalina por recristalización, regular microporosidad vugular y en escasas microfracturas, con posibles trazas de aceite.
+
+A continuación se presentan algunas imágenes.
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+Imagen del N1 en Funda de aluminio
+
+Imagen del N1 Orientado
+
+Como se observa en la imagen anterior, debido al grado de fracturamiento, el núcleo no pudo ser removido de la funda (ver las siguientes imágenes a detalle) por lo cual se captaron bajo luz blanca y ultravioleta en su diámetro completo.
+
+5
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+6
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+7
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+8
+
+1.3 REGISTRO DE RAYOS GAMMA ESPECTRAL
+
+Debido a la poca longitud del núcleo los valores de radioactividad natural y deflexiones no podrían ser de mucha utilidad para ajuste en profundidad real con registros de pozo. A continuación se presenta el registro del núcleo.
+
+TECOLUTLA-10 N1 (2353 - 2354 m) Gamma Total (API)
+
+Potasio (por ciento)
+
+0.0 0.5 1.0 1.5 2.0 2.5 2350
+
+2355
+
+2360
+
+2365
+
+2370
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL 0 Uranio 4 y 8 Torio (ppm) 12 16 2020 16 12 8 4 0 Torio Uranio
+
+9
+
+2.- SERVICIOS GEOLÓGICOS
+
+Los servicios geológicos realizados en el pozo Tecolutla-10 solo incluyen descripciones petrográficas en láminas delgadas.
+
+A continuación se realizan los comentarios de los servicios geológicos llevados a cabo en las muestras.
+
+2.1 DESCRIPCIÓN PETROGRÁFICA EN LÁMINA DELGADA.
+
+Se recibieron 6 láminas delgadas del núcleo 1 (5352-5353.30 mts. Cretácico Superior, Recuperación: 1.30mts), que fueron elaboradas a partir de los tapones seleccionados en el núcleo, y procesadas sin lavar, para conservar las posibles evidencias de hidrocarburos presentes.
+
+A partir de las láminas delgadas, se procedió a identificar petrográficamente la litología, la diagénesis - paragénesis, la posible microfauna, y se hizo énfasis en documentar la presencia de cualquier tipo de porosidad, así como la presencia de trazas o impregnación de aceite. También se determinaron los ambientes de depósito y los eventos diagenéticos en los que estuvieron involucradas dichas rocas.
+
+Se analizaron 5 láminas delgadas (2352.15-2352.25m, 2352.70-2353.24m), que corresponden a Grainstone de foraminíferos bentónicos (Miliólidos, Textuláridos), bioclastos y escasos rudistas, fuertemente recristalizado. Se observa fuerte disolución intergranular e intrafosilar parcialmente sellada con calcita. La porosidad es de tipo intercristalina, móldica e intrafosilar, de buena a regular calidad, sin presencia de hidrocarburos.
+
+Y 1 lámina delgada (2352.38m) constituida por Wackestone de foraminíferos bentónicos (Miliólidos, Textuláridos), bioclastos e intraclastos, en partes de aspecto brechoide, donde destaca la presencia de escasos foraminíferos planctónicos (Globotruncana sp). Se observa fina recristalización, sin porosidad visual, ni presencia de hidrocarburos y escasa disolución sellada con calcita.
+
+Ambiente de depósito: Plataforma Media a Externa.
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+10
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+4XLN 4XLN
+
+4XLN 4XLN
+
+4XLN 4XLN
+
+11
+
+3.- SERVICIOS PETROFÍSICOS CONVENCIONALES BÁSICOS
+
+3.1 MEDICIÓN DE POROSIDAD, PERMEABILIDAD Y DENSIDAD DE GRANOS
+
+Se recibieron en el Laboratorio de Petrofísica 3 tapones del núcleo 1 para realizar análisis de petrofísica básica los cuales incluyen determinación de porosidad, permeabilidad, determinación de saturaciones de fluidos y densidad de granos a condiciones ambientales y a presión de sobrecarga.
+
+Los tapones de los Núcleos 1 fueron descritos para documentar sus características básicas y texturales, posteriormente fueron sometidos al Dean Stark (con tolueno) para realizar el análisis de saturación de fluidos por este método; estabilizada el agua colectada en las trampas y registrado estos valores, los tapones se cambiaron a los “Soxhlet” para completar el proceso de limpieza utilizando Tolueno para remover el remanente de aceite o filtrado del lodo y posteriormente Metanol para eliminar sales del espacio poroso. Una vez verificada la limpieza de los tapones fueron colocados en un horno por 12 horas a 110° C.
+
+Con las muestras secas, se procedió a tomar sus dimensiones, a realizar las medidas de volumen de grano, y posteriormente se fueron colocados en el porosímetro-permeámetro (AP-600) para medir las propiedades básicas a condiciones ambientales (para cálculos de saturaciones de fluidos) y 2 presiones de sobrecarga.
+
+A continuación se presentan tablas y gráficas resúmenes con los resultados obtenidos de la petrofísica básica realizada.
+
+NÚCLEO 1 (2352 – 2353 m)
+
+Tres (3) tapones horizontales se cortaron a lo largo del núcleo recuperado y fueron analizados a condiciones ambientales, 500 (35.1 kg/cm2) y 3400 psi (239.04 kg/cm2) como máxima presión de sobrecarga aplicada de acuerdo a instrucciones de Tonalli Energía. Los resultados obtenidos se muestran a continuación.
+
+Presión de Porosidad Permeabilidad
+
+Densidad Muestra Profundidad
+
+Sobrecarga Helio Aire Klinkenberg de Granos Clasificación (m) (psi) (Fracc) (mD) (mD) (gr/cm3)
+
+Núcleo 1 - Tapones Horizontales
+
+N1H1 2352.25 ambiente 0.030 2.696 Grainstone
+
+500 0.023 0.037 0.020 3400 0.017 0.009 0.004
+
+N1H2 2352.70 ambiente 0.076 2.709 Grainstone
+
+500 0.067 1.158 0.956 3400 0.063 0.467 0.356
+
+N1H3 2352.89 ambiente 0.079 2.713 Grainstone
+
+500 0.076 0.245 0.174 3400 0.071 0.128 0.084
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+12
+
+En la siguiente gráfica de Porosidad Vs Permeabilidad al Aire se puede observar el efecto de la presión de sobrecarga ejercida en los datos petrofísicos pudiéndose notar ligera disminución de los mismos debido al fracturamiento de los tapones.
+
+TECOLUTLA-10 N1 (2353 - 2354 m)
+
+y = 0.0138e50.056x
+
+0.001
+
+A continuación se presentan las imágenes de los tapones analizados bajo luz blanca y ultravioleta antes del proceso de limpieza en el sistema Soxhlet.
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+Permeability vs. Porosity
+
+N1 -horz
+
+Permeability vs. Porosity
+
+1010.1N1 -horz
+
+0.00 0.02 0.04 0.06 0.08 0.10 101) Dm()
+
+Dm(0.1y = 0.0036e61.561x
+
+0.01
+
+0.01
+
+0.001
+
+0.00 0.02 0.04 0.06 0.08 0.10 Porosidad (Fracc)
+
+Porosidad (Fracc)
+
+Presión de Sobrecarga: 500 psi, 35 kg/cm2 Presión de Sobrecarga: 3400 psi (239.04 kg/cm2)
+
+13
+
+La siguiente gráfica de calidad de roca de acuerdo a Winland-35 presentada a continuación con todas las muestras estudiadas del núcleo 1 muestras que se encuentran en el rango de calidad de roca (TR) 3 y 4.
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+14
+
+K vs Ø, Winland-35
+
+10000
+
+TR 1 1000
+
+100
+
+TR 2
+
+10
+
+TR 3
+
+1TR 4
+
+N1H2 - 2352.70 m
+
+0.1N1H3 - 2352.89 m
+
+TR 5
+
+0.01
+
+0.0001
+
+0 5 10 15 20 25 30 35 40
+
+Porosidad (%)
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+N1H1 - 2352.25 m
+
+0.001
+
+TECOLUTLA-10 N1 (2353 - 2354 m)
+
+Presión de Sobrecarga: 3400 psi (239.04 kg/cm2)
+
+15
+
+PROCEDIMIENTOS
+
+PRESERVACION DE NUCLEOS A BOCA DE POZO
+
+Este servicio provee un Geólogo y un técnico para realizar la preservación de cualquier tipo de roca a boca de pozo y el cual cuenta con documentación vigente de acuerdo a los requisitos establecidos para su permanencia en el pozo.
+
+Las actividades principales del Geólogo incluyen recibir el núcleo en la rampa de perforación, marcar cima y base en las fundas de acuerdo con los procedimientos, supervisar el corte de los tubos de aluminio y núcleo en secciones de 1.00 metro, así como realizar la preservación adecuada de acuerdo al tipo de roca.
+
+El método de preservación y estabilización usado fue con espuma expansiva polimérica debido al grado de consolidación de la roca y al poco espacio anular (entre funda de aluminio y roca).
+
+El Geólogo también se encarga de proteger el núcleo para su traslado colocando los tubos o núcleos en la caja especialmente diseñada para este propósito. Stratascan es responsable de transportar el núcleo desde la locación hasta el laboratorio ubicado en Villahermosa, Tabasco, México.
+
+SERVICIOS INICIALES A NÚCLEOS CONSOLIDADOS
+
+Stratascan, al recibir la orden del cliente, inicia las actividades iniciales que aplica para muestras de núcleos consolidados. Las actividades contempladas son un conjunto de procedimientos y procesos distintos que se realizan en el laboratorio, incluyendo, pero no limitado a la preservación, corte, fotografía, inventario y empaque.
+
+Una vez que arribe el núcleo al laboratorio, se extraen los fragmentos de los tubos de aluminio y se orientan de acuerdo a los procedimientos establecidos. Se asigna un número de fragmento y una profundidad con una precisión de un centímetro. La orientación consiste en embonar los fragmentos, marcar sus líneas de orientación (negro y rojo), marcar las profundidades, y trazar la línea azul (LMO – línea maestra de orientación).
+
+Los fragmentos son inmediatamente envueltos en papel plástico para evitar pérdidas de los fluidos. Posteriormente se realiza un inventario de los tubos o fragmentos recuperados. Después se procede a documentar los núcleos con imágenes fotográficas empleando luz blanca y luz ultravioleta.
+
+REGISTRO DE RAYOS GAMMA ESPECTRAL
+
+Este servicio tiene la finalidad de registrar toda manifestación de radiactividad natural presente en los minerales que componen el núcleo, para ello, se emplea un equipo de adquisición automatizada de estas emisiones.
+
+El equipo cuenta con una banda transportadora de velocidad controlada con detectores de rayos gamma y protecciones de plomo. Los detectores comúnmente consisten de cristales de centelleo acoplados con un fotomultímetro. Los cristales comúnmente son de yoduro de sodio (NaI) o de yoduro de cesio (CsI).
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+16
+
+Antes y después de cada prueba, el equipo es estabilizado y calibrado con un cilindro que contiene una cantidad conocida de sales radioactivas de baja intensidad. La banda transportadora debe estar totalmente libre de cualquier contaminación remanente. La calibración también elimina cualquiera actividad radioactiva del ambiente.
+
+Antes de la toma del registro, los fragmentos del núcleo o sus fundas de aluminio deben ser acomodados y orientados. El registro obtenido es la suma de toda la radioactividad presente en el núcleo y es conocido como registro de rayos gamma total; además, se obtienen tres curvas más que corresponden a la discriminación de cada uno de los elementos radioactivos más comunes que son uranio, torio y potasio; éste registro es conocido como gamma espectral. Las lecturas pueden ser tomadas cada centímetro o por intervalos de 5 centímetros cada uno. Las unidades son expresadas en unidades API, en ppm y en porcentaje. El registro se presenta en formato digital (Excel) en escala vertical de 1:100.
+
+ESTUDIO DE PETROGRAFÍA A DETALLE EN LAMINA DELGADA POR CONTEO DE PUNTOS
+
+Previo al estudio, se realiza una selección de las muestras que van a formar parte del estudio petrográfico; estas muestras son seleccionadas por el cliente o en puntos sugeridos por un Geólogo.
+
+En el caso de rocas consolidadas, las muestras son entonces lavadas con una mezcla de tolueno y metanol para extraer todo resto de hidrocarburos, agua y sales; sin embargo a petición del Tonalli Energía estas muestras no fueron lavadas con el proceso anteriormente descrito para conservar las posibles evidencias de hidrocarburos. Las muestras son posteriormente secadas en un horno de humedad controlada para evitar el desecamiento y fracturamiento de muestras hidratadas tales como arcillas o yeso. El tamaño de las láminas delgadas es de 1 x 3 pulgadas.
+
+Se realiza una impregnación al vacío durante 15 minutos, empleando técnicas de tinción para resaltar la porosidad (tintura azul) y la mineralogía (tintura de alizarina roja para diferenciar los carbonatos y ferrocianuro de potasio para identificar otros minerales), luego se deja un tiempo no menor a una hora para su fraguado. La tinción de la lámina es realizada en la mitad de la lámina. Luego se pule una de las caras de la almohadilla y se pega con resina epóxica en un portaobjetos al que previamente se le pulió también una de sus caras; en este punto se debe evitar la formación de burbujas en el área de contacto. La muestra es luego cortada a más o menos 300 micras y finalmente se pule con un equipo hasta alcanzar un espesor de 30 micras. La lámina resultante es identificada con una etiqueta que contiene los datos del pozo, núcleo, fragmento y profundidad de la muestra.
+
+La técnica de descripción petrográfica mayormente usada y aceptada es la del conteo de puntos que consiste en contabilizar los minerales, cementos, matriz y la porosidad presente en una muestra. La descripción petrográfica normalmente es realizada a 300 puntos equidistantes entre si dentro de una cuadricula. Para este método, se emplea un microscopio petrográfico, un contabilizador automático y una unidad de registro de doce canales. Cuando se identifican los minerales, texturas y porosidad en porcentaje, se le llama análisis petrográfico a detalle o por conteo de puntos. Para terrígenos se emplea la clasificación Folk (1974) o Pettijohn (1972), mientras que para los carbonatos se emplean las clasificaciones de Dunham (1962) y de Embry & Klovan (1971).
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+17
+
+La descripción petrográfica detallada para carbonatos incluye el nombre de la roca, tipos y tamaños de granos (aloquímicos y terrígenos, así como sus porcentajes), datos texturales (selección, tamaño de grano promedio, contactos entre granos, tamaño y tipo de cristales, entre otros), tipos de fósiles (planctónicos y bentónicos), así como su abundancia relativa, matriz detrítica, estructuras sedimentarias, macro y microfracturas (indicando tipo y relleno), estilolitas y microestilolitas, facies, ambiente de depósito, minerales autigénicos, cementos y porcentaje de porosidad visual. Esta descripción es realizada al menos por 300 puntos. El informe incluye cuatro fotomicrografías a color representativas de cada muestra, mostrando aspectos generales y a detalle de las características de la muestra.
+
+Cuando se han solicitado otros estudios geológicos se integra la información incluyendo los resultados de mineralogía por Difracción de Rayos-X, imágenes e interpretaciones de los estudios con el microscopio electrónico de barrido, petrofísica básica, sedimentología y fotografías de núcleo. También se incluyen comentarios sobre la capacidad de la roca para ser yacimiento y la presencia de minerales que pudieran afectar las lecturas de los registros geofísicos como pirita, feldespatos, micas y arcilla, así como su distribución en la roca (como grano o dentro de los poros), así como una explicación y comparación de la mineralogía observada y determinada por conteo de puntos con la determinada por medio de la difracción de rayos X, indicando el efecto de las arcillas en el sistema poroso y su estado en la roca, ya sea como grano o entre/dentro de los poros. También se incluye una discusión sobre el efecto de los procesos diagenéticos.
+
+ESTUDIO DE DIAGÉNESIS Y PARAGÉNESIS
+
+Este análisis consiste en identificar e interpretar de manera macro y microscópicamente, aquellos eventos físicos y químicos que afectaron a los sedimentos posteriores al depósito. Estos eventos se clasifican generalmente como diagénesis temprana y diagénesis tardía.
+
+El especialista realiza una reconstrucción cronológica de los procesos y elabora una descripción de la secuencia paragenética. Estos especialistas se encargan de detectar todos aquellos cambios físicos, químicos, texturales y mineralógicos en las rocas. Para ello se apoyan en los estudios geológicos previamente realizados incluyendo la descripción de la lámina delgada, composición por difracción de rayos-x, estudios con el microscopio electrónico de barrido, entre otros.
+
+El estudio engloba la revisión de los aspectos generales y a detalle de las rocas observadas en la descripción sedimentaria cuando este servicio es realizado, por lo que se procede a identificar características macroscópicas tales como fracturas, concreciones, nódulos, etc., así como características microscópicas tales como microfracturas, sobrecrecimientos, minerales autigénicos, neomorfismo, disolución, migración de hidrocarburos, inclusiones fluidas, reemplazamientos, eventos de cementación, etc.
+
+También se evalúa el impacto que tienen esos efectos sobre la calidad de yacimiento (porosidad y permeabilidad). El estudio de diagénesis se apoya en imágenes de núcleo entero, lámina delgada, microscopio electrónico, catodoluminiscencia e inclusiones fluidas cuando estos servicios se soliciten. También se debe de tomar en cuenta otra información como pueden ser registros geofísicos, análisis de aguas, etc.
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+18
+
+POROSIDAD, PERMEABILIDAD Y DENSIDAD DE LA ROCA EN TAPONES
+
+Primeramente los tapones se obtienen del núcleo por medio de un taladro prensa que emplea un lubricante que no altera física ni químicamente a la roca; posteriormente, con la ayuda de una sierra con hoja de diamante, se cortan los extremos hasta obtener un cilindro perfecto (\> 0.2º de desviación); esto es comprobado posteriormente con un caliper electrónico. Los extremos sobrantes son guardados para pruebas posteriores. El fluido de corte es compatible con el fluido de corte del núcleo en el pozo; si éste fue cortado con un fluido base aceite entonces se emplea aceite mineral y si fue cortado con un lodo base agua, entonces se usa una salmuera de salinidad controlada. Los tapones pueden obtenerse de manera horizontal o vertical.
+
+Una vez que los tapones han sido limpiados y secados (se presentan evidencias de ello), se procede a llevar a cabo las mediciones de porosidad y permeabilidad a condiciones ambiente y a tres presiones de sobrecarga. La presión máxima es la representativa del yacimiento, siempre y cuando se conserve la integridad física de las muestras.
+
+Las mediciones de volumen de grano y volumen de poro se realizan por medio de un poropermeametro automatizado, el cual emplea el principio de la expansión de gas (helio) según la Ley de Boyle. Antes y después de cada prueba, el equipo es checado con estándares metálicos de volumen y peso conocido, con la finalidad de asegurar que el equipo fue consistente durante las pruebas. Los resultados obtenidos son calculados automáticamente por un software especial y se reporta porosidad en porcentaje el volumen total de la muestra.
+
+Las mediciones de permeabilidad se realizan por medio de un poropermeametro automatizado, el cual emplea de un flujo de gas (nitrógeno) a través de la muestra, midiendo periódicamente las pérdidas de presión que sufre la muestra al oponerse al flujo.
+
+Se emplea la presión absoluta media de gas apropiada para minimizar el efecto de deslizamiento. Antes y después de cada prueba, el equipo es checado con estándares metálicos de permeabilidad conocida, con la finalidad de asegurar que el equipo fue consistente durante las pruebas. Los resultados obtenidos son calculados automáticamente por un software especial e incluye permeabilidad al aire por la Ley de Darcy.
+
+Para obtener la densidad de grano se emplea el valor obtenido del volumen del grano y el peso de la muestra realizado en una balanza electrónica de alta precisión. La precisión para los tapones es de 0.001 gramos.
+
+SATURACION DE FLUIDOS POR EL METODO DE DEAN STARK PARA MUESTRAS DE TAPON
+
+Este servicio está incluido en las determinaciones petrofísicas y consiste en determinar la saturación de fluidos de las muestras de tapón por la técnica de Dean Stark. Este método de limpieza-extracción utiliza tolueno que es calentado a 240°F, de tal forma que sus vapores pasan a través de la muestra, limpiando el espacio poroso de la roca. Las muestras son pesadas en seco y posteriormente puestas en los aparatos de Dean Stark para iniciar su limpieza. Los volúmenes extraídos de agua son monitoreados y registrados al menos cada 6 horas, y se considera que la extracción de agua termina cuando los volúmenes de agua permanecen constantes durante 18 horas (3 lecturas consecutivas). Las muestras entonces son removidas del aparato de Dean Stark y puestas en un Soxhlet para remover cualquier hidrocarburo remanente y sales precipitadas durante el proceso de Dean Stark. La prueba debe ser realizada en
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+19
+
+aquellas muestras en donde se realizarán mediciones de porosidad y permeabilidad. Cuando se requiera, el cliente podrá solicitar el análisis del agua extraída y del solvente recuperado para la cuantificación del trazador.
+
+La saturación de agua se determina dividiendo el volumen de agua recuperado (corregido por salinidad) por el volumen de poro medido en la roca. La saturación de aceite se calcula por la resta del volumen del agua con la perdida en peso de la muestra. La diferencia en peso resultante se convierte a volumen con el valor de la densidad del aceite. La muestra a toda hora es ubicada dentro de un portamuestra ligero de asbesto conocido como “thimble” o dedal, el cual captura los posibles granos que se puedan desprender de la muestra. El uso del “thimble” es para el control de los pesos y de la calidad de los resultados finales.
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+20
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+ANEXOS
+
+20
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+ANEXOS
+
+20
+
+Stratascan México S.A de C.V. Tecolutla-10 V603-18 REPORTE FINAL
+
+ANEXOS
+
+Stratascan México S.A de C.V.
+
+TECOLUTLA-10 N1 (2352 – 2353 m)
+
+FOTOGRAFÍA DE NÚCLEO LUZ BLANCA & LUZ ULTRAVIOLETA
+
+TECOLUTLA-10 N1 (2352 –2353 m)
+
+Stratascan México S.A de C.V.
+
+TECOLUTLA-10 N1 (2352 –2353 m)
+
+Stratascan México S.A de C.V.
+
+INVENTARIO DE NÚCLEOS
+
+Asignatario o Contratista:
+
+Tonalli Energía
+
+No. De Archivo:
+
+V603-18 Nombre del Pozo:
+
+Tecolutla-10
+
+Fecha de Elaboración:
+
+05/05/2018 Identificador Oficial del Pozo: Núcleo: 1Diametro del Núcleo (pulg):
+
+2.5
+
+Edad o Formación: Longitud del Núcleo (m):
+
+1.30
+
+Estado del Núcleo:
+
+Regular a Malo Recuperación (%):
+
+14.44
+
+Observaciones:
+
+El núcleo se encuentra 2352 2353 ) stM(Tamaño Promedio
+
+canto D ADIDNUFORPguijarro granulo arena limo
+
+O TNEMGARFE Dº N)
+
+mc(D UTIGNOLDESCRIPCIÓN g mg m arcilla 2352
+
+0.1
+
+Parte Superior. 5352.00-5352.38 m. Grainstone de foraminíferos bentónicos y bioclastos, café muy claro, fuertemente recristalizado, con buena microporosidad intercristalina por recristalización, regular microporosidad vugular y en escasas microfracturas, con posibles trazas de aceite. Parte Media. 5352.38 – 5352.61m. Wackestone a Packstone de foraminíferos bentónicos, gris verdoso, arcilloso, finamente recristalizado, sin porosidad visual en la matriz. Parte Inferior. 5352.61 – 5353.30m. Grainstone de foraminíferos bentónicos y bioclastos, café muy claro, fuertemente recristalizado, con buena microporosidad intercristalina por recristalización, regular microporosidad 2356
+
+vugular y en escasas microfracturas, con posibles trazas de aceite.
+
+1.30
+
+Nombre del Área Contractual o Asignación Petrolera:
+
+Intervalo (m):
+
+empacado en la funda de aluminio, en regular estado de preservación.
+
+Tubo1
+
+954 534 2353 2 10 Pedacería1 10
+
+1
+
+6
+
+2354
+
+2355
+
+2357
+
+2358
+
+2359
+
+2360
+
+2361
+
+LEYENDA LITOLÓGIA
+
+LUTITA
+
+CALIZA ARCILLOSA
+
+PEDERNAL
+
+LUTITA ARENOSA
+
+CARBON/LIGNITO
+
+MARGA
+
+ARENA
+
+CALIZA DOLOMITICA
+
+YESO
+
+ARENISCA
+
+LUTITA CALCAREA
+
+CALIZA
+
+HALITA
+
+CONGLOMERADO CALIZA ARENOSA
+
+LIMOLITA INTRUSIVA
+
+BENTONITA
+
+BRECHA ANHIDRITA VOLCANICA
+
+DOLOIA
+
+REGISTRO DE GAMMA ESPECTRAL
+
+Escala Vertical: 1:100 metros
+
+FORMATO "REPORTE DE GAMMA ESPECTRAL"
+
+REVISIÓN VIGENTE DESDE CÓDIGO APROBACIÓN
+
+PÁGINA 03 01/04/2018 LPF-FM034 Gerente de Laboratorio
+
+1 de 1 Cliente: Tonalli Energía Pozo: Tecolutla-10 No. de núcleo: 1 No. de archivo: V603-18
+
+Gamma Total (API)
+
+Potasio (por ciento)
+
+0.0 0.5 1.0 1.5 2.0 2.5 2350
+
+2355
+
+2360
+
+2365
+
+2370
+
+Uranio y Torio (ppm)
+
+0 4 8 12 16 2020 16 12 8 4 0 Torio
+
+Uranio
+
+REPORTE DE PETROFISICA BÁSICA
+
+REVISIÓN VIGENTE DESDE APROBACIÓN 03 01-abr-18 Gerente de Laboratorio 1 de 12 Número de Muestra
+
+CÓDIGO LPF-FM030 PÁGINA
+
+PETROFÍSICA BÁSICA
+
+Tonalli Energía Stratascan México SA de CV Pozo: Tecolutla-10 No. Archivo: V603-18 Área: Veracruz - México Lodo: S/I Formación: S/I Analista: OB/EM
+
+Profundidad Porosidad al
+
+Permeabilidad Helio
+
+al Aire (m) (fracc VT) (mD) (gr/cm3)
+
+Núcleo 1 - horizontal
+
+N1H1 2352.25 0.023 0.037 2.696
+
+N1H2 2352.70 0.067 1.158 2.709
+
+N1H3 2352.89 0.076 0.245 2.713
+
+Densidad de Grano Descripción Litológica
+
+Grainstone de foraminíferos bentónicos y bioclastos, color crema, fuertemente recristalizado, presenta porosidad secundaria asociada a zonas de disolución, parcialmente rellenas con cristales de calcita. presenta porosidad intercristalina. Grainstone de foraminíferos bentónicos y bioclastos, color crema, fuertemente recristalizado, presenta porosidad secundaria asociada a zonas de disolución, parcialmente rellenas con cristales de calcita. presenta porosidad intercristalina.
+
+Grainstone de foraminíferos bentónicos y bioclastos, color crema, fuertemente recristalizado, presenta porosidad secundaria asociada a zonas de disolución, parcialmente rellenas con cristales de calcita. presenta porosidad intercristalina.
+
+RESULTADOS DE LA PETROFÍSICA BÁSICA DE TAPONES
+
+Tonalli Energía Stratascan México SA de CV Pozo: Tecolutla-10 No. Archivo: V603-18 Área: Veracruz - México Lodo: S/I Formación: S/I Analista: OB/EM
+
+Número Prof. Volumen Porosidad Turbulencia
+
+Saturación de
+
+Densidad de de Poro a Helio al Aire Klinkenberg Muestra (m) (cm3) (fracc VT) (mD) (mD) alfa (α) Beta (β)
+
+Fluidos (%VP) Aceite Agua de grano (gr/cm3) Permeabilidad Desliza-
+
+miento (b)
+
+Comentarios
+
+Núcleo 1 - horizontal
+
+N1H1 2352.25 0.419 0.023 0.037 0.020 45.6 8427 1.33E+14 58.8 23.9 2.696 N1H2 2352.70 1.461 0.067 1.158 0.956 11.0 379 1.22E+11 19.7 20.5 2.709 N1H3 2352.89 1.123 0.076 0.245 0.174 21.3 331 5.89E+11 13.8 17.8 2.713
+
+Presión de Confinamiento: 500 psi, 35 kg/cm2
+
+Tonalli Energía Tecolutla-10
+
+y = 0.0138e50.056x
+
+0.01
+
+Permeabilidad vs. Porosidad
+
+10\) Dm(e riAl ad adilibaemreP10.1N1 -horz
+
+0.00 0.02 0.04 0.06 0.08 0.10 Porosidad (fracción VT)
+
+Presión de Confinamiento: 500 psi, 35 kg/cm2 Stratascan México SA de CV
+
+Tonalli Energía Tecolutla-10
+
+y = 0.8228x1.1237
+
+0.01
+
+Permeabilidad: Klinkenberg vs. Aire
+
+1\) Dm(g rebneknilKd adilibaemreP0.1N1 -horz
+
+0.01 0.1 1 10 Permeabilidad al Aire (mD)
+
+Presión de Confinamiento: 500 psi, 35 kg/cm2 Stratascan México SA de CV
+
+Tonalli Energía Tecolutla-10
+
+2.694
+
+Densidad de Granos vs. Porosidad
+
+2.7142.712
+
+2.710
+
+)
+
+2.708 mc/g(s onarGe dd adisneD2.706 2.704
+
+2.702
+
+2.700
+
+2.698
+
+2.696
+
+N1 -horz
+
+0.00 0.02 0.04 0.06 0.08 0.10 Porosidad (Fracción VT)
+
+Presión de Confinamiento: 500 psi, 35 kg/cm2 Stratascan México SA de CV
+
+RESULTADOS DE LA PETROFÍSICA BÁSICA DE TAPONES
+
+Tonalli Energía Stratascan México SA de CV Pozo: Tecolutla-10 No. Archivo: V603-18 Área: Veracruz - México Lodo: S/I Formación: S/I Analista: OB/EM
+
+Número de Muestra Prof. Volumen Porosidad Permeabilidad de Poro a Helio al Aire Klinkenberg (m) (cm3) (fracc VT) (mD) (mD) Desliza-
+
+miento (b)
+
+Turbulencia alfa (α) Beta (β)
+
+Número TR 10 Análisis 35 Winlan
+
+Análisis Pittman
+
+Densidad de grano TR 20 TR 35 TR 40 TR 50 TR (gr/cm3)
+
+Núcleo 1 - horizontal
+
+N1H1 2352.25 0.308 0.017 0.009 0.004 70.0 13450 1.12E+15 0.131 4 0.146 4 0.080 5 0.060 5 0.063 5 0.100 4 2.696 N1H2 2352.70 1.385 0.063 0.467 0.356 16.2 1167 1.01E+12 0.597 3 0.834 3 0.553 3 0.382 4 0.358 4 0.342 4 2.709 N1H3 2352.89 1.058 0.071 0.128 0.084 27.7 327 1.21E+12 0.230 4 0.387 4 0.252 4 0.159 4 0.142 4 0.120 4 2.713
+
+Presión de Confinamiento: 3400 psi (239.04 kg/cm2)
+
+Tonalli Energía Tecolutla-10
+
+y = 0.0036e61.561x
+
+0.001
+
+Permeabilidad vs. Porosidad
+
+1\) Dm(e riAl ad adilibaemreP0.10.01
+
+N1 -horz
+
+0.00 0.02 0.04 0.06 0.08 0.10
+
+Porosidad (fracción)
+
+Presión de Confinamiento: 3400 psi (239.04 kg/cm2) Stratascan México SA de CV
+
+Tonalli Energía Tecolutla-10
+
+y = 0.8568x1.1381
+
+0.001
+
+Permeabilidad: Klinkenberg vs. Aire
+
+1\) Dm(g rebneknilKd adilibaemreP0.10.01
+
+N1 -horz
+
+0.001 0.01 0.1 1
+
+Permeabilidad al Aire (mD)
+
+Presión de Confinamiento: 3400 psi (239.04 kg/cm2) Stratascan México SA de CV
+
+Tonalli Energía Tecolutla-10
+
+0.0001
+
+K vs Ø, Winland-35
+
+10000
+
+1000
+
+100
+
+10
+
+10.10.01
+
+0 5 10 15 20 25 30 35 40
+
+Porosidad (%)
+
+TR 5 TR 4
+
+0.001
+
+TR 3 TR 2
+
+TR 1 N1 -horz
+
+Presión de Confinamiento: 3400 psi (239.04 kg/cm2) Stratascan México SA de CV
+
+PETROFÍSICA BÁSICA DE TAPONES - TODAS LAS PRESIONES
+
+Tonalli Energía Stratascan México SA de CV Pozo: Tecolutla-10 No. Archivo: V603-18 Área: Veracruz - México Lodo: S/I Formación: S/I Analista: OB/EM
+
+Número de Muestra Prof. Presión de Dimensiones Confinamiento Longitud (m) (psi) (cm) del tapón Volumen Diámetro de Poro (cm) (cm3) Porosidad a Helio (fracc VT) Permeabilidad al Aire Klinkenberg (mD) (mD) Desliza-
+
+Turbulencia
+
+miento (b)
+
+alfa (α) Densidad Beta (β)
+
+de grano (gr/cm3)
+
+Comentarios
+
+Núcleo 1: horizontal
+
+N1H1 2352.25 ambiente 3.553 2.544 0.543 0.030 2.696
+
+500 0.419 0.023 0.037 0.020 45.6 8427 1.33E+14 3400 0.308 0.017 0.009 0.004 70.0 13450 1.12E+15 N1H2 2352.70 ambiente 4.379 2.539 1.677 0.076 2.709
+
+500 1.461 0.067 1.158 0.956 11.0 379 1.22E+11 3400 1.385 0.063 0.467 0.356 16.2 1167 1.01E+12 N1H3 2352.89 ambiente 2.944 2.541 1.185 0.079 2.713
+
+500 1.123 0.076 0.245 0.174 21.3 331 5.89E+11 3400 1.058 0.071 0.128 0.084 27.7 327 1.21E+12
+
+REGISTRO DE GAMMA ESPECTRAL
+
+Tonalli Energía Stratascan México SA de CV Pozo: Tecolutla-10 No. de núcleo: 1 Area: Veracruz - México No. de archivo: V603-18
+
+Total Gamma (API)
+
+Potassium (%)
+
+0.0 0.5 1.0 1.5 2.0 2350
+
+2355
+
+2360
+
+2365
+
+2370
+
+Vertical scale: 1:100 meter
+
+Uranium & Thorium (ppm)
+
+0 4 8 12 16 2020 16 12 8 4 0 Thorium
+
+Uranium
+
+REGISTRO DE PETROFISICA BASICA
+
+Tonalli Energía Stratascan México SA de CV Pozo: Tecolutla-10 No. de núcleo: 1 Área: Veracruz - México No. de archivo: V603-18
+
+Total Gamma (API)
+
+Porosity (BV fraction)
+
+Permeability (mD)
+
+Grain Density (g/cm3) 2.69 2.70 2.71 2.72 2350
+
+Plug- 500 psi
+
+Plug - OB
+
+2355
+
+2360
+
+2365
+
+2370
+
+Vertical scale: 1:100 meter
+
+0.30
+
+0.25 0.20 0.15 0.10 0.05 0.00
+
+REGISTRO DE PETROFISICA BASICA
+
+Tonalli Energía Stratascan México SA de CV Pozo: Tecolutla-10 No. de núcleo: 1 Área: Veracruz - México No. de archivo: V603-18
+
+Total Gamma (API)
+
+Grain Density (g/cm3)
+
+Saturation (%PV)
+
+0 20 40 60 80 100100 80 60 40 20 0 2350
+
+Water
+
+Oil
+
+2355
+
+2360
+
+2365
+
+2370
+
+Vertical scale: 1:100 meter
+
+Porosity (BV fraction)
+
+Plug -500 psi
+
+Plug - OB 0.10
+
+0.08 0.06 0.04 0.02 0.00 2.690 2.700 2.710 2.720
+
+Stratascan México S.A de C.V.
+
+TECOLUTLA-10 N1 (2352 – 2353 m)
+
+FOTOGRAFÍA DE TAPONES LUZ BLANCA & LUZ ULTRAVIOLETA
+
+TECOLUTLA-10 N1 (2352 –2353 m)
+
+Stratascan México S.A de C.V.
+
+N1H1 (2352.25 m)
+
+TECOLUTLA-10 N1 (2352 –2353 m)
+
+Stratascan México S.A de C.V.
+
+N1H2 (2352.70 m)
+
+TECOLUTLA-10 N1 (2352 –2353 m)
+
+Stratascan México S.A de C.V.
+
+N1H3 (2352.89 m)
+
+ESTUDIO PETROGRÁFICO CARBONATOS
+
+REVISIÓN VIGENTE DESDE
+
+01 01/04/2018
+
+CÓDIGO APROBACIÓN PÁGINA LPG-FM002 Gerente de Laboratorio 1 de 22
+
+LISTA DE MUESTRAS UTILIZADAS
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número del Núcleo: 1 Campo: Tecolutla Edad de la Formación: N/D Ubicación: Veracruz-México Archivo del Laboratorio: V603-18
+
+Número Profundidad Porosidad Permeabilidad Densidad de a Helio de grano
+
+Comentarios Muestra (m) (Fracc VT) (mD) (gr/cm3)
+
+N1PS 2352.15 N/D N/D N/D
+
+N1H1 2352.25 0.023 0.037 2.696
+
+N1PM 2352.38 N/D N/D N/D
+
+N1H2 2352.70 0.067 1.158 2.709
+
+N1H3 2352.83 0.076 0.245 2.713
+
+N1PI 2353.24 N/D N/D N/D
+
+N/D: No Disponible
+
+Cuando este documento se imprima, se considera una copia no controlada, para asegurarse de que tiene la versión más reciente, consulte el SGC
+
+ESTUDIO PETROGRÁFICO CARACTERÍSTICAS PETROGRÁFICAS DE LAS LAMINAS DELGADAS
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número del Núcleo: 1 Campo: Tecolutla Edad de la Formación: N/D Ubicación: Veracruz-México Archivo del Laboratorio: V603-18
+
+Grupo y Constituyente de la Roca
+
+N1PS N1H1 N1PM Muestras
+
+N1H2 N1H3 N1PI
+
+Petrofísica básica a condiciones ambiente
+
+Profundidad (m) 2352.15 2352.25 2352.38 2352.70 2352.83 2353.24 Porosidad (Fracc VT) N/D 0.023 N/D 0.067 0.076 N/D Permeabilidad (mD) N/D 0.037 N/D 1.158 0.245 N/D Densidad de grano (g/cm3) N/D 2.696 N/D 2.709 0.245 2.713 Promedio Tamaño de Granos (mm) Promedio Tamaño de Aloquimicos Clasificación (Dunham) Grainstone Grainstone Packstone
+
+Wackestone Grainstone Grainstone Grainstone
+
+GRANOS INORGÁNICOS
+
+Peletoides C E T C C E Intraclastos C C C A C Oolitas Oncolitos Pellas
+
+BIOCLASTOS/FAUNA
+
+Moluscos T T E E T Rudistas T Foraminíferos Planctónicos C Globotruncanas Radiolarios Calciesferúlidos Tintínidos Nannoconus Foraminíferos Bentónicos C E E C C C Miliólidos C C C C C Macroforaminíferos Corales Algas Briozoarios Equinodernos Saccocomas Bioclastos Indeterminados E E E E E E
+
+ROCAS CRISTALINAS
+
+Dolomía Mesocristallina Dolomía Microcristalina Dolomía Criptocristalina
+
+DETRITOS Y/O CLASTOS
+
+Cuarzo Feldespatos Micas Pedernal Clastos Ígneos
+
+ESTUDIO PETROGRÁFICO CARACTERÍSTICAS PETROGRÁFICAS DE LAS LAMINAS DELGADAS
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número del Núcleo: 1 Campo: Tecolutla Edad de la Formación: N/D Ubicación: Veracruz-México Archivo del Laboratorio: V603-18
+
+Grupo y Constituyente de la Roca
+
+N1PS N1H1 N1PM Muestras
+
+N1H2 N1H3 N1PI
+
+Clastos de Arenisca Clastos de Limolita Clastos de Lutita Clastos de Caliza Clastos de Dolomía Glauconita Materia Orgánica Accesorios
+
+MATRIZ
+
+Micrita C C Microespatita E C C A A E Calcáreo-Arcillosa Arcilla Dolomitizada Anhidrita Sal
+
+CEMENTOS
+
+Calcita X X X X X X Dolomita Siderita Anhidrita Sílice Pirita
+
+DIAGENESIS
+
+Compactación X X X X X X Recristalización X X X X X X Micritización Dolomitización Dedolomitización Silicificación Cementación X X X X X X Calcitización X X X X X X Estilolitización Fracturamiento Piritización
+
+ESTRUCTURAS
+
+Brecha sedimentaria Brecha tectónica Gradación Laminación Lenticular Convoluta Deslizamiento Inyección de sedimentos
+
+ESTUDIO PETROGRÁFICO CARACTERÍSTICAS PETROGRÁFICAS DE LAS LAMINAS DELGADAS
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número del Núcleo: 1 Campo: Tecolutla Edad de la Formación: N/D Ubicación: Veracruz-México Archivo del Laboratorio: V603-18
+
+Grupo y Constituyente de la Roca
+
+N1PS N1H1 N1PM Muestras
+
+N1H2 N1H3 N1PI
+
+Bioturbación Nodular Masiva X X X X X X Otras
+
+POROSIDAD (% VISUAL)
+
+Intergranular 1 1 Intercristalina 1 1 Intragranular Intrafosilar Oomóldica Disolución 3 2 3 4 2 Fracturas Microporosidad
+
+IMPREGNACIÓN
+
+Buena Pobre No Hay X X X X X X
+
+CALIDAD DE YACIMIENTO
+
+Buena Regular Pobre Sin Calidad de Yacimiento X X X X X X
+
+POROSIDAD BUENA\> 5% REGULAR 3 - 4% POBRE \< 2%
+
+BUENA
+
+BUENA CALIDAD DE
+
+REGULAR CALIDAD
+
+POBRE CALIDAD DE YACIMIENTO
+
+DE YACIMIENTO
+
+YACIMIENTO
+
+POBRE
+
+REGULAR CALIDAD DE YACIMIENTO
+
+NO HAY
+
+ABUNDANCIA RELATIVA
+
+POBRE CALIDAD DE YACIMIENTO
+
+A ABUNDANTE 80 -100% C COMUN 50% E ESCASO 10% T TRAZAS \<5% SIN CALIDAD DE YACIMIENTO SIN CALIDAD DE YACIMIENTO
+
+SIN CALIDAD DE YACIMIENTO
+
+SIN CALIDAD DE YACIMIENTO
+
+RESULTADOS DE LA PETROGRAFÍA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1PS Campo: Tecolutla Profundidad (metros): 2352.15 Ubicación: Veracruz-México Porosidad (Fracc VT): N/D Permeabilidad (mD): N/D Densidad de Grano (gr/cm3): N/D
+
+Descripción de la Lámina Delgada Grainstone de foraminíferos bentónicos (Miliólidos, Textuláridos), bioclastos y escasos rudistas, fuertemente recristalizado. Se observa fuerte disolución intergranular e intrafosilar parcialmente sellada con calcita. La porosidad es de tipo intercristalina, móldica e intrafosilar, sin presencia de hidrocarburos.
+
+Foto A. 4XLN.- Grainstone de miliólidos (B4, H13), textuláridos (L5.5), bioclastos y peletoides, con escasa disolución parcialmente sellada con calcita. La porosidad es de pobre calidad, de tipo intercristalina, sin presencia de hidrocarburos. Foto B. 4XLN.- Grainstone de foraminíferos bentónicos (A5, E15, H1), textuláridos (L12), bioclastos y peletoides. Se observa fuerte disolución(B7-M7) parcialmente sellada con calcita. La porosidad es de buena calidad, de tipo intercristalina, sin presencia de hidrocarburos. Foto C. 4XLN.- Grainstone de foraminíferos bentónicos, textuláridos (I6.5) y bioclastos. Se observa fuerte disolución móldica (B12-L13.5, C1-M2) parcialmente sellada con calcita. La porosidad es de buena calidad, de tipo intercristalina y móldica, sin presencia de hidrocarburos. Foto D. 4XLN.- Grainstone de miliólidos (D8, J13), textuláridos (I10), bioclastos parcialmente disueltos (C10) y escasos rudistas (H1.5). Se observa fuerte disolución parcialmente sellada con calcita. La porosidad es de buena calidad, de tipo intercristalina (A10.5-B11.5-D11.5, B6-D5.5, F8, G4-M3.5), e intrafosilar (B10.5), sin presencia de hidrocarburos.
+
+Descripción de la Diagénesis de la Muestra Depósito, Compactación, Presión-Solución, Recristalización, Disolución, Cementación con calcita, Calcitización de bioclastos.
+
+Ambiente de Depósito Plataforma Externa
+
+RESULTADOS DE LA PETROGRAFÍA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1PS Campo: Tecolutla Profundidad (metros): 2352.15 Ubicación: Veracruz-México Porosidad (Fracc VT): N/D Permeabilidad (mD): N/D Densidad de Grano (gr/cm3): N/D
+
+Gráfica de Conteo de Puntos
+
+Tipos de Porosidad (% visual)
+
+3.5
+
+3.0
+
+2.5
+
+2.0
+
+1.5
+
+1.0
+
+0.5
+
+0.0
+
+Intergranular Intercristalina Intragranular Intrafosilar Oomóldica Disolución Fracturas Microporosidad
+
+FOTOMICROGRAFÍAS DE LAMINA DELGADA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1PS Profundidad (metros): 2352.15 4XLN 4XLN
+
+ABCDEF A G C
+
+HIJKLM1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+
+ABCDEF B G D
+
+HIJKLM
+
+4XLN 4XLN
+
+RESULTADOS DE LA PETROGRAFÍA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1H1 Campo: Tecolutla Profundidad (metros): 2352.25 Ubicación: Veracruz-México Porosidad (Fracc VT): 0.023 Permeabilidad (mD): 0.037 Densidad de Grano (gr/cm3): 2.696
+
+Descripción de la Lámina Delgada Grainstone de foraminíferos bentónicos (Miliólidos) y bioclastos, finamente recristalizado. Se observa escasa disolución parcialmente sellada con calcita, con escasa porosidad intercristalina, sin presencia de hidrocarburos.
+
+Foto A. 4XLN.- Packstone de miliólidos (F7, K7.5, K12.5), bioclastos (M12) intraclastos y peletoides, con escasa disolución (FG13) parcialmente sellada con calcita. La porosidad es de pobre calidad, de tipo intercristalina, sin presencia de hidrocarburos. Foto B. 4XLN.- Packstone de miliólidos (F3), peletoides e intraclastos (H13), finamente recristalizado. Se observa escasa disolución (G9.5) parcialmente sellada con calcita. La porosidad es de regular calidad, de tipo intercristalina, sin presencia de hidrocarburos. Foto C. 4XLN.- Grainstone de miliólidos, intraclastos y bioclastos. Se observa muy escasa disolución (DE11.5) parcialmente sellada con calcita. La porosidad es de pobre calidad, de tipo intercristalina, sin presencia de hidrocarburos. Foto D. 4XLN.- Grainstone de miliólidos (EF14, J13), bioclastos parcialmente disueltos (E8, J14.5) y escasos peletoides e intraclastos. Se observa muy escasa disolución (DE6) parcialmente sellada con calcita. La porosidad es de pobre calidad, de tipo intercristalina, sin presencia de hidrocarburos.
+
+Descripción de la Diagénesis de la Muestra Depósito, Compactación, Presión-Solución, Recristalización, Disolución, Cementación con calcita, Calcitización de bioclastos.
+
+Ambiente de Depósito Plataforma Externa
+
+RESULTADOS DE LA PETROGRAFÍA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1H1 Campo: Tecolutla Profundidad (metros): 2352.25 Ubicación: Veracruz-México Porosidad (Fracc VT): 0.023 Permeabilidad (mD): 0.037 Densidad de Grano (gr/cm3): 2.696
+
+Gráfica de Conteo de Puntos
+
+Tipos de Porosidad (% visual)
+
+2.5
+
+2.0
+
+1.5
+
+1.0
+
+0.5
+
+0.0
+
+Intergranular Intercristalina Intragranular Intrafosilar Oomóldica Disolución Fracturas Microporosidad
+
+FOTOMICROGRAFÍAS DE LAMINA DELGADA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1H1 Profundidad (metros): 2352.25 4XLN 4XLN
+
+ABCDEF A G C
+
+HIJKLM1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+
+ABCDEF B G D
+
+HIJKLM
+
+4XLN 4XLCond
+
+RESULTADOS DE LA PETROGRAFÍA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1PM Campo: Tecolutla Profundidad (metros): 2352.38 Ubicación: Veracruz-México Porosidad (Fracc VT): N/D Permeabilidad (mD): N/D Densidad de Grano (gr/cm3): N/D
+
+Descripción de la Lámina Delgada Wackestone de foraminíferos bentónicos (Miliólidos, Textuláridos) y bioclastos, finamente recristalizado, sin porosidad visual, ni presencia de hidrocarburos. Se observa escasa disolución sellada con calcita.
+
+Foto A. 4XLN.- Wackestone de miliólidos (A11, CD13, H1.5, IJ8.5, J4, L1.5) y bioclastos, finamente recristalizado, sin porosidad visual, ni presencia de hidrocarburos. Se observa escasa disolución sellada con calcita (B8.5, H10.5-L14-K15). Foto B. 4XLN.- Wackestone de foraminíferos bentónicos y bioclastos calcitizados (A1-L15), finamente recristalizado. Se observa claramente en contacto con wackestone de foraminíferos planctónicos y bioclastos (B1-M13), finamente recristalizado, sin porosidad visual, ni traza de hidrocarburos. Foto C. 4XLN.- Wackestone a packstone de foraminíferos planctónicos (C14.5, E2.5, E11.5, J6, L7), bioclastos, trazas de foraminíferos bentónicos y escasos intraclastos. Se observa fuerte recristalización, sin porosidad visual, ni trazas de hidrocarburos. Foto D. 4XLCond.- Wackestone de foraminíferos planctónicos, escasos foraminíferos bentónicos e intraclastos, soportados en matriz finamente recristalizada, sin porosidad visual ni presencia de hidrocarburos. Se observa escasa pirita diseminada.
+
+Descripción de la Diagénesis de la Muestra Depósito, Compactación, Presión-Solución, Recristalización, Disolución, Cementación con calcita, Calcitización de bioclastos.
+
+Ambiente de Depósito Plataforma Externa
+
+RESULTADOS DE LA PETROGRAFÍA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1PM Campo: Tecolutla Profundidad (metros): 2352.38 Ubicación: Veracruz-México Porosidad (Fracc VT): N/D Permeabilidad (mD): N/D Densidad de Grano (gr/cm3): N/D
+
+Gráfica de Conteo de Puntos
+
+Tipos de Porosidad (% visual)
+
+1.2
+
+1.0
+
+0.8
+
+0.6
+
+0.4
+
+0.2
+
+0.0
+
+Intergranular Intercristalina Intragranular Intrafosilar Oomóldica Disolución Fracturas Microporosidad
+
+FOTOMICROGRAFÍAS DE LAMINA DELGADA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1PM Profundidad (metros): 2352.38 4XLN 4XLN
+
+ABCDEF A G C
+
+HIJKLM1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+
+ABCDEF B G D
+
+HIJKLM
+
+4XLN 10XLCond
+
+RESULTADOS DE LA PETROGRAFÍA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1H2 Campo: Tecolutla Profundidad (metros): 2352.70 Ubicación: Veracruz-México Porosidad (Fracc VT): 0.067 Permeabilidad (mD): 1.158 Densidad de Grano (gr/cm3): 2.709
+
+Descripción de la Lámina Delgada Grainstone de foraminíferos bentónicos (Miliólidos, Textuláridos), bioclastos e intraclastos, fuertemente recristalizado. Se aprecia escasa disolución parcialmente sellada con calcita y escasa microporosidad intercristalina, sin presencia de hidrocarburos.
+
+Foto A. 4XLN.- Grainstone de textuláridos (E6.5, K12.5, L4), bioclastos, peletoides e intraclastos, finamente recristalizado, sin porosidad visual, ni presencia de hidrocarburos. Foto B. 4XLN.- Grainstone de miliólidos (B8.5, EF14.5, LM6.5), foraminíferos bentónicos, intraclastos y bioclastos, fuertemente recristalizado. Se observa moderada disolución parcialmente rellena con calcita, y escasa microporosidad intercristalina, sin trazas de hidrocarburos. Foto C. 4XLN.- Grainstone de intraclastos (CD3, JK9), peletoides y bioclastos, finamente recristalizado. Se observa abundante disolución parcialmente rellena con calcita, y escasa microporosidad intercristalina, sin trazas de hidrocarburos. Foto D. 4XLN.- Grainstone de miliólidos (F6, H12.5), intraclastos, peletoides y bioclastos calcitizados, finamente recristalizado. Se observa abundante disolución parcialmente rellena con calcita, y regular a buena microporosidad intercristalina, sin trazas de hidrocarburos.
+
+Descripción de la Diagénesis de la Muestra Depósito, Compactación, Presión-Solución, Recristalización, Disolución, Cementación con calcita, Calcitización de bioclastos.
+
+Ambiente de Depósito Plataforma Externa
+
+RESULTADOS DE LA PETROGRAFÍA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1H2 Campo: Tecolutla Profundidad (metros): 2352.70 Ubicación: Veracruz-México Porosidad (Fracc VT): 0.067 Permeabilidad (mD): 1.158 Densidad de Grano (gr/cm3): 2.709
+
+Gráfica de Conteo de Puntos
+
+Tipos de Porosidad (% visual)
+
+3.5
+
+3.0
+
+2.5
+
+2.0
+
+1.5
+
+1.0
+
+0.5
+
+0.0
+
+Intergranular Intercristalina Intragranular Intrafosilar Oomóldica Disolución Fracturas Microporosidad
+
+FOTOMICROGRAFÍAS DE LAMINA DELGADA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1H2 Profundidad (metros): 2352.70 4XLN 4XLN
+
+ABCDEF A G C
+
+HIJKLM1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+
+ABCDEF B G D
+
+HIJKLM
+
+4XLN 4XLN
+
+RESULTADOS DE LA PETROGRAFÍA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1H3 Campo: Tecolutla Profundidad (metros): 2352.83 Ubicación: Veracruz-México Porosidad (Fracc VT): 0.076 Permeabilidad (mD): 0.245 Densidad de Grano (gr/cm3): 2.713
+
+Descripción de la Lámina Delgada Grainstone de foraminíferos bentónicos (Miliólidos, Textuláridos) y bioclastos calcitizados. Se observa fuerte disolución intergranular e intrafosilar sellada con calcita y escasas fracturas finas, selladas con calcita. La porosidad es muy pobre, originada por microdisolución, sin presencia de hidrocarburos.
+
+Foto A. 4XLN.- Grainstone de miliólidos (A1, G2, F6.5, F9.5), bioclastos (J1.5), intraclastos (A4, K12) y peletoides, fuertemente recristalizado. Sin porosidad visual, ni trazas de hidrocarburos. Foto B. 4XLN.- Grainstone de miliólidos (A11.5, B9, G8.5, L7.5), intraclastos (B2.5, H1, L14.5) y bioclastos (E3.5, F5). Se observa escasa disolución (C1-K6.5) parcialmente sellada con calcita, con buena porosidad intercristalina, sin presencia de hidrocarburos. Foto C. 4XLN.- Grainstone de intraclastos (C2, J14, I2, L2, l11), peletoides y bioclastos, fuertemente recristalizado. Se observa porosidad móldica (A10-M5), parcialmente sellada con calcita, sin presencia de hidrocarburos. Foto D. 4XLN.- Grainstone de miliólidos (C5, K10.5), bioclastos y peletoides, fuertemente recristalizado. Se observa abundante disolución parcialmente sellada con calcita, con buena porosidad intercristalina, sin presencia de hidrocarburos.
+
+Descripción de la Diagénesis de la Muestra Depósito, Compactación, Presión-Solución, Recristalización, Disolución, Cementación con calcita, Calcitización de bioclastos.
+
+Ambiente de Depósito Plataforma Externa
+
+RESULTADOS DE LA PETROGRAFÍA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1H3 Campo: Tecolutla Profundidad (metros): 2352.83 Ubicación: Veracruz-México Porosidad (Fracc VT): 0.076 Permeabilidad (mD): 0.245 Densidad de Grano (gr/cm3): 2.713
+
+Gráfica de Conteo de Puntos
+
+Tipos de Porosidad (% visual)
+
+4.5
+
+4.0
+
+3.5
+
+3.0
+
+2.5
+
+2.0
+
+1.5
+
+1.0
+
+0.5
+
+0.0
+
+Intergranular Intercristalina Intragranular Intrafosilar Oomóldica Disolución Fracturas Microporosidad
+
+FOTOMICROGRAFÍAS DE LAMINA DELGADA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1H3 Profundidad (metros): 2352.83 4XLN 4XLN
+
+ABCDEF A G C
+
+HIJKLM1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+
+ABCDEF B G D
+
+HIJKLM
+
+4XLN 4XLN
+
+RESULTADOS DE LA PETROGRAFÍA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1PI Campo: Tecolutla Profundidad (metros): 2353.24 Ubicación: Veracruz-México Porosidad (Fracc VT): N/D Permeabilidad (mD): N/D Densidad de Grano (gr/cm3): N/D
+
+Descripción de la Lámina Delgada Grainstone de foraminíferos bentónicos (Miliólidos, Textuláridos) y bioclastos calcitizados. Se observa fuerte disolución intergranular e intrafosilar sellada con calcita y escasas fracturas finas, selladas con calcita. La porosidad es muy pobre, originada por microdisolución, sin presencia de hidrocarburos.
+
+Foto A. 4XLN.- Grainstone de miliólidos (A14.5, G3, I8), bioclastos (E6. K2.5, K7) y peletoides (F14, H10.5, J14.5), con escasa disolución, sellada con calcita (C5, F4.5, K9-M9). Sin porosidad visual, ni trazas de hidrocarburos. Se observan escasas fracturas (E14.5-M8.5, G15-K11-M10) selladas con calcita, sin porosidad visual, ni trazas de hidrocarburos. Foto B. 4XLN.- Grainstone de miliólidos (HI11, L13), textuláridos (F4.5, y bioclastos (A7.5, F1.5), bioclastos disueltos y selladas con calcita (GH5, KL2.5). Se observa esporádica disolución (A6-F9) parcialmente sellada con calcita. La porosidad es de pobre calidad, sin presencia de hidrocarburos. Foto C. 4XLN.- Grainstone de miliólidos (B10.5, D8, I14), bioclastos (BC13.5) y peletoides (B5.5, K14), con escasa disolución, sellada con calcita (BC4, B12, H5.5, I10, M12.5), sin porosidad visual, ni trazas de hidrocarburos. Se observa una posible cavidad rellena por micrita, fuertemente recristalizada a microesparita. Foto D. 10XLCond.- Detalle de la microesparita, con mosaico textural cerrado y compacto. Se aprecia muy escasa microporosidad intercristalina rellena con pirita, sin trazas de hidrocarburos.
+
+Descripción de la Diagénesis de la Muestra Depósito, Compactación, Presión-Solución, Recristalización, Disolución, Cementación con calcita, Calcitización de bioclastos.
+
+Ambiente de Depósito Plataforma Externa
+
+RESULTADOS DE LA PETROGRAFÍA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1PI Campo: Tecolutla Profundidad (metros): 2353.24 Ubicación: Veracruz-México Porosidad (Fracc VT): N/D Permeabilidad (mD): N/D Densidad de Grano (gr/cm3): N/D
+
+Gráfica de Conteo de Puntos
+
+Tipos de Porosidad (% visual)
+
+2.5
+
+2.0
+
+1.5
+
+1.0
+
+0.5
+
+0.0
+
+Intergranular Intercristalina Intragranular Intrafosilar Oomóldica Disolución Fracturas Microporosidad
+
+FOTOMICROGRAFÍAS DE LAMINA DELGADA
+
+Tonalli Energía Stratascan México S.A de C.V.
+
+Pozo: Tecolutla-10 Número de Muestra: N1PI Profundidad (metros): 2353.24 4XLN 4XLN
+
+ABCDEF A G C
+
+HIJKLM1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+
+ABCDEF B G D
+
+HIJKLM
+
+4XLN 4XLN

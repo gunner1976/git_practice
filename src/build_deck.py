@@ -94,9 +94,9 @@ slide("10. Economics rebuilt on the 2023 structure", [
     "WTI ~USD 100 in mid-Sep 2026 on a supply disruption; long-term decks 70-80. 2025 fiscal reform not reviewed (G-49).",
     "v3's overhead finding stands: the well works for an operator that already carries the field, not for a single-asset company."], "figures/10_econ_rebuild.png", 8.2)
 slide("11. Decisions and the gap register", [
-    "Before sanction: (1) core-calibrated petrophysics of TEC-10's upper zone (G-47); (2) static gradient on TEC-10 after the multi-year shut-in; (3) confirm AFE currency and re-index escalation (G-44, G-45); (4) pull the ten large files (G-13).",
+    "Before sanction: (1) core-calibrated petrophysics of TEC-10's upper zone (G-47); (2) static gradient on TEC-10 after the multi-year shut-in; (3) confirm AFE currency and re-index escalation (G-44, G-45); (4) pull the ten large-file binaries into data/raw (G-52; their text was read, docs/12).",
     "If the window is water: move the target to 2,311-2,332 mSS (the produced interval in every well) and re-run the base case.",
     "Quote volumes as: recorded 1.72 MMbbl; OOIP 8-10-12; TEC-12 65/218/366 kbbl; AFE USD 1.57 MM (2020) / ~2.0 MM (2026).",
     "Wording fixes for any external document: CMI not FMI; 'wackestone to grainstone, compact'; 'within 2 % of initial pressure'; Simmons volumes are two wells.",
-    "50 gaps logged in docs/gaps.md with status; 18 remain open. Kevin: drive credentials for the ten large files (G-13), the Aug-2025 re-saves (G-03), which well the 2023 model priced (G-17), AFE currency (G-44), CNH polygon (G-43)."])
+    "52 gaps logged in docs/gaps.md with status; 17 remain open. Kevin: the Aug-2025 re-saves (G-03), which well the 2023 model priced (G-17), AFE currency (G-44), CNH polygon (G-43), a Drive API pull or manual download of the ten large binaries (G-52)."])
 prs.save("docs/Tecolutla_TEC12_Handover.pptx"); print("deck saved", len(prs.slides), "slides")
