@@ -1,0 +1,4 @@
+segment,length_m,grainstone_m_dominant,grainstone-wackestone_m_dominant,wackestone-grainstone_m_dominant,packstone_m_dominant,mudstone-wackestone_m_dominant,shale_m_dominant,sandstone_m_dominant,bentonite_m_dominant,unclassified_m_dominant,grainstone_bearing_m_dominant,grainstone_m_pct_weighted,mudwack_m_pct_weighted,show_good_m,show_poor_m,show_scarce_m,show_none_m,mSS_min,mSS_max
+"whole carbonate section (dominant carbonate, from 2360 mMD)",923,0,50,190,0,622,31,0,30,0,240,224.0,563.0,20,259,125,519,2245.4,2331.0
+build section in carbonate (< 80 deg),198,0,0,0,0,198,0,0,0,0,0,0.0,196.1,0,71,90,37,2245.4,2303.6
+"lateral (>= 80 deg, from 2563 mMD)",720,0,50,190,0,419,31,0,30,0,240,224.0,361.9,20,183,35,482,2304.7,2331.0

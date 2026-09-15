@@ -1,0 +1,12 @@
+{
+ "carb_top_mMD": 2360.0,
+ "carb_top_mSS": 2245.2161111111113,
+ "lateral_top_mMD": 2563.0,
+ "td_mMD": 3283.0,
+ "td_mSS": 2331.02,
+ "max_inc": 91.17,
+ "lateral_mSS_range": [
+  2304.6869642857146,
+  2330.95
+ ]
+}
