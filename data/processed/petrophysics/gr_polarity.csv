@@ -1,0 +1,7 @@
+well,n,rho_gr_vs_minus_neutron_counts,rho_gr_vs_porosity,porosity_curve,rho_gr_vs_log_resistivity
+TEC-6,328,-0.04,,,
+TEC-2,818,,0.34,nphi,0.26
+TEC-9,520,0.65,0.49,sphi,-0.77
+TEC-10,4228,,0.28,nprl,-0.19
+TEC-11,8376,,0.18,sphi_wyllie,
+"TEC-2 (2018 cased-hole, 2150-2282 mSS)",1293,,0.4,nprl,
