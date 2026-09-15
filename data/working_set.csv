@@ -1,6 +1,6 @@
 id,kind,local_dir,name,priority,size_bytes_observed,modified_time_observed,notes
 1RjSZUq4t8TQQWcoJJT_22gbVyufKuGH4,file,tec12_drill,2023-09-29 Tec-12 Economics.xlsm,highest,4017136,2025-08-18T17:53:20Z,Never parsed. Drive modifiedTime is Aug 2025 - later than the date in the filename; confirm nothing changed after Sept 2023.
-1FY4O-cKf7cINcYyidWWQmVOeh4xOyfrR,file,tec12_drill,Tecolutla Work Program - Tec-12 Drill.pdf,high,14487956,2023-09-29T15:38:20Z,Re-extract figures and tables.
+1FY4O-cKf7cINcYyidWWQmVOeh4xOyfrR,file,tec12_drill,Tecolutla Work Program - Tec-12 Drill.pdf,high,14487956,2023-09-29T15:38:20Z,"Re-extract figures and tables. A byte-identical-size copy (14,487,956 B) dated 2021-02-18 sits in the YE2020 reserves folder (1lICyY42pTUT5X-lDgkDERvcCQjwKDmu9): the Sept 2023 date is a copy timestamp - see G-08."
 1h9rLxnpQemUlPl_yZGnUoUXDRjcCazIl,file,tec12_drill,Petrel Robertson Tec-12 Assessment.pdf,high,159613,2023-09-29T15:37:26Z,
 1b3DRPagxiPj9T_iJK31sQySMXa1R6YeN,file,tec12_drill,Tec 12 Seismic images.pptx,high,5173134,2023-09-29T15:38:32Z,Unopened.
 1a3MvVcryjl3TnZ-Js45WO9mR8L9UofjL,file,tec12_drill,TEC-12 Build&Hold Well Design.pdf,medium,243995,2023-09-29T15:37:47Z,
@@ -23,13 +23,12 @@ id,kind,local_dir,name,priority,size_bytes_observed,modified_time_observed,notes
 1b7dINYCGMxcc4o4L7IfiK6tCVPfvyGOK,folder,geology,Directional Survey,high,,,Folder containing TECOLUTLA DIRECTIONAL SURVEY DATA.CSV (1OKpQuvjCMGuKX7_-9eZNOTV0-gWbXPYi).
 1eS4NV3LT1NF-Hcwjz31owwkv34LTxnI6,folder,geology,Tecolutla Perforations,high,,,Folder containing Tecolutla Perforations Information.csv (1drqIuDi_2PVZZSHV3li5cwtPi4XyoW2k).
 1Utf__mkt3m3KPT-3J0ZnFcAH_5VwiHRZ,folder,geology,Tecolutla Well header Information,high,,,Folder containing Tecolutla Well Header Information.csv (1hyjTjReFgeJSvJJOdidHYIso2AGevDZK).
-1BbEeSgFaxmNewRXhAbOLWa0mYozlRCsM,folder,geology,Tec-11 DES Sample Descriptions,highest,,,Mud log / lithology column for task 3.
-1NVoaGiQc8n21gIwVWGn3-5UUKlg0FN2y,file,geology,Tecolutla-11Des Columna Litologica 40-3283 MD,highest,,,Rise Energy mud log - task 3.
+1BbEeSgFaxmNewRXhAbOLWa0mYozlRCsM,folder,geology,Tec-11 DES Sample Descriptions,highest,,,"Contains the Rise Energy mud log PDF Tecolutla-11Des Columna Litologica 40-3283 MD.pdf (1NVoaGiQc8n21gIwVWGn3-5UUKlg0FN2y; 536,192 B; 2018-12-04). Task 3."
 1dxjw4IG13Fq6kTP8i5HkkGrQHD0aZkrM,folder,geology,Tecolutla-10 Core and Sample Descriptions,medium,,,Added - facies control for the correlation panel.
-1enIT7tkiG6sbDkTJlWcE7GjrX2XLuB65,folder,geology,Petrophysics,high,,,Incl. LAS subfolder. Not seen under the Geology folder listing - parent to be confirmed.
-1FivwQDgxkzEufcVJj42AUUValzaPLKyC,folder,geology,Pressures,high,,,Not seen under the Geology folder listing - parent to be confirmed.
-17bxvH7xAYe9wfLEj8JYn_Kz31MVgqDrL,file,geology,Tecolutla Pressure Summary.xlsx,high,,,Task 5.
-1E4f1NeV8pqDDuOV1h073jIbhctbPTN1R,folder,geology,Fluid Analyzes,medium,,,Not seen under the Geology folder listing - parent to be confirmed.
+1enIT7tkiG6sbDkTJlWcE7GjrX2XLuB65,folder,geology,Petrophysics,high,,,"Parent is the Jaguar Due Deligence root (1zWvp3hYxAYnjtJFCFxatNP8YA1_bjTbY), not Geology. Contains LAS subfolder, XSections & Logs.xlsx, Potential Pay left behind in TEC-9 and TEC-6.pptx, TEC-9 SS Logs.pptx, PROGRAMA DE PERFORACION 12DES VER1.1.pdf."
+1FivwQDgxkzEufcVJj42AUUValzaPLKyC,folder,geology,Pressures,high,,,"Parent is the Jaguar Due Deligence root. 20 static-gradient PDFs (TEC-2 1956/1964, TEC-6 1964/1971 x11/1973, TEC-7 1964/1998), TEC-2 2018 static gradient xlsx, TEC-2 2018 flow-and-build subfolder. Task 5."
+17bxvH7xAYe9wfLEj8JYn_Kz31MVgqDrL,file,geology,Tecolutla Pressure Summary.xlsx,high,34754,2018-05-12T22:27:59Z,"Task 5. In the Pressures folder (also pulled by recursion; md5-skip handles the duplicate). 34,754 B; 2018-05-12."
+1E4f1NeV8pqDDuOV1h073jIbhctbPTN1R,folder,geology,Fluid Analyzes,medium,,,Parent is the Jaguar Due Deligence root.
 19DHG8n7BhFErTQaJJg81vigJMYuaVW7Y,file,appraisal_plan,Production (Tecolutla).xlsx,high,1159966,2022-05-27T01:49:55Z,
 1oIBQTtf-P11dBhIcxmhTp71nRJ_IU3p5,file,appraisal_plan,Tecolutla Production to Dec 2018.xlsx,high,687388,2022-05-27T01:48:32Z,
 1snFP_ndmVOQuqzmY0jK5UWy6WtoO5px_,file,appraisal_plan,Tecolutla Production History (Possible Solution GOR).xlsx,high,782586,2022-05-27T01:28:46Z,GOR anomaly - task 4.
@@ -54,8 +53,32 @@ id,kind,local_dir,name,priority,size_bytes_observed,modified_time_observed,notes
 1OH71zEL3zrTF1-6c9OZf9SsKYVX2tsT6,file,development_plan,Economic Model (Tecolutla Feb 2022)7 (Tec12 13 14 & 15).xlsm,high,3148039,2022-06-20T17:13:40Z,v7.
 1Cwq8D9VjigXse-XaDDCJIy0bj3tVGg1C,file,development_plan,Economic Model (Tecolutla Feb 2022)8 (Tec14 HZ).xlsm,high,3122660,2022-06-21T14:45:50Z,v8.
 1mO2mEyp0foWocV8rn9zajx4oyz-rTbGc,file,development_plan,Economic Model (Tecolutla Feb 2022)9 (Tec14 HZ).xlsm,high,3118408,2022-06-21T18:17:43Z,v9 - latest by date.
-1kNxlMUGvtTW9RpxueOyN7jxNupXjOtbu,file,development_plan,Tecolutla Production Tracking.xlsx,high,,,To Dec 2022. Not seen in the Development Plan top-level listing - may sit in a subfolder.
+1kNxlMUGvtTW9RpxueOyN7jxNupXjOtbu,file,staff_production,Tecolutla Production Tracking.xlsx,high,371671,2022-12-10T21:09:39Z,"To Dec 2022. Lives in STAFF PRODUCTION TONALLI (1V_Su_OpLDovMckw5r1A62FxBv-dImWP0), not Development Plan. 371,671 B; 2022-12-10."
 1WcyXVxWDCfVTA0LfjZ9Z4Phww76HTa-v,file,development_plan,Tec 11 Summary of Costs (Actual and Budgeted).xlsx,medium,66817,2022-04-11T18:05:27Z,Added - actual TEC-11 cost as an AFE escalation anchor (task 8).
 1quHZ4SrFQyExvhEOUHRnv6v1Zrj-VxWV,file,development_plan,Tecolutla 10 Final Report (IHS PTA) Spanish.pdf,medium,4523092,2018-10-25T20:21:58Z,Added - TEC-10 pressure transient analysis (task 5).
 1eY7X3dpGL9OpJDn8C8UBsLdIz7jnR-9_,file,development_plan,Tecolutla 2 Final Report (IHS PTA) Spanish.pdf,medium,5711721,2018-10-25T20:21:48Z,Added - TEC-2 pressure transient analysis (task 5).
 1lFm12tBuBaiV0-22mRvxP3rVg4KD2fOZ,file,development_plan,pvtdoc.pdf,low,22542,2022-03-11T17:00:12Z,Added.
+14LjKDBmFpn7jj57sFrsbSwRPRWpxD-Lk,file,tec12_budget_2021,Eduardo's Comments to Drilling Cost Estimate.docx,highest,143590,2021-09-14T18:17:52Z,"FOUND (G-02). 143 KB is inconsistent with a title-only document - read natively for tracked changes, comments or images the connector dropped."
+1Rt-cRts4czd7-OO3GSc5ZgnI5Putc3hi,file,tec12_budget_2021,Tec 12.pptx,high,8145385,2021-09-14T18:16:58Z,Sept 2021 budget package deck. Unopened.
+1fGiD3qPJhWMkmgKYhPMGzPXo6LFuSwpm,file,tec12_budget_2021,TEC-12 Rough Drilling & Completion Cost Estimate (2).xlsx,medium,43103,2021-09-14T18:15:09Z,Same size as the TEC-12 Drill copy; pulled to confirm byte-identity.
+1JaY9tPAe0jRpeZUcAo-udZUDpsLccOCZ,file,ye2020_reserves,TEC-12 Drilling & Completion Cost Estimate.xlsx,high,43581,2021-04-07T22:56:43Z,"Earlier AFE version (Apr 2021, no ""(2)""). Diff against the (2) version in task 8."
+1aWaFSTnU9jatgRaa8Z8QwwxzsKBaSiZE,file,ye2020_reserves,PROGRAMA DE PERFORACION TECOLUTLA-12DES VER1.1.pdf,high,5607995,2021-04-07T22:57:19Z,12DES drilling programme v1.1 (Spanish). Latest-dated of four identical-size copies.
+1efU0sb7J09j0pnZA9713a-JOutU_YRwa,file,tec12_regulatory,PROGRAMA DE TERMINACION TECOLUTLA-12DES VER1.0.pdf,medium,2553033,2021-07-09T00:17:42Z,"12DES completion programme v1.0, Jul 2021 issue (2.55 MB). A 1.83 MB Feb 2021 issue also exists (1IF_ZFReO6XCrVfCsv5Pz2k--NZB8SI0o)."
+1IF_ZFReO6XCrVfCsv5Pz2k--NZB8SI0o,file,tec12_regulatory,PROGRAMA DE TERMINACION TECOLUTLA-12DES VER1.0 (Feb 2021).pdf,low,1826395,2021-02-18T20:02:00Z,"Earlier issue of the completion programme, from the Anexo 3.1.1 regulatory folder."
+1eMlvCy-DxgWmr4DNInsyMvBK2da9NqtU,file,tec12_regulatory,Tecolutla-12DES Perforacion.pdf,medium,5651649,2020-09-10T04:47:51Z,Sept 2020 drilling programme submission (Anexo 3.1.1).
+1jP6P7uIk6WgYEmcBgxrd86aFsxHFHDIM,file,tec12_regulatory,Programa de perforacion Tecolutla 12.pdf,low,5622352,2021-05-27T19:11:51Z,May 2021 drilling programme issue.
+14zn5SCmd08aMt36jRAC7lBjCkllscz6c,file,ye2020_reserves,YE 2020 Reserves (Tecolutla) - Corporate Summary Detail (Final).pdf,high,15925842,2021-04-19T20:55:36Z,"GLJ independent YE2020 reserves evaluation - a third independent forecast view for task 6, absent from the review."
+1WBQWnkzW3bG57vde9rfLHl8xojrkZrfR,file,ye2020_reserves,YE 2020 Reserves (Tecolutla) - Corporate Summary.pdf,medium,3907103,2021-04-19T20:55:59Z,GLJ YE2020 summary.
+1n6m8ZL6UnctU8IA8A_7sBBzNQ_aT1xfW,file,ye2020_reserves,2021-02-19 Tecolutla YE Reserve Report - Draft (100 ).xlsx,medium,3729354,2021-02-19T22:21:31Z,GLJ draft export workbook - forecast tables in machine-readable form.
+1TXnAomMCgB48VO7Sol6KOxwhiNR48XQI,file,ye2020_reserves,Gross Oil Monthly Forecast by Well (Kevin).xlsx,high,203307,2021-03-18T18:01:48Z,Kevin's per-well monthly forecast - task 6 input.
+1GVgDMB-qGh8LfE3dfzT4aMfBSGgxVgiA,file,ye2020_reserves,Tonalli - Management Reservoir Engineer Questions 2020.pdf,medium,182679,2021-02-24T18:31:54Z,GLJ evaluator Q&A - may document the forecast basis.
+19tTqV3GcNluf92mTeOJ7GI2LSsoRGSDu,file,ye2020_reserves,Tec-12 Drill.pptx,medium,1987901,2021-02-12T17:25:56Z,Feb 2021 TEC-12 deck.
+12qxiAXyUnaskmNKfcihB7bYruJAVpQPM,file,geology/tec10_image_log,TECOLUTLA 10_CMI INTERPRETED IMAGE__2487.00m-2280.5m_02MAY2018.pdf,high,14128242,2021-02-06T22:54:34Z,"The TEC-10 image log is a Weatherford CMI, not an FMI (G-09). Interpreted image, 2,280.5-2,487 mMD."
+1juM5kCo8XNt4s6-NnfZz69PJ9ncE9Ztg,file,geology/tec10_image_log,TECOLUTLA 10_CMI IMAGE DIPS_2487.00m-2280.5m_02MAY2018.las,high,22661,2018-05-09T21:11:33Z,CMI dip picks as LAS - fracture/bedding dips for task 9. The 194 MB and 620 MB DLIS files are NOT pulled.
+1M8-de1bNc3vdrfHimnPwZuPDVoWPpyAR,file,geology/tec10_image_log,Tec-10 Summary Modern day Image (sink hole).pptx,medium,1687412,2018-08-14T17:29:50Z,Karst / sinkhole interpretation on the TEC-10 image - risk section.
+1sn8A4vrntN_q6P_jAVZ1T9Ph1rjAJrxk,file,drilling_costs,TEC-11 Drilling Cost Tracker 26Dec2018.xlsx,high,46402,2022-09-20T05:20:07Z,TEC-11 actual cost tracker - AFE escalation anchor (task 8).
+1gzR1cHh-gTOTLTXJ6-7NVB23sr6Yd82_,file,drilling_costs,TEC-10 Updated Drilling Cost Summary 15Jun2018.xlsx,high,45919,2022-09-20T05:20:06Z,TEC-10 cost summary - second escalation anchor (task 8).
+1qIM_lf_M53wYrt6hntAHcYqV51Iwm62n,file,tec11,Tecolutla 11_Tieback 4 12_Graficas_181218.pptx,medium,462852,2018-12-18T22:19:58Z,"TEC-11 tieback/liner graphs, Dec 2018 - completion-failure evidence for section 5."
+1ayn5ddE5ioD9MIIhMfieHz0185OUCU4x,file,tec12_2020,Tec-12 Back-up Slides.pptx,medium,14509963,2020-08-27T19:44:11Z,Aug 2020 back-up slides (14.5 MB).
+1DZ-xeQ7n5EAFFl-QipOJPe9ju9J6iuP5,file,tec12_2020,TEC-12 Proposed S-Shaped Well Design.pptx,low,54289,2020-08-25T02:30:06Z,
+1_mSzgoCZN5ol48Iv7Plr_Wt03H4pMNyc,file,tec12_2020,ElAbra Depth Tec12.pptx,medium,985447,2020-12-26T18:21:26Z,El Abra depth prognosis at TEC-12 - depth-risk section.

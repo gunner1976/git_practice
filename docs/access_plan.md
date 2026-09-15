@@ -26,7 +26,7 @@ Either A or B drives `src/pull_drive.py`, which recurses folders, skips files al
 
 Listing the folders surfaced files the tasks need that were not in the kickoff table. They are in `data/working_set.csv` marked "Added": the GLJ Oct-2020 and Jan-2022 price decks, the Tonalli contractual fee / exploration tax sheet, the two Simmons payout comparisons and the Durum–Simmons participation sheet (tasks 1, 2, 8), the Aug 2020 economic model and three Simmons v1–v3 workbooks in `OLD` (lineage for task 2), TEC-11 actual-versus-budget costs (task 8 escalation anchor), the TEC-2 and TEC-10 IHS pressure-transient reports (task 5), the TEC-10 core descriptions (task 9), and the Transition Plan production chapter and Spanish field summary (task 4 cross-check).
 
-Approximate pull size: about 100 MB for the listed files, plus the well-log folder, whose size is unknown until listed.
+Approximate pull size: about 190 MB for the listed files (the GLJ reserves PDF, the CMI interpreted image and the Aug 2020 back-up slides account for 45 MB of that), plus the well-log folder, which has one subfolder per well (2, 3, 5, 6, 7, 9, 10, 11, 101) and is sized on pull. The 194 MB and 620 MB TEC-10 CMI DLIS files are deliberately excluded.
 
 ## Git policy for raw data
 
