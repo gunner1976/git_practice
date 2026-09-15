@@ -168,7 +168,7 @@ TEC-2 skin +196 (workover), TEC-13 now structurally lower on the reprocessed 3D,
 | 6 GLJ YE2020 | Included, task 6 |
 | 7 Current reservoir pressure | Done, task 5: 24.15 MPa in 2018, 2 % below initial |
 | 8 Static gradient at reopening | Still the highest-value cheap measurement; add the TEC-10 petrophysical evaluation |
-| New | Resolve G-47 before sanction; obtain the ten large files still blocked (G-13) and confirm the AFE currency (G-44) |
+| New | Resolve G-47 before sanction; obtain the ten large files still blocked (G-13); confirm the AFE currency (G-44) and which well the 2023 model priced (G-17). 18 of 50 logged gaps remain open |
 
 ## 9. What the presentation says
 
