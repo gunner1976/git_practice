@@ -1,0 +1,47 @@
+key,2020-08,2022-v1,2022-v2,2022-v3,2022-v4,2022-v5,2022-v6,2022-v7,2022-v8,2022-v9,2023-10,n_distinct
+API (deg),40.0,40,40,40,40,40,40,40,40,40,40.0,2
+Abandonment Fund (US$),-150000.0,-150000,-150000,-150000,-150000,-150000,,,,,-150000.0,2
+Assoc. Gas:,Non Assoc. Gas:,Non Assoc. Gas:,Non Assoc. Gas:,Non Assoc. Gas:,Non Assoc. Gas:,Non Assoc. Gas:,Non Assoc. Gas:,Non Assoc. Gas:,Non Assoc. Gas:,Non Assoc. Gas:,Non Assoc. Gas:,1
+Battery Costs (US$/mth),-15000.0,-15000,-15000,-15000,-15000,-15000,-15000,-15000,-15000,-15000,-10000.0,3
+Bid Round Royalty (%),0.3122,0.3122,0.3122,0.3122,0.3122,0.3122,0.3122,0.3122,0.3122,0.3122,0.3122,1
+Block,Tecolutla,Tecolutla,Tecolutla,Tecolutla,Tecolutla,Tecolutla,Tecolutla,Tecolutla,Tecolutla,Tecolutla,Tecolutla,1
+Block Area (km2),7.2,7.2,7.2,7.2,7.2,7.2,7.2,7.2,7.2,7.2,7.2,1
+Block Extraction Area (% total),1.0,1,1,1,1,1,1,1,1,1,1.0,2
+Block Fees (<=60 montns) (peso/km2/mth),-1150,-1150,-1150,-1150,-1150,-1150,-1150,-1150,-1150,-1150,-1150,1
+Block Fees (>60 montns) (peso/km2/mth),-2750,-2750,-2750,-2750,-2750,-2750,-2750,-2750,-2750,-2750,-2750,1
+Bond Amount ($),0.0,0,0,0,0,0,0,0,0,0,0.0,2
+Bond Fee (%/yr),0.018,0.018,0.018,0.018,0.018,0.018,0.018,0.018,0.018,0.018,0.018,1
+Community Royalty (%),0.0,0,0,0,0,0,0,0,0,0,0.0,2
+Cond Offset (US$/bbl),-1.0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1.0,2
+Contract Duration (yrs),35.0,35,35,35,35,35,35,35,35,35,35.0,2
+Depreciation (%),0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,1
+Discount Rate (%),0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,1
+Disposal Well Costs (US$/mth),-1500.0,-1500,-1500,-1500,-1500,-1500,-1500,-1500,-1500,-1500,-1500.0,2
+Economic Start Date,2020-09-01,2022-04-01,2022-04-01,2022-04-01,2022-04-01,2022-04-01,2023-07-01,2023-07-01,2023-07-01,2023-07-01,2024-01-01,4
+Evaluation Start Date,2020-09-01,2022-04-01,2022-04-01,2022-04-01,2022-04-01,2022-04-01,2023-07-01,2023-07-01,2023-07-01,2023-07-01,2024-01-01,4
+GORR,0.0,0,0,0,0,0,0,0,0,0,0.0,2
+Gas Offset (US$/mmbtu),-0.45,-0.45,-0.45,-0.45,-0.45,-0.45,-0.45,-0.45,-0.45,-0.45,-0.45,1
+Gas Well Costs (US$/well/mth),-2500.0,-2500,-2500,-2500,-2500,-2500,-2500,-2500,-2500,-2500,-2500.0,2
+HC Tax (peso/km2/mth) *postprod,-6000.0,-6000,-6000,-6000,-6000,-6000,-6000,-6000,-6000,-6000,-6000.0,2
+HC Tax (peso/km2/mth) *preprod,-1500.0,-1500,-1500,-1500,-1500,-1500,-1500,-1500,-1500,-1500,-1500.0,2
+Inflation Rate (%),0.0,0,0,0,0,0,0.02,0.02,0.02,0.02,0.0,3
+NGL C2 Relative % (%),0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6,1
+NGL C3 Relative % (%),0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,1
+NGL C4 Relative % (%),0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,1
+NGL Offset (US$/bbl),-1.0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1.0,2
+Oil Costs (US$/bbl),-7.25,-7.25,-7.25,-7.25,-7.25,-7.25,-7.25,-7.25,-7.25,-7.25,-7.25,1
+Oil Offset (US$/bbl),-7.46,-7.46,-7.46,-7.46,-7.46,-7.46,-7.46,-7.46,-7.46,-7.46,-7.46,1
+Oil Well Costs (US$/well/mth),-2500.0,-2500,-2500,-2500,-2500,-2500,-1000,-812.5,-812.5,-812.5,-2500.0,4
+Power Generation Costs (US$/well/mth),,,,,,,-10000,-10000,-10000,-10000,,1
+Sales Gas Heating Value (btu/scf),984.0,984,984,984,984,984,984,984,984,984,984.0,2
+Sales Gas Processing (US$/mcf),-0.25,-0.25,-0.25,-0.25,-0.25,-0.25,0,0,0,0,-0.25,2
+Sulphur (%),0.0,0,0,0,0,0,0,0,0,0,0.0,2
+Surface Land Royalty (%),0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,1
+Tax Rate (%),0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,1
+Water Disposal (US$/bbl),-3.25,-3.25,-3.25,-3.25,-3.25,-3.25,-3.25,-3.25,-3.25,-3.25,-3.25,1
+Well Intervention Costs (US$/well/mth),,,,,,,-1500,-1687.5,-1687.5,-1687.5,,2
+"effects total rev, roy, opex, cap; cut off of eval",Fixed,Fixed,Fixed,Fixed,Fixed,Fixed,Fixed,Fixed,Fixed,Fixed,Fixed,1
+"includes 0.79 $/bbl processing cost proposed by PEMEX & ~3% marketing fee; deducted prior to applying bid royalty, added a 2$/bbl deduction for possible quality adjustment *CHECK IF CELL D428 IN USE",Oil Well Costs (US$/well/mth),Oil Well Costs (US$/well/mth),Oil Well Costs (US$/well/mth),Oil Well Costs (US$/well/mth),Oil Well Costs (US$/well/mth),Oil Well Costs (US$/well/mth),Oil Well Costs (US$/well/mth),Oil Well Costs (US$/well/mth),Oil Well Costs (US$/well/mth),Oil Well Costs (US$/well/mth),Oil Well Costs (US$/well/mth),1
+only incls net income / loss as of this date,Bid Round Royalty (%),Bid Round Royalty (%),Bid Round Royalty (%),Bid Round Royalty (%),Bid Round Royalty (%),Bid Round Royalty (%),Bid Round Royalty (%),Bid Round Royalty (%),Bid Round Royalty (%),Bid Round Royalty (%),Bid Round Royalty (%),1
+start,end,end,end,end,end,end,end,end,end,end,end,1
+until,then,then,then,then,then,then,then,then,then,then,then,1

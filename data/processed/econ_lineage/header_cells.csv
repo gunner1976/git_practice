@@ -1,0 +1,500 @@
+tag,row,col,label,value,value2
+2020-08,3,1,Block,Tecolutla,
+2020-08,3,5,Assoc. Gas:,Non Assoc. Gas:,
+2020-08,3,9,start,end,
+2020-08,4,1,Block Area (km2),7.2,
+2020-08,4,4,Sales Gas Heating Value (btu/scf),984.0,984.0
+2020-08,4,7,Bond Amount ($),0.0,2019-01-01
+2020-08,5,1,API (deg),40.0,
+2020-08,5,4,NGL C2 Relative % (%),0.6,0.0
+2020-08,5,7,Bond Fee (%/yr),0.018,
+2020-08,6,1,Sulphur (%),0.0,
+2020-08,6,4,NGL C3 Relative % (%),0.3,0.0
+2020-08,7,4,NGL C4 Relative % (%),0.1,0.0
+2020-08,8,1,Evaluation Start Date,2020-09-01,
+2020-08,9,1,Economic Start Date,2020-09-01,
+2020-08,9,3,only incls net income / loss as of this date,Bid Round Royalty (%),0.3122
+2020-08,9,4,Bid Round Royalty (%),0.3122,
+2020-08,9,7,Surface Land Royalty (%),0.01,
+2020-08,10,1,Depreciation (%),0.25,
+2020-08,10,7,Community Royalty (%),0.0,
+2020-08,11,1,Tax Rate (%),0.3,
+2020-08,11,7,GORR,0.0,
+2020-08,12,1,Inflation Rate (%),0.0,
+2020-08,13,1,Discount Rate (%),0.1,
+2020-08,14,1,Contract Duration (yrs),35.0,
+2020-08,14,3,"effects total rev, roy, opex, cap; cut off of eval",Fixed,
+2020-08,14,9,until,then,
+2020-08,15,4,Battery Costs (US$/mth),-15000.0,2020-09-01
+2020-08,15,7,Oil Costs (US$/bbl),-7.25,2020-08-01
+2020-08,16,1,Oil Offset (US$/bbl),-7.46,
+2020-08,16,3,"includes 0.79 $/bbl processing cost proposed by PEMEX & ~3% marketing fee; deducted prior to applying bid royalty, added a 2$/bbl deduction for possible quality adjustment
+*CHECK IF CELL D428 IN USE",Oil Well Costs (US$/well/mth),-2500.0
+2020-08,16,4,Oil Well Costs (US$/well/mth),-2500.0,
+2020-08,16,7,Water Disposal (US$/bbl),-3.25,2020-08-01
+2020-08,17,1,Gas Offset (US$/mmbtu),-0.45,
+2020-08,17,4,Gas Well Costs (US$/well/mth),-2500.0,
+2020-08,17,7,Sales Gas Processing (US$/mcf),-0.25,2020-08-01
+2020-08,18,1,NGL Offset (US$/bbl),-1.0,
+2020-08,18,4,Disposal Well Costs (US$/mth),-1500.0,2020-09-01
+2020-08,19,1,Cond Offset (US$/bbl),-1.0,
+2020-08,19,4,Block Fees (<=60 montns) (peso/km2/mth),-1150,2020-09-01
+2020-08,19,7,HC Tax (peso/km2/mth) *preprod,-1500.0,2020-09-01
+2020-08,20,4,Block Fees (>60 montns) (peso/km2/mth),-2750,0
+2020-08,20,7,HC Tax (peso/km2/mth) *postprod,-6000.0,
+2020-08,21,1,Abandonment Fund (US$),-150000.0,
+2020-08,21,7,Block Extraction Area (% total),1.0,
+2022-v1,3,1,Block,Tecolutla,
+2022-v1,3,5,Assoc. Gas:,Non Assoc. Gas:,
+2022-v1,3,9,start,end,
+2022-v1,4,1,Block Area (km2),7.2,
+2022-v1,4,4,Sales Gas Heating Value (btu/scf),984,984
+2022-v1,4,7,Bond Amount ($),0,2019-01-01
+2022-v1,5,1,API (deg),40,
+2022-v1,5,4,NGL C2 Relative % (%),0.6,0
+2022-v1,5,7,Bond Fee (%/yr),0.018,
+2022-v1,6,1,Sulphur (%),0,
+2022-v1,6,4,NGL C3 Relative % (%),0.3,0
+2022-v1,7,4,NGL C4 Relative % (%),0.1,0
+2022-v1,8,1,Evaluation Start Date,2022-04-01,
+2022-v1,9,1,Economic Start Date,2022-04-01,
+2022-v1,9,3,only incls net income / loss as of this date,Bid Round Royalty (%),0.3122
+2022-v1,9,4,Bid Round Royalty (%),0.3122,
+2022-v1,9,7,Surface Land Royalty (%),0.01,
+2022-v1,10,1,Depreciation (%),0.25,
+2022-v1,10,7,Community Royalty (%),0,
+2022-v1,11,1,Tax Rate (%),0.3,
+2022-v1,11,7,GORR,0,
+2022-v1,12,1,Inflation Rate (%),0,
+2022-v1,13,1,Discount Rate (%),0.1,
+2022-v1,14,1,Contract Duration (yrs),35,
+2022-v1,14,3,"effects total rev, roy, opex, cap; cut off of eval",Fixed,
+2022-v1,14,9,until,then,
+2022-v1,15,4,Battery Costs (US$/mth),-15000,2022-04-01
+2022-v1,15,7,Oil Costs (US$/bbl),-7.25,2022-03-01
+2022-v1,16,1,Oil Offset (US$/bbl),-7.46,
+2022-v1,16,3,"includes 0.79 $/bbl processing cost proposed by PEMEX & ~3% marketing fee; deducted prior to applying bid royalty, added a 2$/bbl deduction for possible quality adjustment
+*CHECK IF CELL D428 IN USE",Oil Well Costs (US$/well/mth),-2500
+2022-v1,16,4,Oil Well Costs (US$/well/mth),-2500,
+2022-v1,16,7,Water Disposal (US$/bbl),-3.25,2022-03-01
+2022-v1,17,1,Gas Offset (US$/mmbtu),-0.45,
+2022-v1,17,4,Gas Well Costs (US$/well/mth),-2500,
+2022-v1,17,7,Sales Gas Processing (US$/mcf),-0.25,2022-03-01
+2022-v1,18,1,NGL Offset (US$/bbl),-1,
+2022-v1,18,4,Disposal Well Costs (US$/mth),-1500,2022-04-01
+2022-v1,19,1,Cond Offset (US$/bbl),-1,
+2022-v1,19,4,Block Fees (<=60 montns) (peso/km2/mth),-1150,2022-04-01
+2022-v1,19,7,HC Tax (peso/km2/mth) *preprod,-1500,2022-04-01
+2022-v1,20,4,Block Fees (>60 montns) (peso/km2/mth),-2750,0
+2022-v1,20,7,HC Tax (peso/km2/mth) *postprod,-6000,
+2022-v1,21,1,Abandonment Fund (US$),-150000,
+2022-v1,21,7,Block Extraction Area (% total),1,
+2022-v2,3,1,Block,Tecolutla,
+2022-v2,3,5,Assoc. Gas:,Non Assoc. Gas:,
+2022-v2,3,9,start,end,
+2022-v2,4,1,Block Area (km2),7.2,
+2022-v2,4,4,Sales Gas Heating Value (btu/scf),984,984
+2022-v2,4,7,Bond Amount ($),0,2019-01-01
+2022-v2,5,1,API (deg),40,
+2022-v2,5,4,NGL C2 Relative % (%),0.6,0
+2022-v2,5,7,Bond Fee (%/yr),0.018,
+2022-v2,6,1,Sulphur (%),0,
+2022-v2,6,4,NGL C3 Relative % (%),0.3,0
+2022-v2,7,4,NGL C4 Relative % (%),0.1,0
+2022-v2,8,1,Evaluation Start Date,2022-04-01,
+2022-v2,9,1,Economic Start Date,2022-04-01,
+2022-v2,9,3,only incls net income / loss as of this date,Bid Round Royalty (%),0.3122
+2022-v2,9,4,Bid Round Royalty (%),0.3122,
+2022-v2,9,7,Surface Land Royalty (%),0.01,
+2022-v2,10,1,Depreciation (%),0.25,
+2022-v2,10,7,Community Royalty (%),0,
+2022-v2,11,1,Tax Rate (%),0.3,
+2022-v2,11,7,GORR,0,
+2022-v2,12,1,Inflation Rate (%),0,
+2022-v2,13,1,Discount Rate (%),0.1,
+2022-v2,14,1,Contract Duration (yrs),35,
+2022-v2,14,3,"effects total rev, roy, opex, cap; cut off of eval",Fixed,
+2022-v2,14,9,until,then,
+2022-v2,15,4,Battery Costs (US$/mth),-15000,2022-04-01
+2022-v2,15,7,Oil Costs (US$/bbl),-7.25,2022-03-01
+2022-v2,16,1,Oil Offset (US$/bbl),-7.46,
+2022-v2,16,3,"includes 0.79 $/bbl processing cost proposed by PEMEX & ~3% marketing fee; deducted prior to applying bid royalty, added a 2$/bbl deduction for possible quality adjustment
+*CHECK IF CELL D428 IN USE",Oil Well Costs (US$/well/mth),-2500
+2022-v2,16,4,Oil Well Costs (US$/well/mth),-2500,
+2022-v2,16,7,Water Disposal (US$/bbl),-3.25,2022-03-01
+2022-v2,17,1,Gas Offset (US$/mmbtu),-0.45,
+2022-v2,17,4,Gas Well Costs (US$/well/mth),-2500,
+2022-v2,17,7,Sales Gas Processing (US$/mcf),-0.25,2022-03-01
+2022-v2,18,1,NGL Offset (US$/bbl),-1,
+2022-v2,18,4,Disposal Well Costs (US$/mth),-1500,2022-04-01
+2022-v2,19,1,Cond Offset (US$/bbl),-1,
+2022-v2,19,4,Block Fees (<=60 montns) (peso/km2/mth),-1150,2022-04-01
+2022-v2,19,7,HC Tax (peso/km2/mth) *preprod,-1500,2022-04-01
+2022-v2,20,4,Block Fees (>60 montns) (peso/km2/mth),-2750,0
+2022-v2,20,7,HC Tax (peso/km2/mth) *postprod,-6000,
+2022-v2,21,1,Abandonment Fund (US$),-150000,
+2022-v2,21,7,Block Extraction Area (% total),1,
+2022-v3,3,1,Block,Tecolutla,
+2022-v3,3,5,Assoc. Gas:,Non Assoc. Gas:,
+2022-v3,3,9,start,end,
+2022-v3,4,1,Block Area (km2),7.2,
+2022-v3,4,4,Sales Gas Heating Value (btu/scf),984,984
+2022-v3,4,7,Bond Amount ($),0,2019-01-01
+2022-v3,5,1,API (deg),40,
+2022-v3,5,4,NGL C2 Relative % (%),0.6,0
+2022-v3,5,7,Bond Fee (%/yr),0.018,
+2022-v3,6,1,Sulphur (%),0,
+2022-v3,6,4,NGL C3 Relative % (%),0.3,0
+2022-v3,7,4,NGL C4 Relative % (%),0.1,0
+2022-v3,8,1,Evaluation Start Date,2022-04-01,
+2022-v3,9,1,Economic Start Date,2022-04-01,
+2022-v3,9,3,only incls net income / loss as of this date,Bid Round Royalty (%),0.3122
+2022-v3,9,4,Bid Round Royalty (%),0.3122,
+2022-v3,9,7,Surface Land Royalty (%),0.01,
+2022-v3,10,1,Depreciation (%),0.25,
+2022-v3,10,7,Community Royalty (%),0,
+2022-v3,11,1,Tax Rate (%),0.3,
+2022-v3,11,7,GORR,0,
+2022-v3,12,1,Inflation Rate (%),0,
+2022-v3,13,1,Discount Rate (%),0.1,
+2022-v3,14,1,Contract Duration (yrs),35,
+2022-v3,14,3,"effects total rev, roy, opex, cap; cut off of eval",Fixed,
+2022-v3,14,9,until,then,
+2022-v3,15,4,Battery Costs (US$/mth),-15000,2022-04-01
+2022-v3,15,7,Oil Costs (US$/bbl),-7.25,2022-03-01
+2022-v3,16,1,Oil Offset (US$/bbl),-7.46,
+2022-v3,16,3,"includes 0.79 $/bbl processing cost proposed by PEMEX & ~3% marketing fee; deducted prior to applying bid royalty, added a 2$/bbl deduction for possible quality adjustment
+*CHECK IF CELL D428 IN USE",Oil Well Costs (US$/well/mth),-2500
+2022-v3,16,4,Oil Well Costs (US$/well/mth),-2500,
+2022-v3,16,7,Water Disposal (US$/bbl),-3.25,2022-03-01
+2022-v3,17,1,Gas Offset (US$/mmbtu),-0.45,
+2022-v3,17,4,Gas Well Costs (US$/well/mth),-2500,
+2022-v3,17,7,Sales Gas Processing (US$/mcf),-0.25,2022-03-01
+2022-v3,18,1,NGL Offset (US$/bbl),-1,
+2022-v3,18,4,Disposal Well Costs (US$/mth),-1500,2022-04-01
+2022-v3,19,1,Cond Offset (US$/bbl),-1,
+2022-v3,19,4,Block Fees (<=60 montns) (peso/km2/mth),-1150,2022-04-01
+2022-v3,19,7,HC Tax (peso/km2/mth) *preprod,-1500,2022-04-01
+2022-v3,20,4,Block Fees (>60 montns) (peso/km2/mth),-2750,0
+2022-v3,20,7,HC Tax (peso/km2/mth) *postprod,-6000,
+2022-v3,21,1,Abandonment Fund (US$),-150000,
+2022-v3,21,7,Block Extraction Area (% total),1,
+2022-v4,3,1,Block,Tecolutla,
+2022-v4,3,5,Assoc. Gas:,Non Assoc. Gas:,
+2022-v4,3,9,start,end,
+2022-v4,4,1,Block Area (km2),7.2,
+2022-v4,4,4,Sales Gas Heating Value (btu/scf),984,984
+2022-v4,4,7,Bond Amount ($),0,2019-01-01
+2022-v4,5,1,API (deg),40,
+2022-v4,5,4,NGL C2 Relative % (%),0.6,0
+2022-v4,5,7,Bond Fee (%/yr),0.018,
+2022-v4,6,1,Sulphur (%),0,
+2022-v4,6,4,NGL C3 Relative % (%),0.3,0
+2022-v4,7,4,NGL C4 Relative % (%),0.1,0
+2022-v4,8,1,Evaluation Start Date,2022-04-01,
+2022-v4,9,1,Economic Start Date,2022-04-01,
+2022-v4,9,3,only incls net income / loss as of this date,Bid Round Royalty (%),0.3122
+2022-v4,9,4,Bid Round Royalty (%),0.3122,
+2022-v4,9,7,Surface Land Royalty (%),0.01,
+2022-v4,10,1,Depreciation (%),0.25,
+2022-v4,10,7,Community Royalty (%),0,
+2022-v4,11,1,Tax Rate (%),0.3,
+2022-v4,11,7,GORR,0,
+2022-v4,12,1,Inflation Rate (%),0,
+2022-v4,13,1,Discount Rate (%),0.1,
+2022-v4,14,1,Contract Duration (yrs),35,
+2022-v4,14,3,"effects total rev, roy, opex, cap; cut off of eval",Fixed,
+2022-v4,14,9,until,then,
+2022-v4,15,4,Battery Costs (US$/mth),-15000,2022-04-01
+2022-v4,15,7,Oil Costs (US$/bbl),-7.25,2022-03-01
+2022-v4,16,1,Oil Offset (US$/bbl),-7.46,
+2022-v4,16,3,"includes 0.79 $/bbl processing cost proposed by PEMEX & ~3% marketing fee; deducted prior to applying bid royalty, added a 2$/bbl deduction for possible quality adjustment
+*CHECK IF CELL D428 IN USE",Oil Well Costs (US$/well/mth),-2500
+2022-v4,16,4,Oil Well Costs (US$/well/mth),-2500,
+2022-v4,16,7,Water Disposal (US$/bbl),-3.25,2022-03-01
+2022-v4,17,1,Gas Offset (US$/mmbtu),-0.45,
+2022-v4,17,4,Gas Well Costs (US$/well/mth),-2500,
+2022-v4,17,7,Sales Gas Processing (US$/mcf),-0.25,2022-03-01
+2022-v4,18,1,NGL Offset (US$/bbl),-1,
+2022-v4,18,4,Disposal Well Costs (US$/mth),-1500,2022-04-01
+2022-v4,19,1,Cond Offset (US$/bbl),-1,
+2022-v4,19,4,Block Fees (<=60 montns) (peso/km2/mth),-1150,2022-04-01
+2022-v4,19,7,HC Tax (peso/km2/mth) *preprod,-1500,2022-04-01
+2022-v4,20,4,Block Fees (>60 montns) (peso/km2/mth),-2750,0
+2022-v4,20,7,HC Tax (peso/km2/mth) *postprod,-6000,
+2022-v4,21,1,Abandonment Fund (US$),-150000,
+2022-v4,21,7,Block Extraction Area (% total),1,
+2022-v5,3,1,Block,Tecolutla,
+2022-v5,3,5,Assoc. Gas:,Non Assoc. Gas:,
+2022-v5,3,9,start,end,
+2022-v5,4,1,Block Area (km2),7.2,
+2022-v5,4,4,Sales Gas Heating Value (btu/scf),984,984
+2022-v5,4,7,Bond Amount ($),0,2019-01-01
+2022-v5,5,1,API (deg),40,
+2022-v5,5,4,NGL C2 Relative % (%),0.6,0
+2022-v5,5,7,Bond Fee (%/yr),0.018,
+2022-v5,6,1,Sulphur (%),0,
+2022-v5,6,4,NGL C3 Relative % (%),0.3,0
+2022-v5,7,4,NGL C4 Relative % (%),0.1,0
+2022-v5,8,1,Evaluation Start Date,2022-04-01,
+2022-v5,9,1,Economic Start Date,2022-04-01,
+2022-v5,9,3,only incls net income / loss as of this date,Bid Round Royalty (%),0.3122
+2022-v5,9,4,Bid Round Royalty (%),0.3122,
+2022-v5,9,7,Surface Land Royalty (%),0.01,
+2022-v5,10,1,Depreciation (%),0.25,
+2022-v5,10,7,Community Royalty (%),0,
+2022-v5,11,1,Tax Rate (%),0.3,
+2022-v5,11,7,GORR,0,
+2022-v5,12,1,Inflation Rate (%),0,
+2022-v5,13,1,Discount Rate (%),0.1,
+2022-v5,14,1,Contract Duration (yrs),35,
+2022-v5,14,3,"effects total rev, roy, opex, cap; cut off of eval",Fixed,
+2022-v5,14,9,until,then,
+2022-v5,15,4,Battery Costs (US$/mth),-15000,2022-04-01
+2022-v5,15,7,Oil Costs (US$/bbl),-7.25,2022-03-01
+2022-v5,16,1,Oil Offset (US$/bbl),-7.46,
+2022-v5,16,3,"includes 0.79 $/bbl processing cost proposed by PEMEX & ~3% marketing fee; deducted prior to applying bid royalty, added a 2$/bbl deduction for possible quality adjustment
+*CHECK IF CELL D428 IN USE",Oil Well Costs (US$/well/mth),-2500
+2022-v5,16,4,Oil Well Costs (US$/well/mth),-2500,
+2022-v5,16,7,Water Disposal (US$/bbl),-3.25,2022-03-01
+2022-v5,17,1,Gas Offset (US$/mmbtu),-0.45,
+2022-v5,17,4,Gas Well Costs (US$/well/mth),-2500,
+2022-v5,17,7,Sales Gas Processing (US$/mcf),-0.25,2022-03-01
+2022-v5,18,1,NGL Offset (US$/bbl),-1,
+2022-v5,18,4,Disposal Well Costs (US$/mth),-1500,2022-04-01
+2022-v5,19,1,Cond Offset (US$/bbl),-1,
+2022-v5,19,4,Block Fees (<=60 montns) (peso/km2/mth),-1150,2022-04-01
+2022-v5,19,7,HC Tax (peso/km2/mth) *preprod,-1500,2022-04-01
+2022-v5,20,4,Block Fees (>60 montns) (peso/km2/mth),-2750,0
+2022-v5,20,7,HC Tax (peso/km2/mth) *postprod,-6000,
+2022-v5,21,1,Abandonment Fund (US$),-150000,
+2022-v5,21,7,Block Extraction Area (% total),1,
+2022-v6,3,1,Block,Tecolutla,
+2022-v6,3,5,Assoc. Gas:,Non Assoc. Gas:,
+2022-v6,3,9,start,end,
+2022-v6,4,1,Block Area (km2),7.2,
+2022-v6,4,4,Sales Gas Heating Value (btu/scf),984,984
+2022-v6,4,7,Bond Amount ($),0,2019-01-01
+2022-v6,5,1,API (deg),40,
+2022-v6,5,4,NGL C2 Relative % (%),0.6,0
+2022-v6,5,7,Bond Fee (%/yr),0.018,
+2022-v6,6,1,Sulphur (%),0,
+2022-v6,6,4,NGL C3 Relative % (%),0.3,0
+2022-v6,7,4,NGL C4 Relative % (%),0.1,0
+2022-v6,8,1,Evaluation Start Date,2023-07-01,
+2022-v6,9,1,Economic Start Date,2023-07-01,
+2022-v6,9,3,only incls net income / loss as of this date,Bid Round Royalty (%),0.3122
+2022-v6,9,4,Bid Round Royalty (%),0.3122,
+2022-v6,9,7,Surface Land Royalty (%),0.01,
+2022-v6,10,1,Depreciation (%),0.25,
+2022-v6,10,7,Community Royalty (%),0,
+2022-v6,11,1,Tax Rate (%),0.3,
+2022-v6,11,7,GORR,0,
+2022-v6,12,1,Inflation Rate (%),0.02,
+2022-v6,13,1,Discount Rate (%),0.1,
+2022-v6,14,1,Contract Duration (yrs),35,
+2022-v6,14,3,"effects total rev, roy, opex, cap; cut off of eval",Fixed,
+2022-v6,14,9,until,then,
+2022-v6,15,4,Battery Costs (US$/mth),-15000,2023-07-01
+2022-v6,15,7,Oil Costs (US$/bbl),-7.25,2023-07-01
+2022-v6,16,1,Oil Offset (US$/bbl),-7.46,
+2022-v6,16,3,"includes 0.79 $/bbl processing cost proposed by PEMEX & ~3% marketing fee; deducted prior to applying bid royalty, added a 2$/bbl deduction for possible quality adjustment
+*CHECK IF CELL D428 IN USE",Oil Well Costs (US$/well/mth),-1000
+2022-v6,16,4,Oil Well Costs (US$/well/mth),-1000,
+2022-v6,16,7,Water Disposal (US$/bbl),-3.25,2023-07-01
+2022-v6,17,1,Gas Offset (US$/mmbtu),-0.45,
+2022-v6,17,4,Well Intervention Costs (US$/well/mth),-1500,
+2022-v6,17,7,Sales Gas Processing (US$/mcf),0,2025-08-01
+2022-v6,18,1,NGL Offset (US$/bbl),-1,
+2022-v6,18,4,Power Generation Costs (US$/well/mth),-10000,2025-08-01
+2022-v6,19,1,Cond Offset (US$/bbl),-1,
+2022-v6,19,4,Gas Well Costs (US$/well/mth),-2500,
+2022-v6,19,7,HC Tax (peso/km2/mth) *preprod,-1500,2023-07-01
+2022-v6,20,4,Disposal Well Costs (US$/mth),-1500,2023-07-01
+2022-v6,20,7,HC Tax (peso/km2/mth) *postprod,-6000,
+2022-v6,21,4,Block Fees (<=60 montns) (peso/km2/mth),-1150,2023-07-01
+2022-v6,21,7,Block Extraction Area (% total),1,
+2022-v6,22,4,Block Fees (>60 montns) (peso/km2/mth),-2750,0
+2022-v7,3,1,Block,Tecolutla,
+2022-v7,3,5,Assoc. Gas:,Non Assoc. Gas:,
+2022-v7,3,9,start,end,
+2022-v7,4,1,Block Area (km2),7.2,
+2022-v7,4,4,Sales Gas Heating Value (btu/scf),984,984
+2022-v7,4,7,Bond Amount ($),0,2019-01-01
+2022-v7,5,1,API (deg),40,
+2022-v7,5,4,NGL C2 Relative % (%),0.6,0
+2022-v7,5,7,Bond Fee (%/yr),0.018,
+2022-v7,6,1,Sulphur (%),0,
+2022-v7,6,4,NGL C3 Relative % (%),0.3,0
+2022-v7,7,4,NGL C4 Relative % (%),0.1,0
+2022-v7,8,1,Evaluation Start Date,2023-07-01,
+2022-v7,9,1,Economic Start Date,2023-07-01,
+2022-v7,9,3,only incls net income / loss as of this date,Bid Round Royalty (%),0.3122
+2022-v7,9,4,Bid Round Royalty (%),0.3122,
+2022-v7,9,7,Surface Land Royalty (%),0.01,
+2022-v7,10,1,Depreciation (%),0.25,
+2022-v7,10,7,Community Royalty (%),0,
+2022-v7,11,1,Tax Rate (%),0.3,
+2022-v7,11,7,GORR,0,
+2022-v7,12,1,Inflation Rate (%),0.02,
+2022-v7,13,1,Discount Rate (%),0.1,
+2022-v7,14,1,Contract Duration (yrs),35,
+2022-v7,14,3,"effects total rev, roy, opex, cap; cut off of eval",Fixed,
+2022-v7,14,9,until,then,
+2022-v7,15,4,Battery Costs (US$/mth),-15000,2023-07-01
+2022-v7,15,7,Oil Costs (US$/bbl),-7.25,2023-07-01
+2022-v7,16,1,Oil Offset (US$/bbl),-7.46,
+2022-v7,16,3,"includes 0.79 $/bbl processing cost proposed by PEMEX & ~3% marketing fee; deducted prior to applying bid royalty, added a 2$/bbl deduction for possible quality adjustment
+*CHECK IF CELL D428 IN USE",Oil Well Costs (US$/well/mth),-812.5
+2022-v7,16,4,Oil Well Costs (US$/well/mth),-812.5,
+2022-v7,16,7,Water Disposal (US$/bbl),-3.25,2023-07-01
+2022-v7,17,1,Gas Offset (US$/mmbtu),-0.45,
+2022-v7,17,4,Well Intervention Costs (US$/well/mth),-1687.5,
+2022-v7,17,7,Sales Gas Processing (US$/mcf),0,2025-08-01
+2022-v7,18,1,NGL Offset (US$/bbl),-1,
+2022-v7,18,4,Power Generation Costs (US$/well/mth),-10000,2025-08-01
+2022-v7,19,1,Cond Offset (US$/bbl),-1,
+2022-v7,19,4,Gas Well Costs (US$/well/mth),-2500,
+2022-v7,19,7,HC Tax (peso/km2/mth) *preprod,-1500,2023-07-01
+2022-v7,20,4,Disposal Well Costs (US$/mth),-1500,2023-07-01
+2022-v7,20,7,HC Tax (peso/km2/mth) *postprod,-6000,
+2022-v7,21,4,Block Fees (<=60 montns) (peso/km2/mth),-1150,2023-07-01
+2022-v7,21,7,Block Extraction Area (% total),1,
+2022-v7,22,4,Block Fees (>60 montns) (peso/km2/mth),-2750,0
+2022-v8,3,1,Block,Tecolutla,
+2022-v8,3,5,Assoc. Gas:,Non Assoc. Gas:,
+2022-v8,3,9,start,end,
+2022-v8,4,1,Block Area (km2),7.2,
+2022-v8,4,4,Sales Gas Heating Value (btu/scf),984,984
+2022-v8,4,7,Bond Amount ($),0,2019-01-01
+2022-v8,5,1,API (deg),40,
+2022-v8,5,4,NGL C2 Relative % (%),0.6,0
+2022-v8,5,7,Bond Fee (%/yr),0.018,
+2022-v8,6,1,Sulphur (%),0,
+2022-v8,6,4,NGL C3 Relative % (%),0.3,0
+2022-v8,7,4,NGL C4 Relative % (%),0.1,0
+2022-v8,8,1,Evaluation Start Date,2023-07-01,
+2022-v8,9,1,Economic Start Date,2023-07-01,
+2022-v8,9,3,only incls net income / loss as of this date,Bid Round Royalty (%),0.3122
+2022-v8,9,4,Bid Round Royalty (%),0.3122,
+2022-v8,9,7,Surface Land Royalty (%),0.01,
+2022-v8,10,1,Depreciation (%),0.25,
+2022-v8,10,7,Community Royalty (%),0,
+2022-v8,11,1,Tax Rate (%),0.3,
+2022-v8,11,7,GORR,0,
+2022-v8,12,1,Inflation Rate (%),0.02,
+2022-v8,13,1,Discount Rate (%),0.1,
+2022-v8,14,1,Contract Duration (yrs),35,
+2022-v8,14,3,"effects total rev, roy, opex, cap; cut off of eval",Fixed,
+2022-v8,14,9,until,then,
+2022-v8,15,4,Battery Costs (US$/mth),-15000,2023-07-01
+2022-v8,15,7,Oil Costs (US$/bbl),-7.25,2023-07-01
+2022-v8,16,1,Oil Offset (US$/bbl),-7.46,
+2022-v8,16,3,"includes 0.79 $/bbl processing cost proposed by PEMEX & ~3% marketing fee; deducted prior to applying bid royalty, added a 2$/bbl deduction for possible quality adjustment
+*CHECK IF CELL D428 IN USE",Oil Well Costs (US$/well/mth),-812.5
+2022-v8,16,4,Oil Well Costs (US$/well/mth),-812.5,
+2022-v8,16,7,Water Disposal (US$/bbl),-3.25,2023-07-01
+2022-v8,17,1,Gas Offset (US$/mmbtu),-0.45,
+2022-v8,17,4,Well Intervention Costs (US$/well/mth),-1687.5,
+2022-v8,17,7,Sales Gas Processing (US$/mcf),0,2025-08-01
+2022-v8,18,1,NGL Offset (US$/bbl),-1,
+2022-v8,18,4,Power Generation Costs (US$/well/mth),-10000,2025-08-01
+2022-v8,19,1,Cond Offset (US$/bbl),-1,
+2022-v8,19,4,Gas Well Costs (US$/well/mth),-2500,
+2022-v8,19,7,HC Tax (peso/km2/mth) *preprod,-1500,2023-07-01
+2022-v8,20,4,Disposal Well Costs (US$/mth),-1500,2023-07-01
+2022-v8,20,7,HC Tax (peso/km2/mth) *postprod,-6000,
+2022-v8,21,4,Block Fees (<=60 montns) (peso/km2/mth),-1150,2023-07-01
+2022-v8,21,7,Block Extraction Area (% total),1,
+2022-v8,22,4,Block Fees (>60 montns) (peso/km2/mth),-2750,0
+2022-v9,3,1,Block,Tecolutla,
+2022-v9,3,5,Assoc. Gas:,Non Assoc. Gas:,
+2022-v9,3,9,start,end,
+2022-v9,4,1,Block Area (km2),7.2,
+2022-v9,4,4,Sales Gas Heating Value (btu/scf),984,984
+2022-v9,4,7,Bond Amount ($),0,2019-01-01
+2022-v9,5,1,API (deg),40,
+2022-v9,5,4,NGL C2 Relative % (%),0.6,0
+2022-v9,5,7,Bond Fee (%/yr),0.018,
+2022-v9,6,1,Sulphur (%),0,
+2022-v9,6,4,NGL C3 Relative % (%),0.3,0
+2022-v9,7,4,NGL C4 Relative % (%),0.1,0
+2022-v9,8,1,Evaluation Start Date,2023-07-01,
+2022-v9,9,1,Economic Start Date,2023-07-01,
+2022-v9,9,3,only incls net income / loss as of this date,Bid Round Royalty (%),0.3122
+2022-v9,9,4,Bid Round Royalty (%),0.3122,
+2022-v9,9,7,Surface Land Royalty (%),0.01,
+2022-v9,10,1,Depreciation (%),0.25,
+2022-v9,10,7,Community Royalty (%),0,
+2022-v9,11,1,Tax Rate (%),0.3,
+2022-v9,11,7,GORR,0,
+2022-v9,12,1,Inflation Rate (%),0.02,
+2022-v9,13,1,Discount Rate (%),0.1,
+2022-v9,14,1,Contract Duration (yrs),35,
+2022-v9,14,3,"effects total rev, roy, opex, cap; cut off of eval",Fixed,
+2022-v9,14,9,until,then,
+2022-v9,15,4,Battery Costs (US$/mth),-15000,2023-07-01
+2022-v9,15,7,Oil Costs (US$/bbl),-7.25,2023-07-01
+2022-v9,16,1,Oil Offset (US$/bbl),-7.46,
+2022-v9,16,3,"includes 0.79 $/bbl processing cost proposed by PEMEX & ~3% marketing fee; deducted prior to applying bid royalty, added a 2$/bbl deduction for possible quality adjustment
+*CHECK IF CELL D428 IN USE",Oil Well Costs (US$/well/mth),-812.5
+2022-v9,16,4,Oil Well Costs (US$/well/mth),-812.5,
+2022-v9,16,7,Water Disposal (US$/bbl),-3.25,2023-07-01
+2022-v9,17,1,Gas Offset (US$/mmbtu),-0.45,
+2022-v9,17,4,Well Intervention Costs (US$/well/mth),-1687.5,
+2022-v9,17,7,Sales Gas Processing (US$/mcf),0,2025-08-01
+2022-v9,18,1,NGL Offset (US$/bbl),-1,
+2022-v9,18,4,Power Generation Costs (US$/well/mth),-10000,2025-08-01
+2022-v9,19,1,Cond Offset (US$/bbl),-1,
+2022-v9,19,4,Gas Well Costs (US$/well/mth),-2500,
+2022-v9,19,7,HC Tax (peso/km2/mth) *preprod,-1500,2023-07-01
+2022-v9,20,4,Disposal Well Costs (US$/mth),-1500,2023-07-01
+2022-v9,20,7,HC Tax (peso/km2/mth) *postprod,-6000,
+2022-v9,21,4,Block Fees (<=60 montns) (peso/km2/mth),-1150,2023-07-01
+2022-v9,21,7,Block Extraction Area (% total),1,
+2022-v9,22,4,Block Fees (>60 montns) (peso/km2/mth),-2750,0
+2023-10,3,1,Block,Tecolutla,
+2023-10,3,5,Assoc. Gas:,Non Assoc. Gas:,
+2023-10,3,9,start,end,
+2023-10,4,1,Block Area (km2),7.2,
+2023-10,4,4,Sales Gas Heating Value (btu/scf),984.0,984.0
+2023-10,4,7,Bond Amount ($),0.0,2019-01-01
+2023-10,5,1,API (deg),40.0,
+2023-10,5,4,NGL C2 Relative % (%),0.6,0.0
+2023-10,5,7,Bond Fee (%/yr),0.018,
+2023-10,6,1,Sulphur (%),0.0,
+2023-10,6,4,NGL C3 Relative % (%),0.3,0.0
+2023-10,7,4,NGL C4 Relative % (%),0.1,0.0
+2023-10,8,1,Evaluation Start Date,2024-01-01,
+2023-10,9,1,Economic Start Date,2024-01-01,
+2023-10,9,3,only incls net income / loss as of this date,Bid Round Royalty (%),0.3122
+2023-10,9,4,Bid Round Royalty (%),0.3122,
+2023-10,9,7,Surface Land Royalty (%),0.01,
+2023-10,10,1,Depreciation (%),0.25,
+2023-10,10,7,Community Royalty (%),0.0,
+2023-10,11,1,Tax Rate (%),0.3,
+2023-10,11,7,GORR,0.0,
+2023-10,12,1,Inflation Rate (%),0.0,
+2023-10,13,1,Discount Rate (%),0.1,
+2023-10,14,1,Contract Duration (yrs),35.0,
+2023-10,14,3,"effects total rev, roy, opex, cap; cut off of eval",Fixed,
+2023-10,14,9,until,then,
+2023-10,15,4,Battery Costs (US$/mth),-10000.0,2024-01-01
+2023-10,15,7,Oil Costs (US$/bbl),-7.25,2024-01-01
+2023-10,16,1,Oil Offset (US$/bbl),-7.46,
+2023-10,16,3,"includes 0.79 $/bbl processing cost proposed by PEMEX & ~3% marketing fee; deducted prior to applying bid royalty, added a 2$/bbl deduction for possible quality adjustment
+*CHECK IF CELL D428 IN USE",Oil Well Costs (US$/well/mth),-2500.0
+2023-10,16,4,Oil Well Costs (US$/well/mth),-2500.0,
+2023-10,16,7,Water Disposal (US$/bbl),-3.25,2024-01-01
+2023-10,17,1,Gas Offset (US$/mmbtu),-0.45,
+2023-10,17,4,Gas Well Costs (US$/well/mth),-2500.0,
+2023-10,17,7,Sales Gas Processing (US$/mcf),-0.25,2024-01-01
+2023-10,18,1,NGL Offset (US$/bbl),-1.0,
+2023-10,18,4,Disposal Well Costs (US$/mth),-1500.0,2024-01-01
+2023-10,19,1,Cond Offset (US$/bbl),-1.0,
+2023-10,19,4,Block Fees (<=60 montns) (peso/km2/mth),-1150,2024-01-01
+2023-10,19,7,HC Tax (peso/km2/mth) *preprod,-1500.0,2024-01-01
+2023-10,20,4,Block Fees (>60 montns) (peso/km2/mth),-2750,0
+2023-10,20,7,HC Tax (peso/km2/mth) *postprod,-6000.0,
+2023-10,21,1,Abandonment Fund (US$),-150000.0,
+2023-10,21,7,Block Extraction Area (% total),1.0,
