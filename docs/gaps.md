@@ -45,10 +45,13 @@ Anything unreadable, missing, unsubstantiated or inconsistent is logged here rat
 | G-39 | 2026-09-15 | GLJ's YE2020 forecast for TEC-10 (80 bbl/d through 2021, 212 kbbl 2P remaining) was overtaken within a year: field sales were 49 bbl/d in 2021 and 23 bbl/d in 2022 including TEC-2. GLJ's TEC-12 decline shape (b ≈ 1.2) carries the same optimism. | Resolved — noted |
 | G-40 | 2026-09-15 | The Simmons "8-year sales" figures (390–799 kbbl) in review §6.5 are TEC-12 plus TEC-13 (TEC-13 on stream Jan 2022 in every scenario), not single-well volumes; the review's forecast table §6.4 places them beside single-well EURs. | Resolved — wording for task 10 |
 | G-04 | 2026-09-15 | (update) The two `Tecolutla Type Curve.xlsx` copies differ only in header cells (cum-oil labels, row numbering); all rate data identical. | Resolved |
+| G-41 | 2026-09-15 | **7.8 vs 11.2 MMbbl resolved as a petrophysics difference, not an error.** 7.8 is PEMEX's booked original volume filed with CNH (El Abra trend table, PEMEX field summary); 11.2 is IFR's volumetric (630 ac, N/G 0.40, φ 7 %). Petrel Robertson's geomodel gives 7.6 with TEC-2/9 vintage-log petrophysics and 12.0 with TEC-10's logs on the same rock volume. Monte Carlo P90/P50/P10 8.1 / 10.0 / 12.2 MMbbl. | Resolved — `docs/07_volumetrics.md` |
+| G-42 | 2026-09-15 | The review's "1.2 MMbbl remaining at 29 %" uses the IFR OOIP; on the P50 volume it is 0.9 MMbbl and on the CNH volume 0.3 MMbbl. The 29 % is the production-weighted reef-rim RF to Apr 2015 (median 30 %, 3P median 31 %). | Resolved — wording for task 10 |
+| G-43 | 2026-09-15 | CNH lists the Tecolutla surface as 3.1 km² against IFR's 630-acre (2.55 km²) polygon; the boundary of the 3.1 km² is not in the pulled files. Area contributes −0.6/+2.3 MMbbl to the OOIP range. | Open — needs the CNH field polygon |
 
 ## Known data gaps carried in from the kickoff
 
 - No production data pre-1960; none for 1965–1972. → Task 4: field-level monthly exists for 1960–65; TEC-6 monthly from 1966; TEC-2 and TEC-7 monthly only from 1972 (G-30, G-34).
-- OOIP stated as 11.2 MMbbl (volumetrics) and 7.8 MMbbl (El Abra analogue table) in the same deck — task 7.
+- OOIP stated as 11.2 MMbbl (volumetrics) and 7.8 MMbbl (El Abra analogue table) in the same deck — task 7: resolved, G-41.
 - AFE sheet: $5,000 internal arithmetic discrepancy, no currency label — task 8.
 - Forecast basis differs by roughly a factor of two between Petrel Robertson (100 bbl/d base) and IFR (250 bbl/d; 345 mbbl type curve) — task 6.

@@ -1,0 +1,6 @@
+source,file,area_km2,gross_m,ntg,phi,sw,bo,ooip_mmbbl,note,ooip_recalc_mmbbl,hcpv_m_per_km2
+IFR Summary (GLJ) sheet (all economic models 2020-2023),2023-09-29 Tec-12 Economics.xlsm!Summary (GLJ) D6:D19,2.549519546112,42.269,0.4,0.07,0.3,1.19,11.164,630 acres; the '11.2 MMbbl',11.164183236494452,0.8284724
+"Petrel Robertson, deep contact -2374 mSS, all wells",Petrel Robertson Volumetrics.xlsx!B,2.5464,46.781,0.4271,0.05558,0.2,1.19,11.956,Petrel geomodel; bulk 119.1 MMm3,11.957070582035662,0.8883980610064
+"Petrel Robertson, TEC-10 new logs only",Petrel Robertson Volumetrics.xlsx!D,2.5464,46.781,0.4176,0.06164,0.1888,1.299,12.044,Rsi 552 scf/bbl,12.044133601843043,0.9768335406455809
+"Petrel Robertson, TEC-2, 9 and 10 logs",Petrel Robertson Volumetrics.xlsx!F,2.5464,46.781,0.3517,0.04736,0.2103,1.299,7.589,"same bulk rock volume, vintage-log petrophysics",7.587010801750512,0.6153407849325184
+CNH / PEMEX official (El Abra trend table),"El Abra Trend Field Analogies.xlsx row Tecolutla, cols VO_Crudo, Superficie; PEMEX Resumen table 'Volumen Original'",3.115,,,,,,7.818,the '7.8 MMbbl'; 1P=2P=3P original volume 7.8; produced 1.913 to Apr 2015; RF 24.5 %; 3P EUR 2.129 (27.2 %),,

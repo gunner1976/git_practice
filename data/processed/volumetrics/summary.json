@@ -1,0 +1,107 @@
+{
+ "by_source": {
+  "IFR Summary (GLJ) sheet (all economic models 2020-2023)": 11.16,
+  "Petrel Robertson, deep contact -2374 mSS, all wells": 11.96,
+  "Petrel Robertson, TEC-10 new logs only": 12.04,
+  "Petrel Robertson, TEC-2, 9 and 10 logs": 7.59,
+  "CNH / PEMEX official (El Abra trend table)": 7.82
+ },
+ "monte_carlo": {
+  "p90": 8.12,
+  "p50": 10.0,
+  "p10": 12.19,
+  "mean": 10.09
+ },
+ "mode_case": 10.16,
+ "swing": {
+  "area": [
+   9.56,
+   12.43
+  ],
+  "gross": [
+   9.24,
+   10.86
+  ],
+  "ntg": [
+   7.62,
+   11.43
+  ],
+  "phi": [
+   7.62,
+   12.7
+  ],
+  "sw": [
+   8.81,
+   11.11
+  ],
+  "bo": [
+   9.77,
+   10.67
+  ]
+ },
+ "trend_rf": {
+  "n_fields": 45,
+  "n_reef_rim": 35,
+  "rf_current_all_median": 0.2987585878992862,
+  "rf_current_all_mean": 0.2649669545946932,
+  "rf_current_all_weighted": 0.2901675109416768,
+  "rf_current_rim_median": 0.2988127887933304,
+  "rf_current_rim_weighted": 0.29209251670955616,
+  "rf_3p_rim_median": 0.3104182837224659,
+  "rf_3p_rim_p10_p90": [
+   0.40058055974061824,
+   0.1154162314623427
+  ],
+  "rf_3p_rim_max": 0.5298543747633262,
+  "ooip_per_km2_rim_median": 8.258312731275517,
+  "tecolutla_ooip_per_km2": 2.51
+ },
+ "produced_mmbbl": {
+  "recorded_to_2022": 1.715,
+  "with_allocations": 1.9749999999999999
+ },
+ "remaining_mmbbl": {
+  "CNH 7.8": {
+   "RF 25%": -0.02,
+   "RF 28%": 0.29,
+   "RF 33%": 0.6,
+   "RF 38%": 1.0,
+   "RF to date (alloc basis)": 0.253
+  },
+  "MC P90": {
+   "RF 25%": 0.06,
+   "RF 28%": 0.38,
+   "RF 33%": 0.71,
+   "RF 38%": 1.11,
+   "RF to date (alloc basis)": 0.243
+  },
+  "MC P50": {
+   "RF 25%": 0.53,
+   "RF 28%": 0.93,
+   "RF 33%": 1.33,
+   "RF 38%": 1.83,
+   "RF to date (alloc basis)": 0.197
+  },
+  "MC P10": {
+   "RF 25%": 1.07,
+   "RF 28%": 1.56,
+   "RF 33%": 2.05,
+   "RF 38%": 2.66,
+   "RF to date (alloc basis)": 0.162
+  },
+  "IFR 11.2": {
+   "RF 25%": 0.82,
+   "RF 28%": 1.26,
+   "RF 33%": 1.71,
+   "RF 38%": 2.27,
+   "RF to date (alloc basis)": 0.177
+  },
+  "PR 12.0": {
+   "RF 25%": 1.01,
+   "RF 28%": 1.49,
+   "RF 33%": 1.97,
+   "RF 38%": 2.57,
+   "RF to date (alloc basis)": 0.165
+  }
+ }
+}
