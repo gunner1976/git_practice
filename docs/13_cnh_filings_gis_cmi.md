@@ -14,10 +14,10 @@ Second pass over the open gaps that did not need Kevin. Sources are the Tonalli 
 | 2021 (Anexo III.8.III) | 17,402 | 73,827 | 81 % | 14.95 | 859 | 28.4–30.4, avg 29.28 | "Pozo Tecolutla 10" every month |
 | Jul–Oct 2022 (Informe mensual 4.1) | 0 / 189 / 49 / 0 per month | 0 / 2,218 / 511 / 0 | — | 0.6 | — | — | field |
 
-Monthly table with the database comparison: `data/processed/cnh/cnh_production_filings_2020_2022.csv`, `cnh_vs_database_monthly.csv`. Findings:
+Monthly table with the database comparison: `data/processed/cnh/cnh_production_filings_2020_2022.csv`, `cnh_vs_database_monthly.csv`, built by `src/cnh_filings.py` from the transcribed filings and the Nov-2022 VHP workbook. Findings:
 
 - The 2021 filing matches the ticket-based database month by month within −9 to +2 % (annual −3 %), and the filing names TEC-10 as the sole origin for all of 2021. So the 2021 sales are TEC-10 production; TEC-2 was shut in or commingled without allocation (GLJ's note "commingled for testing with Tecolutla-10" dates from 31 Jan 2020).
-- The 2020 filing's monthly oil column is gross (18,973 bbl, matching the database's PEMEX-measured tickets within 0–4 % in most months) while its total line reports 16,132 bbl net. The database therefore carries about 15 % of water in the 2020 oil figure if the filing's net is right (G-53).
+- The 2020 filing's monthly oil column is gross (18,973 bbl, matching the database's tickets within 0–4 % in most months) while its total line reports 16,132 bbl net. The tickets carry BS&W of 0.0–0.4 %, so the difference is not water; PEMEX's reconciled statements run 1–4 % below the tickets, not 15 %. The 16,132 is an accounting figure of unknown basis (G-53).
 - April–June 2020 were zero in the filing and absent in the database: a three-month shut-in (price collapse), not a data gap.
 - 2022: the approved programme was 1,400 bbl/month; reported net oil was 238 bbl in four months. The field was effectively shut in from July 2022. The database's "~25 bbl/d in 2022" is a first-half average.
 - Gas: 14.9 MMcf in 2021 on 17.4 kbbl gives 859 scf/bbl, a fourth measurement above PEMEX's 336 scf/bbl PVT (G-31 now has 565, 685, ~750, 859). The 2020 gas has a 7.8 MMcf August that is probably a measurement or flaring artefact.

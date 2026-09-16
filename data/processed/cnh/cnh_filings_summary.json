@@ -1,0 +1,22 @@
+{
+ "2020": {
+  "gross_oil_monthly_sum_bbl": 18973.29,
+  "net_oil_filing_total_bbl": 16132.29,
+  "gross_liquid_filing_total_bbl": 63864.56,
+  "water_bbl": 47732.27,
+  "gas_mmcf": 21.956,
+  "api_avg": 29.21
+ },
+ "2021": {
+  "oil_bbl": 17402.23,
+  "gross_liquid_filing_total_bbl": 91229.323,
+  "water_bbl": 73827.093,
+  "gas_mmcf": 14.945,
+  "gor_scf_bbl": 859,
+  "api_avg": 29.28
+ },
+ "2022_jul_oct_net_oil_bbl": 238.0,
+ "2022_11_tec10_net_oil_bbl": 678.0,
+ "filed_tec12_first_month_bpd": 300.2,
+ "filed_profile_equals": "IFR Aug-2020 TEC-12 curve month-average (qi 342 bbl/d, b 1.7, Di 3.507/yr); see forecast/tec12_profiles_monthly.csv ifr_2020_bpd"
+}

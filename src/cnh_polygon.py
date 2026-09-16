@@ -8,7 +8,7 @@ Carretas, La Laja, Paso de Oro, Tecolutla, Calibrador, Barcodón, Ricos, Pontón
 Tecolutla record is index 8 and is confirmed here by the well coordinates falling inside it.
 
 Outputs: data/processed/cnh/tecolutla_cnh_polygon.csv (WGS84 + UTM 14N vertices),
-         data/processed/cnh/summary.json, figures/13_cnh_polygon.png
+         data/processed/cnh/cnh_polygon_summary.json, figures/13_cnh_polygon.png
 """
 from __future__ import annotations
 import json
@@ -62,7 +62,7 @@ def main():
             "ratio_cnh_over_ifr": round(area / ifr_km2, 3), "bbox_lon": [float(ll[:, 0].min()), float(ll[:, 0].max())],
             "bbox_lat": [float(ll[:, 1].min()), float(ll[:, 1].max())],
             "wells": wells.rename(columns={namec: "well", lonc: "lon", latc: "lat"}).to_dict("records")}
-    (OUT / "summary.json").write_text(json.dumps(summ, indent=2))
+    (OUT / "cnh_polygon_summary.json").write_text(json.dumps(summ, indent=2))
     print(json.dumps(summ, indent=1))
 
     fig, ax = plt.subplots(figsize=(7, 7))
