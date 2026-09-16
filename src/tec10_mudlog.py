@@ -3,8 +3,9 @@
 
 Source: data/processed/drive_text/Litologia_Tecolutla_10.pdf.txt (Drive-connector
 text rendering of Drive id 1UTXD3q5c2TSs9RFhF0OVXTpWsB5zmGOe, 7,307,773 bytes).
-Depths are mMD below KB (KB 5.13 m per the masterlog header; the directional survey
-is used for mSS in src/log_panel.py).
+Depths are mMD below KB. The masterlog header prints KB 5.13 m; the package uses the
+directional-survey KB 6.13 m for every TEC-10 subsea depth (decision of 16 Sep 2026, G-46),
+applied in src/log_panel.py.
 
 Output: data/processed/tec10/tec10_mudlog_intervals.csv
 """

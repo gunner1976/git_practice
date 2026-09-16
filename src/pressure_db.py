@@ -2,7 +2,7 @@
 Usage: python src/pressure_db.py
 Outputs: data/processed/pressure/tecolutla_pressures.csv (one row per survey, with datum-corrected pressure at 2,300 mSS),
          data/processed/pressure/pressure_summary.json, figures/05_pressure_depletion.png
-Datum: 2,300 m subsea (mSS). The IFR summary workbook uses 2,300 m below KB; the difference is the KB elevation (3.8-7.1 m).
+Datum: 2,300 m subsea (mSS). The IFR summary workbook uses 2,300 m below KB; the difference is the KB elevation (3.8-6.13 m).
 Gradient used between gauge depth and datum: 10.5 kPa/m (the reservoir gradient IHS derived from the 2018 build-ups); sensitivity
 with an oil gradient of 8.7 kPa/m is reported per row. Nothing is interpolated between surveys.
 """
@@ -13,7 +13,7 @@ SUM = "data/raw/geology/Tecolutla Pressure Summary.xlsx"
 OUT = "data/processed/pressure/"
 KPA_PER_KGCM2 = 98.0665
 GRAD = 10.5; GRAD_OIL = 8.7   # kPa/m
-KB = {"TEC-2": 3.8, "TEC-6": 6.0, "TEC-7": 4.8, "TEC-10": 7.1}   # m; TEC-2/7 from the PEMEX survey forms, TEC-6 from Tecolutla Well Header Information.csv (ELEV_KB), TEC-10 from the IHS report
+KB = {"TEC-2": 3.8, "TEC-6": 6.0, "TEC-7": 4.8, "TEC-10": 6.13}   # m; TEC-2/7 from the PEMEX survey forms, TEC-6 from Tecolutla Well Header Information.csv (ELEV_KB), TEC-10 from the directional survey (decision of 16 Sep 2026, G-46; the IHS report used 7.1)
 
 wb = openpyxl.load_workbook(SUM, read_only=True, data_only=True); rows = list(wb["all"].iter_rows(values_only=True, max_col=14)); wb.close()
 hi = next(i for i, r in enumerate(rows) if r[0] == "Date"); hdr = rows[hi]; s = pd.DataFrame(rows[hi + 1:], columns=[str(h) for h in hdr]).dropna(subset=["Date"])
@@ -54,7 +54,7 @@ recs += [
     dict(date=pd.Timestamp("2018-05-30"), well="TEC-2", kind="build-up, extrapolated p*", shut_in_days=311 / 24, gauge_depth_mkb=2309.0, gauge_depth_mss=2305.2,
          p_gauge_kpa=24190, p_gauge_source="IHS PTA final report p.5/14: pR 24190 kPa(a) at 2309 mKB (final measured 24187 after 311 h)", ifr_datum_2300mkb_kpa=np.nan,
          comment="k 50 mD, h 8 m, skin +196, constant-pressure boundary at 700 m; last flow 50 bbl/d oil, 453 bbl/d water", source="development_plan/Tecolutla 2 Final Report (IHS PTA) Spanish.pdf", quality_flag="model-extrapolated; 13-day build-up still rising 3 kPa"),
-    dict(date=pd.Timestamp("2018-08-31"), well="TEC-10", kind="build-up, extrapolated p*", shut_in_days=598 / 24, gauge_depth_mkb=2322.1, gauge_depth_mss=2315.0,
+    dict(date=pd.Timestamp("2018-08-31"), well="TEC-10", kind="build-up, extrapolated p*", shut_in_days=598 / 24, gauge_depth_mkb=2322.1, gauge_depth_mss=round(2322.1 - KB["TEC-10"], 2),
          p_gauge_kpa=24304, p_gauge_source="IHS PTA final report p.5/15: pR 24304 kPa(a) at 2322.1 mTVD KB (final measured 24283 after 598 h)", ifr_datum_2300mkb_kpa=np.nan,
          comment="k 18 mD, h 13.2 m, skin +4.9, constant-pressure boundary at 195 m, no-flow at 125 m; last flow 196 bbl/d oil, 114 bbl/d water", source="development_plan/Tecolutla 10 Final Report (IHS PTA) Spanish.pdf", quality_flag="model-extrapolated; 25-day build-up"),
 ]
@@ -77,7 +77,7 @@ u = p[p.usable_static]
 init = p[(p.well == "TEC-2") & (p.date.dt.year == 1956)].iloc[0]
 first_static = u.iloc[0]; last = u[u.date.dt.year == 2018]
 summary = dict(
-    datum="2300 mSS", gradient_kpa_per_m=GRAD, kb_m=KB, kb_note="TEC-6 form of 2 Dec 1964 states Elev. Mesa Rotaria 5.67 m; header CSV 6.0 m; 0.33 m ignored",
+    datum="2300 mSS", gradient_kpa_per_m=GRAD, kb_m=KB, kb_note="TEC-6 form of 2 Dec 1964 states Elev. Mesa Rotaria 5.67 m; header CSV 6.0 m; 0.33 m ignored. TEC-10 on the directional-survey KB 6.13 m (G-46 closed by decision); IHS quoted 2,315.0 mSS for the 2,322.1 mTVD gauge, i.e. KB 7.1",
     p_1956_tec2_2300mss_mpa=round(float(init.p_2300mss_mpa), 2), p_1956_note="2 h 45 min shut-in on a new well; taken as initial by PEMEX (252 kg/cm2)",
     p_1964_mpa={w: round(float(v), 2) for w, v in u[u.date.dt.year == 1964].set_index("well").p_2300mss_mpa.items()},
     p_1971_tec6_final_74d_mpa=round(float(u[(u.well == "TEC-6") & (u.date == "1971-10-18")].p_2300mss_mpa.iloc[0]), 2),

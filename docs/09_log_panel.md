@@ -37,7 +37,7 @@ In every well with a usable porosity curve, GR **rises** with porosity. The revi
 | TEC-6 bridge plug / top squeezed | 2303–2304 | 2297–2298 | same |
 | TEC-2 active interval | 2307.4–2311 | 2303.4–2307 | same, KB 4.0 |
 | TEC-9 produced interval | 2328–2333 | 2323–2328 | same, KB 5.0 |
-| TEC-10 producing perforations | 2349.5–2350.5, 2351.5–2353 | **2314.3–2318** (survey) vs 2311.5–2315 (By Zone / review) | survey CSV; G-46 |
+| TEC-10 producing perforations | 2349.5–2350.5, 2351.5–2353 | **2314.3–2318** (survey) vs 2311.5–2315 (By Zone / review) | survey CSV; G-46 closed on the survey basis |
 | TEC-10 upper zone (review: "high-porosity reef margin") | ~2302–2346 | 2270–2311 | logs |
 | TEC-12 target window | — | 2294–2311 | review v3 §6.1 |
 | TEC-11 lateral | 2563–3283 | 2305–2331 | task 3 |
@@ -81,5 +81,5 @@ Either way, the premise that the window is "un-perforated crestal El Abra pay th
 
 - Old logs (1956, 1973) are digitised with unknown scales: GR values for TEC-6 are 0.9–8.2 units, neutron curves are counts; only their shapes are used.
 - TEC-2's 2018 neutron log stopped at 2,286 mMD, 21 m above the perforations, so TEC-2 has no modern porosity in the reservoir.
-- TEC-10 KB is 6.13 m in the survey CSV and header CSV but 5.13 m in the cement bond log header; 1 m of uncertainty on every TEC-10 subsea depth.
+- TEC-10 KB: 6.13 m in the survey CSV and header CSV, 5.13 m in the masterlog and cement bond log headers. Decision of 16 Sep 2026 (Kevin Gunning): the directional-survey KB 6.13 m is the package basis for every TEC-10 subsea depth (G-46 resolved).
 - Archie inputs (Rw, m, n) are book values; the TEC-10 water analyses in `fluid_analyses/` were not read.

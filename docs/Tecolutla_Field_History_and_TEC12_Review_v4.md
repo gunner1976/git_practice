@@ -70,7 +70,7 @@ Tecolutla holds 2.5 MMbbl/km² against a reef-rim median of 8.3. On the CNH volu
 | Dec 1964 | TEC-2 / TEC-7 | 75–95 d | 24.36–24.66 |
 | Aug–Oct 1971 | TEC-6 | 4 → 74 d | 23.24 → 24.35 (a 74-day build-up; short shut-ins understate by up to 1 MPa; all 16 PEMEX scans OCR-verified, one transcription error corrected) |
 | Oct 1998 | TEC-7 | — | 24.52 |
-| Mar–Aug 2018 | TEC-2 (SG), TEC-2 (build-up), TEC-10 (build-up) | 2 y, 13 d, 25 d | 24.16, 24.14, 24.15 (the TEC-2 build-up end, 3,441 psi at the 2,263 m gauge in the Weatherford report, reproduces IHS's 24.19 MPa at the perforations within 0.01 MPa) |
+| Mar–Aug 2018 | TEC-2 (SG), TEC-2 (build-up), TEC-10 (build-up) | 2 y, 13 d, 25 d | 24.16, 24.14, 24.14 (the TEC-2 build-up end, 3,441 psi at the 2,263 m gauge in the Weatherford report, reproduces IHS's 24.19 MPa at the perforations within 0.01 MPa) |
 
 Both 2018 build-ups needed a constant-pressure boundary (TEC-2 at 700 m, TEC-10 at 195 m) to match late-time data; TEC-10 also needed a no-flow boundary at 125 m, consistent with the facies edge TEC-11 found. TEC-2's skin is +196 (a workover candidate); TEC-10's is +4.9 with kh/μ 519 mD·m/mPa·s over an assumed 13.2 m.
 
@@ -82,7 +82,7 @@ The IFR curve (qi 342, b 1.7, Di 3.5/yr; 401 kbbl over 417 months; "345 kbbl" is
 
 ## 3. TEC-10 — the direct analogue, re-read
 
-- Perforations 2,349.5–2,353 mMD = **2,314–2,318 mSS on the survey** (2,311.5 in the By Zone sheet; G-46). 2.5 m perforated in a 5–6 % porosity, 15–50 ohm·m interval.
+- Perforations 2,349.5–2,353 mMD = **2,314–2,318 mSS on the survey** (2,311.5 in the By Zone sheet; G-46, closed on the survey basis with KB 6.13 m). 2.5 m perforated in a 5–6 % porosity, 15–50 ohm·m interval.
 - 181 bbl/d in the first full month, 78 bbl/d at 12 months, ~45 at 33 months, ~21 at 45 months; water cut 42 % → 67 % in year one; 44.5 kbbl in the first 431 days.
 - The 41 m of 9–11 % porosity above the perforations (2,270–2,311 mSS) reads 4–5 ohm·m with neutron > density porosity and PE 3.8. The CMI sees no open fracture in it (3 mixed, 6 cemented picks over 17 m) and none in the perforated 10 m; open fractures start below 2,320 mSS, in the produced and water-bearing interval (`docs/13_cnh_filings_gis_cmi.md` §4). A 72-case saturation sensitivity anchored to the well's own aquifer and its own producing interval puts the window at Sw ≥ 1.1 on the core-supported density porosity while the perforations sit at 0.6–1.0; only if the neutron porosity is trusted in the tight zones does the window look as good as the perforations, and the neutron-density crossover flips sign exactly at 2,311 mSS. At TEC-9, 118 m from the TEC-12 location, the same test on the 1973 sonic gives the opposite: the window's 12.7 % porosity at 8.7 ohm·m is at parity with the 2,323–2,328 mSS interval that produced 353 kbbl, unless a fifth or more of that porosity is shale effect (`docs/14_sw_sensitivity.md`). Tonalli logged it with a modern suite and did not perforate it. The Weatherford image log is a CMI, not an FMI (G-09).
 - GLJ's YE2020 forecast for TEC-10 (80 bbl/d through 2021) was overtaken within a year (G-39). GLJ's TEC-12 parameters are now read from the detail report: 200/225/275 bbl/d, b 0.5/0.6/0.7, EUR 250/400/600 kbbl, NPV10 2.2/4.1/6.0 MM at 42 $/bbl. The Work Program itself files 345,000 bbl as the vertical type-curve volume and 75 ac as the TEC-12 drainage polygon at the 2,315 mSS contour.
@@ -156,7 +156,7 @@ The v3 overhead finding is unchanged: USD 1.05 MM/yr of corporate and regulatory
 | Water | Every well water-limited within a year; the aquifer that holds pressure also delivers the water |
 | Cost | AFE on 2018 rates, no contingency; 25 % escalation assumed |
 | Price and fiscal | 44 % royalty burden at WTI 70; the March 2025 Ley del Sector Hidrocarburos leaves existing contract terms under the LISH per secondary sources, but its Reglamento allows substitution of contracts by assignments and the regulator is now the Comisión Nacional de Energía; counsel to confirm (G-49) |
-| Depth control | TEC-10 came in low against prognosis; 3 m offset between survey and By Zone depths (G-46) |
+| Depth control | TEC-10 came in low against prognosis; 3 m offset between survey and By Zone depths. All TEC-10 depths in this package are on the directional survey, KB 6.13 m (G-46 closed by decision, 16 Sep 2026) |
 
 ## 7. Beyond TEC-12 (unchanged from v3)
 
@@ -174,7 +174,7 @@ TEC-2 skin +196 (workover), TEC-13 now structurally lower on the reprocessed 3D,
 | 6 GLJ YE2020 | Included, task 6 |
 | 7 Current reservoir pressure | Done, task 5: 24.15 MPa in 2018, 2 % below initial |
 | 8 Static gradient at reopening | Still the highest-value cheap measurement; add the TEC-10 petrophysical evaluation |
-| New | Resolve G-47 before sanction; confirm which well the 2023 model priced (G-17); pull the ten large-file binaries into `data/raw/` (G-52). 14 of 53 logged gaps remain open |
+| New | Resolve G-47 before sanction; confirm which well the 2023 model priced (G-17); pull the ten large-file binaries into `data/raw/` (G-52). 13 of 53 logged gaps remain open |
 
 ## 9. What the presentation says
 

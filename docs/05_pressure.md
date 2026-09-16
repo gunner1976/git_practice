@@ -10,7 +10,7 @@ Sources:
 
 ## 1. Datum and corrections
 
-- Datum used here: **2,300 m subsea**. The IFR summary uses 2,300 m below KB, which is a different level in each well (KB 3.8 m TEC-2, 4.8 m TEC-7, 7.1 m TEC-10, TEC-6 6.0 m from the well-header CSV). The two bases differ by 0.04–0.07 MPa; small, but a handover table must say which it uses (G-35).
+- Datum used here: **2,300 m subsea**. The IFR summary uses 2,300 m below KB, which is a different level in each well (KB 3.8 m TEC-2, 4.8 m TEC-7, 6.13 m TEC-10 from the directional survey by decision of 16 Sep 2026 (G-46; IHS used 7.1), TEC-6 6.0 m from the well-header CSV). The two bases differ by 0.04–0.07 MPa; small, but a handover table must say which it uses (G-35).
 - Gauge-to-datum correction at 10.5 kPa/m, the reservoir gradient IHS derived from the 2018 build-ups. All gauges sit within 35 m of the datum, so the choice of gradient (oil 8.7 versus 10.5 kPa/m) moves any value by at most 0.06 MPa; both are in the CSV.
 - Nothing is interpolated between surveys. Each row keeps the gauge depth, the raw reading, the shut-in time and the source.
 
@@ -28,13 +28,13 @@ Sources:
 | 1998-10-06 | TEC-7 | static gradient | not stated | 2,320 | 24,736 (252.2 kg/cm²) | 24.52 | yes |
 | 2018-03-27 | TEC-2 | static gradient | 2 years+ (field shut in since Jan 2016) | 2,246 (gauge stopped above perfs) | 23,591 | 24.16 | yes, extrapolated 54 m at a water gradient by IFR |
 | 2018-05-30 | TEC-2 | build-up p* | 13 d | 2,305 | 24,190 | 24.14 | yes; IHS model extrapolation, last point 24,187 still rising |
-| 2018-08-31 | TEC-10 | build-up p* | 25 d | 2,315 | 24,304 | 24.15 | yes; IHS model extrapolation |
+| 2018-08-31 | TEC-10 | build-up p* | 25 d | 2,316 | 24,304 | 24.14 | yes; IHS model extrapolation; 2,322.1 mTVD KB less the survey KB 6.13 (IHS wrote 2,315 mSS) |
 
 ## 3. What the data say
 
 1. **Initial pressure.** The number in circulation, 24.7 MPa (PEMEX "252 kg/cm²"), is the 24 May 1956 TEC-2 reading after 2 h 45 min shut-in, 252.0 kg/cm² at 2,310 mKB. It is not a stabilised static, but the well had produced almost nothing, so it is a fair initial. At 2,300 mSS it is 24.65 MPa (3,575 psia). The 1964 surveys on TEC-2 and TEC-7 after 75–95 days, at 24.36–24.66 MPa, bracket the same value after 0.58 MMbbl of production.
 2. **1971–1998.** TEC-6 after 74 days: 24.35 MPa (0.74 MMbbl). TEC-7 in 1998: 24.52 MPa (1.78 MMbbl). No measurable trend within the ±0.15 MPa scatter of the surveys.
-3. **2018.** Three independent measurements in three wells agree at **24.14–24.16 MPa at 2,300 mSS** (3,500–3,505 psia) after 2.06 MMbbl including the wellfile allocations (1.63 MMbbl recorded). IHS's own datum table gives the same result: TEC-2 24,190 kPa at 2,305 mSS and TEC-10 24,304 kPa at 2,315 mSS lie on one 10.5 kPa/m gradient.
+3. **2018.** Three independent measurements in three wells agree at **24.14–24.16 MPa at 2,300 mSS** (3,500–3,505 psia) after 2.06 MMbbl including the wellfile allocations (1.63 MMbbl recorded). IHS's own datum table gives the same result: TEC-2 24,190 kPa at 2,305 mSS and TEC-10 24,304 kPa at 2,316 mSS lie on one 10.5 kPa/m gradient.
 4. **Depletion 1956 to 2018: 0.5 MPa, 2 % of initial** (24.65 → 24.15 MPa), over roughly 1.9–2.1 MMbbl of oil and 0.65 MMbbl of recorded water. Rock and fluid expansion alone (N 11.2 MMbbl, ct 1.98 × 10⁻⁶ /kPa from the IHS TEC-2 report, Δp 500 kPa) would supply about 11 kbbl, so more than 99 % of the voidage has been replaced by water influx. That is the quantitative form of the review's "strong aquifer support".
 5. **Short shut-ins understate pressure.** The 1971 TEC-6 series climbs from 23.24 MPa at 4 days to 24.35 MPa at 74 days and is still not flat at 40 days (24.45) versus 74 days (24.35, within scatter). The 2018 build-ups (13 and 25 days) had to be model-extrapolated for the same reason. Any future static survey after the 2020–2023 shut-in should be read as a multi-year build-up, which is the review's recommendation 8, and should be reported at 2,300 mSS with the gauge depth and gradient stated.
 6. **Both 2018 build-ups needed a constant-pressure boundary** to match late-time data (TEC-2 at 700 m, TEC-10 at 195 m from the well), which is the aquifer seen in the transient. TEC-10 also required a no-flow boundary at 125 m, consistent with the facies edge that TEC-11 found to the north-west.

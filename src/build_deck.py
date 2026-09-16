@@ -79,7 +79,7 @@ slide("8. Logs on one datum: GR polarity and the target window", [
     "Target window 2,294-2,311 mSS: TEC-10 phi 9-11 %, ILD 4-5 ohm.m, N-D separation, PE 3.8, Archie Sw ~1; TEC-9 ILD 3-5 ohm.m.",
     "Resistivity rises to 15-50 ohm.m below ~2,310 mSS in both wells; Tonalli did not perforate the upper zone after logging it.",
     "Free water or clay-bound water in an argillaceous carbonate: the logs alone cannot say. Core-calibrated evaluation of TEC-10 before sanction (G-47).",
-    "TEC-10 top perf is 2,314 mSS on the survey vs 2,311.5 in the summary sheet (G-46)."], "figures/09_log_panel.png", 8.6)
+    "TEC-10 top perf is 2,314 mSS on the survey vs 2,311.5 in the summary sheet; all TEC-10 depths here are on the survey, KB 6.13 m (G-46 closed by decision)."], "figures/09_log_panel.png", 8.6)
 slide("9. AFE: USD 1,572,724, priced on 2018 rates", [
     "Sep 2021 copy shows 1,567,724 because the SUB formula on Drilling Pad Maintenance (5,000) was deleted; daily totals still include it.",
     "Rig and move 27 %, tubulars and wellhead 23 %, mud and disposal 18 %; day rates identical to the TEC-11 Dec-2018 tracker.",
@@ -107,5 +107,5 @@ slide("12. Decisions and the gap register", [
     "If the window is water: move the target to 2,311-2,332 mSS (the produced interval in every well) and re-run the base case.",
     "Quote volumes as: recorded 1.72 MMbbl; OOIP 8-10-12; TEC-12 65/218/366 kbbl; AFE USD 1.57 MM (2020) / ~2.0 MM (2026).",
     "Wording fixes for any external document: CMI not FMI; 'wackestone to grainstone, compact'; 'within 2 % of initial pressure'; Simmons volumes are two wells.",
-    "53 gaps logged in docs/gaps.md with status; 14 remain open. Kevin: the Aug-2025 re-saves (G-03), which well the 2023 model priced (G-17), the 2020 CNH filing gross-vs-net oil (G-53), a Drive API pull or manual download of the ten large binaries (G-52)."])
+    "53 gaps logged in docs/gaps.md with status; 13 remain open. Kevin: the Aug-2025 re-saves (G-03), which well the 2023 model priced (G-17), the 2020 CNH filing gross-vs-net oil (G-53), a Drive API pull or manual download of the ten large binaries (G-52)."])
 prs.save("docs/Tecolutla_TEC12_Handover.pptx"); print("deck saved", len(prs.slides), "slides")
