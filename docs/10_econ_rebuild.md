@@ -1,6 +1,6 @@
 # Task 10 — Economics rebuild, review v4 and the deck
 
-Outputs: `docs/Tecolutla_Field_History_and_TEC12_Review_v4.md` (the extended review), `docs/Tecolutla_TEC12_Handover.pptx` (12 slides, built by `src/build_deck.py`), `src/econ_rebuild.py` with `data/processed/econ_rebuild/{cases.csv, cashflow_base.csv, summary.json}` and `figures/10_econ_rebuild.png`.
+Outputs: `docs/Tecolutla_Field_History_and_TEC12_Review_v4.md` (the extended review), `docs/Tecolutla_TEC12_Handover.pptx` (13 slides, built by `src/build_deck.py`), `src/econ_rebuild.py` with `data/processed/econ_rebuild/{cases.csv, cashflow_base.csv, summary.json}` and `figures/10_econ_rebuild.png`.
 
 ## Economics rebuild
 
@@ -8,11 +8,21 @@ Structure: the 2023 IFR workbook's fiscal and cost terms (task 1): bid royalty 3
 
 Two views are reported: **stand-alone** (all fixed costs on TEC-12) and **incremental** to a producing TEC-10 (battery and disposal fixed costs already carried), which is the relevant one for an operator that keeps the field on production. NPV10 grids are in `summary.json` and the review §6.5.
 
-| Base profile, base capex | Stand-alone NPV10 BTAX | Incremental NPV10 BTAX | Payout (incremental) |
+| Base profile, base capex, price factor 0.90 (as first run) | Stand-alone NPV10 BTAX | Incremental NPV10 BTAX | Payout (incremental) |
 |---|---|---|---|
 | WTI 60 | −0.62 MM | +0.06 MM | — |
 | WTI 70 | −0.09 MM | +0.76 MM | < 2 yr |
 | WTI 80 | +0.46 MM | +1.41 MM | < 2 yr |
+
+**Addendum (task 15).** The PEMEX delivery-reception settlements measure the realised price at 0.81 × WTI volume-weighted over 2020–22 (`docs/15_pemex_settlements.md`), not the 0.90 the 2023 workbook assumed. `econ_rebuild.py` now also sweeps every profile and both views at 0.81; these are the numbers carried into the review v4 §6.5 and the deck:
+
+| Base profile, base capex, price factor 0.81 (measured) | Stand-alone NPV10 BTAX | Incremental NPV10 BTAX | Payout (incremental) |
+|---|---|---|---|
+| WTI 60 | −0.92 MM | −0.34 MM | — |
+| WTI 70 | −0.46 MM | +0.27 MM | 32 months |
+| WTI 80 | +0.02 MM | +0.89 MM | 23 months |
+
+Break-even moves from WTI ≈ 72 to ≈ 80 stand-alone and from ≈ 59 to ≈ 65 incremental. The high profile stays positive incremental from WTI 60 and stand-alone from 70; the low profile is negative everywhere.
 
 Not covered: the March 2025 fiscal reform (G-49), corporate G&A, the Simmons carry, inflation, and any TEC-13 follow-on.
 

@@ -1,0 +1,55 @@
+{
+ "months_with_settlement": 37,
+ "months_with_deliveries": 27,
+ "volume_bbl_2020_2022": 39326.971000000005,
+ "revenue_usd_2020_2022": 1799324.9744199999,
+ "vol_weighted_precio_venta": 55.13352752618553,
+ "vol_weighted_precio_compra": 45.75295093080014,
+ "vol_weighted_wti": 56.5250343673811,
+ "vol_weighted_brent": 59.817910211289856,
+ "realised_over_wti_volume_weighted": 0.8094280957607483,
+ "realised_over_wti_median": 0.801088017854652,
+ "realised_over_wti_p10_p90": [
+  0.7655375652432654,
+  0.8393979546606521
+ ],
+ "venta_over_wti_median": 0.9688168755732192,
+ "constante_rendimiento_range": [
+  0.8963,
+  0.916
+ ],
+ "fixed_deductions_usd_bbl_range": [
+  3.8200000000000003,
+  5.32
+ ],
+ "ajuste_comercial_total_usd": 8313.52,
+ "by_year": {
+  "2020": {
+   "volume_bbl": 19040.656,
+   "revenue_usd": 681874.2649000001,
+   "realised_usd_bbl": 35.81149015559129,
+   "wti_vol_weighted": 43.95434511552543,
+   "realised_over_wti": 0.8147428897295083,
+   "api_mean": 29.21111111111111,
+   "sulphur_mean": 1.6155555555555556
+  },
+  "2021": {
+   "volume_bbl": 17545.982,
+   "revenue_usd": 939419.1931100001,
+   "realised_usd_bbl": 53.540417008862775,
+   "wti_vol_weighted": 66.1348719501707,
+   "realised_over_wti": 0.8095640836683374,
+   "api_mean": 29.28333333333333,
+   "sulphur_mean": 1.6408333333333331
+  },
+  "2022": {
+   "volume_bbl": 2740.333,
+   "revenue_usd": 178031.51641,
+   "realised_usd_bbl": 64.96711035118724,
+   "wti_vol_weighted": 82.33946366372261,
+   "realised_over_wti": 0.7890154667088348,
+   "api_mean": 28.525,
+   "sulphur_mean": 1.72
+  }
+ }
+}

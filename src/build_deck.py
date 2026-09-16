@@ -34,7 +34,7 @@ slide("1. What changed from version 3", [
     "OOIP 7.8 (CNH) vs 11.2 (IFR) is petrophysics, not geometry: P90/P50/P10 8.1 / 10.0 / 12.2 MMbbl.",
     "AFE is USD 1,572,724 (deleted formula explains the 5,000); escalated base USD 1.97 MM / CAD 2.74 MM.",
     "Every IFR model since 2020 costs TEC-12 as a TEC-10 re-entry, not the S-shape AFE well.",
-    "Rebuilt economics: incremental to a producing TEC-10, NPV10 +0.76 MM at WTI 70; stand-alone, break-even at WTI ~72."])
+    "Rebuilt economics at the measured 0.81 x WTI realised price: incremental to a producing TEC-10, NPV10 +0.27 MM at WTI 70, break-even ~65; stand-alone, break-even ~80."])
 slide("2. Production database: 1,341 tidy rows, six sources, no interpolation", [
     "CNH monthly 1966-2016 (four wells), CNH field level 1960-65, Tonalli tests, TEC-10 daily 2018-19, trucking tickets, PEMEX statements.",
     "Recorded 1.72 MMbbl to Dec 2022; 0.48 MMbbl of the March 2020 By Zone total is wellfile allocation.",
@@ -57,7 +57,7 @@ slide("4. TEC-11: 720 m of lateral, metres by facies", [
 slide("5. Eleven economic models, one basis", [
     "Aug 2020, nine 'Feb 2022' (saved 11 Apr - 21 Jun 2022, suffixes out of order), Sept/Oct 2023.",
     "TEC-12 curve identical in all: qi 342, b 1.7, 300 bbl/d first month, 401 kbbl.",
-    "What moved: WTI 30/90/GLJ deck/85; PEMEX factor 0.95/0.801/0.90 (unsourced); well count; window placement.",
+    "What moved: WTI 30/90/GLJ deck/85; PEMEX factor 0.95/0.801/0.90 (settlements measure 0.81); well count; window placement.",
     "v6-v9 exclude 3.45 MM of TEC-12/13 capital by placing it before the window.",
     "2023 workbook descends from the 2020 file and prices TEC-12 as a 1.8 MM TEC-10 re-entry.",
     "Use the 2023 structure with new capital, price and profile; retire the 2022 series as a reference."], "figures/02_econ_model_lineage.png", 8.2)
@@ -84,13 +84,13 @@ slide("9. AFE: USD 1,572,724, priced on 2018 rates", [
     "Sep 2021 copy shows 1,567,724 because the SUB formula on Drilling Pad Maintenance (5,000) was deleted; daily totals still include it.",
     "Rig and move 27 %, tubulars and wellhead 23 %, mud and disposal 18 %; day rates identical to the TEC-11 Dec-2018 tracker.",
     "No contingency, no production casing, no owner's costs. TEC-11 came in +12 % over budget.",
-    "Currency USD by evidence (Tonalli cost format 'Dolares', models in US$); author to confirm (G-44).",
+    "Currency USD: Tonalli cost format 'Dolares', models in US$, confirmed by the author 16 Sep 2026 (G-44 resolved).",
     "Escalated to Sep 2026 (assumed x1.15 / 1.25 / 1.40; index blocked, G-45): USD 1.81 / 1.97 / 2.20 MM = CAD 2.52 / 2.74 / 3.06 MM at 1.3915."], "figures/08_afe.png", 8.4)
 slide("10. Economics rebuilt on the 2023 structure", [
     "Fiscal and cost terms from the 2023 workbook; base profile; escalated base AFE; water cut following TEC-10; start Jan 2027; 100 % WI; no G&A, no carry.",
-    "Stand-alone NPV10 BTAX at WTI 60/70/80: base -0.62 / -0.09 / +0.46 MM; high +0.03 / +0.77 / +1.53; low never positive.",
-    "Incremental to a producing TEC-10 (battery and disposal already carried): base +0.06 / +0.76 / +1.41 MM, payout < 2 years at WTI 70.",
-    "Royalty burden 42-44 % of revenue; fixed costs end the stand-alone base case at 69 months with 142 of 218 kbbl produced.",
+    "Realised price 0.81 x WTI from 37 PEMEX settlements (2020-22). Stand-alone NPV10 BTAX at WTI 60/70/80: base -0.92 / -0.46 / +0.02 MM; high -0.39 / +0.25 / +0.92; low never positive.",
+    "Incremental to a producing TEC-10 (battery and disposal already carried): base -0.34 / +0.27 / +0.89 MM, payout 32 months at WTI 70. The 2023 model's 0.90 factor added 0.4-0.5 MM to every case.",
+    "Royalty burden 42-44 % of revenue; fixed costs end the stand-alone base case at 61 months with 134 of 218 kbbl produced.",
     "WTI ~USD 100 in mid-Sep 2026 on a supply disruption; long-term decks 70-80. 2025 fiscal reform not reviewed (G-49).",
     "v3's overhead finding stands: the well works for an operator that already carries the field, not for a single-asset company."], "figures/10_econ_rebuild.png", 8.2)
 slide("11. New sources read in the second pass: CNH polygon, CMI fractures", [
@@ -103,9 +103,9 @@ slide("11. New sources read in the second pass: CNH polygon, CMI fractures", [
     "Sw sensitivity (72 cases, anchored to the aquifer and the producing interval): the window is water at TEC-10 on the core-supported density porosity, Sw >= 1.1 vs 0.6-1.0 in the perforations; N-D crossover flips sign at 2,311 mSS. At TEC-9 (118 m from TEC-12) the 1973 sonic puts the window at parity with the 353-kbbl producer unless 20 %+ of its porosity is shale effect. Base case on 2,311-2,332 mSS; log and test the window at TEC-12 before completing (docs/14).",
     "2025 reform: contract fiscal terms preserved per secondary sources; regulator now CNE; contract-to-assignment substitution clause to be checked by counsel (G-49)."], "figures/14_cmi_fractures.png", 6.6)
 slide("12. Decisions and the gap register", [
-    "Before sanction: (1) core-calibrated petrophysics of TEC-10's upper zone (G-47); (2) static gradient on TEC-10 after the multi-year shut-in; (3) confirm AFE currency and re-index escalation (G-44, G-45); (4) pull the ten large-file binaries into data/raw (G-52; their text was read, docs/12).",
+    "Before sanction: (1) core-calibrated petrophysics of TEC-10's upper zone (G-47); (2) static gradient on TEC-10 after the multi-year shut-in; (3) re-index escalation when the Nov-2020 PPI is read (G-45; AFE currency USD confirmed); (4) pull the ten large-file binaries into data/raw (G-52; their text was read, docs/12).",
     "If the window is water: move the target to 2,311-2,332 mSS (the produced interval in every well) and re-run the base case.",
     "Quote volumes as: recorded 1.72 MMbbl; OOIP 8-10-12; TEC-12 65/218/366 kbbl; AFE USD 1.57 MM (2020) / ~2.0 MM (2026).",
     "Wording fixes for any external document: CMI not FMI; 'wackestone to grainstone, compact'; 'within 2 % of initial pressure'; Simmons volumes are two wells.",
-    "53 gaps logged in docs/gaps.md with status; 15 remain open. Kevin: the Aug-2025 re-saves (G-03), which well the 2023 model priced (G-17), AFE currency (G-44), the 2020 CNH filing gross-vs-net oil (G-53), a Drive API pull or manual download of the ten large binaries (G-52)."])
+    "53 gaps logged in docs/gaps.md with status; 14 remain open. Kevin: the Aug-2025 re-saves (G-03), which well the 2023 model priced (G-17), the 2020 CNH filing gross-vs-net oil (G-53), a Drive API pull or manual download of the ten large binaries (G-52)."])
 prs.save("docs/Tecolutla_TEC12_Handover.pptx"); print("deck saved", len(prs.slides), "slides")

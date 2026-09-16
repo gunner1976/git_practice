@@ -71,6 +71,11 @@ for inc in [False, True]:
                 o, _ = run(profile, wti, afe.loc[capcase, "usd"], incremental=inc); o["capex_case"] = capcase; cases.append(o)
 for pf in [0.80, 0.85]:
     o, _ = run("base_bpd", 70, afe.loc["base", "usd"], price_factor=pf); o["capex_case"] = "base"; cases.append(o)
+# measured realised price: 0.81 x WTI volume-weighted over the 2020-2022 PEMEX settlements (src/pemex_settlements.py, G-24)
+for inc in [False, True]:
+    for profile in ["low_bpd", "base_bpd", "high_bpd"]:
+        for wti in [50, 60, 70, 80, 90, 100]:
+            o, _ = run(profile, wti, afe.loc["base", "usd"], price_factor=0.81, incremental=inc); o["capex_case"] = "base"; cases.append(o)
 cases = pd.DataFrame(cases); cases.to_csv(OUT + "cases.csv", index=False)
 base, cfd = run("base_bpd", 70, afe.loc["base", "usd"]); cfd.to_csv(OUT + "cashflow_base.csv", index=False)
 sa = cases[(cases.capex_case == "base") & (cases.price_factor == 0.9)]

@@ -1,0 +1,39 @@
+# Transcribed from the PEMEX Exploración y Producción "Comprobante de Entrega-Recepción" PDFs (monthly crude settlements for Área Contractual A24 Tecolutla, delivered at Estación de Bombas Ezequiel Ordóñez by truck) read through the Drive connector on 16 Sep 2026. Formula on every comprobante: precio_compra = precio_venta x constante_rendimiento - tarifa_PEP - tarifa_PL - tarifa_TRI - margen_comercial (margen = 3 % of precio_venta). ajuste_comercial_usd is the monthly delivery-programme penalty from the "Registro de Programas de Entrega" page where present. The two invoice rows (2019-12, 2023-01) are Tonalli CFDI invoices to PEP and carry only volume and unit price. Months with no deliveries carry zero volume.
+month,drive_id,precio_venta_usd_bbl,tarifa_pep,tarifa_pl,tarifa_tri,margen_comercial,constante_rendimiento,precio_compra_usd_bbl,volume_bbl,api,bsw_pct,sulphur_pct,ajuste_comercial_usd,note
+2019-12,15BYJHdXu3Fv18TPAXu_tlsNC5_4P65GK,,,,,,,51.34,2378.84,,,,,"CFDI TNFA 00020, 15 Jan 2020, CR-2019-12_A24-TECOLUTLA, subtotal USD 122,129.65"
+2020-01,1v-lxXBZyuhzbN5uwFNHKQtT1s1KSoSsV,60.00,0.59,2.20,0.00,1.80,0.916,50.37,2851.263,28.9,,1.42,,
+2020-02,1xLu28JIy44W1zjVZCowQFCvtsDKm4qwJ,50.42,0.59,2.20,0.00,1.51,0.916,41.88,2208.233,29.9,0.30,1.61,,
+2020-03,1pltGgJroZJcIPxIyKh6YZGqTE-Q68psz,34.28,0.59,2.20,0.00,1.03,0.916,27.58,1966.634,28.4,0.50,1.69,,
+2020-04,18Z21TgwTtXEgu5ouyQq6ajrC4djcgeTR,0.00,0.59,2.20,0.00,0.00,0.916,0.00,0,,,,,no deliveries
+2020-05,1ABr7dD8kpu3-MH9WNSB3fi101O8Oo5Yy,0.00,0.59,2.20,0.00,0.00,0.916,0.00,0,,,,,no deliveries
+2020-06,1EYUDH0sTfQ-4asJHLG_ksUrBJHkHhJbK,0.00,0.59,2.20,0.00,0.00,0.916,0.00,0,,,,,no deliveries
+2020-07,1IYnJ3Es6EMrLpYDmFdVXfZDaXwXC4ATh,38.03,0.59,2.20,0.00,1.14,0.916,30.91,1333.017,28.1,0.16,1.73,,
+2020-08,1PGoCxhZzNYbbBqcNIpUKnSXvUd4i26kg,40.44,0.59,2.20,0.00,1.21,0.913,32.94,2234.363,29.5,0.08,1.53,,
+2020-09,1sr5fL_ILoL1aMKY_fUAZYHsSqXxrqnBn,39.16,0.59,2.20,0.00,1.17,0.913,31.80,2588.750,29.8,0.09,1.55,,
+2020-10,1J0HeKkcy8ViwX3BLurpMcvK8EtuCGueH,38.92,0.59,2.20,0.00,1.17,0.907,31.34,2161.510,29.3,0.05,1.69,,
+2020-11,1nd-u_hQUytDystdeFtqLat6sdwxH82lb,38.66,0.59,2.20,0.00,1.16,0.907,31.11,1908.847,29.3,0.09,1.77,,
+2020-12,14dVYty5UZVuDJOT7mlqgu4LQ8ppeEG6k,45.90,0.59,2.20,0.00,1.38,0.911,37.63,1788.039,29.7,1.57,1.55,,
+2021-01,1i44IMMql5OYi-FzlkU5oeOEWMuRQevu8,50.69,0.59,2.20,0.00,1.52,0.911,41.87,1982.230,30.4,0.19,1.61,0.00,
+2021-02,1YZF625k-9x-5Ys3sXSI_Cnje-H_cD1-9,56.48,0.59,2.20,0.00,1.69,0.912,47.02,2247.902,29.1,1.61,1.52,,
+2021-03,1NaK1vfyTHVAJnvKFCSuHZfXv4yc6RhXq,62.65,0.55,2.20,0.00,1.88,0.910,52.36,2148.077,28.8,0.23,1.60,,"two comprobantes: 1-18 Mar at PEP 0.59 (1,061.352 bbl, 52.32) and 19-31 Mar at PEP 0.51 (1,086.725 bbl, 52.40) after Comité de Precios acuerdo 2021-069; volume-weighted here"
+2021-04,1aiHFBQj5FNaTIXaJmAlhopHlMySCYtrl,60.16,0.51,2.20,0.00,1.80,0.907,50.04,1580.546,28.4,0.41,1.70,,
+2021-05,1KI5LhiM1ZqCYKAI2DwywMQSN0S4GD14h,63.38,0.51,2.20,0.00,1.90,0.9095,53.03,1440.048,29.9,2.46,1.58,807.92,
+2021-06,1crhAiY-ERYLo7GfC5BKqsR955Q0R5K5X,67.27,0.51,2.20,0.00,2.02,0.911,56.57,1421.147,29.0,0.08,1.65,774.31,
+2021-07,1gUJnVR7GlPkwxPvauYGo1hy6MpwDq8KT,69.59,0.51,2.20,0.00,2.09,0.912,58.65,1251.249,29.6,0.42,1.71,,
+2021-08,1hhlsGEgjmRZ3Iky15HgYL-82NZCFu2uk,66.32,0.51,2.20,0.00,1.99,0.907,55.45,729.377,29.2,0.30,1.73,,
+2021-09,1vQmB54SyIee5I0TZYsdZ2wRnJ_lR6yRf,67.52,0.51,2.20,0.00,2.03,0.9078,56.55,1469.716,29.6,0.23,1.70,284.33,
+2021-10,1vqJXDHX3ortQV0tx8dByIos5va5HVPpO,76.35,0.51,2.20,0.00,2.29,0.907,64.28,919.734,29.2,5.10,1.69,1989.90,
+2021-11,146vnPVaiUl2P82ZZAh0sjoZuayWDmY-U,78.23,0.51,2.20,0.00,2.35,0.9082,65.99,1289.463,29.5,0.25,1.67,822.92,
+2021-12,1VDgtraHHMBwnX6NXEqUfX-NqskO5JXIK,68.74,0.51,2.20,0.00,2.06,0.9049,57.43,1066.493,28.7,1.99,1.53,1356.43,
+2022-01,1EgQheOT8IPkSZTSyREa66nmYqkrt_Pp1,76.73,0.51,2.20,0.00,2.30,0.9049,64.42,920.779,28.0,0.23,1.79,0.00,
+2022-02,1mGfusrYInIRfAqZuTia9UPVJWWXkbGla,86.97,0.51,2.20,0.00,2.61,0.8998,72.94,183.027,25.7,0.10,1.85,2277.71,
+2022-03,1x4TeNa6EJp7_-zl7cATrErAbfFF0HDbW,103.20,0.51,2.20,0.00,3.10,0.916,0.00,0,,,,,"reference price computed, no volume delivered"
+2022-04,1zuWCuh1Ay-UJQwXXGiRmcTp1A-pKt-0T,102.64,0.51,2.20,0.00,3.08,0.916,0.00,0,,,,,"reference price computed, no volume delivered"
+2022-05,1Ga0EUgatJbMoi-8zAj4THpVitxAZ1w7g,0.00,0.51,2.20,0.00,0.00,0.000,0.00,0,,,,,no deliveries
+2022-06,1mraz1sMo5kNJEkRQmL9ONhf-n2kdVHkg,113.93,0.51,2.20,0.00,3.42,0.916,0.00,0,,,,,"reference price computed, no volume delivered"
+2022-08,1GRxc4aC-dYhwef6Ime1IRxiZCEEOzp7m,0.00,0.51,2.20,0.00,0.00,0.000,0.00,0,,,,0.00,no deliveries
+2022-09,1rbUtYnhH0tLxRbT_aRmteqYLydbqdAR4,0.00,0.51,2.20,0.00,0.00,0.000,0.00,0,,,,,no deliveries
+2022-10,1CG1zKZJO3NNUy6r5OzdG3--ifLxjXDze,83.43,0.51,2.20,0.00,2.50,0.916,0.00,0,,,,,"reference price computed, no volume delivered"
+2022-11,10T9VSoZuuGvUQJQA1V-AkSSIGH72Xrhl,83.12,0.51,2.20,0.00,2.49,0.9007,69.67,919.123,30.9,0.45,1.60,,
+2022-12,1WTy0PMVCMIHhwo6m7Y24cMH6O7c_vu0N,69.63,0.51,2.20,0.00,2.09,0.8963,57.61,717.404,29.5,0.05,1.64,,
+2023-01,1ptaXMXzRCE4QhejxeUkhKR5Hj-CGWCpt,,,,,,,57.33,352.591,,,,,"CFDI folio 66, 15 Feb 2023, TECOLUTLA ENERO (1-26), subtotal USD 20,214.04; exchange rate 18.6327"

@@ -14,9 +14,9 @@
 3. **The 345 kbbl type curve embeds PEMEX-era recompletions.** The four wells it is fitted to were each re-perforated two or three times over 30–50 years. TEC-10, the only single-completion modern well, declines with b = 0.49 and points to ~100 kbbl. The recommended TEC-12 range is **65 / 218 / 366 kbbl (P90 / P50 / P10)** with a 180 bbl/d base (task 6). GLJ's YE2020 1P/2P/3P were 203 / 343 / 502 kbbl; Petrel Robertson's 100 bbl/d base and 200 bbl/d upside bracket the low and base.
 4. **The TEC-12 target window (2,294–2,311 mSS) reads 4–5 ohm·m in both wells that have resistivity** (TEC-9 1973, TEC-10 2018), with neutron-density separation and a PE of 3.8 at TEC-10; a book-parameter Archie pass returns Sw ≈ 1. Resistivity rises to 15–50 ohm·m below ~2,310 mSS, and every barrel the field has produced came from 2,303–2,332 mSS (task 9). The window is either water-bearing or an argillaceous, poorer reservoir; the logs alone cannot say which. This is the decisive open item (G-47) and it was invisible in v3 because no one had hung the logs on one datum. Second pass (`docs/12`–`14`): the CMI sees no open fracture in the window at TEC-10; the only core, 17 m below it, is a recrystallised grainstone at 2–8 % porosity and 0.01–0.5 mD; a 72-case saturation sensitivity anchored to TEC-10's own aquifer and producer puts the window at Sw ≥ 1.1 on the core-supported density porosity, while at TEC-9 (118 m from TEC-12) the 1973 sonic puts it at parity with the 353-kbbl producer unless a fifth or more of its porosity is shale effect. TEC-12 must log and test the window before it is completed there.
 5. **The 11.2 vs 7.8 MMbbl OOIP difference is petrophysics, not geometry.** 7.8 is PEMEX's CNH-booked volume; 11.2 is IFR's with TEC-10 log parameters; the independent Petrel Robertson model gives 7.6 with TEC-2/9 vintage-log petrophysics and 12.0 with TEC-10's on the same rock volume. Monte Carlo on the source ranges: **8.1 / 10.0 / 12.2 MMbbl**; remaining at trend-average recovery about 0.9 (0.3–1.6) MMbbl (task 7).
-6. **The AFE is USD 1,572,724, not 1,567,724**; the difference is a deleted formula in the September 2021 copy. It is priced on 2018 TEC-11 contract rates. Escalated to September 2026: USD 1.81 / 1.97 / 2.20 MM, CAD 2.52 / 2.74 / 3.06 MM at 1.3915 (task 8). The currency is USD by evidence, still to be confirmed by the author.
-7. **Every IFR economic model since 2020 carries TEC-12 as a USD 1.55–1.8 MM horizontal re-entry of TEC-10**, not the S-shape new drill in the AFE and work program (task 2). The eleven models differ in price, price factor (0.95 → 0.801 → 0.90, unsourced), well count and window placement, never in the TEC-12 curve.
-8. **Rebuilt single-well economics** (2023 fiscal and cost structure, base profile, escalated AFE, flat WTI): stand-alone NPV10 before tax is −0.09 MM at WTI 70 and +0.46 MM at 80; **incremental to a producing TEC-10** (battery and disposal already carried) it is +0.76 MM at 70 and +1.41 MM at 80, payout under two years. The low profile never pays out; the high profile pays out at WTI 60 (task 10). WTI is about USD 100 in mid-September 2026 on a supply disruption, against long-term decks of 70–80.
+6. **The AFE is USD 1,572,724, not 1,567,724**; the difference is a deleted formula in the September 2021 copy. It is priced on 2018 TEC-11 contract rates. Escalated to September 2026: USD 1.81 / 1.97 / 2.20 MM, CAD 2.52 / 2.74 / 3.06 MM at 1.3915 (task 8). The currency is USD, confirmed by the author on 16 Sep 2026.
+7. **Every IFR economic model since 2020 carries TEC-12 as a USD 1.55–1.8 MM horizontal re-entry of TEC-10**, not the S-shape new drill in the AFE and work program (task 2). The eleven models differ in price, price factor (0.95 → 0.801 → 0.90), well count and window placement, never in the TEC-12 curve. The PEMEX delivery-reception settlements (task 15) put the realised price at 0.81 × WTI volume-weighted over 2020–22, so the 2022 models' 0.801 was measured and the 2023 model's 0.90 overstates revenue by 11 %.
+8. **Rebuilt single-well economics** (2023 fiscal and cost structure, base profile, escalated USD AFE, flat WTI, realised price 0.81 × WTI from the settlements): stand-alone NPV10 before tax is −0.46 MM at WTI 70 and +0.02 MM at 80, break-even at WTI ≈ 80; **incremental to a producing TEC-10** (battery and disposal already carried) it is +0.27 MM at 70 and +0.89 MM at 80, break-even at WTI ≈ 65, payout 32 months at 70. The low profile never pays out; the high profile pays out at WTI 60 incremental and 70 stand-alone (tasks 10, 15). At the 2023 model's 0.90 factor the same cases were −0.09 / +0.46 stand-alone and +0.76 / +1.41 incremental. WTI is about USD 100 in mid-September 2026 on a supply disruption, against long-term decks of 70–80.
 9. **The second pass through the Drive closed seven more gaps** (`docs/12`, `13`): the CNH field polygon is 3.14 km² with all nine wells inside (the upper bound of the OOIP range); the forecast tables Tonalli filed with CNH carry the IFR 2020 TEC-12 curve, not 500 kbbl; the CNH annual filings give 16.1 kbbl (2020) and 17.4 kbbl (2021, TEC-10 only, GOR 859 scf/bbl, 29 °API) and show the field shut in from July 2022; the GLJ YE2020 detail books TEC-12 at 250/400/600 kbbl; the 2025 hydrocarbons reform leaves contract terms in place per secondary sources, with a contract-to-assignment substitution clause for counsel.
 
 **The honest framing for the incoming team.** The field is a small, thin, strongly aquifer-supported El Abra accumulation whose wells are water-limited from their first year. TEC-12 is a sound well only as an incremental well on a producing pad, at a base rate about half of what the internal case assumed, and only if the target interval is shown to hold oil. The v3 conclusion that "the well economics were never the problem" survives for the incremental case at WTI ≥ 65; the v3 rate and volume assumptions do not. The cheapest high-value step remains the one v3 recommended: a long shut-in static gradient on TEC-10 (four years of build-up for free), now paired with a core-calibrated petrophysical evaluation of the TEC-10 upper zone.
@@ -129,16 +129,20 @@ Simmons' 390–799 kbbl "8-year sales" are TEC-12 plus TEC-13 (G-40) and the 202
 
 2023 IFR fiscal and cost structure (bid royalty 31.22 %, basic royalty B0 × price + 1.5 %, surface 1 %, hydrocarbon tax on 7.2 km², field price 90 % of WTI, opex 7.25 USD/bbl oil + 3.25 USD/bbl water + 2,500 USD/well/month, battery 10,000 and disposal 1,500 USD/month, 30 % tax, 25 % depreciation, 10 % discount), start January 2027, water cut following TEC-10 (40 % → 85 %), escalated base AFE, 100 % WI, no corporate G&A, no carry. NPV10 before tax, USD MM:
 
+Realised price 0.81 × WTI (PEMEX settlements 2020–22, task 15; the 2023 workbook's 0.90 is shown for comparison):
+
 | WTI flat | 50 | 60 | 70 | 80 | 90 | 100 |
 |---|---|---|---|---|---|---|
-| Stand-alone, low profile | −1.77 | −1.57 | −1.36 | −1.15 | −0.94 | −0.73 |
-| Stand-alone, **base** | −1.12 | −0.62 | **−0.09** | **0.46** | 1.00 | 1.54 |
-| Stand-alone, high | −0.66 | 0.03 | 0.77 | 1.53 | 2.32 | 3.10 |
-| Incremental to producing TEC-10, low | −1.41 | −1.14 | −0.88 | −0.63 | −0.39 | −0.16 |
-| Incremental, **base** | −0.60 | 0.06 | **0.76** | **1.41** | 2.04 | 2.64 |
-| Incremental, high | −0.08 | 0.85 | 1.81 | 2.72 | 3.59 | 4.42 |
+| Stand-alone, low profile | −1.87 | −1.69 | −1.51 | −1.32 | −1.13 | −0.94 |
+| Stand-alone, **base** | −1.36 | −0.92 | **−0.46** | **0.02** | 0.51 | 1.00 |
+| Stand-alone, high | −0.99 | −0.39 | 0.25 | 0.92 | 1.61 | 2.32 |
+| Incremental to producing TEC-10, low | −1.54 | −1.30 | −1.06 | −0.82 | −0.60 | −0.39 |
+| Incremental, **base** | −0.90 | −0.34 | **0.27** | **0.89** | 1.48 | 2.04 |
+| Incremental, high | −0.49 | 0.27 | 1.15 | 2.00 | 2.81 | 3.59 |
+| *Prior (0.90): stand-alone base* | −1.12 | −0.62 | −0.09 | 0.46 | 1.00 | 1.54 |
+| *Prior (0.90): incremental base* | −0.60 | 0.06 | 0.76 | 1.41 | 2.04 | 2.64 |
 
-Base case at WTI 70, stand-alone: 142 kbbl produced in 69 months before the fixed costs and 44 % royalty end it; payout 35 months. Incremental to a producing TEC-10: payout under two years at WTI 70. A 0.80 PEMEX price factor instead of 0.90 costs 0.4 MM. After-tax values are 0.3–0.5 MM lower.
+Base case at WTI 70, stand-alone: 134 kbbl produced in 61 months before the fixed costs and 41–44 % royalty end it; no payout. Incremental to a producing TEC-10: payout 32 months at WTI 70, 23 months at 80. Moving the price factor from 0.90 to the measured 0.81 costs 0.4–0.5 MM at every WTI. After-tax values are 0.3–0.5 MM lower.
 
 The v3 overhead finding is unchanged: USD 1.05 MM/yr of corporate and regulatory cost consumed 97 % of the Simmons most-likely NOI. It is also now clear that the well-level case at the base profile only works as an add-on to an existing operation, which is the incoming operator's situation and not IFR's.
 
@@ -170,7 +174,7 @@ TEC-2 skin +196 (workover), TEC-13 now structurally lower on the reprocessed 3D,
 | 6 GLJ YE2020 | Included, task 6 |
 | 7 Current reservoir pressure | Done, task 5: 24.15 MPa in 2018, 2 % below initial |
 | 8 Static gradient at reopening | Still the highest-value cheap measurement; add the TEC-10 petrophysical evaluation |
-| New | Resolve G-47 before sanction; confirm the AFE currency (G-44) and which well the 2023 model priced (G-17); pull the ten large-file binaries into `data/raw/` (G-52). 15 of 53 logged gaps remain open |
+| New | Resolve G-47 before sanction; confirm which well the 2023 model priced (G-17); pull the ten large-file binaries into `data/raw/` (G-52). 14 of 53 logged gaps remain open |
 
 ## 9. What the presentation says
 

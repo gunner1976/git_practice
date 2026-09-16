@@ -38,7 +38,7 @@ Neither workbook carries a currency label. The evidence that the figures are USD
 - The same line items and vendors (Simmons rig at 15,950/day, Tenaris tubulars per metre) carry the same numbers in the TEC-11 tracker, which is in the USD format above.
 - Every IFR economic model carries TEC-12 capital as "(US$)" 1.55–1.8 MM, consistent only with a USD AFE.
 
-Conclusion: **USD**, with the confirmation still to be obtained from the author (G-44). No conversion of any source figure was made until this point; the CAD figures below are conversions of the USD total at stated rates.
+Conclusion: **USD**, confirmed by Kevin Gunning on 16 Sep 2026 (G-44 resolved). No conversion of any source figure was made until this point; the CAD figures below are conversions of the USD total at stated rates.
 
 ## 4. Escalation from Nov 2020 to Sep 2026
 
