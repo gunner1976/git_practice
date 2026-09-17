@@ -1,0 +1,64 @@
+well,item,od_in,weight_lbft,grade,top_mmd,base_mmd,status,source,kb_m
+TEC-2,perf,,,,2307.4,2311.0,active 2019,Tecolutla Perforations Information.csv,4.0
+TEC-2,plug,,,,2330.0,2331.0,bridge plug,Tecolutla Perforations Information.csv,4.0
+TEC-2,perf,,,,2335.0,2339.0,squeezed,Tecolutla Perforations Information.csv,4.0
+TEC-2,plug,,,,2341.0,2342.0,bridge plug,Tecolutla Perforations Information.csv,4.0
+TEC-2,perf,,,,2345.0,2349.0,squeezed,Tecolutla Perforations Information.csv,4.0
+TEC-2,perf,,,,2353.0,2354.0,squeezed,Tecolutla Perforations Information.csv,4.0
+TEC-2,perf,,,,2019.0,2020.0,2019 RTG 1 11/16 in shallow shot (interval per Tonalli 2019 estado mecanico text),TON_estado_mecanico_tec_2_20190219.pdf (1RxpD0jw),4.0
+TEC-2,td,,,,0.0,2375.0,TD,Tecolutla Well Header Information.csv,4.0
+TEC-2,casing_unknown,,,,0.0,2375.0,casing strings not in the package (G-54),-,4.0
+TEC-3,open_hole,,,,2376.8,2380.8,open hole,Tecolutla Perforations Information.csv,6.0
+TEC-3,td,,,,0.0,2381.0,TD; plugged 1956 (salt water),Well header CSV; TEC-6 informe final,6.0
+TEC-3,casing_unknown,,,,0.0,2381.0,casing strings not in the package (G-54),-,6.0
+TEC-5,surface,9.625,36.0,J-55,0.0,501.35,cemented,BLOQUE_TECOLUTLA_5_ESTADO_MECANICO.pdf (1VCktsVx),4.0
+TEC-5,open_hole,8.625,,,501.35,2562.1,"open hole 8 5/8 in, plugged 28 Jul 1956",BLOQUE_TECOLUTLA_5_ESTADO_MECANICO.pdf,4.0
+TEC-5,plug,,,,477.8,525.0,cement plug,BLOQUE_TECOLUTLA_5_ESTADO_MECANICO.pdf,4.0
+TEC-5,plug,,,,2505.3,2562.1,cement plug,BLOQUE_TECOLUTLA_5_ESTADO_MECANICO.pdf,4.0
+TEC-5,td,,,,0.0,2562.1,TD,BLOQUE_TECOLUTLA_5_INFORME_FINAL.PDF,4.0
+TEC-6,surface,9.625,,,0.0,499.5,cemented,TECOLUTLA_6_INFORME_FINAL.pdf (1c2-WKxk),5.67
+TEC-6,production,6.625,,,0.0,2280.0,cemented,TECOLUTLA_6_INFORME_FINAL.pdf,5.67
+TEC-6,liner,4.5,,,2302.0,2336.0,liner,TECOLUTLA_6_INFORME_FINAL.pdf,5.67
+TEC-6,tubing,2.875,,,0.0,2280.0,2 3/8 and 2 7/8 in (1956),TECOLUTLA_6_INFORME_FINAL.pdf,5.67
+TEC-6,plug,,,,2303.0,2304.0,bridge plug,Tecolutla Perforations Information.csv,5.67
+TEC-6,perf,,,,2314.0,2316.0,squeezed,Tecolutla Perforations Information.csv,5.67
+TEC-6,perf,,,,2320.0,2321.0,squeezed,Tecolutla Perforations Information.csv,5.67
+TEC-6,perf,,,,2324.0,2327.0,squeezed,Tecolutla Perforations Information.csv,5.67
+TEC-6,perf,,,,2336.0,2338.0,open hole (1956 initial interval),Perforations CSV; TEC-6 informe final,5.67
+TEC-6,td,,,,0.0,2338.9,TD,TECOLUTLA_6_INFORME_FINAL.pdf,5.67
+TEC-7,surface,9.625,36.0,J-55,0.0,600.48,cemented,Anexo 3 estado mecanico final tec-7.pdf (11Wasndd),5.0
+TEC-7,production,6.625,20.0,J-55/N-80 20-24,0.0,2306.5,cemented,Anexo 3 estado mecanico final tec-7.pdf,5.0
+TEC-7,liner,4.5,11.6,J-55,2281.0,2340.0,liner,Anexo 3 estado mecanico final tec-7.pdf,5.0
+TEC-7,tubing,2.375,,EUE,0.0,2300.0,"2 3/8 in tubing + 4.5 in mechanical packer at ~2,300 m (2019 water-injection string)",Anexo 3 estado mecanico final tec-7.pdf,5.0
+TEC-7,perf,,,,2310.0,2313.0,active (last interval),Perforations CSV; estado mecanico 2019,5.0
+TEC-7,plug,,,,2325.0,2325.5,permanent plug,Anexo 3 estado mecanico final tec-7.pdf,5.0
+TEC-7,plug,,,,2330.0,2330.5,mechanical plug,BLOQUE_TECOLUTLA_7_ESTADO_MECANICO.pdf (1UZlBMHq),5.0
+TEC-7,perf,,,,2335.0,2337.0,squeezed / below plug,Perforations CSV; estado mecanico,5.0
+TEC-7,td,,,,0.0,2340.0,TD,Well header CSV,5.0
+TEC-9,surface,9.625,36.0,J-55,0.0,502.0,cemented,BLOQUE_TECOLUTLA_9_ESTADO_MECANICO.PDF (1ys9wOiU),5.07
+TEC-9,production,6.625,28.0,P-110,0.0,2340.0,cemented,BLOQUE_TECOLUTLA_9_ESTADO_MECANICO.PDF,5.07
+TEC-9,tubing,2.875,,,0.0,2318.0,"2 7/8 in to 2,318 m + 2 3/8 in",BLOQUE_TECOLUTLA_9_ESTADO_MECANICO.PDF,5.07
+TEC-9,perf,,,,2328.0,2333.0,squeezed (closed Jan 1999; monument),Perforations CSV; estado mecanico,5.07
+TEC-9,td,,,,0.0,2340.0,"TD; deviated from 296 m, 11 deg, 112 m displacement",BLOQUE_TECOLUTLA_9_ESTADO_MECANICO.PDF,5.07
+TEC-101,surface,9.625,40.0,N-80,0.0,807.19,cemented,BLOQUE_TECOLUTLA_101_ESTADO_MECANICO.pdf (1a00morB),8.0
+TEC-101,open_hole,8.625,,,807.19,2804.0,"open hole; fish at 926 m; water-invaded, plugged 31 Mar 1972",BLOQUE_TECOLUTLA_101_ESTADO_MECANICO.pdf,8.0
+TEC-101,perf,,,,2718.0,2804.0,"open-hole interval, squeezed",Tecolutla Perforations Information.csv,8.0
+TEC-101,td,,,,0.0,2804.0,TD,BLOQUE_TECOLUTLA_101_ESTADO_MECANICO.pdf,8.0
+TEC-10,conductor,13.375,,,0.0,30.0,cemented 11 Apr 2018,POST OPERATIVO TEC-10 13 3/8 @ 30 m (1EV-1L__),6.13
+TEC-10,surface,9.625,32.3,H-40 STC,0.0,470.0,cemented to surface 16 Apr 2018,POST OPERATIVO TEC-10 TR 9 5/8 @ 470 m (1_5UzGZI),6.13
+TEC-10,production,7.0,26.0,L-80,0.0,2285.0,cemented to surface 27 Apr 2018,POSTOPERATIVO TEC-10 TR 7 (16_dQsnw),6.13
+TEC-10,liner,4.5,11.6,L-80 (test report: 13.5 P-110),2133.42,2489.33,cemented 4 May 2018,POST OPERATIVO TEC-10 LN 4 1/2 @ 2489 m (10f2RlOT),6.13
+TEC-10,tubing,2.375,,L-80 EUE,0.0,2057.0,"2 3/8 in tubing, packer at 2,057 m (ESTADO MECANICO FINAL Jul 2019, well unnamed)",ESTADO MECANICO FINAL.pdf (1HUjuDEt),6.13
+TEC-10,perf,,,,2349.5,2350.5,active,Tecolutla Perforations Information.csv,6.13
+TEC-10,perf,,,,2351.5,2353.0,active,Tecolutla Perforations Information.csv,6.13
+TEC-10,perf,,,,2394.5,2398.5,inactive,Tecolutla Perforations Information.csv,6.13
+TEC-10,perf,,,,2404.0,2406.0,inactive,Tecolutla Perforations Information.csv,6.13
+TEC-10,perf,,,,2410.0,2414.0,inactive,Tecolutla Perforations Information.csv,6.13
+TEC-10,perf,,,,2433.5,2442.5,"active per CSV; injectivity test Jun 2018 admitted at 2,120 psi",Perforations CSV; Prueba de Admision (1XyZ35a9),6.13
+TEC-10,td,,,,0.0,2490.0,"TD (J-shape, ~20 deg at TD)",Well header CSV; QMAX mud report,6.13
+TEC-11,surface,9.625,,,0.0,472.0,proposal depth 472/500 m; post-operative report not read,PROPUESTA VF TEC-11 TR 9 5/8 @ 472 m (1o4iHKGh),4.7
+TEC-11,production,7.0,26.0,,0.0,2354.44,"cemented 24-25 Nov 2018, returns to surface",TEC-11 DES TR 7 Reporte Post Operativo (1CL89Fst),4.7
+TEC-11,liner,4.5,13.5,,2354.44,3283.0,4 1/2 in liner in the lateral (liner run design 1Fk1BJgP); tubing-less,Tecolutla 11_Corrida_V1_Liner 4.5.xlsm; Fideicomiso 2024,4.7
+TEC-11,plug,,,,2400.0,2401.0,Boss composite plug set Aug 2019; 100 % water,Anexo 4 aviso abandono temporal (18kU9Zb7),4.7
+TEC-11,perf,,,,2624.0,2806.0,"ten proposed 2 m intervals 2,624-2,806 mMD (never produced oil)",Tecolutla Perforations Information.csv,4.7
+TEC-11,td,,,,0.0,3283.0,"TD mMD (2,331 mTVD)",Well header CSV; Fideicomiso 2024,4.7
