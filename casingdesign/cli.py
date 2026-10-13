@@ -13,7 +13,7 @@ from pathlib import Path
 import typer
 
 from casingdesign.catalog import Catalog
-from casingdesign.design import evaluate_string, optimize_string
+from casingdesign.design import evaluate_string, optimize_string, optimize_tapered
 from casingdesign.examples import onshore_horizontal_well
 from casingdesign.well import Well
 
@@ -84,8 +84,10 @@ def check(well_file: Path,
 
 @app.command()
 def optimize(well_file: Path, string: list[str] = typer.Option(None, "--string"),
-             connection: str = "BTC", top: int = 3) -> None:
-    """Cheapest passing designs for each string (or the named strings)."""
+             connection: str = "BTC", top: int = 3, tapered: bool = True,
+             max_sections: int = 3, min_section: float = 500.0) -> None:
+    """Cheapest passing designs for each string (or the named strings), uniform and
+    tapered."""
     well = _load_well(well_file)
     cat = Catalog.default()
     targets = [well.string(n) for n in string] if string else well.strings
@@ -99,6 +101,16 @@ def optimize(well_file: Path, string: list[str] = typer.Option(None, "--string")
             summ = c.result.summary
             dfs = " ".join(f"{k[:4]} {v['min_df']:.2f}" for k, v in summ.items())
             typer.echo(f"  {i}. {c.spec.label:<28} cost idx {c.cost_per_ft:6.1f}/ft   {dfs}")
+        if tapered:
+            t = optimize_tapered(well, s, cat, connection=connection, max_sections=max_sections,
+                                 min_section_length=min_section)
+            if t is not None and not t.design.is_uniform:
+                summ = t.result.summary
+                dfs = " ".join(f"{k[:4]} {v['min_df']:.2f}" for k, v in summ.items())
+                saving = 100 * (1 - t.cost_per_ft / cands[0].cost_per_ft) if cands else 0
+                typer.echo(f"  tapered: cost idx {t.cost_per_ft:6.1f}/ft ({saving:.1f}% saving)   {dfs}")
+                for sec in t.design.sections:
+                    typer.echo(f"     {sec.top_md:>7.0f}-{sec.bottom_md:<7.0f} {sec.spec.label}")
 
 
 if __name__ == "__main__":

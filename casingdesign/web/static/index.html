@@ -36,6 +36,7 @@
   .muted { color:var(--muted) } .err { color:var(--bad); white-space:pre-wrap }
   .tabs { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap }
   .tabs button[aria-selected="true"] { background:var(--accent); color:#fff; border-color:var(--accent) }
+  .taper { font-size:12px; color:var(--accent) }
 </style>
 </head>
 <body>
@@ -55,7 +56,7 @@
   </section>
   <section class="panel" id="results">
     <h2>Results</h2>
-    <p class="muted">Load the example or paste a well, choose pipe for each string and evaluate.</p>
+    <p class="muted">Load the example or paste a well, choose pipe for each string and evaluate. ★ in the optimizer marks the cheapest tapered design.</p>
   </section>
 </main>
 <script>
@@ -84,14 +85,32 @@ function renderSpecRows(well) {
     box.appendChild(row);
   }
 }
+const tapered = {};   // string name -> sections chosen from the optimizer
 function readSpecs() {
-  return [...document.querySelectorAll('#specs .row')].map(r => ({
-    string: r.dataset.string, od: stringsOf(parseWell()).find(s => s.name === r.dataset.string).od,
-    weight: +r.querySelector('.wt').value, grade: r.querySelector('.gr').value, connection: r.querySelector('.cn').value }));
+  const well = parseWell();
+  return [...document.querySelectorAll('#specs .row')].map(r => {
+    const name = r.dataset.string, od = stringsOf(well).find(s => s.name === name).od;
+    if (tapered[name]) return {string: name, od, sections: tapered[name]};
+    return {string: name, od, weight: +r.querySelector('.wt').value, grade: r.querySelector('.gr').value, connection: r.querySelector('.cn').value};
+  });
+}
+function markTapered(name) {
+  const r = document.querySelector(`#specs .row[data-string="${name}"]`); if (!r) return;
+  let tag = r.querySelector('.taper'); 
+  if (tapered[name]) {
+    if (!tag) { tag = document.createElement('button'); tag.className = 'taper'; r.appendChild(tag); }
+    tag.textContent = `tapered (${tapered[name].length}) ✕`; tag.title = 'click to go back to uniform pipe';
+    tag.onclick = () => { delete tapered[name]; markTapered(name); };
+  } else if (tag) tag.remove();
 }
 function setSpec(name, weight, grade, connection) {
   const r = document.querySelector(`#specs .row[data-string="${name}"]`); if (!r) return;
+  delete tapered[name]; markTapered(name);
   r.querySelector('.wt').value = weight; r.querySelector('.gr').value = grade; r.querySelector('.cn').value = connection;
+}
+function setTapered(name, sections) {
+  tapered[name] = sections.map(s => ({top_md: s.top_md, bottom_md: s.bottom_md, weight: s.spec.weight, grade: s.spec.grade, connection: s.spec.connection}));
+  markTapered(name);
 }
 
 const fmt = (x, d=2) => x == null ? '∞' : x.toLocaleString(undefined, {maximumFractionDigits:d, minimumFractionDigits:d});
@@ -103,7 +122,7 @@ function renderResults(data) {
   root.innerHTML = `<h2>Results · ${data.well}</h2><div class="tabs" id="tabs"></div><div id="detail"></div>`;
   const tabs = $('#tabs');
   data.results.forEach((r, i) => {
-    const b = document.createElement('button'); b.textContent = `${r.string}: ${r.spec.label} ${r.pass ? '✓' : '✗'}`;
+    const b = document.createElement('button'); b.textContent = `${r.string}: ${r.design.uniform ? r.spec.label : 'tapered'} ${r.pass ? '✓' : '✗'}`;
     b.className = r.pass ? 'pass' : 'fail'; b.setAttribute('aria-selected', i === 0);
     b.onclick = () => { [...tabs.children].forEach(c => c.setAttribute('aria-selected', c === b)); renderDetail(r); };
     tabs.appendChild(b);
@@ -116,9 +135,10 @@ function renderDetail(r) {
   const rows = Object.entries(r.summary).map(([k, v]) =>
     `<tr><td>${k}</td><td>${fmt(v.min_df)}</td><td>${fmt(v.required)}</td><td>${v.case}</td><td>${fmt0(v.md)}</td>
      <td class="${v.pass ? 'pass' : 'fail'}">${v.pass ? 'PASS' : 'FAIL'}</td></tr>`).join('');
+  const secs = r.design.sections.map(x => `<tr><td>${fmt0(x.top_md)}–${fmt0(x.bottom_md)}</td><td>${x.spec.label}</td><td>${x.spec.id.toFixed(3)}"</td>
+     <td>${fmt0(x.spec.burst)}</td><td>${fmt0(x.spec.collapse)}</td><td>${fmt0(x.spec.body_yield)}</td><td>${fmt0(x.spec.joint_strength)}</td></tr>`).join('');
   d.innerHTML = `
-    <p class="muted">${s.label} · ID ${s.id.toFixed(3)}" · burst ${fmt0(s.burst)} psi · collapse ${fmt0(s.collapse)} psi ·
-       body yield ${fmt0(s.body_yield)} lbf · joint ${fmt0(s.joint_strength)} lbf</p>
+    <table><thead><tr><th>MD (ft)</th><th>Pipe</th><th>ID</th><th>Burst psi</th><th>Collapse psi</th><th>Body yield lbf</th><th>Joint lbf</th></tr></thead><tbody>${secs}</tbody></table>
     <table><thead><tr><th>Check</th><th>Min DF</th><th>Required</th><th>Governing case</th><th>MD (ft)</th><th></th></tr></thead>
     <tbody>${rows}</tbody></table>
     <div class="plots">
@@ -186,12 +206,13 @@ function renderOptimize(data) {
     html += `<h3 style="margin:14px 0 4px;font-size:14px">${name}</h3>`;
     if (!cands.length) { html += '<p class="fail">No catalog item passes.</p>'; continue; }
     html += `<table><thead><tr><th>#</th><th>Pipe</th><th>Cost idx /ft</th><th>Burst</th><th>Collapse</th><th>Tension</th><th>Triaxial</th><th></th></tr></thead><tbody>` +
-      cands.map((c, i) => `<tr><td>${i+1}</td><td>${c.spec.label}</td><td>${fmt(c.cost_per_ft,1)}</td>
+      cands.map((c, i) => `<tr><td>${c.tapered ? '★' : i + (cands[0].tapered ? 0 : 1)}</td><td>${c.design.uniform ? c.spec.label : c.design.label}</td><td>${fmt(c.cost_per_ft,1)}</td>
         <td>${fmt(c.summary.burst.min_df)}</td><td>${fmt(c.summary.collapse.min_df)}</td><td>${fmt(c.summary.tension.min_df)}</td><td>${fmt(c.summary.triaxial.min_df)}</td>
-        <td><button data-use='${JSON.stringify([name, c.spec.weight, c.spec.grade, c.spec.connection])}'>Use</button></td></tr>`).join('') + '</tbody></table>';
+        <td><button data-use='${JSON.stringify(c.design.uniform ? [name, c.spec.weight, c.spec.grade, c.spec.connection] : [name, c.design.sections])}'>Use</button></td></tr>`).join('') + '</tbody></table>';
   }
   root.innerHTML = html;
-  root.querySelectorAll('button[data-use]').forEach(b => b.onclick = () => { setSpec(...JSON.parse(b.dataset.use)); run(); });
+  root.querySelectorAll('button[data-use]').forEach(b => b.onclick = () => {
+    const u = JSON.parse(b.dataset.use); if (Array.isArray(u[1])) setTapered(u[0], u[1]); else setSpec(...u); run(); });
 }
 
 async function run() {

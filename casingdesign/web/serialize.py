@@ -7,6 +7,7 @@ import numpy as np
 
 from casingdesign.catalog import PipeSpec
 from casingdesign.design.evaluate import StringResult
+from casingdesign.design.sections import StringDesign
 from casingdesign.loads import LoadCase
 
 
@@ -24,6 +25,12 @@ def spec_dict(spec: PipeSpec) -> dict:
     }
 
 
+def design_dict(design: StringDesign) -> dict:
+    return {"label": design.label, "uniform": design.is_uniform,
+            "sections": [{"top_md": sec.top_md, "bottom_md": sec.bottom_md,
+                          "spec": spec_dict(sec.spec)} for sec in design.sections]}
+
+
 def case_dict(case: LoadCase) -> dict:
     return {
         "name": case.name, "kind": case.kind.value, "description": case.description,
@@ -36,6 +43,7 @@ def result_dict(result: StringResult, cases: list[LoadCase], axial_by_case: dict
     return {
         "string": result.string,
         "spec": spec_dict(result.spec),
+        "design": design_dict(result.design),
         "pass": result.passes,
         "summary": result.summary,
         "cases": [case_dict(c) | {"axial": _list(axial_by_case[c.name])} for c in cases],
