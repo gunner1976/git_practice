@@ -13,7 +13,7 @@ from casingdesign.catalog import Catalog, PipeSpec
 from casingdesign.design.evaluate import StringResult, evaluate_design, evaluate_string
 from casingdesign.design.sections import Section, StringDesign
 from casingdesign.loads import LoadCase
-from casingdesign.loads.cases import standard_load_cases
+from casingdesign.loads.cases import depth_grid, standard_load_cases
 from casingdesign.well import CasingString, Well
 
 # Relative price index per lb by grade (carbon grades ~1.0, higher grades cost more).
@@ -148,11 +148,12 @@ def optimize_tapered(well: Well, s: CasingString, catalog: Catalog,
     order = sorted(range(len(cands)), key=lambda i: (costs_list[i], cands[i].pipe.nominal_weight))
     specs = [cands[i] for i in order]
     costs = np.array([costs_list[i] for i in order])
-    cases: list[LoadCase] = standard_load_cases(well, s, step)
-    md = cases[0].profile.md
-
+    # Load cases depend (weakly) on the pipe ID through the gas kick case, so they are
+    # built per candidate; the MD grid is common.
     masks = np.array([evaluate_design(well, s, StringDesign.uniform(s.hanger_md, s.shoe_md, sp),
-                                      cases).pass_mask() for sp in specs])
+                                      standard_load_cases(well, s, step, sp.pipe.id)).pass_mask()
+                      for sp in specs])
+    md = depth_grid(s, step)
     if not masks.any(axis=0).all():
         return None  # some depth has no passing candidate even uniformly
     choice = np.argmax(masks, axis=0)  # first (cheapest) passing index per depth
@@ -160,6 +161,7 @@ def optimize_tapered(well: Well, s: CasingString, catalog: Catalog,
     for _ in range(max_iter):
         choice = _enforce_sections(choice, md, costs, min_section_length, max_sections)
         design = _design_from_choice(md, choice, specs, s.hanger_md, s.shoe_md)
+        cases: list[LoadCase] = standard_load_cases(well, s, step, design.sections[0].spec.pipe.id)
         result = evaluate_design(well, s, design, cases)
         ok = result.pass_mask()
         if ok.all():

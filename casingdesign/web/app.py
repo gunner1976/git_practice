@@ -105,7 +105,7 @@ def evaluate(req: EvaluateRequest) -> dict:
             raise HTTPException(400, f"unknown string or pipe: {e}") from e
         except ValueError as e:
             raise HTTPException(400, str(e)) from e
-        cases = standard_load_cases(req.well, s)
+        cases = standard_load_cases(req.well, s, inner_diameter=design.sections[0].spec.pipe.id)
         r = evaluate_design(req.well, s, design, cases)
         axial = {c.name: _axial_for(c, req.well, s, design) for c in cases}
         out.append(result_dict(r, cases, axial))

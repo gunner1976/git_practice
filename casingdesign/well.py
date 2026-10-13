@@ -159,6 +159,16 @@ class CasingString(BaseModel):
     overpull: float = Field(ge=0, default=100_000.0, description="running overpull, lbf")
     pressure_test: float | None = Field(default=None, description="surface test pressure, psi")
 
+    # Well-control burst case for strings drilled ahead below (surface / intermediate).
+    # kick_volume_bbl = None -> conservative gas-to-surface case; a volume -> kick
+    # tolerance case with that influx. include_gas_to_surface keeps both.
+    kick_volume_bbl: float | None = Field(default=None, gt=0, description="influx volume, bbl")
+    kick_intensity_ppg: float = Field(
+        default=0.5, ge=0, description="formation pressure in excess of next mud weight, ppg")
+    max_surface_pressure: float | None = Field(
+        default=None, gt=0, description="BOP / wellhead working pressure cap, psi")
+    include_gas_to_surface: bool = False
+
     # Production-string specific
     packer_md: float | None = None
     packer_fluid_ppg: float | None = None

@@ -108,7 +108,8 @@ def evaluate_design(well: Well, s: CasingString, design: StringDesign,
     """Evaluate a (possibly tapered) design: at each depth the section in effect
     supplies the geometry, yield and ratings; the axial profile uses the composite
     weight of all sections below."""
-    cases = cases if cases is not None else standard_load_cases(well, s, step)
+    if cases is None:
+        cases = standard_load_cases(well, s, step, design.sections[0].spec.pipe.id)
     dfs = well.design_factors
     result = StringResult(s.name, design, required={
         "burst": dfs.burst, "collapse": dfs.collapse, "tension": dfs.tension,
