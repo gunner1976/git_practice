@@ -107,7 +107,8 @@ def evaluate_design(well: Well, s: CasingString, design: StringDesign,
                     cases: list[LoadCase] | None = None, step: float = 50.0) -> StringResult:
     """Evaluate a (possibly tapered) design: at each depth the section in effect
     supplies the geometry, yield and ratings; the axial profile uses the composite
-    weight of all sections below."""
+    weight of all sections below. Yield (and every rating) is derated for the static
+    temperature at depth per well.yield_derating."""
     if cases is None:
         cases = standard_load_cases(well, s, step, design.sections[0].spec.pipe.id)
     dfs = well.design_factors
@@ -121,12 +122,13 @@ def evaluate_design(well: Well, s: CasingString, design: StringDesign,
         specs = design.spec_at(md)
         axial = _axial_for(case, well, s, design)
         area = np.array([sp.geometry.area for sp in specs])
-        yp = np.array([sp.grade.min_yield for sp in specs])
+        derate = well.yield_derating.factor(well.formation.temperature(well.trajectory.tvd(md)))
+        yp = np.array([sp.grade.min_yield for sp in specs]) * derate
         sigma_a = axial / area
         dls = np.asarray(well.trajectory.dls(md), dtype=float)
 
         # Burst: body/connection internal yield vs differential pressure.
-        burst_rating = design.per_depth(md, "burst")
+        burst_rating = design.per_depth(md, "burst") * derate
         burst_load = case.profile.burst_load
         result.checks.append(CheckResult(case.name, "burst", md,
                                          _safe_df(burst_rating, burst_load), burst_load,
@@ -134,8 +136,8 @@ def evaluate_design(well: Well, s: CasingString, design: StringDesign,
 
         # Collapse: rating reduced for axial tension at each depth (API 5C3 biaxial).
         coll_rating = np.array([
-            collapse_rating_with_axial(sp.geometry, sp.grade.min_yield, float(sa))
-            * sp.connection.collapse_efficiency for sp, sa in zip(specs, sigma_a)])
+            collapse_rating_with_axial(sp.geometry, float(y), float(sa))
+            * sp.connection.collapse_efficiency for sp, y, sa in zip(specs, yp, sigma_a)])
         coll_load = case.profile.collapse_load
         result.checks.append(CheckResult(case.name, "collapse", md,
                                          _safe_df(coll_rating, coll_load), coll_load,
@@ -145,7 +147,7 @@ def evaluate_design(well: Well, s: CasingString, design: StringDesign,
         bend_force = np.array([bending_stress(sp.geometry, float(d)) for sp, d in
                                zip(specs, dls)]) * area
         tension_load = np.maximum(axial, 0.0) + bend_force
-        tension_rating = design.per_depth(md, "tension_rating")
+        tension_rating = design.per_depth(md, "tension_rating") * derate
         result.checks.append(CheckResult(case.name, "tension", md,
                                          _safe_df(tension_rating, tension_load),
                                          tension_load, tension_rating))

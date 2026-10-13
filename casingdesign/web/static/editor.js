@@ -88,7 +88,11 @@ const Editor = (() => {
         ...['burst', 'collapse', 'tension', 'triaxial'].map(k =>
           h('label', {class: 'f'}, h('span', {}, `DF ${k}`), input(w.design_factors, k, 'num'))),
         h('label', {class: 'f'}, h('span', {}, 'Gas grad (psi/ft)'), input(w, 'gas_gradient_psi_ft', 'num')),
-        h('label', {class: 'f'}, h('span', {}, 'Sour'), input(w.formation, 'sour', 'bool'))),
+        h('label', {class: 'f'}, h('span', {}, 'Sour'), input(w.formation, 'sour', 'bool')),
+        h('label', {class: 'f'}, h('span', {}, 'Surface T (°F)'), input(w.formation, 'surface_temperature_f', 'num')),
+        h('label', {class: 'f'}, h('span', {}, 'Geo grad (°F/100ft)'), input(w.formation, 'geothermal_gradient_f_per_100ft', 'num')),
+        h('label', {class: 'f'}, h('span', {}, 'Derate yield'), input(w.yield_derating, 'enabled', 'bool')),
+        h('label', {class: 'f'}, h('span', {}, 'Derate slope (/°F)'), input(w.yield_derating, 'slope_per_f', 'num'))),
       table(w.trajectory.stations, [['md', 'MD ft'], ['inclination', 'Inc °'], ['azimuth', 'Azi °']],
         rows => ({md: (rows.at(-1)?.md ?? 0) + 1000, inclination: rows.at(-1)?.inclination ?? 0, azimuth: rows.at(-1)?.azimuth ?? 0}),
         'Trajectory (survey stations)'),

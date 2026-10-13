@@ -39,8 +39,16 @@ def case_dict(case: LoadCase) -> dict:
     }
 
 
-def result_dict(result: StringResult, cases: list[LoadCase], axial_by_case: dict[str, np.ndarray]) -> dict:
+def result_dict(result: StringResult, cases: list[LoadCase], axial_by_case: dict[str, np.ndarray],
+                well=None) -> dict:
+    temp = None
+    if well is not None:
+        md = cases[0].profile.md
+        t = well.formation.temperature(well.trajectory.tvd(md))
+        temp = {"md": _list(md), "temperature_f": _list(t),
+                "yield_factor": _list(well.yield_derating.factor(t))}
     return {
+        "temperature": temp,
         "string": result.string,
         "spec": spec_dict(result.spec),
         "design": design_dict(result.design),

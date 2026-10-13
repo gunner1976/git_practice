@@ -108,7 +108,7 @@ def evaluate(req: EvaluateRequest) -> dict:
         cases = standard_load_cases(req.well, s, inner_diameter=design.sections[0].spec.pipe.id)
         r = evaluate_design(req.well, s, design, cases)
         axial = {c.name: _axial_for(c, req.well, s, design) for c in cases}
-        out.append(result_dict(r, cases, axial))
+        out.append(result_dict(r, cases, axial, req.well))
     return {"well": req.well.name, "results": out}
 
 

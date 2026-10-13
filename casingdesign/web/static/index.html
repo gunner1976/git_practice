@@ -162,7 +162,9 @@ function renderDetail(r) {
      <td class="${v.pass ? 'pass' : 'fail'}">${v.pass ? 'PASS' : 'FAIL'}</td></tr>`).join('');
   const secs = r.design.sections.map(x => `<tr><td>${fmt0(x.top_md)}–${fmt0(x.bottom_md)}</td><td>${x.spec.label}</td><td>${x.spec.id.toFixed(3)}"</td>
      <td>${fmt0(x.spec.burst)}</td><td>${fmt0(x.spec.collapse)}</td><td>${fmt0(x.spec.body_yield)}</td><td>${fmt0(x.spec.joint_strength)}</td></tr>`).join('');
-  d.innerHTML = `
+  const tp = r.temperature; const tmax = tp ? Math.max(...tp.temperature_f) : null; const fmin = tp ? Math.min(...tp.yield_factor) : 1;
+  const tnote = tp ? `<p class="muted">Static temperature to ${fmt0(tmax)} °F at the shoe · yield derated to ${(100*fmin).toFixed(1)}% there${fmin === 1 ? ' (derating off or not reached)' : ''}</p>` : '';
+  d.innerHTML = tnote + `
     <table><thead><tr><th>MD (ft)</th><th>Pipe</th><th>ID</th><th>Burst psi</th><th>Collapse psi</th><th>Body yield lbf</th><th>Joint lbf</th></tr></thead><tbody>${secs}</tbody></table>
     <table><thead><tr><th>Check</th><th>Min DF</th><th>Required</th><th>Governing case</th><th>MD (ft)</th><th></th></tr></thead>
     <tbody>${rows}</tbody></table>

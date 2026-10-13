@@ -11,17 +11,20 @@ the inputs that produced it.
 - Surface, intermediate, production strings (liners after MVP).
 - Ratings per API TR 5C3: burst, collapse (4 regimes + biaxial axial correction),
   pipe body yield, triaxial VME with Lame stresses and bending.
-- Load cases: pressure test, gas to surface, tubing leak, stimulation, full evacuation,
-  cementing, lost returns, running + overpull.
-- Pipe/grade/connection catalog in editable CSV.
-- Optimizer: cheapest passing item per string.
-- CLI with JSON well files; results exportable as JSON.
+- Load cases: pressure test, gas to surface or kick tolerance (finite influx, frac and
+  BOP capped), tubing leak, stimulation, full evacuation, cementing, lost returns,
+  running + overpull.
+- Pipe/grade/connection catalog in editable CSV; API 5C3 joint strength for STC/LTC/BTC.
+- Static-temperature yield derating (linear, configurable slope).
+- Optimizer: cheapest passing uniform pipe per string, and cheapest tapered design
+  (section length and count limits, exact composite re-check).
+- CLI with JSON well files; web UI with form editor, plots and design envelope.
 
 ## Explicit non-goals (post-MVP)
-- Thermal: temperature derating, APB, thermal cycling, wellhead growth.
+- Thermal: transient temperatures, APB, thermal cycling, wellhead growth.
 - Deepwater / BSEE requirements.
-- Kick tolerance with finite influx volume (we use the conservative gas-to-surface case).
 - Reliability-based design, casing wear, buckling, premium connection envelopes.
+- Liners and tiebacks.
 
 ## Architecture
 ```
@@ -43,8 +46,8 @@ tests/       benchmark against published API tables; worked-example wells
    (needs access to one licensed run); add each discrepancy as a test.
 
 ## Roadmap after MVP
-1. Web UI (FastAPI + plots of load vs rating vs depth, VME ellipse).
-2. Sectional (tapered) strings and liners.
-3. Kick tolerance load case; buckling; wear derating.
-4. Temperature derating, then APB for thermal wells.
-5. Report generator (PDF) for regulatory submission.
+1. Verify round-thread engaged lengths against API 5B; load vendor premium connection data.
+2. Liners/tiebacks; buckling; casing wear derating.
+3. Service-life axial changes (ballooning), then APB for thermal wells.
+4. Report generator (PDF) for regulatory submission; StressCheck import.
+5. Side-by-side validation against a licensed StressCheck/WELLCAT run.

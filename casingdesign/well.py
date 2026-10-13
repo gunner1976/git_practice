@@ -131,8 +131,35 @@ class Formation(BaseModel):
     pore_pressure: Profile = Field(description="pore pressure EMW, ppg vs TVD")
     fracture_gradient: Profile = Field(description="fracture gradient EMW, ppg vs TVD")
     surface_temperature_f: float = 70.0
-    geothermal_gradient_f_per_100ft: float = 1.2  # used for yield derating later; MVP ignores
+    geothermal_gradient_f_per_100ft: float = 1.2
     sour: bool = False
+
+    def temperature(self, tvd) -> np.ndarray | float:
+        """Static (geothermal) temperature, deg F, at TVD."""
+        return self.surface_temperature_f + self.geothermal_gradient_f_per_100ft * np.asarray(
+            tvd, dtype=float) / 100.0
+
+
+class YieldDerating(BaseModel):
+    """Linear reduction of yield strength with temperature above a reference.
+
+    factor = max(floor, 1 - slope (T - T_ref)). Default 0.03 % per deg F above 70 F is
+    a conservative envelope for carbon/low-alloy casing grades (manufacturer data
+    typically 0.02-0.03 %/F); replace with grade-specific data when available. All
+    ratings scale with yield (joint strength approximately, since it also depends on
+    tensile strength).
+    """
+
+    enabled: bool = True
+    slope_per_f: float = Field(default=0.0003, ge=0)
+    reference_f: float = 70.0
+    floor: float = Field(default=0.80, gt=0, le=1)
+
+    def factor(self, temperature_f) -> np.ndarray:
+        t = np.asarray(temperature_f, dtype=float)
+        if not self.enabled:
+            return np.ones_like(t)
+        return np.maximum(self.floor, 1.0 - self.slope_per_f * np.maximum(t - self.reference_f, 0.0))
 
 
 # ---------------------------------------------------------------------------
@@ -205,6 +232,7 @@ class Well(BaseModel):
     formation: Formation
     strings: list[CasingString]
     design_factors: DesignFactors = DesignFactors()
+    yield_derating: YieldDerating = YieldDerating()
     gas_gradient_psi_ft: float = 0.1  # dry gas column assumption for kick cases
     seawater_or_fresh_gradient_psi_ft: float = 0.433  # backup fluid for degraded cement/mud
 
