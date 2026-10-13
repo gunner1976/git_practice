@@ -10,7 +10,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "pytest-cov", "ruff"]
+dev = ["pytest>=8", "pytest-cov", "ruff", "httpx"]
+web = ["fastapi>=0.110", "uvicorn[standard]>=0.29"]  # plotly.min.js is vendored in web/static
 
 [project.scripts]
 casingdesign = "casingdesign.cli:app"
@@ -21,6 +22,9 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["casingdesign*"]
+
+[tool.setuptools.package-data]
+casingdesign = ["catalog/data/*.csv", "web/static/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

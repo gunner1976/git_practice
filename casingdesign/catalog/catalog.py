@@ -17,6 +17,7 @@ from casingdesign.ratings import (
     collapse_rating,
     pipe_body_yield,
 )
+from casingdesign.ratings.joints import buttress_joint_strength, round_thread_joint_strength
 
 
 @dataclass(frozen=True)
@@ -46,7 +47,12 @@ class PipeItem:
 
 @dataclass(frozen=True)
 class Connection:
+    """A connection type. `kind` selects the API 5C3 joint-strength formula:
+    'round' (STC/LTC), 'buttress' (BTC) or 'efficiency' (joint = efficiency x body yield,
+    for premium/proprietary connections until a datasheet is loaded)."""
+
     name: str
+    kind: str
     tension_efficiency: float
     burst_efficiency: float
     collapse_efficiency: float
@@ -60,6 +66,7 @@ class PipeSpec:
     pipe: PipeItem
     grade: Grade
     connection: Connection
+    engaged_thread_length: float | None = None  # in, round threads only (API 5B)
 
     @property
     def geometry(self) -> PipeGeometry:
@@ -90,6 +97,18 @@ class PipeSpec:
 
     @cached_property
     def joint_strength(self) -> float:
+        """API 5C3 joint strength, lbf (see ratings/joints.py)."""
+        k = self.connection.kind
+        if k == "round":
+            if self.engaged_thread_length is None:
+                raise ValueError(f"no engaged thread length for {self.pipe.od} in "
+                                 f"{self.connection.name}")
+            return round_thread_joint_strength(self.geometry, self.grade.min_yield,
+                                               self.grade.min_tensile,
+                                               self.engaged_thread_length)
+        if k == "buttress":
+            return buttress_joint_strength(self.geometry, self.grade.min_yield,
+                                           self.grade.min_tensile)
         return self.body_yield * self.connection.tension_efficiency
 
     @property
@@ -104,10 +123,12 @@ def _read_csv(name: str) -> list[dict[str, str]]:
 
 class Catalog:
     def __init__(self, grades: Iterable[Grade], pipes: Iterable[PipeItem],
-                 connections: Iterable[Connection]):
+                 connections: Iterable[Connection],
+                 thread_lengths: dict[tuple[float, str], float] | None = None):
         self.grades = {g.name: g for g in grades}
         self.pipes = list(pipes)
         self.connections = {c.name: c for c in connections}
+        self.thread_lengths = thread_lengths or {}
 
     @classmethod
     def default(cls) -> Catalog:
@@ -122,12 +143,19 @@ class Catalog:
             for r in _read_csv("pipe.csv")
         ]
         conns = [
-            Connection(r["connection"], float(r["tension_efficiency"]),
+            Connection(r["connection"], r["kind"], float(r["tension_efficiency"]),
                        float(r["burst_efficiency"]), float(r["collapse_efficiency"]),
                        r.get("notes", ""))
             for r in _read_csv("connections.csv")
         ]
-        return cls(grades, pipes, conns)
+        tl: dict[tuple[float, str], float] = {}
+        for r in _read_csv("thread_lengths.csv"):
+            od = float(r["od_in"])
+            if r["stc_engaged_in"]:
+                tl[(od, "STC")] = float(r["stc_engaged_in"])
+            if r["ltc_engaged_in"]:
+                tl[(od, "LTC")] = float(r["ltc_engaged_in"])
+        return cls(grades, pipes, conns, tl)
 
     def pipe(self, od: float, nominal_weight: float) -> PipeItem:
         for p in self.pipes:
@@ -138,10 +166,13 @@ class Catalog:
     def pipes_for_od(self, od: float) -> list[PipeItem]:
         return [p for p in self.pipes if abs(p.od - od) < 1e-6]
 
+    def _thread_length(self, od: float, connection: str) -> float | None:
+        return self.thread_lengths.get((round(od, 3), connection))
+
     def spec(self, od: float, nominal_weight: float, grade: str,
              connection: str = "BTC") -> PipeSpec:
         return PipeSpec(self.pipe(od, nominal_weight), self.grades[grade],
-                        self.connections[connection])
+                        self.connections[connection], self._thread_length(od, connection))
 
     def candidates(self, od: float, grades: Iterable[str] | None = None,
                    connection: str = "BTC", sour: bool = False) -> list[PipeSpec]:
@@ -153,5 +184,9 @@ class Catalog:
                 grade = self.grades[g]
                 if sour and not grade.sour_service:
                     continue
-                out.append(PipeSpec(p, grade, self.connections[connection]))
+                conn = self.connections[connection]
+                tl = self._thread_length(od, connection)
+                if conn.kind == "round" and tl is None:
+                    continue  # connection not made in this size
+                out.append(PipeSpec(p, grade, conn, tl))
         return out

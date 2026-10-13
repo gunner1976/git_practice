@@ -1,5 +1,5 @@
-connection,tension_efficiency,burst_efficiency,collapse_efficiency,notes
-STC,0.70,1.00,1.00,API short round thread; tension efficiency is a conservative placeholder - replace with API 5C3 joint strength
-LTC,0.80,1.00,1.00,API long round thread; placeholder efficiency
-BTC,1.00,1.00,1.00,API buttress; joint strength ~ body yield for most sizes
-PREMIUM,1.00,1.00,1.00,Generic premium; replace with manufacturer datasheet
+connection,kind,tension_efficiency,burst_efficiency,collapse_efficiency,notes
+STC,round,1.00,1.00,1.00,API short round thread; joint strength per API 5C3 round-thread formulas
+LTC,round,1.00,1.00,1.00,API long round thread; joint strength per API 5C3 round-thread formulas
+BTC,buttress,1.00,1.00,1.00,API buttress; joint strength per API 5C3 buttress formulas
+PREMIUM,efficiency,1.00,1.00,1.00,Generic premium placeholder (joint = body yield); replace with manufacturer datasheet
