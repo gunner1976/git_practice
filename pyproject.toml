@@ -1,0 +1,35 @@
+[project]
+name = "casingdesign"
+version = "0.1.0"
+description = "Casing string design engine for onshore oil and gas wells (API TR 5C3 based)"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "pydantic>=2.5",
+    "typer>=0.12",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-cov", "ruff"]
+
+[project.scripts]
+casingdesign = "casingdesign.cli:app"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["casingdesign*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+ignore = ["B008"]  # typer.Option in defaults is the library's idiom
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # package re-exports
