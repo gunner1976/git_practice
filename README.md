@@ -17,6 +17,7 @@ casingdesign import export.xml --list   # Landmark EDM/COMPASS/StressCheck expor
 pip install -e ".[web]"
 casingdesign serve                    # web app at http://127.0.0.1:8000
 # or: docker build -t casingdesign . && docker run -p 8000:8000 -v casingdesign-data:/data casingdesign
+# hosting options and the optional site passphrase: docs/DEPLOY.md
 ```
 
 All units are US oilfield (ft, psi, ppg, in, lb/ft, lbf). Every rating function cites the

@@ -125,6 +125,17 @@ const Editor = (() => {
     return h('div', {}, h('h3', {}, 'Grades to consider'), h('p', {class: 'muted small'}, 'The optimizer only picks from these. Sour wells automatically exclude non-sour grades.'),
       h('div', {class: 'row'}, ...GRADES.map(g => h('label', {class: 'chip'}, h('input', {type: 'checkbox', checked: well.prefs.grades.includes(g), onchange: e => { const set = new Set(well.prefs.grades); e.target.checked ? set.add(g) : set.delete(g); well.prefs.grades = GRADES.filter(x => set.has(x)); onChange(); }}), g))));
   }
+  const INDEX = {'H-40': 0.95, 'J-55': 1.0, 'K-55': 1.0, 'M-65': 1.05, 'N-80': 1.1, 'L-80': 1.15, 'C-90': 1.35, 'R-95': 1.25, 'T-95': 1.4, 'C-110': 1.6, 'P-110': 1.35, 'Q-125': 1.6};
+  function pricing() {
+    well.prefs = well.prefs || {}; const on = !!well.prefs.price_per_lb;
+    const box = h('div', {});
+    const draw = () => box.replaceChildren(h('h3', {}, 'Pricing'),
+      h('p', {class: 'muted small'}, on ? 'Price per pound by grade. Costs on the design page are shown in money and the optimizer minimises them.' : 'Without prices the optimizer uses a relative cost index (carbon grades ≈ 1.0/lb, premium grades up to 1.6).'),
+      h('div', {class: 'row'}, h('label', {class: 'chip'}, h('input', {type: 'checkbox', checked: on, onchange: e => { well.prefs.price_per_lb = e.target.checked ? Object.fromEntries((well.prefs.grades || Object.keys(INDEX)).map(g => [g, +(INDEX[g] * 1.1).toFixed(2)])) : null; onChange(); render(); }}), 'Use my prices'),
+        on ? h('label', {class: 'f', style: 'width:90px'}, h('span', {}, 'Currency'), input(well.prefs, 'currency', 'text', 'prefs.currency')) : null),
+      on ? h('div', {class: 'grid'}, ...Object.keys(well.prefs.price_per_lb).map(g => h('label', {class: 'f'}, h('span', {}, `${g} (${well.prefs.currency || '$'}/lb)`), input(well.prefs.price_per_lb, g, 'num', 'prefs.price.' + g)))) : null);
+    draw(); return box;
+  }
   function render() {
     if (!root || !well) return;
     pathCounter = 0;
@@ -142,7 +153,7 @@ const Editor = (() => {
         h('label', {class: 'f'}, h('span', {}, 'Derate yield for temperature'), input(w.yield_derating, 'enabled', 'bool')),
         h('label', {class: 'f'}, h('span', {}, 'Derating slope (per °F)'), input(w.yield_derating, 'slope_per_f', 'num'))),
         h('p', {class: 'muted small'}, 'Design factors are minimum rating ÷ load. The defaults are common onshore values; set them to your company standard.'),
-        gradePicker()),
+        gradePicker(), pricing()),
       panel('Trajectory', h('p', {class: 'muted small'}, 'Survey stations, minimum curvature between them. A vertical well needs only surface and TD.'),
         ...issueList('trajectory'),
         table(w.trajectory.stations, [['md', 'MD ft'], ['inclination', 'Inc °'], ['azimuth', 'Azi °']], stationFactory, 'Survey stations')));

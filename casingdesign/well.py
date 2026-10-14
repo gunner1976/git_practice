@@ -246,6 +246,9 @@ class DesignPrefs(BaseModel):
     """User preferences that steer the optimizer (not the physics)."""
 
     grades: list[str] | None = Field(default=None, description="grades the optimizer may pick")
+    price_per_lb: dict[str, float] | None = Field(
+        default=None, description="$/lb by grade; when set, costs are shown in dollars")
+    currency: str = "$"
 
 
 class Well(BaseModel):

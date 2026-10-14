@@ -47,3 +47,15 @@ svg.schematic { width:100%; height:auto; display:block } .schematic .ground { st
 .schematic .cement { fill:#9aa6b4; opacity:.7 } .schematic .casing { fill:var(--panel); stroke:var(--ink); stroke-width:1.5 } .schematic .casing.liner { stroke:var(--accent) }
 .schematic .lbl { font:11px system-ui, sans-serif; fill:var(--ink) } .schematic .lbl.muted { fill:var(--muted) }
 .small.link { font-size:12px }
+
+.guide { border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:8px; padding:8px 14px; margin:0 0 12px; background:var(--accent-soft); font-size:13px }
+.guide ul { margin:4px 0 2px; padding-left:18px } .guide.collapsed { padding:4px 14px }
+.how ol { margin:0; padding-left:20px } .how li { margin:4px 0 }
+@media (max-width:700px) {
+  header { padding:8px 12px; gap:8px } header .muted { display:none } main { padding:10px 10px }
+  .panel { padding:12px; border-radius:8px } .grid { grid-template-columns:repeat(auto-fill,minmax(130px,1fr)) }
+  .steps button { padding:6px 10px; font-size:12px } .hero { padding:14px 4px } .hero p { margin-bottom:10px } button.big { padding:10px 14px; font-size:14px; width:100% }
+  .hero .row { flex-direction:column; align-items:stretch } .hero label.big { text-align:center }
+  table.edit { display:block; overflow-x:auto } table.edit input { width:84px } .plot { height:320px }
+  .projects li { flex-wrap:wrap } .card .dfs { grid-template-columns:repeat(2,1fr) }
+}

@@ -72,3 +72,26 @@ def test_drafts_save_but_design_refuses_invalid(client):
     r = client.post("/api/design", json={"well": well})
     assert r.status_code == 400 and "top of cement" in r.json()["detail"]
     assert client.get(f"/report/{p.json()['id']}").status_code == 400
+
+
+def test_design_uses_prices_when_given(client):
+    well = client.get("/api/example").json()
+    well["prefs"] = {"grades": ["J-55", "L-80", "N-80", "P-110"],
+                     "price_per_lb": {"J-55": 1.0, "L-80": 1.2, "N-80": 1.1, "P-110": 1.4},
+                     "currency": "USD "}
+    d = client.post("/api/design", json={"well": well}).json()
+    assert d["priced"] is True and d["currency"] == "USD "
+    s = d["strings"][0]
+    assert s["cost_per_ft"] > 0 and s["length"] == 2000
+    # 13-3/8 54.5# J-55 at $1/lb -> $54.5/ft
+    assert s["cost_per_ft"] == pytest.approx(54.5, abs=0.01)
+
+
+def test_site_password(client, monkeypatch):
+    monkeypatch.setenv("APP_PASSWORD", "open-sesame")
+    assert client.get("/api/projects").status_code == 401
+    import base64
+    tok = base64.b64encode(b"anyone:open-sesame").decode()
+    assert client.get("/api/projects", headers={"Authorization": f"Basic {tok}"}).status_code == 200
+    bad = base64.b64encode(b"anyone:wrong").decode()
+    assert client.get("/api/projects", headers={"Authorization": f"Basic {bad}"}).status_code == 401

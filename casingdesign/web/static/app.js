@@ -3,6 +3,21 @@ const $ = s => document.querySelector(s);
 const app = $('#app');
 let catalog = null, project = null, designData = null, saveTimer = null, dirty = false;
 const STEPS = [['well', 'Well & design basis'], ['pressures', 'Pressures'], ['strings', 'Casing program'], ['design', 'Design']];
+const GUIDE = {
+  well: ['Set the design factors your company uses (defaults are typical onshore values).', 'Enter the survey: surface and TD are enough for a vertical well; add stations for build and lateral sections.', 'Untick grades you would not run; the optimizer only picks from the ticked ones.'],
+  pressures: ['Pore pressure and fracture gradient as equivalent mud weight versus true vertical depth.', 'Use the prognosis you would use to set casing points; two or three points per curve are usually enough.', 'The chart shows the drilling window; each string\'s mud weight should sit inside it.'],
+  strings: ['One card per string from the surface down. "+ Add next string" proposes the next standard size.', 'Fill the "drilling ahead" fields for strings you drill below (surface, intermediate) and the production fields for the production string or liner.', 'Blank test, kick or production fields simply skip those load cases. Red notes must be fixed; amber ones are advice.'],
+  design: ['Each card is the cheapest pipe that passes every load case; tapered strings are proposed when they save money.', 'Open "Choose a different pipe" to pick from the passing alternatives, or "Show loads & plots" to see what governs.', 'The report prints to PDF from your browser.'],
+};
+function guide(step) {
+  const key = 'guide-hidden-' + step; let hidden = false; try { hidden = localStorage.getItem(key) === '1'; } catch {}
+  const box = h('div', {class: 'guide' + (hidden ? ' collapsed' : '')});
+  const draw = () => box.replaceChildren(
+    h('div', {class: 'row', style: 'justify-content:space-between'}, h('b', {}, hidden ? 'What to enter here' : 'What to enter here'),
+      h('button', {class: 'link small', onclick: () => { hidden = !hidden; try { localStorage.setItem(key, hidden ? '1' : '0'); } catch {} box.classList.toggle('collapsed', hidden); draw(); }}, hidden ? 'show' : 'hide')),
+    hidden ? null : h('ul', {}, ...GUIDE[step].map(t => h('li', {}, t))));
+  draw(); return box;
+}
 
 async function api(path, method = 'GET', body) {
   const r = await fetch(path, {method, headers: body ? {'content-type': 'application/json'} : {}, body: body ? JSON.stringify(body) : undefined});
@@ -36,6 +51,10 @@ async function renderHome() {
         h('button', {class: 'big', onclick: () => newProject('liner')}, '+ Example with frac liner'),
         h('label', {class: 'big', style: 'padding:12px 16px;border:1px solid var(--line);border-radius:7px;cursor:pointer'}, 'Import Landmark EDM…',
           h('input', {type: 'file', accept: '.xml', hidden: true, onchange: e => importEdm(e.target.files[0])})))),
+    h('div', {class: 'panel how'}, h('h2', {}, 'How it works'), h('ol', {},
+      h('li', {}, h('b', {}, 'Describe the well'), ' — trajectory, pore and fracture pressure, casing points and mud weights. Start from an example and change what differs.'),
+      h('li', {}, h('b', {}, 'Design'), ' — every API 5CT pipe in the catalog is checked against the burst, collapse, tension and triaxial load cases for each string; the cheapest that passes is recommended.'),
+      h('li', {}, h('b', {}, 'Review'), ' — see the governing load case and design factor per string, swap pipe if you prefer, print the report.'))),
     h('div', {class: 'panel'}, h('h2', {}, 'Your wells'),
       list.length ? h('ul', {class: 'projects'}, ...list.map(p => h('li', {},
         h('a', {href: `#/p/${p.id}`}, p.name), h('span', {class: 'muted small'}, `${p.strings} strings · TD ${fmt0(p.td)} ft · updated ${new Date(p.updated).toLocaleString()}`),
@@ -80,6 +99,7 @@ function renderProject(step) {
       h('div', {class: 'row'}, h('a', {href: `/report/${project.id}`, target: '_blank'}, h('button', {}, 'Report')),
         h('button', {onclick: () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(w, null, 2)], {type: 'application/json'})); a.download = project.name.replace(/[^\w.-]+/g, '_') + '.json'; a.click(); }}, 'Export JSON'))),
     h('div', {class: 'steps'}, ...STEPS.map(([k, label], i) => h('button', {'aria-current': k === step ? 'step' : null, class: STEPS.findIndex(s => s[0] === step) > i ? 'done' : '', onclick: () => location.hash = `#/p/${project.id}/${k}`}, `${i + 1}. ${label}`))),
+    guide(step),
     h('div', {id: 'step'}));
   const el = $('#step');
   if (step === 'design') renderDesign(el); else { const ed = h('div', {id: 'editor'}); el.append(ed); Editor.mount(ed, markDirty); Editor.set(w, step); Editor.bind(obj => { project.well = obj; }); }
@@ -118,8 +138,9 @@ function stringCard(s) {
   const card = h('div', {class: 'card'});
   card.append(h('div', {class: 'row', style: 'justify-content:space-between'}, h('h3', {}, `${s.string} · ${s.od}"`), r ? h('span', {class: 'badge ' + (r.pass ? 'pass' : 'fail')}, r.pass ? 'PASS' : 'FAIL') : h('span', {class: 'badge fail'}, 'NO PIPE PASSES')));
   if (!r) { card.append(h('p', {class: 'muted small'}, 'No catalog pipe meets the design factors over the full length. Consider a larger OD, a shallower shoe, or relaxing the load basis.')); return card; }
+  const money = (c) => designData.priced ? `${designData.currency}${fmt(c, 2)}/ft · ${designData.currency}${fmt0(c * s.length)} total` : `cost index ${fmt(c, 1)}/ft`;
   card.append(h('div', {class: 'pipe'}, r.design.uniform ? r.spec.label : 'Tapered: ' + r.design.sections.map(x => x.spec.label).join(' / ')),
-    h('div', {class: 'small muted'}, s.overridden ? 'your selection' : (rec ? (rec.kind === 'tapered' ? 'cheapest passing design (tapered)' : 'cheapest passing pipe') : '')),
+    h('div', {class: 'small muted'}, (s.overridden ? 'your selection' : (rec ? (rec.kind === 'tapered' ? 'cheapest passing design (tapered)' : 'cheapest passing pipe') : '')) + (s.cost_per_ft != null ? ' · ' + money(s.cost_per_ft) : '')),
     h('div', {class: 'dfs'}, ...Object.entries(r.summary).map(([k, v]) => h('div', {class: 'df'}, k, h('b', {class: v.pass ? 'pass' : 'fail'}, fmt(v.min_df)), h('span', {class: 'muted'}, `≥ ${v.required} · ${v.case}`)))));
   if (!r.design.uniform) card.append(h('table', {}, h('tbody', {}, ...r.design.sections.map(x => h('tr', {}, h('td', {}, `${fmt0(x.top_md)}–${fmt0(x.bottom_md)} ft`), h('td', {}, x.spec.label))))));
   const pipes = catalog.pipes.filter(p => Math.abs(p.od - s.od) < 1e-6);
@@ -130,7 +151,7 @@ function stringCard(s) {
   const apply = async () => { project.design = project.design || {}; project.design[s.string] = {weight: +wt.value, grade: gr.value, connection: cn.value}; dirty = true; designData = null; await save(); renderDesign($('#step')); };
   card.append(h('details', {}, h('summary', {}, 'Choose a different pipe', h('span', {class: 'muted small'}, `${s.alternatives.length} passing uniform options`)),
     h('div', {class: 'row'}, wt, gr, cn, h('button', {onclick: apply}, 'Use')),
-    s.alternatives.length ? h('table', {}, h('tbody', {}, ...s.alternatives.map(a => h('tr', {}, h('td', {}, a.design.label), h('td', {class: 'muted small'}, `cost idx ${fmt(a.cost_per_ft, 1)}/ft`), h('td', {}, h('button', {class: 'link', onclick: () => { wt.value = a.design.sections[0].spec.weight; gr.value = a.design.sections[0].spec.grade; cn.value = a.design.sections[0].spec.connection; apply(); }}, 'use')))))) : null));
+    s.alternatives.length ? h('table', {}, h('tbody', {}, ...s.alternatives.map(a => h('tr', {}, h('td', {}, a.design.label), h('td', {class: 'muted small'}, money(a.cost_per_ft)), h('td', {}, h('button', {class: 'link', onclick: () => { wt.value = a.design.sections[0].spec.weight; gr.value = a.design.sections[0].spec.grade; cn.value = a.design.sections[0].spec.connection; apply(); }}, 'use')))))) : null));
   card.append(h('button', {class: 'link', onclick: () => showDetail(s)}, 'Show loads & plots ↓'));
   return card;
 }

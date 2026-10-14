@@ -28,6 +28,31 @@ from casingdesign.well import Well
 
 STATIC = Path(__file__).parent / "static"
 app = FastAPI(title="casingdesign", version="0.1.0")
+
+
+@app.middleware("http")
+async def _site_password(request, call_next):
+    """Optional single passphrase (APP_PASSWORD) for a hosted instance - not accounts,
+    just a gate. HTTP Basic: any user name, the passphrase as password."""
+    import base64
+    import os
+    import secrets
+
+    from fastapi.responses import Response
+    pw = os.environ.get("APP_PASSWORD")
+    if pw:
+        auth = request.headers.get("authorization", "")
+        ok = False
+        if auth.lower().startswith("basic "):
+            try:
+                _, _, given = base64.b64decode(auth[6:]).decode().partition(":")
+                ok = secrets.compare_digest(given, pw)
+            except (ValueError, UnicodeDecodeError):  # malformed header
+                ok = False
+        if not ok:
+            return Response("Enter the site passphrase.", status_code=401,
+                            headers={"WWW-Authenticate": 'Basic realm="casingdesign"'})
+    return await call_next(request)
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 catalog = Catalog.default()
 store = ProjectStore()
@@ -155,11 +180,15 @@ def design(req: DesignRequest) -> dict:
     grades = req.grades or req.well.prefs.grades or None
     if grades:
         grades = [g for g in grades if g in catalog.grades] or None
+    prices = req.well.prefs.price_per_lb or None
+    if prices:
+        prices = {g: v for g, v in prices.items() if v and v > 0} or None
     for s in req.well.strings:
         uniform = optimize_string(req.well, s, catalog, grades=grades, connection=req.connection,
-                                  max_results=3)
+                                  price_per_lb=prices, max_results=3)
         tapered = (optimize_tapered(req.well, s, catalog, grades=grades, connection=req.connection,
-                                    max_sections=req.max_sections) if req.tapered else None)
+                                    price_per_lb=prices, max_sections=req.max_sections)
+                   if req.tapered else None)
         rec = None
         if tapered is not None and (not uniform or tapered.cost_per_ft < uniform[0].cost_per_ft - 1e-9):
             rec = {"kind": "tapered", "design": design_dict(tapered.design),
@@ -181,19 +210,24 @@ def design(req: DesignRequest) -> dict:
         except (KeyError, ValueError) as e:
             raise HTTPException(400, f"{s.name}: {e}") from e
         result = None
+        cost = None
         if dsg is not None:
+            from casingdesign.design.optimize import design_cost
+            cost = design_cost(dsg, prices) / max(s.shoe_md - s.hanger_md, 1.0)
             cases = standard_load_cases(req.well, s, inner_diameter=dsg.sections[0].spec.pipe.id)
             r = evaluate_design(req.well, s, dsg, cases)
             axial = {c.name: _axial_for(c, req.well, s, dsg) for c in cases}
             result = result_dict(r, cases, axial, req.well)
         out.append({
             "string": s.name, "od": s.od, "top_md": s.hanger_md, "shoe_md": s.shoe_md,
-            "recommended": rec, "overridden": bool(ch),
+            "recommended": rec, "overridden": bool(ch), "cost_per_ft": cost,
+            "length": s.shoe_md - s.hanger_md,
             "alternatives": [{"design": design_dict(c.design), "cost_per_ft": c.cost_per_ft,
                               "summary": c.result.summary} for c in uniform],
             "result": result,
         })
-    return {"well": req.well.name, "strings": out, "warnings": req.well.warnings()}
+    return {"well": req.well.name, "strings": out, "warnings": req.well.warnings(),
+            "priced": prices is not None, "currency": req.well.prefs.currency}
 
 
 # ---------------------------------------------------------------------------
