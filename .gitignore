@@ -6,3 +6,4 @@ build/
 dist/
 example_well.json
 results.json
+casingdesign.db

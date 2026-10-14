@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Casing Design</title>
+<script src="/static/plotly.min.js"></script>
+<script src="/static/editor.js"></script>
+<style>
+  :root { --bg:#f6f7f9; --panel:#fff; --ink:#1c2430; --muted:#5f6b7a; --line:#dde2e8;
+          --ok:#1e8e4f; --bad:#c0392b; --accent:#1f5fbf; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg:#13181f; --panel:#1b222c; --ink:#e7ecf2; --muted:#9aa6b4; --line:#2b3542; } }
+  :root[data-theme="dark"] { --bg:#13181f; --panel:#1b222c; --ink:#e7ecf2; --muted:#9aa6b4; --line:#2b3542; }
+  * { box-sizing:border-box }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.45 system-ui, sans-serif; }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); display:flex; gap:16px; align-items:baseline }
+  header h1 { margin:0; font-size:18px } header span { color:var(--muted) }
+  main { display:grid; grid-template-columns: 470px 1fr; gap:16px; padding:16px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr } }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px; }
+  h2 { font-size:14px; margin:0 0 10px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted) }
+  textarea { width:100%; height:420px; font:12px/1.4 ui-monospace, monospace; background:var(--bg);
+             color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:8px; }
+  select, button, input { font:inherit; padding:6px 8px; border:1px solid var(--line); border-radius:6px;
+             background:var(--bg); color:var(--ink); }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); cursor:pointer }
+  button { cursor:pointer }
+  .row { display:flex; gap:8px; align-items:center; margin:6px 0; flex-wrap:wrap }
+  .row label { min-width:100px; color:var(--muted) }
+  table { border-collapse:collapse; width:100%; margin-top:8px }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); font-variant-numeric:tabular-nums }
+  th { color:var(--muted); font-weight:600; font-size:12px }
+  .pass { color:var(--ok); font-weight:600 } .fail { color:var(--bad); font-weight:600 }
+  .plots { display:grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap:12px; margin-top:12px }
+  .plot { height:420px }
+  .muted { color:var(--muted) } .err { color:var(--bad); white-space:pre-wrap }
+  .tabs { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap }
+  .tabs button[aria-selected="true"] { background:var(--accent); color:#fff; border-color:var(--accent) }
+  .taper { font-size:12px; color:var(--accent) }
+  .warn { color:#9a6400; font-size:13px; margin:2px 0 8px }
+  #form { max-height: 62vh; overflow:auto; padding-right:4px }
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap:6px 10px; margin:6px 0 }
+  .f { display:flex; flex-direction:column; gap:2px; font-size:12px; color:var(--muted) }
+  .f.wide { grid-column: 1 / -1 }
+  .f input, .f select { width:100%; padding:4px 6px; font-size:13px; color:var(--ink) }
+  .f input[type=checkbox] { width:auto; align-self:flex-start; margin-top:6px }
+  h3 { font-size:13px; margin:10px 0 2px } h4 { font-size:12px; color:var(--muted); margin:8px 0 0; font-weight:600 }
+  table.edit td { padding:2px 4px } table.edit input { width:90px; padding:3px 5px }
+  button.x { padding:0 7px; line-height:20px; color:var(--bad); border-color:transparent; background:transparent; font-size:16px }
+  details { border:1px solid var(--line); border-radius:6px; padding:6px 10px; margin:6px 0 }
+  summary { cursor:pointer; display:flex; justify-content:space-between; align-items:center }
+</style>
+</head>
+<body>
+<header><h1>Casing Design</h1><span>API TR 5C3 · onshore, non-thermal · US oilfield units</span></header>
+<main>
+  <section class="panel">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">Well</h2>
+      <div class="tabs" style="margin:0"><button id="tab-form" aria-selected="true">Form</button><button id="tab-json" aria-selected="false">JSON</button></div></div>
+    <div id="form"></div>
+    <textarea id="well" spellcheck="false" hidden></textarea>
+    <div class="row"><select id="example"><option value="horizontal">Horizontal well</option><option value="liner">Well with frac liner</option></select>
+      <button id="load-example">Load example</button>
+      <button id="download">Download JSON</button><span class="muted" id="well-status"></span></div>
+    <div class="row"><label for="edm" class="muted">Import Landmark EDM/StressCheck export:</label>
+      <input type="file" id="edm" accept=".xml"><select id="edm-wellbore" hidden></select></div>
+    <div id="import-notes" class="muted" style="font-size:12px"></div>
+    <h2 style="margin-top:14px">Pipe selection</h2>
+    <div id="specs"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="primary" id="run">Evaluate</button>
+      <button id="optimize">Optimize (cheapest passing)</button>
+    </div>
+    <div class="err" id="error"></div>
+  </section>
+  <section class="panel" id="results">
+    <h2>Results</h2>
+    <p class="muted">Load the example or paste a well, choose pipe for each string and evaluate. ★ in the optimizer marks the cheapest tapered design.</p>
+  </section>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+let catalog = null, lastEval = null;
+
+async function api(path, body) {
+  const r = await fetch(path, body ? {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(body)} : {});
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+let jsonMode = false;
+function parseWell() {
+  if (jsonMode) {
+    try { return JSON.parse($('#well').value); } catch (e) { throw new Error('Well JSON invalid: ' + e.message); }
+  }
+  return Editor.get();
+}
+function showTab(json) {
+  if (json && !jsonMode) $('#well').value = JSON.stringify(Editor.get(), null, 2);
+  if (!json && jsonMode) { try { Editor.set(JSON.parse($('#well').value)); renderSpecRows(Editor.get()); } catch (e) { $('#error').textContent = 'Well JSON invalid: ' + e.message; return; } }
+  jsonMode = json; $('#form').hidden = json; $('#well').hidden = !json;
+  $('#tab-form').setAttribute('aria-selected', !json); $('#tab-json').setAttribute('aria-selected', json);
+}
+function stringsOf(well) { return (well.strings || []); }
+
+function renderSpecRows(well) {
+  const box = $('#specs'); box.innerHTML = '';
+  for (const s of stringsOf(well)) {
+    const pipes = catalog.pipes.filter(p => Math.abs(p.od - s.od) < 1e-6);
+    const row = document.createElement('div'); row.className = 'row'; row.dataset.string = s.name;
+    row.innerHTML = `<label>${s.name} (${s.od}")</label>
+      <select class="wt">${pipes.map(p => `<option value="${p.weight}">${p.weight}#</option>`).join('')}</select>
+      <select class="gr">${catalog.grades.map(g => `<option ${g==='L-80'?'selected':''}>${g}</option>`).join('')}</select>
+      <select class="cn">${catalog.connections.map(c => `<option ${c==='BTC'?'selected':''}>${c}</option>`).join('')}</select>`;
+    box.appendChild(row);
+  }
+}
+const tapered = {};   // string name -> sections chosen from the optimizer
+function readSpecs() {
+  const well = parseWell();
+  return [...document.querySelectorAll('#specs .row')].map(r => {
+    const name = r.dataset.string, od = stringsOf(well).find(s => s.name === name).od;
+    if (tapered[name]) return {string: name, od, sections: tapered[name]};
+    return {string: name, od, weight: +r.querySelector('.wt').value, grade: r.querySelector('.gr').value, connection: r.querySelector('.cn').value};
+  });
+}
+function markTapered(name) {
+  const r = document.querySelector(`#specs .row[data-string="${name}"]`); if (!r) return;
+  let tag = r.querySelector('.taper'); 
+  if (tapered[name]) {
+    if (!tag) { tag = document.createElement('button'); tag.className = 'taper'; r.appendChild(tag); }
+    tag.textContent = `tapered (${tapered[name].length}) ✕`; tag.title = 'click to go back to uniform pipe';
+    tag.onclick = () => { delete tapered[name]; markTapered(name); };
+  } else if (tag) tag.remove();
+}
+function setSpec(name, weight, grade, connection) {
+  const r = document.querySelector(`#specs .row[data-string="${name}"]`); if (!r) return;
+  delete tapered[name]; markTapered(name);
+  r.querySelector('.wt').value = weight; r.querySelector('.gr').value = grade; r.querySelector('.cn').value = connection;
+}
+function setTapered(name, sections) {
+  tapered[name] = sections.map(s => ({top_md: s.top_md, bottom_md: s.bottom_md, weight: s.spec.weight, grade: s.spec.grade, connection: s.spec.connection}));
+  markTapered(name);
+}
+
+const fmt = (x, d=2) => x == null ? '∞' : x.toLocaleString(undefined, {maximumFractionDigits:d, minimumFractionDigits:d});
+const fmt0 = x => x == null ? '—' : Math.round(x).toLocaleString();
+
+function renderResults(data) {
+  lastEval = data;
+  const root = $('#results');
+  const warn = (data.warnings || []).map(w => `<div class="warn">⚠ ${w}</div>`).join('');
+  root.innerHTML = `<h2>Results · ${data.well}</h2>${warn}<div class="tabs" id="tabs"></div><div id="detail"></div>`;
+  const tabs = $('#tabs');
+  data.results.forEach((r, i) => {
+    const b = document.createElement('button'); b.textContent = `${r.string}: ${r.design.uniform ? r.spec.label : 'tapered'} ${r.pass ? '✓' : '✗'}`;
+    b.className = r.pass ? 'pass' : 'fail'; b.setAttribute('aria-selected', i === 0);
+    b.onclick = () => { [...tabs.children].forEach(c => c.setAttribute('aria-selected', c === b)); renderDetail(r); };
+    tabs.appendChild(b);
+  });
+  if (data.results.length) renderDetail(data.results[0]);
+}
+
+function renderDetail(r) {
+  const d = $('#detail'); const s = r.spec;
+  const rows = Object.entries(r.summary).map(([k, v]) =>
+    `<tr><td>${k}</td><td>${fmt(v.min_df)}</td><td>${fmt(v.required)}</td><td>${v.case}</td><td>${fmt0(v.md)}</td>
+     <td class="${v.pass ? 'pass' : 'fail'}">${v.pass ? 'PASS' : 'FAIL'}</td></tr>`).join('');
+  const secs = r.design.sections.map(x => `<tr><td>${fmt0(x.top_md)}–${fmt0(x.bottom_md)}</td><td>${x.spec.label}</td><td>${x.spec.id.toFixed(3)}"</td>
+     <td>${fmt0(x.spec.burst)}</td><td>${fmt0(x.spec.collapse)}</td><td>${fmt0(x.spec.body_yield)}</td><td>${fmt0(x.spec.joint_strength)}</td></tr>`).join('');
+  const tp = r.temperature; const tmax = tp ? Math.max(...tp.temperature_f) : null; const fmin = tp ? Math.min(...tp.yield_factor) : 1;
+  const tnote = tp ? `<p class="muted">Static temperature to ${fmt0(tmax)} °F at the shoe · yield derated to ${(100*fmin).toFixed(1)}% there${fmin === 1 ? ' (derating off or not reached)' : ''}</p>` : '';
+  d.innerHTML = tnote + `
+    <table><thead><tr><th>MD (ft)</th><th>Pipe</th><th>ID</th><th>Burst psi</th><th>Collapse psi</th><th>Body yield lbf</th><th>Joint lbf</th></tr></thead><tbody>${secs}</tbody></table>
+    <table><thead><tr><th>Check</th><th>Min DF</th><th>Required</th><th>Governing case</th><th>MD (ft)</th><th></th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    <div class="plots">
+      <div class="plot" id="p-burst"></div><div class="plot" id="p-collapse"></div>
+      <div class="plot" id="p-tension"></div><div class="plot" id="p-vme"></div>
+    </div>`;
+  plotCheck('p-burst', r, 'burst', 'Burst: differential pressure (psi)');
+  plotCheck('p-collapse', r, 'collapse', 'Collapse: differential pressure (psi)');
+  plotCheck('p-tension', r, 'tension', 'Tension: axial load (lbf)');
+  plotEllipse('p-vme', r);
+}
+
+const palette = ['#1f5fbf','#d35400','#1e8e4f','#8e44ad','#c0392b','#16a085','#7f8c8d','#b7950b'];
+const layoutBase = (title, xTitle) => ({
+  title: {text: title, font:{size:13}}, margin:{l:60,r:20,t:40,b:50}, paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
+  font:{color: getComputedStyle(document.body).color},
+  xaxis:{title:xTitle, gridcolor:'rgba(128,128,128,.25)', zeroline:false},
+  yaxis:{title:'MD (ft)', autorange:'reversed', gridcolor:'rgba(128,128,128,.25)'},
+  legend:{orientation:'h', y:-0.2, font:{size:11}} });
+
+function plotCheck(id, r, check, title) {
+  const req = r.summary[check].required;
+  const checks = r.checks.filter(c => c.check === check && c.load.some(x => x > 0));
+  const traces = checks.map((c, i) => ({x: c.load, y: c.md, name: c.case, mode:'lines', line:{color: palette[i % palette.length], width:2}}));
+  const rating = r.checks.find(c => c.check === check);
+  traces.push({x: rating.rating.map(x => x / req), y: rating.md, name: `Rating / DF ${req}`, mode:'lines', line:{color:'#000', dash:'dash', width:2}});
+  traces.push({x: rating.rating, y: rating.md, name: 'Rating', mode:'lines', line:{color:'#888', dash:'dot', width:1}});
+  Plotly.newPlot(id, traces, layoutBase(title, title.split(':')[1]), {responsive:true, displaylogo:false});
+}
+
+function plotEllipse(id, r) {
+  const s = r.spec, Yp = s.yield, req = r.summary.triaxial.required;
+  const ro = s.od/2, ri = s.id/2, area = Math.PI*(ro*ro - ri*ri);
+  const k = (ro*ro + ri*ri)/(ro*ro - ri*ri);            // inner-wall hoop per unit ΔP (Pe=0)
+  const Y = Yp / req;                                   // allowable VME
+  const xs = [], up = [], dn = [];
+  for (let i = 0; i <= 200; i++) {
+    const sa = -Y*2/Math.sqrt(3) + i*(2*Y*2/Math.sqrt(3))/200;
+    const disc = Y*Y - 0.75*sa*sa; if (disc < 0) continue;
+    const root = Math.sqrt(disc);
+    xs.push(sa*area/1000); up.push((sa/2 + root)/k); dn.push((sa/2 - root)/k);
+  }
+  const traces = [
+    {x: xs.concat([...xs].reverse()), y: up.concat([...dn].reverse()), mode:'lines', name:`Triaxial limit / DF ${req}`, line:{color:'#000', width:2}},
+    {x: [-s.body_yield/1000, s.tension_rating/1000, s.tension_rating/1000, -s.body_yield/1000, -s.body_yield/1000],
+     y: [s.burst/r.summary.burst.required, s.burst/r.summary.burst.required, -s.collapse/r.summary.collapse.required, -s.collapse/r.summary.collapse.required, s.burst/r.summary.burst.required],
+     mode:'lines', name:'API uniaxial limits / DF', line:{color:'#888', dash:'dash'}},
+  ];
+  r.cases.forEach((c, i) => {
+    traces.push({x: c.axial.map(f => f/1000), y: c.internal.map((p, j) => p - c.external[j]),
+      mode:'markers', name: c.name, marker:{size:5, color: palette[i % palette.length]}});
+  });
+  Plotly.newPlot(id, traces, {
+    title:{text:'Design envelope (triaxial, inner wall)', font:{size:13}}, margin:{l:60,r:20,t:40,b:50},
+    paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)', font:{color:getComputedStyle(document.body).color},
+    xaxis:{title:'Axial load (klbf, tension +)', gridcolor:'rgba(128,128,128,.25)', zeroline:true},
+    yaxis:{title:'Differential pressure Pi − Pe (psi)', gridcolor:'rgba(128,128,128,.25)', zeroline:true},
+    legend:{orientation:'h', y:-0.2, font:{size:11}} }, {responsive:true, displaylogo:false});
+}
+
+function renderOptimize(data) {
+  const root = $('#results');
+  let html = `<h2>Cheapest passing designs · ${data.well}</h2>`;
+  for (const [name, cands] of Object.entries(data.candidates)) {
+    html += `<h3 style="margin:14px 0 4px;font-size:14px">${name}</h3>`;
+    if (!cands.length) { html += '<p class="fail">No catalog item passes.</p>'; continue; }
+    html += `<table><thead><tr><th>#</th><th>Pipe</th><th>Cost idx /ft</th><th>Burst</th><th>Collapse</th><th>Tension</th><th>Triaxial</th><th></th></tr></thead><tbody>` +
+      cands.map((c, i) => `<tr><td>${c.tapered ? '★' : i + (cands[0].tapered ? 0 : 1)}</td><td>${c.design.uniform ? c.spec.label : c.design.label}</td><td>${fmt(c.cost_per_ft,1)}</td>
+        <td>${fmt(c.summary.burst.min_df)}</td><td>${fmt(c.summary.collapse.min_df)}</td><td>${fmt(c.summary.tension.min_df)}</td><td>${fmt(c.summary.triaxial.min_df)}</td>
+        <td><button data-use='${JSON.stringify(c.design.uniform ? [name, c.spec.weight, c.spec.grade, c.spec.connection] : [name, c.design.sections])}'>Use</button></td></tr>`).join('') + '</tbody></table>';
+  }
+  root.innerHTML = html;
+  root.querySelectorAll('button[data-use]').forEach(b => b.onclick = () => {
+    const u = JSON.parse(b.dataset.use); if (Array.isArray(u[1])) setTapered(u[0], u[1]); else setSpec(...u); run(); });
+}
+
+async function run() {
+  $('#error').textContent = '';
+  try { renderResults(await api('/api/evaluate', {well: parseWell(), specs: readSpecs()})); }
+  catch (e) { $('#error').textContent = e.message; }
+}
+async function optimize() {
+  $('#error').textContent = '';
+  try { renderOptimize(await api('/api/optimize', {well: parseWell(), top: 5})); }
+  catch (e) { $('#error').textContent = e.message; }
+}
+async function loadExample() {
+  const w = await api('/api/example?name=' + $('#example').value); Editor.set(w); $('#well').value = JSON.stringify(w, null, 2);
+  renderSpecRows(w); $('#well-status').textContent = `${w.strings.length} strings`;
+}
+function syncFromForm() {
+  const w = Editor.get(); $('#well').value = JSON.stringify(w, null, 2);
+  // Keep pipe pickers in step with string list / ODs, preserving choices by name.
+  const prev = Object.fromEntries([...document.querySelectorAll('#specs .row')].map(r =>
+    [r.dataset.string, [r.querySelector('.wt').value, r.querySelector('.gr').value, r.querySelector('.cn').value]]));
+  renderSpecRows(w);
+  for (const [name, [wt, gr, cn]] of Object.entries(prev)) { const r = document.querySelector(`#specs .row[data-string="${name}"]`);
+    if (r && [...r.querySelector('.wt').options].some(o => o.value === wt)) { r.querySelector('.wt').value = wt; r.querySelector('.gr').value = gr; r.querySelector('.cn').value = cn; } }
+  for (const name of Object.keys(tapered)) if (!w.strings.some(s => s.name === name)) delete tapered[name];
+  $('#well-status').textContent = `${w.strings.length} strings`;
+}
+async function importEdm(wellbore) {
+  const f = $('#edm').files[0]; if (!f) return;
+  $('#error').textContent = ''; $('#import-notes').textContent = 'importing…';
+  const fd = new FormData(); fd.append('file', f);
+  const q = wellbore ? '?wellbore=' + encodeURIComponent(wellbore) : '';
+  const r = await fetch('/api/import' + q, {method: 'POST', body: fd});
+  if (!r.ok) { $('#error').textContent = await r.text(); $('#import-notes').textContent = ''; return; }
+  const d = await r.json();
+  Editor.set(d.well); $('#well').value = JSON.stringify(d.well, null, 2); renderSpecRows(d.well);
+  for (const [name, sp] of Object.entries(d.specs)) setSpec(name, sp.weight, sp.grade, sp.connection);
+  $('#well-status').textContent = `${d.well.strings.length} strings (imported)`;
+  const sel = $('#edm-wellbore'); sel.hidden = d.wellbores.length < 2;
+  sel.innerHTML = d.wellbores.map(w => `<option value="${w.id}" ${w.name === d.well.name.replace(w.well + ' ', '') ? 'selected' : ''}>${w.name}</option>`).join('');
+  const cmp = d.rating_comparison.map(c => `${c.string}: stored/ours burst ${fmt0(c.burst_stored)}/${fmt0(c.burst_ours)} · collapse ${fmt0(c.collapse_stored)}/${fmt0(c.collapse_ours)} psi`).join('<br>');
+  $('#import-notes').innerHTML = d.warnings.map(w => '• ' + w).join('<br>') + (cmp ? '<br><b>Ratings check</b><br>' + cmp : '');
+}
+$('#edm').onchange = () => importEdm(); $('#edm-wellbore').onchange = e => importEdm(e.target.value);
+$('#load-example').onclick = loadExample; $('#run').onclick = run; $('#optimize').onclick = optimize;
+$('#tab-form').onclick = () => showTab(false); $('#tab-json').onclick = () => showTab(true);
+$('#download').onclick = () => { const w = parseWell(); const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(w, null, 2)], {type: 'application/json'}));
+  a.download = (w.name || 'well').replace(/[^\w.-]+/g, '_') + '.json'; a.click(); };
+$('#well').addEventListener('change', () => { try { renderSpecRows(parseWell()); } catch (e) { $('#error').textContent = e.message; } });
+Editor.mount($('#form'), syncFromForm);
+(async () => { catalog = await api('/api/catalog'); await loadExample(); })();
+</script>
+</body>
+</html>

@@ -7,7 +7,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -23,12 +23,14 @@ from casingdesign.design.evaluate import _axial_for
 from casingdesign.examples import onshore_horizontal_well, onshore_liner_well
 from casingdesign.loads.cases import standard_load_cases
 from casingdesign.web.serialize import design_dict, result_dict, spec_dict
+from casingdesign.web.store import ProjectStore
 from casingdesign.well import Well
 
 STATIC = Path(__file__).parent / "static"
 app = FastAPI(title="casingdesign", version="0.1.0")
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 catalog = Catalog.default()
+store = ProjectStore()
 
 
 class SectionChoice(BaseModel):
@@ -68,6 +70,136 @@ class OptimizeRequest(BaseModel):
 @app.get("/")
 def index():
     return FileResponse(STATIC / "index.html")
+
+
+@app.get("/legacy")
+def legacy():
+    return FileResponse(STATIC / "legacy.html")
+
+
+# ---------------------------------------------------------------------------
+# Projects
+# ---------------------------------------------------------------------------
+class ProjectIn(BaseModel):
+    name: str | None = None
+    well: Well | None = None
+    design: dict | None = None  # string name -> SpecChoice-like dict (uniform or sections)
+
+
+@app.get("/api/projects")
+def list_projects() -> list[dict]:
+    return store.list()
+
+
+@app.post("/api/projects")
+def create_project(body: ProjectIn) -> dict:
+    well = body.well or onshore_horizontal_well()
+    return store.create(body.name or well.name, well.model_dump(), body.design)
+
+
+@app.get("/api/projects/{pid}")
+def get_project(pid: str) -> dict:
+    p = store.get(pid)
+    if p is None:
+        raise HTTPException(404, "no such project")
+    return p
+
+
+@app.put("/api/projects/{pid}")
+def update_project(pid: str, body: ProjectIn) -> dict:
+    p = store.update(pid, body.name, body.well.model_dump() if body.well else None, body.design)
+    if p is None:
+        raise HTTPException(404, "no such project")
+    return p
+
+
+@app.delete("/api/projects/{pid}")
+def delete_project(pid: str) -> dict:
+    if not store.delete(pid):
+        raise HTTPException(404, "no such project")
+    return {"deleted": pid}
+
+
+# ---------------------------------------------------------------------------
+# One-shot design: optimise every string, evaluate the chosen/recommended pipe
+# ---------------------------------------------------------------------------
+class DesignRequest(BaseModel):
+    well: Well
+    choices: dict[str, dict] | None = None  # overrides per string (SpecChoice fields)
+    connection: str = "BTC"
+    tapered: bool = True
+    max_sections: int = 3
+
+
+def _design_from_choice(s, ch: dict) -> StringDesign:
+    if ch.get("sections"):
+        return StringDesign(tuple(
+            Section(sec["top_md"], sec["bottom_md"],
+                    catalog.spec(s.od, sec["weight"], sec["grade"], sec.get("connection", "BTC")))
+            for sec in ch["sections"]))
+    return StringDesign.uniform(s.hanger_md, s.shoe_md,
+                                catalog.spec(s.od, ch["weight"], ch["grade"],
+                                             ch.get("connection", "BTC")))
+
+
+@app.post("/api/design")
+def design(req: DesignRequest) -> dict:
+    """For each string: the cheapest passing uniform pipe, the cheapest tapered design,
+    and a full evaluation of the chosen pipe (user override, else recommendation)."""
+    out = []
+    choices = req.choices or {}
+    for s in req.well.strings:
+        uniform = optimize_string(req.well, s, catalog, connection=req.connection, max_results=3)
+        tapered = (optimize_tapered(req.well, s, catalog, connection=req.connection,
+                                    max_sections=req.max_sections) if req.tapered else None)
+        rec = None
+        if tapered is not None and (not uniform or tapered.cost_per_ft < uniform[0].cost_per_ft - 1e-9):
+            rec = {"kind": "tapered", "design": design_dict(tapered.design),
+                   "cost_per_ft": tapered.cost_per_ft, "summary": tapered.result.summary}
+        elif uniform:
+            rec = {"kind": "uniform", "design": design_dict(uniform[0].design),
+                   "cost_per_ft": uniform[0].cost_per_ft, "summary": uniform[0].result.summary}
+        # What to evaluate in full: the user's choice if given, else the recommendation.
+        ch = choices.get(s.name)
+        try:
+            if ch:
+                dsg = _design_from_choice(s, ch)
+            elif tapered is not None and rec and rec["kind"] == "tapered":
+                dsg = tapered.design
+            elif uniform:
+                dsg = uniform[0].design
+            else:
+                dsg = None
+        except (KeyError, ValueError) as e:
+            raise HTTPException(400, f"{s.name}: {e}") from e
+        result = None
+        if dsg is not None:
+            cases = standard_load_cases(req.well, s, inner_diameter=dsg.sections[0].spec.pipe.id)
+            r = evaluate_design(req.well, s, dsg, cases)
+            axial = {c.name: _axial_for(c, req.well, s, dsg) for c in cases}
+            result = result_dict(r, cases, axial, req.well)
+        out.append({
+            "string": s.name, "od": s.od, "top_md": s.hanger_md, "shoe_md": s.shoe_md,
+            "recommended": rec, "overridden": bool(ch),
+            "alternatives": [{"design": design_dict(c.design), "cost_per_ft": c.cost_per_ft,
+                              "summary": c.result.summary} for c in uniform],
+            "result": result,
+        })
+    return {"well": req.well.name, "strings": out, "warnings": req.well.warnings()}
+
+
+# ---------------------------------------------------------------------------
+# Printable report
+# ---------------------------------------------------------------------------
+@app.get("/report/{pid}", response_class=HTMLResponse)
+def report(pid: str) -> str:
+    from casingdesign.web.report import render_report
+    p = store.get(pid)
+    if p is None:
+        raise HTTPException(404, "no such project")
+    well = Well.model_validate(p["well"])
+    data = design(DesignRequest(well=well, choices=p.get("design") or None))
+    return render_report(p, well, data)
 
 
 EXAMPLES = {"horizontal": onshore_horizontal_well, "liner": onshore_liner_well}

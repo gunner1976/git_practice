@@ -1,13 +1,14 @@
-// Well-plan form editor. `well` (a plain object matching casingdesign.well.Well) is the
-// single source of truth; the form and the JSON view are two renderings of it.
+// Well-plan form editor. Edits the well object in place; `section` selects which part
+// of the form to show ('well' | 'pressures' | 'strings' | null for everything).
 const Editor = (() => {
-  let well = null, onChange = () => {};
+  let well = null, root = null, section = null, onChangeCb = () => {}, onBind = () => {};
+  const onChange = () => { onBind(well); onChangeCb(); };
   const num = v => (v === '' || v == null) ? null : +v;
 
   const STRING_FIELDS = [
     ['name', 'Name', 'text'], ['type', 'Type', ['surface', 'intermediate', 'production', 'liner', 'conductor']],
     ['od', 'OD (in)', 'num'], ['hole_size', 'Hole (in)', 'num'],
-    ['hanger_md', 'Hanger MD', 'num'], ['shoe_md', 'Shoe MD', 'num'], ['toc_md', 'TOC MD', 'num'],
+    ['hanger_md', 'Top MD (liners)', 'num'], ['shoe_md', 'Shoe MD', 'num'], ['toc_md', 'TOC MD', 'num'],
     ['mud_weight', 'Mud (ppg)', 'num'], ['cement_lead_ppg', 'Lead (ppg)', 'num'],
     ['cement_tail_ppg', 'Tail (ppg)', 'num'], ['tail_length', 'Tail length (ft)', 'num'],
     ['overpull', 'Overpull (lbf)', 'num'], ['pressure_test', 'Test (psi)', 'num'],
@@ -26,83 +27,44 @@ const Editor = (() => {
   const h = (tag, attrs = {}, ...kids) => {
     const el = document.createElement(tag);
     for (const [k, v] of Object.entries(attrs)) {
-      if (k === 'class') el.className = v; else if (k.startsWith('on')) el[k] = v; else el.setAttribute(k, v);
+      if (k === 'class') el.className = v; else if (k.startsWith('on')) el[k] = v; else if (v != null && v !== false) el.setAttribute(k, v === true ? '' : v);
     }
-    for (const k of kids.flat()) el.append(k instanceof Node ? k : document.createTextNode(String(k)));
+    for (const k of kids.flat()) if (k != null) el.append(k instanceof Node ? k : document.createTextNode(String(k)));
     return el;
   };
 
   function input(obj, key, kind) {
     if (Array.isArray(kind)) {
-      const sel = h('select', {onchange: e => { obj[key] = e.target.value; onChange(); }},
-        ...kind.map(o => h('option', {value: o, ...(obj[key] === o ? {selected: ''} : {})}, o)));
-      return sel;
+      return h('select', {onchange: e => { obj[key] = e.target.value; onChange(); }},
+        ...kind.map(o => h('option', {value: o, selected: obj[key] === o}, o)));
     }
     if (kind === 'bool') {
-      return h('input', {type: 'checkbox', ...(obj[key] ? {checked: ''} : {}),
-        onchange: e => { obj[key] = e.target.checked; onChange(); }});
+      return h('input', {type: 'checkbox', checked: !!obj[key], onchange: e => { obj[key] = e.target.checked; onChange(); }});
     }
-    return h('input', {type: kind === 'num' ? 'number' : 'text', step: 'any',
-      value: obj[key] == null ? '' : obj[key],
+    return h('input', {type: kind === 'num' ? 'number' : 'text', step: 'any', value: obj[key] == null ? '' : obj[key],
       onchange: e => { obj[key] = kind === 'num' ? num(e.target.value) : e.target.value; onChange(); }});
   }
-
-  function fieldGrid(obj, fields) {
-    return h('div', {class: 'grid'}, ...fields.map(([k, label, kind]) =>
-      h('label', {class: 'f'}, h('span', {}, label), input(obj, k, kind))));
-  }
+  const fieldGrid = (obj, fields) => h('div', {class: 'grid'}, ...fields.map(([k, label, kind]) =>
+    h('label', {class: 'f'}, h('span', {}, label), input(obj, k, kind))));
 
   function table(rows, cols, factory, title) {
-    const render = () => {
-      const t = h('table', {class: 'edit'},
-        h('thead', {}, h('tr', {}, ...cols.map(c => h('th', {}, c[1])), h('th'))),
-        h('tbody', {}, ...rows.map((r, i) => h('tr', {},
-          ...cols.map(([k]) => h('td', {}, input(r, k, 'num'))),
-          h('td', {}, h('button', {class: 'x', title: 'remove', onclick: () => { rows.splice(i, 1); onChange(); redraw(); }}, '×'))))));
-      return t;
-    };
     const wrap = h('div', {class: 'tbl'});
-    const redraw = () => { wrap.replaceChildren(h('div', {class: 'row'}, h('h3', {}, title),
-      h('button', {onclick: () => { rows.push(factory(rows)); onChange(); redraw(); }}, '+ row')), render()); };
+    const redraw = () => wrap.replaceChildren(
+      h('div', {class: 'row'}, h('h3', {}, title), h('button', {onclick: () => { rows.push(factory(rows)); onChange(); redraw(); }}, '+ row')),
+      h('table', {class: 'edit'}, h('thead', {}, h('tr', {}, ...cols.map(c => h('th', {}, c[1])), h('th'))),
+        h('tbody', {}, ...rows.map((r, i) => h('tr', {}, ...cols.map(([k]) => h('td', {}, input(r, k, 'num'))),
+          h('td', {}, h('button', {class: 'x', title: 'remove', onclick: () => { rows.splice(i, 1); onChange(); redraw(); }}, '×')))))));
     redraw();
     return wrap;
   }
 
   function stringCard(s, i) {
-    const details = h('details', {open: ''},
-      h('summary', {}, h('b', {}, `${s.name || 'string'} · ${s.od}"`),
-        h('button', {class: 'x', onclick: e => { e.preventDefault(); well.strings.splice(i, 1); onChange(); render(); }}, '×')),
+    return h('details', {open: true, class: 'string'},
+      h('summary', {}, h('b', {}, `${s.name || 'string'} · ${s.od}" · ${s.type}`),
+        h('button', {class: 'x', title: 'remove string', onclick: e => { e.preventDefault(); well.strings.splice(i, 1); onChange(); render(); }}, '×')),
       fieldGrid(s, STRING_FIELDS),
-      h('h4', {}, 'Drilling ahead (well control)'), fieldGrid(s, DRILL_AHEAD),
-      h('h4', {}, 'Production'), fieldGrid(s, PRODUCTION));
-    return details;
-  }
-
-  let root;
-  function render() {
-    if (!root || !well) return;
-    const w = well;
-    root.replaceChildren(
-      h('div', {class: 'grid'},
-        h('label', {class: 'f wide'}, h('span', {}, 'Well name'), input(w, 'name', 'text')),
-        ...['burst', 'collapse', 'tension', 'triaxial'].map(k =>
-          h('label', {class: 'f'}, h('span', {}, `DF ${k}`), input(w.design_factors, k, 'num'))),
-        h('label', {class: 'f'}, h('span', {}, 'Gas grad (psi/ft)'), input(w, 'gas_gradient_psi_ft', 'num')),
-        h('label', {class: 'f'}, h('span', {}, 'Sour'), input(w.formation, 'sour', 'bool')),
-        h('label', {class: 'f'}, h('span', {}, 'Surface T (°F)'), input(w.formation, 'surface_temperature_f', 'num')),
-        h('label', {class: 'f'}, h('span', {}, 'Geo grad (°F/100ft)'), input(w.formation, 'geothermal_gradient_f_per_100ft', 'num')),
-        h('label', {class: 'f'}, h('span', {}, 'Derate yield'), input(w.yield_derating, 'enabled', 'bool')),
-        h('label', {class: 'f'}, h('span', {}, 'Derate slope (/°F)'), input(w.yield_derating, 'slope_per_f', 'num'))),
-      table(w.trajectory.stations, [['md', 'MD ft'], ['inclination', 'Inc °'], ['azimuth', 'Azi °']],
-        rows => ({md: (rows.at(-1)?.md ?? 0) + 1000, inclination: rows.at(-1)?.inclination ?? 0, azimuth: rows.at(-1)?.azimuth ?? 0}),
-        'Trajectory (survey stations)'),
-      table(w.formation.pore_pressure.points, [['tvd', 'TVD ft'], ['value', 'EMW ppg']],
-        rows => ({tvd: (rows.at(-1)?.tvd ?? 0) + 1000, value: rows.at(-1)?.value ?? 9}), 'Pore pressure'),
-      table(w.formation.fracture_gradient.points, [['tvd', 'TVD ft'], ['value', 'EMW ppg']],
-        rows => ({tvd: (rows.at(-1)?.tvd ?? 0) + 1000, value: rows.at(-1)?.value ?? 14}), 'Fracture gradient'),
-      h('div', {class: 'row'}, h('h3', {}, 'Casing strings'),
-        h('button', {onclick: () => { well.strings.push(newString()); onChange(); render(); }}, '+ string')),
-      ...w.strings.map(stringCard));
+      h('h4', {}, 'Drilling ahead below this string (well control)'), fieldGrid(s, DRILL_AHEAD),
+      h('h4', {}, 'Production / stimulation'), fieldGrid(s, PRODUCTION));
   }
 
   function newString() {
@@ -115,10 +77,42 @@ const Editor = (() => {
       shut_in_tubing_pressure: null, frac_surface_pressure: null, frac_fluid_ppg: null};
   }
 
+  const panel = (title, ...kids) => h('div', {class: 'panel'}, h('h2', {}, title), ...kids);
+  const stationFactory = rows => ({md: (rows.at(-1)?.md ?? 0) + 1000, inclination: rows.at(-1)?.inclination ?? 0, azimuth: rows.at(-1)?.azimuth ?? 0});
+  const ppFactory = (dflt) => rows => ({tvd: (rows.at(-1)?.tvd ?? 0) + 1000, value: rows.at(-1)?.value ?? dflt});
+
+  function render() {
+    if (!root || !well) return;
+    const w = well, parts = [];
+    if (!section || section === 'well') parts.push(
+      panel('Well', h('div', {class: 'grid'},
+        ...['burst', 'collapse', 'tension', 'triaxial'].map(k => h('label', {class: 'f'}, h('span', {}, `Design factor: ${k}`), input(w.design_factors, k, 'num'))),
+        h('label', {class: 'f'}, h('span', {}, 'Gas gradient (psi/ft)'), input(w, 'gas_gradient_psi_ft', 'num')),
+        h('label', {class: 'f'}, h('span', {}, 'Sour service'), input(w.formation, 'sour', 'bool')),
+        h('label', {class: 'f'}, h('span', {}, 'Surface temperature (°F)'), input(w.formation, 'surface_temperature_f', 'num')),
+        h('label', {class: 'f'}, h('span', {}, 'Geothermal gradient (°F/100 ft)'), input(w.formation, 'geothermal_gradient_f_per_100ft', 'num')),
+        h('label', {class: 'f'}, h('span', {}, 'Derate yield for temperature'), input(w.yield_derating, 'enabled', 'bool')),
+        h('label', {class: 'f'}, h('span', {}, 'Derating slope (per °F)'), input(w.yield_derating, 'slope_per_f', 'num'))),
+        h('p', {class: 'muted small'}, 'Design factors are minimum rating ÷ load. The defaults are common onshore values; set them to your company standard.')),
+      panel('Trajectory', h('p', {class: 'muted small'}, 'Survey stations, minimum curvature between them. A vertical well needs only surface and TD.'),
+        table(w.trajectory.stations, [['md', 'MD ft'], ['inclination', 'Inc °'], ['azimuth', 'Azi °']], stationFactory, 'Survey stations')));
+    if (!section || section === 'pressures') parts.push(
+      panel('Pore pressure and fracture gradient', h('p', {class: 'muted small'}, 'Equivalent mud weight versus TVD, interpolated linearly between points.'),
+        h('div', {class: 'grid', style: 'grid-template-columns:1fr 1fr'},
+          table(w.formation.pore_pressure.points, [['tvd', 'TVD ft'], ['value', 'EMW ppg']], ppFactory(9), 'Pore pressure'),
+          table(w.formation.fracture_gradient.points, [['tvd', 'TVD ft'], ['value', 'EMW ppg']], ppFactory(14), 'Fracture gradient'))));
+    if (!section || section === 'strings') parts.push(
+      panel('Casing program', h('p', {class: 'muted small'}, 'One card per string, shallowest first. Filling in test, kick or production inputs switches on the matching load cases; leave a field blank to skip that case.'),
+        ...w.strings.map(stringCard),
+        h('div', {class: 'row'}, h('button', {onclick: () => { well.strings.push(newString()); onChange(); render(); }}, '+ Add string'))));
+    root.replaceChildren(...parts);
+  }
+
   return {
-    mount(el, cb) { root = el; onChange = cb; },
-    set(w) { well = structuredClone(w); render(); },
+    mount(el, cb) { root = el; onChangeCb = cb; },
+    set(w, sec = null) { well = w; section = sec; render(); },
     get() { return structuredClone(well); },
+    bind(cb) { onBind = cb; },
     render,
   };
 })();

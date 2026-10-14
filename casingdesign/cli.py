@@ -154,5 +154,16 @@ def import_cmd(edm_file: Path, out: Path = Path("imported_well.json"),
         typer.echo(f"\nnext: casingdesign check {out} {flags}")
 
 
+@app.command()
+def serve(host: str = "127.0.0.1", port: int = 8000, db: str | None = None) -> None:
+    """Run the web application (open http://HOST:PORT in a browser)."""
+    import os
+
+    import uvicorn
+    if db:
+        os.environ["CASINGDESIGN_DB"] = db
+    uvicorn.run("casingdesign.web.app:app", host=host, port=port)
+
+
 if __name__ == "__main__":
     app()
