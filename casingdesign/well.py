@@ -39,12 +39,16 @@ class Trajectory(BaseModel):
 
     @model_validator(mode="after")
     def _check(self):
-        if len(self.stations) < 1:
-            raise ValueError("trajectory needs at least one station")
-        mds = [s.md for s in self.stations]
-        if mds != sorted(mds) or len(set(mds)) != len(mds):
-            raise ValueError("stations must be strictly increasing in MD")
-        if self.stations[0].md != 0.0:
+        """Keep the model tolerant so drafts can always be saved: stations are sorted
+        and de-duplicated here; hard problems are reported by Well.errors()."""
+        self.stations.sort(key=lambda s: s.md)
+        seen, keep = set(), []
+        for s in self.stations:
+            if s.md not in seen:
+                seen.add(s.md)
+                keep.append(s)
+        self.stations = keep
+        if not self.stations or self.stations[0].md != 0.0:
             # prepend a surface station to anchor TVD = 0 at MD = 0
             self.stations.insert(0, SurveyStation(md=0.0, inclination=0.0, azimuth=0.0))
         return self
@@ -204,17 +208,21 @@ class CasingString(BaseModel):
         default=None, description="max surface treating pressure for stimulation, psi")
     frac_fluid_ppg: float | None = None
 
-    @model_validator(mode="after")
-    def _depths(self):
+    def errors(self) -> list[str]:
+        """Hard problems that make the string undesignable (drafts may still be saved)."""
+        out = []
         if self.toc_md > self.shoe_md:
-            raise ValueError("TOC must be above the shoe")
+            out.append(f"{self.name}: top of cement ({self.toc_md:.0f}) is below the shoe "
+                       f"({self.shoe_md:.0f})")
         if self.hanger_md >= self.shoe_md:
-            raise ValueError("hanger must be above shoe")
+            out.append(f"{self.name}: shoe must be below the top of the string")
         if self.type == "liner" and self.hanger_md <= 0:
-            raise ValueError("a liner must hang below surface (hanger_md > 0)")
+            out.append(f"{self.name}: a liner must hang below surface (liner top MD > 0)")
         if self.type != "liner" and self.hanger_md > 0:
-            raise ValueError("only liners may have hanger_md > 0 (use type='liner')")
-        return self
+            out.append(f"{self.name}: only liners have a top MD (set 0 or change type to liner)")
+        if self.hole_size <= self.od:
+            out.append(f"{self.name}: hole size must exceed the casing OD")
+        return out
 
     @property
     def is_liner(self) -> bool:
@@ -234,6 +242,12 @@ class DesignFactors(BaseModel):
     triaxial: float = 1.25
 
 
+class DesignPrefs(BaseModel):
+    """User preferences that steer the optimizer (not the physics)."""
+
+    grades: list[str] | None = Field(default=None, description="grades the optimizer may pick")
+
+
 class Well(BaseModel):
     name: str
     trajectory: Trajectory
@@ -241,6 +255,7 @@ class Well(BaseModel):
     strings: list[CasingString]
     design_factors: DesignFactors = DesignFactors()
     yield_derating: YieldDerating = YieldDerating()
+    prefs: DesignPrefs = DesignPrefs()
     gas_gradient_psi_ft: float = 0.1  # dry gas column assumption for kick cases
     seawater_or_fresh_gradient_psi_ft: float = 0.433  # backup fluid for degraded cement/mud
 
@@ -263,6 +278,19 @@ class Well(BaseModel):
         """Liners hung (directly) in this string, shallowest first."""
         return sorted((s for s in self.strings if s.is_liner and self.parent_of(s) is parent),
                       key=lambda s: s.hanger_md)
+
+    def errors(self) -> list[str]:
+        """Problems that must be fixed before the well can be designed."""
+        out: list[str] = []
+        if len(self.trajectory.stations) < 2:
+            out.append("trajectory needs at least surface and TD")
+        if not self.formation.pore_pressure.points or not self.formation.fracture_gradient.points:
+            out.append("pore pressure and fracture gradient need at least one point each")
+        if not self.strings:
+            out.append("add at least one casing string")
+        for s in self.strings:
+            out.extend(s.errors())
+        return out
 
     def warnings(self) -> list[str]:
         """Non-fatal design checks a reviewer should see."""

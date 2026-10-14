@@ -22,12 +22,15 @@ def test_parent_and_liner_relationships(liner_well):
 
 
 def test_liner_validation():
-    with pytest.raises(ValueError):
-        CasingString(name="L", type="liner", od=4.5, hole_size=6.125, hanger_md=0,
-                     shoe_md=18_000, toc_md=0, mud_weight=12)
-    with pytest.raises(ValueError):
-        CasingString(name="P", type="production", od=7.0, hole_size=8.5, hanger_md=500,
-                     shoe_md=18_000, toc_md=0, mud_weight=12)
+    bad = CasingString(name="L", type="liner", od=4.5, hole_size=6.125, hanger_md=0,
+                       shoe_md=18_000, toc_md=0, mud_weight=12)
+    assert any("liner must hang" in e for e in bad.errors())
+    bad2 = CasingString(name="P", type="production", od=7.0, hole_size=8.5, hanger_md=500,
+                        shoe_md=18_000, toc_md=0, mud_weight=12)
+    assert any("only liners" in e for e in bad2.errors())
+    good = CasingString(name="L", type="liner", od=4.5, hole_size=6.125, hanger_md=10_500,
+                        shoe_md=18_000, toc_md=10_500, mud_weight=12)
+    assert good.errors() == []
 
 
 def test_warnings_for_bad_lap(liner_well):

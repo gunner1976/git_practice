@@ -2,7 +2,7 @@
 const $ = s => document.querySelector(s);
 const app = $('#app');
 let catalog = null, project = null, designData = null, saveTimer = null, dirty = false;
-const STEPS = [['well', 'Well & trajectory'], ['pressures', 'Pressures & temperature'], ['strings', 'Casing program'], ['design', 'Design']];
+const STEPS = [['well', 'Well & design basis'], ['pressures', 'Pressures'], ['strings', 'Casing program'], ['design', 'Design']];
 
 async function api(path, method = 'GET', body) {
   const r = await fetch(path, {method, headers: body ? {'content-type': 'application/json'} : {}, body: body ? JSON.stringify(body) : undefined});
@@ -82,17 +82,25 @@ function renderProject(step) {
     h('div', {class: 'steps'}, ...STEPS.map(([k, label], i) => h('button', {'aria-current': k === step ? 'step' : null, class: STEPS.findIndex(s => s[0] === step) > i ? 'done' : '', onclick: () => location.hash = `#/p/${project.id}/${k}`}, `${i + 1}. ${label}`))),
     h('div', {id: 'step'}));
   const el = $('#step');
-  if (step === 'design') renderDesign(el); else { Editor.mount(el, markDirty); Editor.set(w, step); Editor.bind(obj => { project.well = obj; }); }
+  if (step === 'design') renderDesign(el); else { const ed = h('div', {id: 'editor'}); el.append(ed); Editor.mount(ed, markDirty); Editor.set(w, step); Editor.bind(obj => { project.well = obj; }); }
   const notes = sessionStorage.getItem('import-notes-' + project.id);
   if (notes && step === 'strings') { el.prepend(h('div', {class: 'panel'}, h('h2', {}, 'Imported from EDM — please review'), h('ul', {class: 'small warn'}, ...JSON.parse(notes).map(n => h('li', {}, n))))); sessionStorage.removeItem('import-notes-' + project.id); }
-  if (step !== 'design') el.append(h('div', {class: 'row', style: 'justify-content:flex-end'}, h('button', {class: 'primary', onclick: () => { const i = STEPS.findIndex(s => s[0] === step); location.hash = `#/p/${project.id}/${STEPS[i + 1][0]}`; }}, step === 'strings' ? 'Design my well →' : 'Next →')));
+  if (step !== 'design') {
+    const nav = h('div', {class: 'row', style: 'justify-content:flex-end'});
+    const refresh = () => { const errs = validateWell(project.well).filter(i => i.level === 'error'); nav.replaceChildren(...[
+      errs.length ? h('span', {class: 'fail small'}, `${errs.length} thing${errs.length > 1 ? 's' : ''} to fix before designing`) : null,
+      h('button', {class: 'primary', disabled: step === 'strings' && errs.length > 0, onclick: () => { const i = STEPS.findIndex(s => s[0] === step); location.hash = `#/p/${project.id}/${STEPS[i + 1][0]}`; }}, step === 'strings' ? 'Design my well →' : 'Next →')].filter(Boolean)); };
+    refresh(); el.addEventListener('change', () => setTimeout(refresh, 300)); el.append(nav);
+  }
 }
 
 // ---------------------------------------------------------------- design
 async function renderDesign(el) {
   el.replaceChildren(h('div', {class: 'panel'}, h('div', {class: 'row'}, h('span', {}, 'Running the optimizer for every string…'))));
   await save();
-  try { if (!designData) designData = await api('/api/design', 'POST', {well: project.well, choices: project.design && Object.keys(project.design).length ? project.design : null}); }
+  const errs = validateWell(project.well).filter(i => i.level === 'error');
+  if (errs.length) { el.replaceChildren(h('div', {class: 'panel'}, h('h2', {}, 'Fix these first'), ...errs.map(e => h('div', {class: 'fail'}, '✗ ' + e.msg)), h('div', {class: 'row'}, h('button', {onclick: () => location.hash = `#/p/${project.id}/strings`}, '← Back to casing program')))); return; }
+  try { if (!designData) designData = await api('/api/design', 'POST', {well: project.well, choices: project.design && Object.keys(project.design).length ? project.design : null, grades: project.well.prefs?.grades || null}); }
   catch (e) { el.replaceChildren(h('div', {class: 'panel'}, h('div', {class: 'err'}, e.message))); return; }
   const d = designData;
   const allPass = d.strings.every(s => s.result && s.result.pass);

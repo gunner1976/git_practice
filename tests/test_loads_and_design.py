@@ -41,7 +41,7 @@ def test_axial_running_is_tension_at_surface_compression_at_shoe(onshore_well, c
     md = depth_grid(s)
     f = running_axial(md, s, spec, onshore_well.trajectory, overpull=0.0)
     # Buoyed weight ~ 47 lb/ft * 8500 ft * (1 - 10/65.4) ~ 338 klbf
-    assert f[0] == pytest.approx(47 * 8500 * (1 - 10 / 65.4), rel=0.03)
+    assert f[0] == pytest.approx(47 * 8500 * (1 - s.mud_weight / 65.4), rel=0.03)
     assert f[-1] < 0
     f_cem = as_cemented_axial(md, s, spec, onshore_well.trajectory)
     assert f_cem[-1] < f[-1]  # heavier cement at shoe -> more compression

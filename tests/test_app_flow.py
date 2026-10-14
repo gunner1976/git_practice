@@ -51,3 +51,24 @@ def test_design_endpoint_recommends_and_respects_overrides(client):
 def test_index_serves_app_and_legacy(client):
     assert "app.js" in client.get("/").text
     assert client.get("/legacy").status_code == 200
+
+
+def test_design_respects_grade_preferences(client):
+    well = client.get("/api/example").json()
+    d = client.post("/api/design", json={"well": well}).json()
+    assert "H-40" in d["strings"][0]["recommended"]["design"]["label"]
+    d2 = client.post("/api/design", json={"well": well, "grades": ["J-55", "L-80", "P-110"]}).json()
+    assert "H-40" not in d2["strings"][0]["recommended"]["design"]["label"]
+    well["prefs"] = {"grades": ["P-110"]}
+    d3 = client.post("/api/design", json={"well": well}).json()
+    assert all("P-110" in sec["spec"]["grade"] for s in d3["strings"] for sec in s["result"]["design"]["sections"])
+
+
+def test_drafts_save_but_design_refuses_invalid(client):
+    well = client.get("/api/example").json()
+    well["strings"][1]["toc_md"] = 9000  # below the 8500 ft shoe
+    p = client.post("/api/projects", json={"name": "draft", "well": well})
+    assert p.status_code == 200  # a draft always saves
+    r = client.post("/api/design", json={"well": well})
+    assert r.status_code == 400 and "top of cement" in r.json()["detail"]
+    assert client.get(f"/report/{p.json()['id']}").status_code == 400

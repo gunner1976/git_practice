@@ -129,6 +129,7 @@ class DesignRequest(BaseModel):
     connection: str = "BTC"
     tapered: bool = True
     max_sections: int = 3
+    grades: list[str] | None = None  # overrides well.prefs.grades
 
 
 def _design_from_choice(s, ch: dict) -> StringDesign:
@@ -146,11 +147,18 @@ def _design_from_choice(s, ch: dict) -> StringDesign:
 def design(req: DesignRequest) -> dict:
     """For each string: the cheapest passing uniform pipe, the cheapest tapered design,
     and a full evaluation of the chosen pipe (user override, else recommendation)."""
+    errors = req.well.errors()
+    if errors:
+        raise HTTPException(400, "fix before designing: " + "; ".join(errors))
     out = []
     choices = req.choices or {}
+    grades = req.grades or req.well.prefs.grades or None
+    if grades:
+        grades = [g for g in grades if g in catalog.grades] or None
     for s in req.well.strings:
-        uniform = optimize_string(req.well, s, catalog, connection=req.connection, max_results=3)
-        tapered = (optimize_tapered(req.well, s, catalog, connection=req.connection,
+        uniform = optimize_string(req.well, s, catalog, grades=grades, connection=req.connection,
+                                  max_results=3)
+        tapered = (optimize_tapered(req.well, s, catalog, grades=grades, connection=req.connection,
                                     max_sections=req.max_sections) if req.tapered else None)
         rec = None
         if tapered is not None and (not uniform or tapered.cost_per_ft < uniform[0].cost_per_ft - 1e-9):
@@ -198,6 +206,9 @@ def report(pid: str) -> str:
     if p is None:
         raise HTTPException(404, "no such project")
     well = Well.model_validate(p["well"])
+    if well.errors():
+        return HTMLResponse("<h1>Cannot generate report</h1><ul>"
+                            + "".join(f"<li>{e}</li>" for e in well.errors()) + "</ul>", status_code=400)
     data = design(DesignRequest(well=well, choices=p.get("design") or None))
     return render_report(p, well, data)
 

@@ -30,7 +30,8 @@ def test_profile_pressure():
     assert p.pressure(10_000) == pytest.approx(0.052 * 10.0 * 10_000)
 
 
-def test_unsorted_stations_rejected():
-    with pytest.raises(ValueError):
-        Trajectory(stations=[SurveyStation(md=100, inclination=0, azimuth=0),
-                             SurveyStation(md=50, inclination=0, azimuth=0)])
+def test_unsorted_stations_are_sorted_and_anchored():
+    t = Trajectory(stations=[SurveyStation(md=100, inclination=0, azimuth=0),
+                             SurveyStation(md=50, inclination=0, azimuth=0),
+                             SurveyStation(md=50, inclination=10, azimuth=0)])
+    assert [s.md for s in t.stations] == [0, 50, 100]

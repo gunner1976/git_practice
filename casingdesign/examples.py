@@ -31,10 +31,10 @@ def onshore_horizontal_well() -> Well:
     strings = [
         CasingString(name="Surface", type="surface", od=13.375, hole_size=17.5,
                      shoe_md=2_000, toc_md=0, mud_weight=9.0, cement_lead_ppg=12.5,
-                     cement_tail_ppg=15.6, tail_length=500, next_hole_mud_weight=10.0,
+                     cement_tail_ppg=15.6, tail_length=500, next_hole_mud_weight=11.0,
                      next_section_td_md=8_500, pressure_test=1_500),
         CasingString(name="Intermediate", type="intermediate", od=9.625, hole_size=12.25,
-                     shoe_md=8_500, toc_md=1_500, mud_weight=10.0, cement_lead_ppg=12.5,
+                     shoe_md=8_500, toc_md=1_500, mud_weight=11.0, cement_lead_ppg=12.5,
                      cement_tail_ppg=15.8, tail_length=1_000, next_hole_mud_weight=12.0,
                      next_section_td_md=18_000, pressure_test=3_500, overpull=150_000),
         CasingString(name="Production", type="production", od=5.5, hole_size=8.5,

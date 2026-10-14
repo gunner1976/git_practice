@@ -24,7 +24,7 @@ def test_example_temperature_profile(onshore_well):
 def test_derating_lowers_design_factors_at_depth(onshore_well):
     cat = Catalog.default()
     s = onshore_well.string("Intermediate")
-    spec = cat.spec(9.625, 47.0, "N-80")
+    spec = cat.spec(9.625, 47.0, "P-110")
     hot = evaluate_string(onshore_well, s, spec)
     onshore_well.yield_derating.enabled = False
     cool = evaluate_string(onshore_well, s, spec)
@@ -48,8 +48,9 @@ def test_derating_lowers_design_factors_at_depth(onshore_well):
 def test_hot_well_can_fail_where_cool_passes(onshore_well):
     cat = Catalog.default()
     s = onshore_well.string("Intermediate")
-    spec = cat.spec(9.625, 47.0, "N-80")
+    spec = cat.spec(9.625, 47.0, "P-110")
     assert evaluate_string(onshore_well, s, spec).passes
     onshore_well.formation.geothermal_gradient_f_per_100ft = 3.0  # ~325 F at the shoe
-    onshore_well.yield_derating.slope_per_f = 0.001  # a grade with steep hot-yield loss
+    onshore_well.yield_derating.slope_per_f = 0.002  # a grade with steep hot-yield loss
+    onshore_well.yield_derating.floor = 0.6
     assert not evaluate_string(onshore_well, s, spec).passes
