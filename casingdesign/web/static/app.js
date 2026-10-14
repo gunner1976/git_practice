@@ -13,7 +13,7 @@ function guide(step) {
   const key = 'guide-hidden-' + step; let hidden = false; try { hidden = localStorage.getItem(key) === '1'; } catch {}
   const box = h('div', {class: 'guide' + (hidden ? ' collapsed' : '')});
   const draw = () => box.replaceChildren(
-    h('div', {class: 'row', style: 'justify-content:space-between'}, h('b', {}, hidden ? 'What to enter here' : 'What to enter here'),
+    h('div', {class: 'row', style: 'justify-content:space-between'}, h('b', {}, step === 'design' ? 'What you are looking at' : 'What to enter here'),
       h('button', {class: 'link small', onclick: () => { hidden = !hidden; try { localStorage.setItem(key, hidden ? '1' : '0'); } catch {} box.classList.toggle('collapsed', hidden); draw(); }}, hidden ? 'show' : 'hide')),
     hidden ? null : h('ul', {}, ...GUIDE[step].map(t => h('li', {}, t))));
   draw(); return box;
