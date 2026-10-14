@@ -11,7 +11,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "pytest-cov", "ruff", "httpx"]
-web = ["fastapi>=0.110", "uvicorn[standard]>=0.29"]  # plotly.min.js is vendored in web/static
+web = ["fastapi>=0.110", "uvicorn[standard]>=0.29", "python-multipart>=0.0.9"]  # plotly.min.js is vendored in web/static
 
 [project.scripts]
 casingdesign = "casingdesign.cli:app"

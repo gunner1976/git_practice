@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export>
+<TOPLEVEL>
+<CD_WELL well_id="W1" well_common_name="Demo 1H" water_depth="0"/>
+<CD_WELLBORE wellbore_id="WB1" well_id="W1" wellbore_name="Demo 1H Original Hole"/>
+<CD_WELLBORE wellbore_id="WB2" well_id="W1" wellbore_name="Demo 1H Pilot"/>
+<CD_SURVEY_HEADER survey_header_id="SH1" wellbore_id="WB1" survey_name="Plan" md_min="0" md_max="18000"/>
+<CD_SURVEY_STATION survey_header_id="SH1" md="0" inclination="0" azimuth="0" tvd="0" sequence_no="1"/>
+<CD_SURVEY_STATION survey_header_id="SH1" md="8000" inclination="0" azimuth="0" tvd="8000" sequence_no="2"/>
+<CD_SURVEY_STATION survey_header_id="SH1" md="9500" inclination="90" azimuth="90" tvd="8955" sequence_no="3"/>
+<CD_SURVEY_STATION survey_header_id="SH1" md="18000" inclination="90" azimuth="90" tvd="8955" sequence_no="4"/>
+<CD_SURVEY_HEADER survey_header_id="SH2" wellbore_id="WB2" survey_name="Pilot" md_min="0" md_max="9000"/>
+<CD_SURVEY_STATION survey_header_id="SH2" md="0" inclination="0" azimuth="0" tvd="0" sequence_no="1"/>
+<CD_SURVEY_STATION survey_header_id="SH2" md="9000" inclination="0" azimuth="0" tvd="9000" sequence_no="2"/>
+<CD_PORE_PRESSURE_GROUP pore_pressure_group_id="PPG1" wellbore_id="WB1" name="Prognosis" phase="PLAN"/>
+<CD_PORE_PRESSURE pore_pressure_group_id="PPG1" tvd="1000" pore_pressure="447.2" pore_pressure_emw="8.6"/>
+<CD_PORE_PRESSURE pore_pressure_group_id="PPG1" tvd="6000" pore_pressure="2808" pore_pressure_emw="9.0"/>
+<CD_PORE_PRESSURE pore_pressure_group_id="PPG1" tvd="9000" pore_pressure="5148" pore_pressure_emw="11.0"/>
+<CD_FRAC_GRADIENT_GROUP frac_gradient_group_id="FGG1" wellbore_id="WB1" name="Prognosis" phase="PLAN"/>
+<CD_FRAC_GRADIENT frac_gradient_group_id="FGG1" tvd="2000" frac_gradient_pressure="1404" frac_gradient_emw="13.5"/>
+<CD_FRAC_GRADIENT frac_gradient_group_id="FGG1" tvd="9000" frac_gradient_pressure="7722" frac_gradient_emw="16.5"/>
+<CD_TEMP_GRADIENT_GROUP temp_gradient_group_id="TGG1" wellbore_id="WB1" name="Geothermal" phase="PLAN"/>
+<CD_TEMP_GRADIENT temp_gradient_group_id="TGG1" tvd="0" temperature="70"/>
+<CD_TEMP_GRADIENT temp_gradient_group_id="TGG1" tvd="9000" temperature="178"/>
+<CD_ASSEMBLY assembly_id="A1" wellbore_id="WB1" string_type="Casing" assembly_name="13-3/8 Surface" assembly_size="13.375" hole_size="17.5" md_assembly_top="0" md_assembly_base="2000" tvd_assembly_base="2000"/>
+<CD_ASSEMBLY_COMP assembly_id="A1" sect_type_code="CAS" sequence_no="1" catalog_key_desc="13 3/8 54.5 J-55 BTC" grade="J-55" od_body="13.375" id_body="12.615" min_yield_stress="55000" approximate_weight="54.5" length="2000" connection_name="BTC" axial_rating="853" pipe_pressure_burst="2730" pressure_collapse="1130"/>
+<CD_ASSEMBLY assembly_id="A2" wellbore_id="WB1" string_type="Casing" assembly_name="9-5/8 Intermediate" assembly_size="9.625" hole_size="12.25" md_assembly_top="0" md_assembly_base="8500" tvd_assembly_base="8500"/>
+<CD_ASSEMBLY_COMP assembly_id="A2" sect_type_code="CAS" sequence_no="1" catalog_key_desc="9 5/8 40 L-80 BTC" grade="L80" od_body="9.625" id_body="8.835" min_yield_stress="80000" approximate_weight="40" length="3000" connection_name="BTC" axial_rating="916" pipe_pressure_burst="5750" pressure_collapse="3090"/>
+<CD_ASSEMBLY_COMP assembly_id="A2" sect_type_code="CAS" sequence_no="2" catalog_key_desc="9 5/8 47 L-80 BTC" grade="L80" od_body="9.625" id_body="8.681" min_yield_stress="80000" approximate_weight="47" length="5500" connection_name="BTC" axial_rating="1086" pipe_pressure_burst="6870" pressure_collapse="4760"/>
+<CD_ASSEMBLY assembly_id="A3" wellbore_id="WB1" string_type="Casing" assembly_name="5-1/2 Production" assembly_size="5.5" hole_size="8.5" md_assembly_top="0" md_assembly_base="18000" tvd_assembly_base="8955"/>
+<CD_ASSEMBLY_COMP assembly_id="A3" sect_type_code="CAS" sequence_no="1" catalog_key_desc="5 1/2 20 P-110 TenarisHydril Wedge 563" grade="P110" od_body="5.5" id_body="4.778" min_yield_stress="110000" approximate_weight="20" length="18000" connection_name="TH Wedge 563" axial_rating="641" pipe_pressure_burst="12640" pressure_collapse="11100"/>
+<CD_ASSEMBLY assembly_id="A4" wellbore_id="WB1" string_type="BHA" assembly_name="Drilling BHA" assembly_size="8.5" md_assembly_base="18000"/>
+<CD_ASSEMBLY assembly_id="A5" wellbore_id="WB2" string_type="Casing" assembly_name="Pilot casing" assembly_size="7" hole_size="8.5" md_assembly_top="0" md_assembly_base="9000"/>
+</TOPLEVEL>
+</export>

@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -93,6 +93,33 @@ def get_catalog() -> dict:
         "pipes": [{"od": p.od, "weight": p.nominal_weight, "wall": p.wall, "id": p.id}
                   for p in catalog.pipes],
     }
+
+
+@app.post("/api/import")
+async def import_edm_file(file: UploadFile = File(...), wellbore: str | None = None,
+                          units: str = "feet") -> dict:
+    """Import a Landmark EDM export. Returns the well, the resolved pipe specs per
+    string, warnings, and the stored-vs-computed rating comparison."""
+    import tempfile
+
+    from casingdesign.io import import_edm, list_wellbores
+    data = await file.read()
+    with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as tmp:
+        tmp.write(data)
+        path = tmp.name
+    try:
+        wellbores = list_wellbores(path)
+        r = import_edm(path, wellbore=wellbore, source_units=units, catalog=catalog)
+    except (ValueError, KeyError) as e:
+        raise HTTPException(400, f"import failed: {e}") from e
+    except Exception as e:  # malformed XML etc.
+        raise HTTPException(400, f"could not parse EDM file: {e}") from e
+    return {"well": r.well.model_dump(),
+            "specs": {n: {"od": sp.pipe.od, "weight": sp.pipe.nominal_weight,
+                          "grade": sp.grade.name, "connection": sp.connection.name}
+                      for n, sp in r.specs.items()},
+            "warnings": r.warnings, "rating_comparison": r.rating_comparison(),
+            "wellbores": [{"id": i, "name": n, "well": w} for i, n, w in wellbores]}
 
 
 @app.post("/api/evaluate")

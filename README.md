@@ -11,6 +11,7 @@ casingdesign demo                       # writes example_well.json (--liner for 
 casingdesign optimize example_well.json
 casingdesign check example_well.json -s "Production=5.5,20,P-110" --json-out out.json
 casingdesign ratings 9.625 47 L-80
+casingdesign import export.xml --list   # Landmark EDM/COMPASS/StressCheck export -> well JSON
 
 pip install -e ".[web]"
 uvicorn casingdesign.web.app:app      # web UI at http://127.0.0.1:8000 (plots, optimizer)

@@ -63,6 +63,9 @@
     <div class="row"><select id="example"><option value="horizontal">Horizontal well</option><option value="liner">Well with frac liner</option></select>
       <button id="load-example">Load example</button>
       <button id="download">Download JSON</button><span class="muted" id="well-status"></span></div>
+    <div class="row"><label for="edm" class="muted">Import Landmark EDM/StressCheck export:</label>
+      <input type="file" id="edm" accept=".xml"><select id="edm-wellbore" hidden></select></div>
+    <div id="import-notes" class="muted" style="font-size:12px"></div>
     <h2 style="margin-top:14px">Pipe selection</h2>
     <div id="specs"></div>
     <div class="row" style="margin-top:12px">
@@ -270,6 +273,23 @@ function syncFromForm() {
   for (const name of Object.keys(tapered)) if (!w.strings.some(s => s.name === name)) delete tapered[name];
   $('#well-status').textContent = `${w.strings.length} strings`;
 }
+async function importEdm(wellbore) {
+  const f = $('#edm').files[0]; if (!f) return;
+  $('#error').textContent = ''; $('#import-notes').textContent = 'importing…';
+  const fd = new FormData(); fd.append('file', f);
+  const q = wellbore ? '?wellbore=' + encodeURIComponent(wellbore) : '';
+  const r = await fetch('/api/import' + q, {method: 'POST', body: fd});
+  if (!r.ok) { $('#error').textContent = await r.text(); $('#import-notes').textContent = ''; return; }
+  const d = await r.json();
+  Editor.set(d.well); $('#well').value = JSON.stringify(d.well, null, 2); renderSpecRows(d.well);
+  for (const [name, sp] of Object.entries(d.specs)) setSpec(name, sp.weight, sp.grade, sp.connection);
+  $('#well-status').textContent = `${d.well.strings.length} strings (imported)`;
+  const sel = $('#edm-wellbore'); sel.hidden = d.wellbores.length < 2;
+  sel.innerHTML = d.wellbores.map(w => `<option value="${w.id}" ${w.name === d.well.name.replace(w.well + ' ', '') ? 'selected' : ''}>${w.name}</option>`).join('');
+  const cmp = d.rating_comparison.map(c => `${c.string}: stored/ours burst ${fmt0(c.burst_stored)}/${fmt0(c.burst_ours)} · collapse ${fmt0(c.collapse_stored)}/${fmt0(c.collapse_ours)} psi`).join('<br>');
+  $('#import-notes').innerHTML = d.warnings.map(w => '• ' + w).join('<br>') + (cmp ? '<br><b>Ratings check</b><br>' + cmp : '');
+}
+$('#edm').onchange = () => importEdm(); $('#edm-wellbore').onchange = e => importEdm(e.target.value);
 $('#load-example').onclick = loadExample; $('#run').onclick = run; $('#optimize').onclick = optimize;
 $('#tab-form').onclick = () => showTab(false); $('#tab-json').onclick = () => showTab(true);
 $('#download').onclick = () => { const w = parseWell(); const a = document.createElement('a');

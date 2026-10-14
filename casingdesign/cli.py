@@ -4,6 +4,7 @@
   casingdesign check WELL.json           # evaluate every string with chosen specs
   casingdesign optimize WELL.json        # find the cheapest passing design per string
   casingdesign ratings OD WEIGHT GRADE   # print API ratings for a pipe item
+  casingdesign import EDM.xml            # Landmark EDM/COMPASS/StressCheck export -> well JSON
 """
 from __future__ import annotations
 
@@ -115,6 +116,42 @@ def optimize(well_file: Path, string: list[str] = typer.Option(None, "--string")
                 typer.echo(f"  tapered: cost idx {t.cost_per_ft:6.1f}/ft ({saving:.1f}% saving)   {dfs}")
                 for sec in t.design.sections:
                     typer.echo(f"     {sec.top_md:>7.0f}-{sec.bottom_md:<7.0f} {sec.spec.label}")
+
+
+@app.command("import")
+def import_cmd(edm_file: Path, out: Path = Path("imported_well.json"),
+               wellbore: str | None = typer.Option(None, help="wellbore name or id"),
+               units: str = typer.Option("feet", help="depth units stored in the file"),
+               list_only: bool = typer.Option(False, "--list", help="list wellbores and exit")
+               ) -> None:
+    """Import a well from a Landmark EDM export; writes well JSON and shows how our
+    API 5C3 ratings compare with the ratings stored in the file."""
+    from casingdesign.io import import_edm, list_wellbores
+    if list_only:
+        for wid, wname, well in list_wellbores(edm_file):
+            typer.echo(f"{wid:<12} {wname:<40} {well}")
+        return
+    r = import_edm(edm_file, wellbore=wellbore, source_units=units)
+    out.write_text(r.well.model_dump_json(indent=2))
+    typer.echo(f"wrote {out}: {r.well.name}, {len(r.well.strings)} strings, "
+               f"TD {r.well.trajectory.td:.0f} ft MD")
+    for w in r.warnings:
+        typer.echo(f"  note: {w}")
+    cmp = r.rating_comparison()
+    if cmp:
+        typer.echo("\nStored (Landmark) vs API 5C3 (ours):")
+        typer.echo(f"  {'string':<22}{'pipe':<26}{'burst':>14}{'collapse':>14}{'axial klbf':>16}")
+        for c in cmp:
+            def pair(a, b, fmt="{:.0f}"):
+                return f"{fmt.format(b) if b is not None else '-':>6}/{fmt.format(a):<7}"
+            typer.echo(f"  {c['string'][:21]:<22}{c['pipe'][:25]:<26}"
+                       f"{pair(c['burst_ours'], c['burst_stored']):>14}"
+                       f"{pair(c['collapse_ours'], c['collapse_stored']):>14}"
+                       f"{pair(c['axial_ours_klbf'], c['axial_stored_klbf']):>16}")
+    if r.specs:
+        flags = " ".join(f'-s "{n}={sp.pipe.od},{sp.pipe.nominal_weight},{sp.grade.name},'
+                         f'{sp.connection.name}"' for n, sp in r.specs.items())
+        typer.echo(f"\nnext: casingdesign check {out} {flags}")
 
 
 if __name__ == "__main__":

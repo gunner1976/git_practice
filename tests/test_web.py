@@ -44,3 +44,15 @@ def test_evaluate_with_sections_and_tapered_optimize():
     o = client.post("/api/optimize", json={"well": well, "strings": ["Intermediate"], "top": 1})
     c = o.json()["candidates"]["Intermediate"]
     assert c[0].get("tapered") is True and c[0]["cost_per_ft"] < c[1]["cost_per_ft"]
+
+
+def test_import_endpoint():
+    from pathlib import Path
+    fix = Path(__file__).parent / "fixtures" / "sample_edm.xml"
+    r = client.post("/api/import", files={"file": ("sample.xml", fix.read_bytes(), "text/xml")})
+    assert r.status_code == 200, r.text
+    d = r.json()
+    assert len(d["well"]["strings"]) == 3 and "9-5/8 Intermediate" in d["specs"]
+    assert d["rating_comparison"] and len(d["wellbores"]) == 2
+    bad = client.post("/api/import", files={"file": ("x.xml", b"<nope", "text/xml")})
+    assert bad.status_code == 400

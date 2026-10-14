@@ -19,6 +19,8 @@ the inputs that produced it.
 - Optimizer: cheapest passing uniform pipe per string, and cheapest tapered design
   (section length and count limits, exact composite re-check).
 - CLI with JSON well files; web UI with form editor, plots and design envelope.
+- Landmark EDM/COMPASS/StressCheck export import (trajectory, pore/frac/temperature,
+  strings and pipe specs) with a stored-vs-computed rating check.
 
 ## Explicit non-goals (post-MVP)
 - Thermal: transient temperatures, APB, thermal cycling, wellhead growth.
@@ -49,5 +51,5 @@ tests/       benchmark against published API tables; worked-example wells
 1. Verify round-thread engaged lengths against API 5B; load vendor premium connection data.
 2. Buckling; casing wear derating.
 3. Service-life axial changes (ballooning), then APB for thermal wells.
-4. Report generator (PDF) for regulatory submission; StressCheck import.
+4. Report generator (PDF) for regulatory submission.
 5. Side-by-side validation against a licensed StressCheck/WELLCAT run.
