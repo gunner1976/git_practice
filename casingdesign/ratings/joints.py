@@ -18,10 +18,12 @@ import math
 
 from .api5c3 import PipeGeometry
 
-# API 5CT regular buttress coupling ODs (in) for sizes where the coupling may govern.
+# API Spec 5CT Table E.28 regular buttress coupling OD W (in). Special-clearance
+# couplings (smaller OD, lower strength) are not modelled; pass coupling_od explicitly.
 BTC_COUPLING_OD = {
-    4.5: 5.000, 5.0: 5.563, 5.5: 6.050, 7.0: 7.656, 7.625: 8.500, 8.625: 9.625,
-    9.625: 10.625, 10.75: 11.750, 13.375: 14.375, 16.0: 17.000, 20.0: 21.000,
+    4.5: 5.250, 5.0: 5.800, 5.5: 6.300, 6.625: 7.390, 7.0: 7.875, 7.625: 8.500,
+    8.625: 9.625, 9.625: 10.625, 10.75: 11.750, 11.75: 12.750, 13.375: 14.375,
+    16.0: 17.000, 18.625: 20.000, 20.0: 21.000,
 }
 
 

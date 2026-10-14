@@ -2,11 +2,14 @@ od_in,stc_engaged_in,ltc_engaged_in,source
 4.5,1.27,2.29,calibrated to published L-80 joint strengths - VERIFY vs API 5B
 5.0,1.35,2.50,interpolated - VERIFY vs API 5B
 5.5,1.43,2.69,calibrated to published L-80 joint strengths - VERIFY vs API 5B
+6.625,1.80,3.20,interpolated - VERIFY vs API 5B
 7.0,2.02,3.50,calibrated to published L-80 joint strengths - VERIFY vs API 5B
 7.625,2.10,3.70,interpolated - VERIFY vs API 5B
 8.625,2.20,3.95,interpolated - VERIFY vs API 5B
 9.625,2.33,4.24,calibrated to published L-80 joint strengths - VERIFY vs API 5B
-10.75,2.60,4.40,interpolated - VERIFY vs API 5B
-13.375,3.22,4.60,STC calibrated to published J-55 joint strength - VERIFY vs API 5B
-16.0,3.40,,STC only - VERIFY vs API 5B
-20.0,3.60,,STC only - VERIFY vs API 5B
+10.75,2.60,,STC only per API 5CT (no LTC coupling in Table E.27) - VERIFY vs API 5B
+11.75,2.70,,STC only per API 5CT - interpolated - VERIFY vs API 5B
+13.375,3.22,,STC only per API 5CT; calibrated to published J-55 joint strength - VERIFY vs API 5B
+16.0,3.40,,STC only per API 5CT - VERIFY vs API 5B
+18.625,3.50,,STC only per API 5CT - interpolated - VERIFY vs API 5B
+20.0,3.60,4.80,LTC exists for 20 in per API 5CT Table E.27 - interpolated - VERIFY vs API 5B
