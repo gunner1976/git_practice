@@ -44,11 +44,16 @@ def test_round_thread_not_offered_where_api_makes_none():
 
 
 def test_btc_small_pipe_uses_regular_coupling():
-    """4-1/2 11.6# L-80 BTC: with the 5CT regular coupling (W = 5.25 in) the pipe thread
-    governs (~291 klbf); the special-clearance OD used earlier made the coupling govern."""
+    """4-1/2 11.6# L-80 BTC: the pipe thread governs (~291 klbf). The regular 5CT coupling
+    (W = 5.25 in) is stronger than the special-clearance one (5.0 in) that was wrongly
+    tabulated before; a thin enough coupling would govern instead."""
+    import math
     c = Catalog.default()
     s = c.spec(4.5, 11.6, "L-80", "BTC")
     g = s.geometry
     pipe_thread = 0.95 * g.area * 95_000 * (1.008 - 0.0396 * (1.083 - 80 / 95) * 4.5)
     assert s.joint_strength == pytest.approx(pipe_thread, rel=1e-6)
-    assert buttress_joint_strength(g, 80_000, 95_000, coupling_od=5.0) < pipe_thread
+    regular = 0.95 * math.pi / 4 * (5.25**2 - 4.5**2) * 95_000
+    special = 0.95 * math.pi / 4 * (5.0**2 - 4.5**2) * 95_000
+    assert special < regular and pipe_thread < special
+    assert buttress_joint_strength(g, 80_000, 95_000, coupling_od=4.8) < pipe_thread
