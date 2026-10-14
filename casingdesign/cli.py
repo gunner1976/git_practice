@@ -14,7 +14,7 @@ import typer
 
 from casingdesign.catalog import Catalog
 from casingdesign.design import evaluate_string, optimize_string, optimize_tapered
-from casingdesign.examples import onshore_horizontal_well
+from casingdesign.examples import onshore_horizontal_well, onshore_liner_well
 from casingdesign.well import Well
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
@@ -35,9 +35,11 @@ def _print_summary(result) -> None:
 
 
 @app.command()
-def demo(out: Path = Path("example_well.json")) -> None:
-    """Write the built-in example well to JSON so you can edit it."""
-    out.write_text(onshore_horizontal_well().model_dump_json(indent=2))
+def demo(out: Path = Path("example_well.json"), liner: bool = False) -> None:
+    """Write a built-in example well to JSON so you can edit it (--liner for the
+    variant with a frac'd production liner)."""
+    well = onshore_liner_well() if liner else onshore_horizontal_well()
+    out.write_text(well.model_dump_json(indent=2))
     typer.echo(f"wrote {out}")
 
 
@@ -61,6 +63,8 @@ def check(well_file: Path,
     """Evaluate chosen pipe specs against all load cases."""
     well = _load_well(well_file)
     cat = Catalog.default()
+    for w in well.warnings():
+        typer.echo(f"warning: {w}")
     results = {}
     for item in spec:
         name, rest = item.split("=", 1)

@@ -46,3 +46,23 @@ def onshore_horizontal_well() -> Well:
     ]
     return Well(name="Example Onshore Horizontal Well", trajectory=traj, formation=formation,
                 strings=strings, design_factors=DesignFactors())
+
+
+def onshore_liner_well() -> Well:
+    """Same well as above but completed with a 7" production casing to 11,500 ft and a
+    4-1/2" frac'd liner from 10,500 ft to TD (1,000 ft lap)."""
+    base = onshore_horizontal_well()
+    strings = base.strings[:2] + [
+        CasingString(name="Production", type="production", od=7.0, hole_size=8.5,
+                     shoe_md=11_500, toc_md=7_000, mud_weight=12.0, cement_lead_ppg=13.5,
+                     cement_tail_ppg=15.8, tail_length=3_000, pressure_test=6_000,
+                     overpull=150_000, packer_md=8_000, packer_fluid_ppg=9.0,
+                     shut_in_tubing_pressure=4_500),
+        CasingString(name="Liner", type="liner", od=4.5, hole_size=6.125,
+                     hanger_md=10_500, shoe_md=18_000, toc_md=10_500, mud_weight=12.0,
+                     cement_lead_ppg=15.8, cement_tail_ppg=15.8, tail_length=7_500,
+                     pressure_test=8_000, overpull=60_000, frac_surface_pressure=9_500,
+                     frac_fluid_ppg=8.6),
+    ]
+    return Well(name="Example Onshore Well with Frac Liner", trajectory=base.trajectory,
+                formation=base.formation, strings=strings, design_factors=base.design_factors)

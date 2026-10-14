@@ -210,7 +210,15 @@ class CasingString(BaseModel):
             raise ValueError("TOC must be above the shoe")
         if self.hanger_md >= self.shoe_md:
             raise ValueError("hanger must be above shoe")
+        if self.type == "liner" and self.hanger_md <= 0:
+            raise ValueError("a liner must hang below surface (hanger_md > 0)")
+        if self.type != "liner" and self.hanger_md > 0:
+            raise ValueError("only liners may have hanger_md > 0 (use type='liner')")
         return self
+
+    @property
+    def is_liner(self) -> bool:
+        return self.type == "liner"
 
     @property
     def length(self) -> float:
@@ -241,3 +249,38 @@ class Well(BaseModel):
             if s.name == name:
                 return s
         raise KeyError(name)
+
+    def parent_of(self, liner: CasingString) -> CasingString | None:
+        """The string a liner hangs in: the smallest-OD string larger than the liner
+        whose interval covers the liner hanger."""
+        if not liner.is_liner:
+            return None
+        hosts = [s for s in self.strings if s is not liner and s.od > liner.od
+                 and s.hanger_md <= liner.hanger_md < s.shoe_md]
+        return min(hosts, key=lambda s: s.od) if hosts else None
+
+    def liners_of(self, parent: CasingString) -> list[CasingString]:
+        """Liners hung (directly) in this string, shallowest first."""
+        return sorted((s for s in self.strings if s.is_liner and self.parent_of(s) is parent),
+                      key=lambda s: s.hanger_md)
+
+    def warnings(self) -> list[str]:
+        """Non-fatal design checks a reviewer should see."""
+        out: list[str] = []
+        for s in self.strings:
+            if s.shoe_md > self.trajectory.td:
+                out.append(f"{s.name}: shoe {s.shoe_md:.0f} ft is below the surveyed TD "
+                           f"{self.trajectory.td:.0f} ft")
+            if s.is_liner:
+                parent = self.parent_of(s)
+                if parent is None:
+                    out.append(f"{s.name}: no parent casing found covering the hanger at "
+                               f"{s.hanger_md:.0f} ft")
+                else:
+                    if s.toc_md > s.hanger_md:
+                        out.append(f"{s.name}: TOC {s.toc_md:.0f} ft is below the liner top "
+                                   f"{s.hanger_md:.0f} ft (uncemented lap)")
+                    if parent.shoe_md - s.hanger_md < 200:
+                        out.append(f"{s.name}: only {parent.shoe_md - s.hanger_md:.0f} ft overlap "
+                                   f"inside {parent.name}")
+        return out

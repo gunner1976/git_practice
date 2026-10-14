@@ -97,6 +97,10 @@ def collapse_external(well: Well, string: CasingString, md: np.ndarray) -> np.nd
 # ---------------------------------------------------------------------------
 # Load cases
 # ---------------------------------------------------------------------------
+def _via(src: CasingString, s: CasingString) -> str:
+    return "" if src is s else f" (via {src.name})"
+
+
 def pressure_test(well: Well, s: CasingString, md: np.ndarray) -> LoadCase | None:
     if s.pressure_test is None:
         return None
@@ -112,10 +116,16 @@ def pressure_test(well: Well, s: CasingString, md: np.ndarray) -> LoadCase | Non
 def _cap_profile(well: Well, s: CasingString, md: np.ndarray, internal: np.ndarray,
                  notes: list[str]) -> np.ndarray:
     """Shift a well-control profile down so the shoe never exceeds fracture pressure
-    (the formation breaks down first) and surface pressure never exceeds the BOP cap."""
+    (the formation breaks down first) and surface pressure never exceeds the BOP cap.
+    `s` is the string whose shoe is open to formation (a liner's, when inherited)."""
     shoe_tvd = well.trajectory.tvd(s.shoe_md)
     p_frac = well.formation.fracture_gradient.pressure(shoe_tvd)
-    p_shoe = float(np.interp(s.shoe_md, md, internal))
+    if s.shoe_md <= md[-1]:
+        p_shoe = float(np.interp(s.shoe_md, md, internal))
+    else:  # shoe below this grid: continue the last gradient (in TVD) down to it
+        tvd = well.trajectory.tvd(md)
+        grad = (internal[-1] - internal[-2]) / max(tvd[-1] - tvd[-2], 1e-9)
+        p_shoe = float(internal[-1] + grad * (shoe_tvd - tvd[-1]))
     if p_shoe > p_frac:
         internal = internal - (p_shoe - p_frac)
         notes.append(f"limited by frac at shoe ({p_frac:.0f} psi)")
@@ -126,7 +136,7 @@ def _cap_profile(well: Well, s: CasingString, md: np.ndarray, internal: np.ndarr
 
 
 def gas_kick(well: Well, s: CasingString, md: np.ndarray,
-             inner_diameter: float | None) -> LoadCase | None:
+             inner_diameter: float | None, src: CasingString | None = None) -> LoadCase | None:
     """Kick tolerance: an influx of `kick_volume_bbl` gas sits at the top of the casing
     (worst case for burst) with next-section mud below it, the whole column anchored
     at formation pressure at the next section TD. Kick intensity is defined, as is
@@ -137,19 +147,20 @@ def gas_kick(well: Well, s: CasingString, md: np.ndarray,
     bubble height h is the influx volume over the casing capacity. Capped by fracture
     pressure at the shoe and by the BOP rating if given.
     """
-    if s.type not in ("surface", "intermediate") or s.kick_volume_bbl is None:
+    src = src or s
+    if src.type not in ("surface", "intermediate", "liner") or src.kick_volume_bbl is None:
         return None
-    if s.next_hole_mud_weight is None or s.next_section_td_md is None:
+    if src.next_hole_mud_weight is None or src.next_section_td_md is None:
         return None
     traj = well.trajectory
     cid = inner_diameter if inner_diameter is not None else s.od - 0.9  # typical wall
     capacity_bbl_per_ft = cid**2 / 1029.4
-    h_md = s.kick_volume_bbl / capacity_bbl_per_ft
+    h_md = src.kick_volume_bbl / capacity_bbl_per_ft
     h_md = min(h_md, s.shoe_md - s.hanger_md)
     h_tvd = traj.tvd(s.hanger_md + h_md) - traj.tvd(s.hanger_md)
-    td_tvd = traj.tvd(s.next_section_td_md)
-    g_mud = ppg_to_gradient(s.next_hole_mud_weight)
-    p_form = (g_mud + ppg_to_gradient(s.kick_intensity_ppg)) * td_tvd
+    td_tvd = traj.tvd(src.next_section_td_md)
+    g_mud = ppg_to_gradient(src.next_hole_mud_weight)
+    p_form = (g_mud + ppg_to_gradient(src.kick_intensity_ppg)) * td_tvd
     g_gas = well.gas_gradient_psi_ft
     tvd = traj.tvd(md)
     tvd0 = traj.tvd(s.hanger_md)
@@ -157,16 +168,17 @@ def gas_kick(well: Well, s: CasingString, md: np.ndarray,
     depth = tvd - tvd0
     internal = p_surface + np.where(depth <= h_tvd, g_gas * depth,
                                     g_gas * h_tvd + g_mud * (depth - h_tvd))
-    notes = [(f"{s.kick_volume_bbl:g} bbl gas at top of casing (ID {cid:.2f} in, "
-              f"{h_md:.0f} ft), {s.kick_intensity_ppg} ppg intensity, "
-              f"formation {p_form:.0f} psi at {s.next_section_td_md:.0f} ft MD")]
-    internal = _cap_profile(well, s, md, internal, notes)
+    notes = [(f"{src.kick_volume_bbl:g} bbl gas at top of casing (ID {cid:.2f} in, "
+              f"{h_md:.0f} ft), {src.kick_intensity_ppg} ppg intensity, "
+              f"formation {p_form:.0f} psi at {src.next_section_td_md:.0f} ft MD")]
+    internal = _cap_profile(well, src, md, internal, notes)
     external = burst_backup(well, s, md)
-    return LoadCase("Gas kick", LoadKind.BURST, LoadProfile(md, internal, external),
-                    "as_cemented", "; ".join(notes))
+    return LoadCase("Gas kick" + _via(src, s), LoadKind.BURST,
+                    LoadProfile(md, internal, external), "as_cemented", "; ".join(notes))
 
 
-def gas_to_surface(well: Well, s: CasingString, md: np.ndarray) -> LoadCase | None:
+def gas_to_surface(well: Well, s: CasingString, md: np.ndarray,
+                   src: CasingString | None = None) -> LoadCase | None:
     """Displacement to gas: shoe at fracture pressure, dry gas gradient to surface.
 
     Applies to strings that will have a BOP on them while drilling ahead
@@ -174,52 +186,60 @@ def gas_to_surface(well: Well, s: CasingString, md: np.ndarray) -> LoadCase | No
     the formation will break down before the casing sees more. Used when no kick
     volume is given, or when include_gas_to_surface is set.
     """
-    if s.type not in ("surface", "intermediate"):
+    src = src or s
+    if src.type not in ("surface", "intermediate", "liner"):
         return None
-    if s.kick_volume_bbl is not None and not s.include_gas_to_surface:
+    if src.is_liner and src.next_section_td_md is None:
+        return None  # a production liner is not drilled ahead below
+    if src.kick_volume_bbl is not None and not src.include_gas_to_surface:
         return None
     traj = well.trajectory
     tvd = traj.tvd(md)
-    shoe_tvd = traj.tvd(s.shoe_md)
+    shoe_tvd = traj.tvd(src.shoe_md)
     p_frac_shoe = well.formation.fracture_gradient.pressure(shoe_tvd)
     internal = p_frac_shoe - well.gas_gradient_psi_ft * (shoe_tvd - tvd)
     notes = [(f"frac at shoe {p_frac_shoe:.0f} psi, gas gradient "
               f"{well.gas_gradient_psi_ft} psi/ft, pore/mud backup")]
-    internal = _cap_profile(well, s, md, internal, notes)
+    internal = _cap_profile(well, src, md, internal, notes)
     external = burst_backup(well, s, md)
-    return LoadCase("Gas to surface", LoadKind.BURST, LoadProfile(md, internal, external),
-                    "as_cemented", "; ".join(notes))
+    return LoadCase("Gas to surface" + _via(src, s), LoadKind.BURST,
+                    LoadProfile(md, internal, external), "as_cemented", "; ".join(notes))
 
 
-def tubing_leak(well: Well, s: CasingString, md: np.ndarray) -> LoadCase | None:
+def tubing_leak(well: Well, s: CasingString, md: np.ndarray,
+                src: CasingString | None = None) -> LoadCase | None:
     """Tubing leak near surface: SITP applied on top of packer fluid down to the packer."""
-    if s.type != "production" or s.shut_in_tubing_pressure is None:
+    src = src or s
+    if src.type not in ("production", "liner") or src.shut_in_tubing_pressure is None:
         return None
-    pf = s.packer_fluid_ppg if s.packer_fluid_ppg is not None else s.mud_weight
-    packer_md = s.packer_md if s.packer_md is not None else s.shoe_md
+    pf = src.packer_fluid_ppg if src.packer_fluid_ppg is not None else src.mud_weight
+    packer_md = src.packer_md if src.packer_md is not None else src.shoe_md
     tvd = well.trajectory.tvd(md)
     packer_tvd = well.trajectory.tvd(packer_md)
-    internal = s.shut_in_tubing_pressure + ppg_to_gradient(pf) * np.minimum(tvd, packer_tvd)
+    internal = src.shut_in_tubing_pressure + ppg_to_gradient(pf) * np.minimum(tvd, packer_tvd)
     # Below the packer the casing sees the pore (reservoir) pressure continuation; we
     # conservatively continue the packer-fluid gradient.
     internal = np.where(tvd > packer_tvd,
                         internal + ppg_to_gradient(pf) * (tvd - packer_tvd), internal)
     external = burst_backup(well, s, md)
-    return LoadCase("Tubing leak", LoadKind.BURST, LoadProfile(md, internal, external),
-                    "as_cemented", f"SITP {s.shut_in_tubing_pressure:.0f} psi on {pf} ppg "
-                    "packer fluid")
+    return LoadCase("Tubing leak" + _via(src, s), LoadKind.BURST,
+                    LoadProfile(md, internal, external), "as_cemented",
+                    f"SITP {src.shut_in_tubing_pressure:.0f} psi on {pf} ppg packer fluid")
 
 
-def stimulation(well: Well, s: CasingString, md: np.ndarray) -> LoadCase | None:
+def stimulation(well: Well, s: CasingString, md: np.ndarray,
+                src: CasingString | None = None) -> LoadCase | None:
     """Fracturing down casing: surface treating pressure + frac fluid hydrostatic."""
-    if s.frac_surface_pressure is None:
+    src = src or s
+    if src.frac_surface_pressure is None:
         return None
-    ff = s.frac_fluid_ppg if s.frac_fluid_ppg is not None else 8.5
-    internal = s.frac_surface_pressure + mud_hydrostatic(well, md, ff)
+    ff = src.frac_fluid_ppg if src.frac_fluid_ppg is not None else 8.5
+    internal = src.frac_surface_pressure + mud_hydrostatic(well, md, ff)
     external = burst_backup(well, s, md)
-    return LoadCase("Stimulation", LoadKind.BURST, LoadProfile(md, internal, external),
-                    "as_cemented", f"{s.frac_surface_pressure:.0f} psi surface treating "
-                    f"pressure on {ff} ppg frac fluid")
+    return LoadCase("Stimulation" + _via(src, s), LoadKind.BURST,
+                    LoadProfile(md, internal, external), "as_cemented",
+                    f"{src.frac_surface_pressure:.0f} psi surface treating pressure on "
+                    f"{ff} ppg frac fluid")
 
 
 def full_evacuation(well: Well, s: CasingString, md: np.ndarray) -> LoadCase:
@@ -278,4 +298,15 @@ def standard_load_cases(well: Well, s: CasingString, step: float = 50.0,
     kick = gas_kick(well, s, md, inner_diameter)
     if kick is not None:
         cases.insert(1, kick)
+    # Loads a liner hung in this string imposes on it: its well-control cases while
+    # drilling ahead below the liner, and its production cases (the parent casing
+    # carries the same tubing-leak / stimulation pressure down to the liner top).
+    for liner in well.liners_of(s):
+        for b in (gas_to_surface, tubing_leak, stimulation):
+            lc = b(well, s, md, src=liner)
+            if lc is not None:
+                cases.append(lc)
+        lc = gas_kick(well, s, md, inner_diameter, src=liner)
+        if lc is not None:
+            cases.append(lc)
     return cases

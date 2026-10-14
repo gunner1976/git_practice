@@ -20,7 +20,7 @@ from casingdesign.design import (
     optimize_tapered,
 )
 from casingdesign.design.evaluate import _axial_for
-from casingdesign.examples import onshore_horizontal_well
+from casingdesign.examples import onshore_horizontal_well, onshore_liner_well
 from casingdesign.loads.cases import standard_load_cases
 from casingdesign.web.serialize import design_dict, result_dict, spec_dict
 from casingdesign.well import Well
@@ -70,9 +70,19 @@ def index():
     return FileResponse(STATIC / "index.html")
 
 
+EXAMPLES = {"horizontal": onshore_horizontal_well, "liner": onshore_liner_well}
+
+
 @app.get("/api/example")
-def example() -> dict:
-    return onshore_horizontal_well().model_dump()
+def example(name: str = "horizontal") -> dict:
+    if name not in EXAMPLES:
+        raise HTTPException(404, f"unknown example; choose from {list(EXAMPLES)}")
+    return EXAMPLES[name]().model_dump()
+
+
+@app.get("/api/examples")
+def examples() -> list[str]:
+    return list(EXAMPLES)
 
 
 @app.get("/api/catalog")
@@ -109,7 +119,7 @@ def evaluate(req: EvaluateRequest) -> dict:
         r = evaluate_design(req.well, s, design, cases)
         axial = {c.name: _axial_for(c, req.well, s, design) for c in cases}
         out.append(result_dict(r, cases, axial, req.well))
-    return {"well": req.well.name, "results": out}
+    return {"well": req.well.name, "results": out, "warnings": req.well.warnings()}
 
 
 @app.post("/api/optimize")

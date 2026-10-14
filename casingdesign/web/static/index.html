@@ -38,6 +38,7 @@
   .tabs { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap }
   .tabs button[aria-selected="true"] { background:var(--accent); color:#fff; border-color:var(--accent) }
   .taper { font-size:12px; color:var(--accent) }
+  .warn { color:#9a6400; font-size:13px; margin:2px 0 8px }
   #form { max-height: 62vh; overflow:auto; padding-right:4px }
   .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap:6px 10px; margin:6px 0 }
   .f { display:flex; flex-direction:column; gap:2px; font-size:12px; color:var(--muted) }
@@ -59,7 +60,8 @@
       <div class="tabs" style="margin:0"><button id="tab-form" aria-selected="true">Form</button><button id="tab-json" aria-selected="false">JSON</button></div></div>
     <div id="form"></div>
     <textarea id="well" spellcheck="false" hidden></textarea>
-    <div class="row"><button id="load-example">Load example</button>
+    <div class="row"><select id="example"><option value="horizontal">Horizontal well</option><option value="liner">Well with frac liner</option></select>
+      <button id="load-example">Load example</button>
       <button id="download">Download JSON</button><span class="muted" id="well-status"></span></div>
     <h2 style="margin-top:14px">Pipe selection</h2>
     <div id="specs"></div>
@@ -144,7 +146,8 @@ const fmt0 = x => x == null ? '—' : Math.round(x).toLocaleString();
 function renderResults(data) {
   lastEval = data;
   const root = $('#results');
-  root.innerHTML = `<h2>Results · ${data.well}</h2><div class="tabs" id="tabs"></div><div id="detail"></div>`;
+  const warn = (data.warnings || []).map(w => `<div class="warn">⚠ ${w}</div>`).join('');
+  root.innerHTML = `<h2>Results · ${data.well}</h2>${warn}<div class="tabs" id="tabs"></div><div id="detail"></div>`;
   const tabs = $('#tabs');
   data.results.forEach((r, i) => {
     const b = document.createElement('button'); b.textContent = `${r.string}: ${r.design.uniform ? r.spec.label : 'tapered'} ${r.pass ? '✓' : '✗'}`;
@@ -253,7 +256,7 @@ async function optimize() {
   catch (e) { $('#error').textContent = e.message; }
 }
 async function loadExample() {
-  const w = await api('/api/example'); Editor.set(w); $('#well').value = JSON.stringify(w, null, 2);
+  const w = await api('/api/example?name=' + $('#example').value); Editor.set(w); $('#well').value = JSON.stringify(w, null, 2);
   renderSpecRows(w); $('#well-status').textContent = `${w.strings.length} strings`;
 }
 function syncFromForm() {

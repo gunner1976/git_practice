@@ -7,7 +7,7 @@ cheapest-passing-pipe optimizer. See `docs/MVP_PLAN.md` for scope and roadmap.
 ```bash
 pip install -e ".[dev]"
 pytest                                  # benchmark suite vs published API tables
-casingdesign demo                       # writes example_well.json
+casingdesign demo                       # writes example_well.json (--liner for the frac-liner variant)
 casingdesign optimize example_well.json
 casingdesign check example_well.json -s "Production=5.5,20,P-110" --json-out out.json
 casingdesign ratings 9.625 47 L-80

@@ -24,7 +24,7 @@ the inputs that produced it.
 - Thermal: transient temperatures, APB, thermal cycling, wellhead growth.
 - Deepwater / BSEE requirements.
 - Reliability-based design, casing wear, buckling, premium connection envelopes.
-- Liners and tiebacks.
+- Tiebacks as a distinct string type (model one as a production string to the liner top).
 
 ## Architecture
 ```
@@ -47,7 +47,7 @@ tests/       benchmark against published API tables; worked-example wells
 
 ## Roadmap after MVP
 1. Verify round-thread engaged lengths against API 5B; load vendor premium connection data.
-2. Liners/tiebacks; buckling; casing wear derating.
+2. Buckling; casing wear derating.
 3. Service-life axial changes (ballooning), then APB for thermal wells.
 4. Report generator (PDF) for regulatory submission; StressCheck import.
 5. Side-by-side validation against a licensed StressCheck/WELLCAT run.
