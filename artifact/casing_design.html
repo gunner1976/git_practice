@@ -45,6 +45,7 @@ details.sub { border:none; border-top:1px dashed var(--line); border-radius:0; p
 svg.schematic { width:100%; height:auto; display:block } .schematic .ground { stroke:var(--ink); stroke-width:2 } .schematic .hole { fill:var(--hole); opacity:.35 } .schematic .cement { fill:var(--cement); opacity:.7 } .schematic .casing { fill:var(--panel); stroke:var(--ink); stroke-width:1.5 } .schematic .casing.liner { stroke:var(--accent) } .schematic .lbl { font:11px var(--font-ui); fill:var(--ink) } .schematic .lbl.muted { fill:var(--muted) }
 .report h1 { font-size:20px; margin:0 } .report h2 { font-size:15px; margin:22px 0 6px; border-bottom:1px solid var(--line); padding-bottom:4px } .report .meta { color:var(--muted); font-size:12px }
 .confirm { display:inline-flex; gap:6px; align-items:center }
+details.planner > summary { cursor:pointer; list-style:revert } details.planner .tag { display:inline-block; font-size:11px; padding:1px 6px; border:1px solid var(--line); border-radius:10px; white-space:nowrap } details.planner tr.warn td { background:var(--accent-soft) } details.planner label.row { margin:8px 0; align-items:flex-start }
 @media (prefers-reduced-motion: reduce) { .toast { transition:none } }
 @media (max-width:900px) { .two, .two.wide-left { grid-template-columns:1fr } .two > .panel:last-child { position:static } }
 @media (max-width:700px) { header .muted { display:none } .panel { padding:12px } .grid { grid-template-columns:repeat(auto-fill,minmax(130px,1fr)) } .steps button { padding:6px 10px; font-size:12px } .hero { padding:12px 4px } button.big { padding:10px 14px; font-size:14px; width:100% } .hero .row { flex-direction:column; align-items:stretch } table.edit input { width:84px } .plot { height:320px } .card .dfs { grid-template-columns:repeat(2,1fr) } }
@@ -316,6 +317,97 @@ const Engine = (() => {
 })();
 if (typeof module !== 'undefined') module.exports = Engine;
 
+// SRDE Planner integration: when opened from the Planner as /pages/casing-design/#...&pwell=SRDE-001 the tool loads the well
+// from the hub (/api/plan/*), builds the design basis in engine units, and can publish the result back into the Planner's
+// 'casing' module. Inert outside the hub (no pwell in the hash, or not served under /pages/).
+(() => {
+const M_TO_FT = 3.280839895, KPAM_TO_PPG = 0.145037738 * 0.3048 / 0.052;   // 1 kPa/m = 0.8502 ppg EMW
+const OD_TALLY = {20: '20"', 16: '16"', 13.375: '13-3/8"', 11.75: '11-3/4"', 10.75: '10-3/4"', 9.625: '9-5/8"', 8.625: '8-5/8"', 7.625: '7-5/8"', 7: '7"', 6.625: '6-5/8"', 5.5: '5-1/2"', 5: '5"', 4.5: '4-1/2"'};
+const HOLE_TALLY = {26: '26"', 17.5: '17-1/2"', 16: '16"', 14.75: '14-3/4"', 12.25: '12-1/4"', 10.625: '10-5/8"', 9.875: '9-7/8"', 8.75: '8-3/4"', 8.5: '8-1/2"', 7.875: '7-7/8"', 6.75: '6-3/4"', 6.125: '6-1/8"', 6: '6"', 4.75: '4-3/4"'};
+const tallyToDec = s => { if (!s) return null; const m = String(s).match(/^(\d+)(?:-(\d+)\/(\d+))?/); return m ? +m[1] + (m[2] ? +m[2] / +m[3] : 0) : null; };
+const nearestKey = (map, v) => { let best = null; for (const k of Object.keys(map)) if (best == null || Math.abs(+k - v) < Math.abs(+best - v)) best = k; return best != null && Math.abs(+best - v) < 0.02 ? map[best] : ''; };
+const PWELL = decodeURIComponent((location.hash.match(/pwell=([^&]+)/) || [])[1] || '');
+const ON_HUB = /\/pages\//.test(location.pathname);
+if (!PWELL || !ON_HUB) return;
+
+async function hub(path, body) { const r = await fetch('/api/plan/' + path, body ? {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)} : {cache: 'no-store'}); let j = {}; try { j = await r.json(); } catch {} if (!r.ok) throw new Error(j.error || ('hub error ' + r.status)); return j; }
+const numv = (inputs, key) => { const r = (inputs || []).find(x => x.key === key); const v = r ? +r.value : NaN; return isFinite(v) && r.value !== '' ? v : null; };
+
+async function loadWell(id) {
+  const q = '?well=' + encodeURIComponent(id);
+  const [program, survey, casing, tops] = await Promise.all([hub('program' + q), hub('module' + q + '&module=survey').catch(() => null), hub('module' + q + '&module=casing').catch(() => null), hub('prog_tops' + q).catch(() => null)]);
+  let overlays = null; try { overlays = (await (await fetch('/pages/planner/data.json', {cache: 'no-store'})).json()).overlays; } catch {}
+  const basis = [];   // what came from where, with tags, shown to the user and carried in the publish
+  const inputs = program.inputs || [], g = program.geometry || {};
+  // --- trajectory (m -> ft)
+  let stations;
+  const sv = survey && survey.doc && survey.doc.data && survey.doc.data.stations;
+  if (sv && sv.length >= 2) { stations = sv.map(([md, inc, azi]) => ({md: md * M_TO_FT, inclination: inc, azimuth: azi})); basis.push({item: 'Trajectory', value: `${sv.length} survey stations (${survey.doc.data.survey_type || 'plan'})`, tag: 'S', source: 'Planner deviation-survey module'}); }
+  else { const kop = numv(inputs, 'kop') ?? g.kop_md ?? null, land = g.land_md ?? g.landing_md ?? null, lat = numv(inputs, 'lat_len') ?? 0;
+    if (land) { stations = [{md: 0, inclination: 0, azimuth: 0}, {md: (kop ?? land * 0.6) * M_TO_FT, inclination: 0, azimuth: 0}, {md: land * M_TO_FT, inclination: 90, azimuth: 0}, {md: (land + Math.max(lat, 100)) * M_TO_FT, inclination: 90, azimuth: 0}]; basis.push({item: 'Trajectory', value: `synthesised from design inputs: KOP ${Math.round(kop ?? land * 0.6)} m, landing ${Math.round(land)} m MD, lateral ${Math.round(lat)} m`, tag: 'S', source: 'Planner design inputs / well_calc.geometry (no survey module yet)'}); }
+    else { stations = [{md: 0, inclination: 0, azimuth: 0}, {md: 1000 * M_TO_FT, inclination: 0, azimuth: 0}]; basis.push({item: 'Trajectory', value: 'no survey and no landing depth: vertical 1,000 m placeholder', tag: 'S', source: '-'}); } }
+  // --- pressures and temperature
+  const pore_kpam = overlays && overlays.pressure ? +overlays.pressure.pore_kpa_m : 7.9, pore_tag = overlays && overlays.pressure ? overlays.pressure.pore_tag : 'T record / E reading';
+  const pore_ppg = +(pore_kpam * KPAM_TO_PPG).toFixed(2);
+  basis.push({item: 'Pore pressure', value: `${pore_kpam} kPa/m = ${pore_ppg} ppg EMW, constant with depth`, tag: pore_tag, source: 'Planner overlay (regional RFT)'});
+  const frac_ppg = 13.46;   // 0.70 psi/ft - an ASSUMPTION; no LOT/FIT exists in the concession (hazard H10)
+  basis.push({item: 'Fracture gradient', value: `${frac_ppg} ppg EMW (0.70 psi/ft) ASSUMED - no LOT/FIT held (H10). Edit on the Pressures step; confirm before publishing.`, tag: 'S assumed', source: 'none held', warn: true});
+  const ot = (overlays && overlays.temperature) || {}; const t0c = ot.intercept_c != null ? +ot.intercept_c : ot.surface_c != null ? +ot.surface_c : 18, tgc = ot.grad_c_per_m != null ? +ot.grad_c_per_m : ot.grad_c_m != null ? +ot.grad_c_m : 0.031;
+  const tsurf_f = +(t0c * 1.8 + 32).toFixed(1), tgrad_f100 = +(tgc * 1.8 * 30.48).toFixed(2);
+  basis.push({item: 'Temperature', value: `${t0c} °C + ${tgc} °C/m = ${tsurf_f} °F + ${tgrad_f100} °F/100 ft`, tag: ot.tag || 'S', source: 'Planner overlay (geotherm)'});
+  // --- strings: the current casing document if any, else the Nexus default rows
+  const doc = casing && casing.doc && casing.doc.data && casing.doc.data.strings && casing.doc.data.strings.length ? casing.doc.data : null;
+  let rows = doc ? doc.strings : null;
+  if (!rows) { try { rows = ((await (await fetch('/pages/planner/data.json', {cache: 'no-store'})).json()).design || {}).strings || null; } catch {} }
+  const depthM = key => key ? numv(inputs, key) : null;
+  const landM = g.land_md ?? g.landing_md ?? g.prod_shoe_md ?? null;
+  const strings = []; let prevShoe = 0;
+  const mw = Math.max(pore_ppg + 0.5, 8.6);
+  for (const r of (rows || [])) {
+    const kind = (r.kind || '').toLowerCase(); if (!['conductor', 'surface', 'intermediate', 'production', 'liner'].includes(kind)) continue;
+    const od = tallyToDec(r.od), hole = tallyToDec(r.hole) || (od ? od + 2.5 : null); if (!od) continue;
+    let shoe_m = depthM(r.depth_key); if (shoe_m == null && kind === 'production') shoe_m = landM; if (shoe_m == null && kind === 'surface') shoe_m = numv(inputs, 'surf_shoe'); if (shoe_m == null && kind === 'conductor') shoe_m = numv(inputs, 'cond_shoe');
+    if (shoe_m == null) { shoe_m = prevShoe + 300; basis.push({item: `${r.label || kind} shoe`, value: `no depth input - placed ${Math.round(shoe_m)} m`, tag: 'S', source: '-', warn: true}); }
+    const s = Engine.baseString({name: r.label || kind[0].toUpperCase() + kind.slice(1), type: kind, od, hole_size: hole, hanger_md: kind === 'liner' ? Math.max(0, prevShoe - 100) * M_TO_FT : 0, shoe_md: shoe_m * M_TO_FT, toc_md: kind === 'liner' ? Math.max(0, prevShoe - 100) * M_TO_FT : 0, mud_weight: +mw.toFixed(1), pressure_test: kind === 'conductor' ? null : 1500});
+    s._planner = {depth_key: r.depth_key || '', od_tally: r.od, hole_tally: r.hole, grade: r.grade, weight: r.weight_ppf, conn: r.conn};
+    strings.push(s); prevShoe = shoe_m;
+  }
+  for (let i = 0; i < strings.length - 1; i++) { const s = strings[i], nx = strings[i + 1]; if (['surface', 'intermediate', 'conductor'].includes(s.type) && nx.shoe_md > s.shoe_md) { s.next_hole_mud_weight = nx.mud_weight; s.next_section_td_md = nx.shoe_md; } }
+  basis.push({item: 'Mud weights', value: `${mw.toFixed(1)} ppg on every string (max(pore + 0.5, 8.6)) - planning default`, tag: 'S', source: '-', warn: true});
+  basis.push({item: 'Casing strings', value: doc ? `${strings.length} rows from the Planner casing module (${casing.doc.source === 'tool' ? 'published by ' + casing.doc.tool_id : 'entered in the Planner'})` : `${strings.length} rows from the Nexus default design`, tag: 'S', source: doc ? 'Planner casing module' : 'planner/data.json design.strings'});
+  const base = Engine.exampleHorizontal();
+  const well = {...base, name: `${id} casing design`, trajectory: {stations}, strings,
+    formation: {...base.formation, pore_pressure: {points: [{tvd: 0, value: pore_ppg}]}, fracture_gradient: {points: [{tvd: 0, value: frac_ppg}]}, surface_temperature_f: tsurf_f, geothermal_gradient_f_per_100ft: tgrad_f100},
+    planner: {well_id: id, slot: program.well, basis, frac_confirmed: false, loaded_at: new Date().toISOString()}};
+  return well;
+}
+
+function toPlannerDoc(well, design) {
+  const strings = [], an = [];
+  for (const st of design.strings) { const r = st.result; const s = well.strings.find(x => x.name === st.string) || {}; const pl = s._planner || {};
+    const secs = r ? r.design.sections : []; const label = st.string;
+    const purpose = r ? Object.entries(r.summary).map(([k, v]) => `${k} DF ${isFinite(v.min_df) ? v.min_df.toFixed(2) : 'inf'} (${v.case})`).join('; ') : 'no catalog pipe passes';
+    secs.forEach((x, i) => strings.push({kind: s.type || 'production', label: secs.length > 1 ? `${label} ${Math.round(x.top_md / M_TO_FT).toLocaleString()}-${Math.round(x.bottom_md / M_TO_FT).toLocaleString()} m` : label,
+      od: nearestKey(OD_TALLY, x.spec.od) || pl.od_tally || '', hole: nearestKey(HOLE_TALLY, s.hole_size) || pl.hole_tally || '', weight_ppf: String(x.spec.weight), grade: x.spec.grade.name,
+      conn: x.spec.connection.name === 'PREMIUM' ? 'premium' : x.spec.connection.name,
+      cement: i === secs.length - 1 ? `TOC ${Math.round((s.toc_md || 0) / M_TO_FT).toLocaleString()} m; lead ${s.cement_lead_ppg} / tail ${s.cement_tail_ppg} ppg; shoe ${Math.round(s.shoe_md / M_TO_FT).toLocaleString()} m MD` : '',
+      purpose: i === 0 ? purpose : '', depth_key: i === secs.length - 1 ? (pl.depth_key || (s.type === 'surface' ? 'surf_shoe' : s.type === 'conductor' ? 'cond_shoe' : '')) : ''}));
+    if (!secs.length) strings.push({kind: s.type || 'production', label, od: pl.od_tally || nearestKey(OD_TALLY, s.od), hole: pl.hole_tally || '', weight_ppf: '', grade: '', conn: '', cement: '', purpose, depth_key: pl.depth_key || ''});
+    an.push({name: st.string, od: s.od, pipe: r ? (r.design.uniform ? r.spec.label : 'tapered: ' + secs.map(x => x.spec.label).join(' / ')) : null, pass: !!(r && r.passes), overridden: !!st.overridden,
+      sections: secs.map(x => ({top_m: Math.round(x.top_md / M_TO_FT), bottom_m: Math.round(x.bottom_md / M_TO_FT), pipe: x.spec.label, burst_psi: Math.round(x.spec.burst), collapse_psi: Math.round(x.spec.collapse), joint_lbf: Math.round(x.spec.joint_strength)})),
+      summary: r ? Object.fromEntries(Object.entries(r.summary).map(([k, v]) => [k, {min_df: isFinite(v.min_df) ? +v.min_df.toFixed(3) : null, required: v.required, case: v.case, md_m: Math.round(v.md / M_TO_FT), pass: v.pass}])) : {},
+      cases: r ? r.cases.map(c => ({name: c.name, basis: c.description})) : []}); }
+  const f = well.formation, p = well.planner || {};
+  return {strings, analysis: {tool: 'casing-design', tool_version: 'v1', run_at: new Date().toISOString().slice(0, 16).replace('T', ' '),
+    frac_basis: p.frac_confirmed ? `E team-entered ${f.fracture_gradient.points.map(x => x.value).join('/')} ppg EMW` : `S assumed ${f.fracture_gradient.points.map(x => x.value).join('/')} ppg EMW (no LOT/FIT held, H10)`,
+    basis: {pore_ppg: f.pore_pressure.points.map(x => [x.tvd / M_TO_FT, x.value]), frac_ppg: f.fracture_gradient.points.map(x => [x.tvd / M_TO_FT, x.value]), surface_temperature_c: +((f.surface_temperature_f - 32) / 1.8).toFixed(1), geothermal_c_per_m: +(f.geothermal_gradient_f_per_100ft / 1.8 / 30.48).toFixed(4),
+      design_factors: well.design_factors, mud_weights_ppg: Object.fromEntries(well.strings.map(s => [s.name, s.mud_weight])), grades: well.prefs && well.prefs.grades, loaded: p.basis || []},
+    strings: an, warnings: design.warnings || [], units_note: 'engine ran in US oilfield units (ft, psi, ppg); depths published in metres'}};
+}
+
+window.PlannerMode = {well_id: PWELL, loadWell, toPlannerDoc, hub, plannerUrl: `/pages/planner/#program/design&well=${encodeURIComponent(PWELL)}`};
+})();
+
 // UI for the in-browser casing design app. Everything computes locally via Engine.
 (() => {
 const $ = s => document.querySelector(s); const app = $('#app');
@@ -479,12 +571,12 @@ const STEPS = [['well', 'Well & design basis'], ['pressures', 'Pressures'], ['st
 const GUIDE = {well: ['Set the design factors your company uses (defaults are typical onshore values).', 'Enter the survey: surface and TD are enough for a vertical well; add stations for build and lateral sections.', 'Untick grades you would not run; the optimizer only picks from the ticked ones.'],
   pressures: ['Pore pressure and fracture gradient as equivalent mud weight versus true vertical depth.', 'Two or three points per curve are usually enough.', 'The chart shows the drilling window; each string\'s mud weight should sit inside it.'],
   strings: ['One card per string from the surface down. "+ Add next string" proposes the next standard size.', 'Fill the "drilling ahead" fields for strings you drill below, and the production fields for the production string or liner.', 'Blank test, kick or production fields skip those load cases. Red notes must be fixed; amber ones are advice.'],
-  design: ['Each card is the cheapest pipe that passes every load case; tapered strings are proposed when they save money.', 'Open "Choose a different pipe" to pick from the passing alternatives, or "Show loads & plots" to see what governs.', 'Everything is computed in your browser; nothing is sent anywhere.'],
+  design: ['Each card is the cheapest pipe that passes every load case; tapered strings are proposed when they save money.', 'Open "Choose a different pipe" to pick from the passing alternatives, or "Show loads & plots" to see what governs.', 'Everything is computed in your browser; nothing is sent anywhere unless you press "Publish to Planner" (hub only).'],
   report: ['A complete record of the design basis, load cases and results for this well.', 'Select all and copy into a document, or screenshot sections, to share it.']};
 let project = null, designData = null, saveTimer = null, dirty = false;
 function guide(step) { const key = 'guide-hidden-' + step; let hidden = false; try { hidden = localStorage.getItem(key) === '1'; } catch {} const box = h('div', {class: 'guide'});
   const draw = () => box.replaceChildren(h('div', {class: 'row', style: 'justify-content:space-between'}, h('b', {}, step === 'design' || step === 'report' ? 'What you are looking at' : 'What to enter here'), h('button', {class: 'link small', onclick: () => { hidden = !hidden; try { localStorage.setItem(key, hidden ? '1' : '0'); } catch {} draw(); }}, hidden ? 'show' : 'hide')), hidden ? null : h('ul', {}, ...GUIDE[step].map(t => h('li', {}, t)))); draw(); return box; }
-function route() { const m = (location.hash || '').match(/^#p-([a-z0-9]+)-(\w+)$/); if (m) openProject(m[1], m[2]); else renderHome(); }
+function route() { const m = (location.hash || '').match(/^#p-([a-z0-9]+)-(\w+)$/); if (m) openProject(m[1], m[2]); else if (window.PlannerMode && /pwell=/.test(location.hash)) plannerStart(); else renderHome(); }
 window.addEventListener('hashchange', route);
 async function renderHome() { project = null; designData = null; $('#save-state').textContent = ''; app.replaceChildren(h('div', {class: 'panel hero'}, h('h2', {style: 'font-size:20px'}, 'Design casing strings for an onshore well'), h('p', {}, 'Loading your wells…')));
   const list = await Store.list(); const mode = Store.mode();
@@ -501,10 +593,32 @@ async function importFile(file) { if (!file) return; try { const r = importEdm(a
 async function openProject(id, step) { if (!project || project.id !== id) { project = await Store.get(id); designData = null; if (!project) { location.hash = '#home'; return; } } renderProject(step); }
 function markDirty() { dirty = true; designData = null; $('#save-state').textContent = 'unsaved…'; clearTimeout(saveTimer); saveTimer = setTimeout(save, 800); }
 async function save() { if (!project || !dirty) return; const mode = await Store.save(project); dirty = false; $('#save-state').textContent = mode === 'shared' ? 'saved' : 'saved (this browser)'; }
+const plannerPid = () => 'pw' + String(PlannerMode.well_id).toLowerCase().replace(/[^a-z0-9]/g, '');
+async function plannerStart(reload = false) { const PM = window.PlannerMode; const pid = plannerPid();
+  app.replaceChildren(h('div', {class: 'panel hero'}, h('h2', {style: 'font-size:20px'}, `Loading ${PM.well_id} from the Planner…`), h('p', {class: 'muted'}, 'Reading the program, survey, casing module and pressure/temperature overlays.')));
+  try { const existing = reload ? null : await Store.get(pid);
+    if (existing) { project = existing; designData = null; location.hash = `#p-${pid}-well`; return; }
+    const well = await PM.loadWell(PM.well_id); const p = {id: pid, name: well.name, well, design: {}, created: new Date().toISOString()}; await Store.save(p); project = p; designData = null; location.hash = `#p-${pid}-well`; }
+  catch (e) { app.replaceChildren(h('div', {class: 'panel'}, h('h2', {}, 'Could not load the well from the Planner'), h('div', {class: 'err'}, e.message), h('div', {class: 'row'}, h('button', {onclick: () => plannerStart(reload)}, 'Try again'), h('a', {href: PM.plannerUrl}, '← Back to the Planner')))); } }
+function plannerPanel(w, step) { const PM = window.PlannerMode, pl = w.planner; if (!PM || !pl) return null; const warnCount = (pl.basis || []).filter(b => b.warn).length;
+  const det = h('details', {class: 'panel planner', open: step === 'well' ? '' : null}, h('summary', {}, h('b', {}, `Planner basis: ${pl.well_id}`), h('span', {class: 'muted small'}, ` · loaded ${new Date(pl.loaded_at).toLocaleString()}${warnCount ? ` · ${warnCount} assumption${warnCount > 1 ? 's' : ''} to review` : ''}`)),
+    h('p', {class: 'small muted'}, 'Every input below came from the hub with its truth tag (T measured, E engineering, S scenario/assumed, C consensus). Change anything on the steps; the tags of what you edit become E (team-entered) on publish.'),
+    h('div', {class: 'tbl'}, h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Item'), h('th', {}, 'Value'), h('th', {}, 'Tag'), h('th', {}, 'Source'))), h('tbody', {}, ...(pl.basis || []).map(b => h('tr', {class: b.warn ? 'warn' : ''}, h('td', {}, b.item), h('td', {}, (b.warn ? '⚠ ' : '') + b.value), h('td', {}, h('span', {class: 'tag'}, b.tag)), h('td', {class: 'small muted'}, b.source)))))),
+    h('label', {class: 'row small'}, h('input', {type: 'checkbox', checked: pl.frac_confirmed ? '' : null, onchange: e => { pl.frac_confirmed = e.target.checked; markDirty(); }}), 'I have reviewed the fracture gradient on the Pressures step and it reflects the team’s engineering estimate (publishes tagged E instead of S assumed)'),
+    h('div', {class: 'row'}, h('a', {href: PM.plannerUrl}, '← Back to the Planner'), h('button', {class: 'link small', onclick: () => { if (confirm('Reload the well from the Planner? Your edits and pipe selections for this well will be replaced.')) plannerStart(true); }}, 'Reload from Planner')));
+  return det; }
+function publishButton(el) { const PM = window.PlannerMode, w = project.well; if (!PM || !w.planner) return null; const box = h('span', {});
+  const run = async () => { box.replaceChildren(h('span', {class: 'muted small'}, 'Publishing…'));
+    try { await save(); const data = PM.toPlannerDoc(w, designData); const r = await PM.hub('module_publish', {well: PM.well_id, module: 'casing', data, tool_id: 'casing-design', tool_ref: `${location.pathname}#p-${project.id}-design`});
+      box.replaceChildren(h('span', {class: 'pass small'}, `✓ Published to the Planner casing module${r && r.version ? ' (v' + r.version + ')' : ''} · `), h('a', {href: PM.plannerUrl, class: 'small'}, 'open in Planner')); toast('Published to the Planner'); }
+    catch (e) { box.replaceChildren(h('span', {class: 'fail small'}, 'Publish failed: ' + e.message + ' '), h('button', {class: 'small', onclick: run}, 'Retry')); } };
+  const ask = () => { if (w.planner.frac_confirmed) return run();
+    box.replaceChildren(h('span', {class: 'confirm'}, h('span', {class: 'warn small'}, 'Fracture gradient is still an assumption (no LOT/FIT held). Publish tagged "S assumed"?'), h('button', {class: 'small', onclick: run}, 'Publish as S'), h('button', {class: 'small', onclick: () => box.replaceChildren(btn)}, 'Cancel'))); };
+  const btn = h('button', {class: 'primary', onclick: ask}, 'Publish to Planner'); box.append(btn); return box; }
 function renderProject(step) { const w = project.well;
   app.replaceChildren(h('div', {class: 'row', style: 'justify-content:space-between'}, h('input', {value: project.name, id: 'project-name', 'aria-label': 'well name', style: 'font-size:18px;font-weight:600;border:none;background:none;padding:4px 0;min-width:200px;flex:1', onchange: e => { project.name = e.target.value; markDirty(); }}),
       h('div', {class: 'row'}, h('button', {onclick: () => copyText(JSON.stringify(w, null, 2), 'Well JSON copied')}, 'Copy JSON'))),
-    h('div', {class: 'steps'}, ...STEPS.map(([k, label], i) => h('button', {'aria-current': k === step ? 'step' : null, class: STEPS.findIndex(s => s[0] === step) > i ? 'done' : '', onclick: () => location.hash = `#p-${project.id}-${k}`}, `${i + 1}. ${label}`))), guide(step), h('div', {id: 'step'}));
+    h('div', {class: 'steps'}, ...STEPS.map(([k, label], i) => h('button', {'aria-current': k === step ? 'step' : null, class: STEPS.findIndex(s => s[0] === step) > i ? 'done' : '', onclick: () => location.hash = `#p-${project.id}-${k}`}, `${i + 1}. ${label}`))), plannerPanel(w, step), guide(step), h('div', {id: 'step'}));
   const el = $('#step');
   if (step === 'design') renderDesign(el); else if (step === 'report') renderReport(el); else { const ed = h('div', {id: 'editor'}); el.append(ed); Editor.mount(ed, markDirty); Editor.set(w, step);
     const notes = ss.get('import-notes'); if (notes && step === 'strings') { el.prepend(h('div', {class: 'panel'}, h('h2', {}, 'Imported from EDM: please review'), h('ul', {class: 'small warn'}, ...JSON.parse(notes).map(n => h('li', {}, n))))); ss.del('import-notes'); }
@@ -522,7 +636,7 @@ async function renderDesign(el) { el.replaceChildren(h('div', {class: 'panel'}, 
   const errs = validateWell(project.well).filter(i => i.level === 'error'); if (errs.length) { el.replaceChildren(h('div', {class: 'panel'}, h('h2', {}, 'Fix these first'), ...errs.map(e => h('div', {class: 'fail'}, '✗ ' + e.msg)), h('div', {class: 'row'}, h('button', {onclick: () => location.hash = `#p-${project.id}-strings`}, '← Back to casing program')))); return; }
   await new Promise(r => setTimeout(r, 20)); try { if (!designData) designData = computeDesign(project.well, project.design && Object.keys(project.design).length ? project.design : null); } catch (e) { el.replaceChildren(h('div', {class: 'panel'}, h('div', {class: 'err'}, e.message))); return; }
   const d = designData, allPass = d.strings.every(s => s.result && s.result.passes);
-  el.replaceChildren(h('div', {class: 'panel'}, h('div', {class: 'row', style: 'justify-content:space-between'}, h('h2', {style: 'margin:0'}, allPass ? '✓ Every string passes' : '✗ Some strings need attention'), h('div', {class: 'row'}, h('button', {class: 'link', onclick: () => { project.design = {}; markDirty(); designData = null; renderDesign(el); }}, 'Reset to recommendations'), h('button', {class: 'primary', onclick: () => location.hash = `#p-${project.id}-report`}, 'Open report'))), ...(d.warnings || []).map(w => h('div', {class: 'warn small'}, '⚠ ' + w))),
+  el.replaceChildren(h('div', {class: 'panel'}, h('div', {class: 'row', style: 'justify-content:space-between'}, h('h2', {style: 'margin:0'}, allPass ? '✓ Every string passes' : '✗ Some strings need attention'), h('div', {class: 'row'}, h('button', {class: 'link', onclick: () => { project.design = {}; markDirty(); designData = null; renderDesign(el); }}, 'Reset to recommendations'), h('button', {class: 'primary', onclick: () => location.hash = `#p-${project.id}-report`}, 'Open report'), publishButton(el))), ...(d.warnings || []).map(w => h('div', {class: 'warn small'}, '⚠ ' + w))),
     h('div', {class: 'cards'}, ...d.strings.map(stringCard)), h('div', {id: 'detail'})); }
 function stringCard(s) { const r = s.result, rec = s.recommended, card = h('div', {class: 'card'});
   card.append(h('div', {class: 'row', style: 'justify-content:space-between'}, h('h3', {}, `${s.string} · ${s.od}"`), r ? h('span', {class: 'badge ' + (r.passes ? 'pass' : 'fail')}, r.passes ? 'PASS' : 'FAIL') : h('span', {class: 'badge fail'}, 'NO PIPE PASSES')));

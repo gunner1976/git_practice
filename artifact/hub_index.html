@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Casing Design</title>
+<style>
+/* Layout: a working app - fixed header, one scrolling column of panels; the schematic and
+   pressure window sit beside their forms on wide screens and stack on phones. */
+:root { --bg:#f3f5f7; --panel:#ffffff; --ink:#1b2430; --muted:#5d6b7a; --line:#d9dfe6; --ok:#1d7f49; --bad:#b93a2d; --warn:#8a5a00;
+  --accent:#1f5fbf; --accent-soft:#e6eefb; --hole:#c9a66b; --cement:#9aa6b4;
+  --font-ui: "Source Sans 3", "Segoe UI", system-ui, sans-serif; --font-num: "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#12171e; --panel:#1a212b; --ink:#e6ebf1; --muted:#99a5b3; --line:#2a3440; --ok:#4fc27c; --bad:#ef7b6e; --warn:#e0a94a; --accent:#6ea2ff; --accent-soft:#1f2c42; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg:#12171e; --panel:#1a212b; --ink:#e6ebf1; --muted:#99a5b3; --line:#2a3440; --ok:#4fc27c; --bad:#ef7b6e; --warn:#e0a94a; --accent:#6ea2ff; --accent-soft:#1f2c42; color-scheme: dark; }
+* { box-sizing:border-box } body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 var(--font-ui) }
+header { position:sticky; top:env(safe-area-inset-top, 0px); z-index:5; display:flex; align-items:center; gap:14px; padding-block:9px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); border-bottom:1px solid var(--line); background:var(--panel) }
+header h1 { font-size:17px; margin:0; letter-spacing:.01em } header a { color:inherit; text-decoration:none } header .spacer { flex:1 } header .muted { font-size:12px }
+main { max-width:1180px; margin:0 auto; padding-block:18px; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); min-width:0 }
+.panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:14px; min-width:0 }
+h2 { font-size:15px; margin:0 0 10px; text-wrap:balance } h3 { font-size:13px; margin:12px 0 4px } h4 { font-size:12px; color:var(--muted); margin:10px 0 0; font-weight:600; letter-spacing:.03em; text-transform:uppercase }
+.muted { color:var(--muted) } .small { font-size:12px } .pass { color:var(--ok); font-weight:600 } .fail { color:var(--bad); font-weight:600 } .warn { color:var(--warn) }
+button, select, input { font:inherit; padding:7px 10px; border:1px solid var(--line); border-radius:7px; background:var(--panel); color:var(--ink) }
+input, select { font-variant-numeric: tabular-nums } button { cursor:pointer } button:focus-visible, input:focus-visible, select:focus-visible { outline:2px solid var(--accent); outline-offset:1px }
+button.primary { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:600 } button.big { padding:12px 22px; font-size:15px } button.link { border:none; background:none; color:var(--accent); padding:4px 6px }
+button.x { border:none; background:none; color:var(--bad); font-size:16px; padding:0 6px } button:disabled { opacity:.5; cursor:default }
+.row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:6px 0 }
+.steps { display:flex; gap:6px; margin:0 0 14px; flex-wrap:wrap } .steps button { border-radius:999px; padding:7px 14px } .steps button[aria-current="step"] { background:var(--accent); color:#fff; border-color:var(--accent) }
+.steps button.done::before { content:"✓ "; color:var(--ok) } .steps button[aria-current="step"].done::before { color:#fff }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px 12px; margin:6px 0 }
+.f { display:flex; flex-direction:column; gap:3px; font-size:12px; color:var(--muted); min-width:0 } .f.wide { grid-column:1/-1 }
+.f input, .f select { width:100%; padding:6px 8px; font-size:13px; color:var(--ink) } .f input[type=checkbox] { width:auto; align-self:flex-start; margin-top:6px }
+.f.bad input, .f.bad select { border-color:var(--bad) } .f.warnish input { border-color:var(--warn) } .f small { font-size:11px; line-height:1.3 }
+table { border-collapse:collapse; width:100%; margin:6px 0; font-variant-numeric:tabular-nums } th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line) } th { color:var(--muted); font-weight:600; font-size:12px }
+.tbl { overflow-x:auto } table.edit td { padding:2px 4px } table.edit input { width:100px; padding:4px 6px }
+details { border:1px solid var(--line); border-radius:8px; padding:8px 12px; margin:8px 0 } summary { cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:8px }
+details.sub { border:none; border-top:1px dashed var(--line); border-radius:0; padding:6px 0 0; margin:10px 0 0 } details.sub summary { font-size:12px; color:var(--muted) }
+.chip { display:inline-flex; align-items:center; gap:4px; border:1px solid var(--line); border-radius:999px; padding:3px 9px 3px 6px; font-size:12px; background:var(--bg) } .chip input { margin:0 }
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:12px }
+.card { border:1px solid var(--line); border-radius:10px; padding:14px; background:var(--panel); min-width:0 } .card h3 { margin:0 0 4px; font-size:14px } .card .pipe { font-size:16px; font-weight:600; margin:6px 0 }
+.card .dfs { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:8px 0 } .card .df { background:var(--bg); border-radius:7px; padding:6px 8px; font-size:12px } .card .df b { display:block; font-size:15px; font-family:var(--font-num) }
+.badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:600 } .badge.pass { background:color-mix(in srgb, var(--ok) 15%, var(--panel)); color:var(--ok) } .badge.fail { background:color-mix(in srgb, var(--bad) 15%, var(--panel)); color:var(--bad) } .badge.info { background:var(--accent-soft); color:var(--accent) }
+.plots { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr)); gap:12px; margin-top:10px } .plot { height:400px; min-width:0 }
+.projects { list-style:none; padding:0; margin:0 } .projects li { display:flex; gap:12px; align-items:center; padding:10px 4px; border-bottom:1px solid var(--line); flex-wrap:wrap } .projects a, .projects .name { color:inherit; text-decoration:none; font-weight:600; cursor:pointer } .projects .spacer { flex:1 }
+.empty { text-align:center; padding:40px 20px; color:var(--muted) } .err { color:var(--bad); white-space:pre-wrap; margin:8px 0 }
+.toast { position:fixed; right:max(16px, env(safe-area-inset-right, 0px)); bottom:max(16px, env(safe-area-inset-bottom, 0px)); background:var(--ink); color:var(--bg); padding:8px 14px; border-radius:8px; font-size:12px; opacity:0; transition:opacity .3s; pointer-events:none } .toast.show { opacity:1 }
+.hero { text-align:center; padding:26px 10px } .hero p { color:var(--muted); max-width:560px; margin:8px auto 18px }
+.guide { border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:8px; padding:8px 14px; margin:0 0 12px; background:var(--accent-soft); font-size:13px } .guide ul { margin:4px 0 2px; padding-left:18px } .how ol { margin:0; padding-left:20px } .how li { margin:4px 0 }
+.two { display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start } .two.wide-left { grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr) } .two .panel { margin-bottom:0 } .two > .panel:last-child { position:sticky; top:56px }
+svg.schematic { width:100%; height:auto; display:block } .schematic .ground { stroke:var(--ink); stroke-width:2 } .schematic .hole { fill:var(--hole); opacity:.35 } .schematic .cement { fill:var(--cement); opacity:.7 } .schematic .casing { fill:var(--panel); stroke:var(--ink); stroke-width:1.5 } .schematic .casing.liner { stroke:var(--accent) } .schematic .lbl { font:11px var(--font-ui); fill:var(--ink) } .schematic .lbl.muted { fill:var(--muted) }
+.report h1 { font-size:20px; margin:0 } .report h2 { font-size:15px; margin:22px 0 6px; border-bottom:1px solid var(--line); padding-bottom:4px } .report .meta { color:var(--muted); font-size:12px }
+.confirm { display:inline-flex; gap:6px; align-items:center }
+details.planner > summary { cursor:pointer; list-style:revert } details.planner .tag { display:inline-block; font-size:11px; padding:1px 6px; border:1px solid var(--line); border-radius:10px; white-space:nowrap } details.planner tr.warn td { background:var(--accent-soft) } details.planner label.row { margin:8px 0; align-items:flex-start }
+@media (prefers-reduced-motion: reduce) { .toast { transition:none } }
+@media (max-width:900px) { .two, .two.wide-left { grid-template-columns:1fr } .two > .panel:last-child { position:static } }
+@media (max-width:700px) { header .muted { display:none } .panel { padding:12px } .grid { grid-template-columns:repeat(auto-fill,minmax(130px,1fr)) } .steps button { padding:6px 10px; font-size:12px } .hero { padding:12px 4px } button.big { padding:10px 14px; font-size:14px; width:100% } .hero .row { flex-direction:column; align-items:stretch } table.edit input { width:84px } .plot { height:320px } .card .dfs { grid-template-columns:repeat(2,1fr) } }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.2/plotly.min.js"></script>
+<script src="/static/nexus.js" data-tool="casing-design" defer></script>
+</head>
+<body>
+<header><a href="#home"><h1>Casing Design</h1></a><span class="muted">onshore · API TR 5C3 · US oilfield units</span><span class="spacer"></span><span id="save-state" class="muted small"></span></header>
+<main id="app"></main>
+<div class="toast" id="toast" role="status"></div>
+<script>
+// Generated from casingdesign/catalog/data/*.csv - do not edit by hand.
+const CATALOG_DATA = {"grades":[{"name":"H-40","min_yield":40000.0,"max_yield":80000.0,"min_tensile":60000.0,"sour":true},{"name":"J-55","min_yield":55000.0,"max_yield":80000.0,"min_tensile":75000.0,"sour":true},{"name":"K-55","min_yield":55000.0,"max_yield":80000.0,"min_tensile":95000.0,"sour":true},{"name":"M-65","min_yield":65000.0,"max_yield":85000.0,"min_tensile":85000.0,"sour":true},{"name":"N-80","min_yield":80000.0,"max_yield":110000.0,"min_tensile":100000.0,"sour":false},{"name":"L-80","min_yield":80000.0,"max_yield":95000.0,"min_tensile":95000.0,"sour":true},{"name":"C-90","min_yield":90000.0,"max_yield":105000.0,"min_tensile":100000.0,"sour":true},{"name":"R-95","min_yield":95000.0,"max_yield":110000.0,"min_tensile":105000.0,"sour":false},{"name":"T-95","min_yield":95000.0,"max_yield":110000.0,"min_tensile":105000.0,"sour":true},{"name":"C-110","min_yield":110000.0,"max_yield":120000.0,"min_tensile":115000.0,"sour":true},{"name":"P-110","min_yield":110000.0,"max_yield":140000.0,"min_tensile":125000.0,"sour":false},{"name":"Q-125","min_yield":125000.0,"max_yield":150000.0,"min_tensile":135000.0,"sour":false}],"pipes":[{"od":4.5,"weight":9.5,"wall":0.205,"drift":3.965},{"od":4.5,"weight":10.5,"wall":0.224,"drift":3.927},{"od":4.5,"weight":11.6,"wall":0.25,"drift":3.875},{"od":4.5,"weight":13.5,"wall":0.29,"drift":3.795},{"od":4.5,"weight":15.1,"wall":0.337,"drift":3.701},{"od":5.0,"weight":11.5,"wall":0.22,"drift":4.435},{"od":5.0,"weight":13.0,"wall":0.253,"drift":4.369},{"od":5.0,"weight":15.0,"wall":0.296,"drift":4.283},{"od":5.0,"weight":18.0,"wall":0.362,"drift":4.151},{"od":5.0,"weight":21.4,"wall":0.437,"drift":4.001},{"od":5.0,"weight":23.2,"wall":0.478,"drift":3.919},{"od":5.0,"weight":24.1,"wall":0.5,"drift":3.875},{"od":5.5,"weight":14.0,"wall":0.244,"drift":4.887},{"od":5.5,"weight":15.5,"wall":0.275,"drift":4.825},{"od":5.5,"weight":17.0,"wall":0.304,"drift":4.767},{"od":5.5,"weight":20.0,"wall":0.361,"drift":4.653},{"od":5.5,"weight":23.0,"wall":0.415,"drift":4.545},{"od":5.5,"weight":26.0,"wall":0.476,"drift":4.423},{"od":7.0,"weight":17.0,"wall":0.231,"drift":6.413},{"od":7.0,"weight":20.0,"wall":0.272,"drift":6.331},{"od":7.0,"weight":23.0,"wall":0.317,"drift":6.241},{"od":7.0,"weight":26.0,"wall":0.362,"drift":6.151},{"od":7.0,"weight":29.0,"wall":0.408,"drift":6.059},{"od":7.0,"weight":32.0,"wall":0.453,"drift":5.969},{"od":7.0,"weight":35.0,"wall":0.498,"drift":5.879},{"od":7.0,"weight":38.0,"wall":0.54,"drift":5.795},{"od":7.625,"weight":24.0,"wall":0.3,"drift":6.9},{"od":7.625,"weight":26.4,"wall":0.328,"drift":6.844},{"od":7.625,"weight":29.7,"wall":0.375,"drift":6.75},{"od":7.625,"weight":33.7,"wall":0.43,"drift":6.64},{"od":7.625,"weight":39.0,"wall":0.5,"drift":6.5},{"od":8.625,"weight":24.0,"wall":0.264,"drift":7.972},{"od":8.625,"weight":28.0,"wall":0.304,"drift":7.892},{"od":8.625,"weight":32.0,"wall":0.352,"drift":7.796},{"od":8.625,"weight":36.0,"wall":0.4,"drift":7.7},{"od":8.625,"weight":40.0,"wall":0.45,"drift":7.6},{"od":8.625,"weight":44.0,"wall":0.5,"drift":7.5},{"od":8.625,"weight":49.0,"wall":0.557,"drift":7.386},{"od":9.625,"weight":36.0,"wall":0.352,"drift":8.765},{"od":9.625,"weight":40.0,"wall":0.395,"drift":8.679},{"od":9.625,"weight":43.5,"wall":0.435,"drift":8.599},{"od":9.625,"weight":47.0,"wall":0.472,"drift":8.525},{"od":9.625,"weight":53.5,"wall":0.545,"drift":8.379},{"od":9.625,"weight":58.4,"wall":0.595,"drift":8.279},{"od":9.625,"weight":61.1,"wall":0.625,"drift":8.219},{"od":10.75,"weight":32.75,"wall":0.279,"drift":10.036},{"od":10.75,"weight":40.5,"wall":0.35,"drift":9.894},{"od":10.75,"weight":45.5,"wall":0.4,"drift":9.794},{"od":10.75,"weight":51.0,"wall":0.45,"drift":9.694},{"od":10.75,"weight":55.5,"wall":0.495,"drift":9.604},{"od":10.75,"weight":60.7,"wall":0.545,"drift":9.504},{"od":10.75,"weight":65.7,"wall":0.595,"drift":9.404},{"od":11.75,"weight":42.0,"wall":0.333,"drift":10.928},{"od":11.75,"weight":47.0,"wall":0.375,"drift":10.844},{"od":11.75,"weight":54.0,"wall":0.435,"drift":10.724},{"od":11.75,"weight":60.0,"wall":0.489,"drift":10.616},{"od":13.375,"weight":48.0,"wall":0.33,"drift":12.559},{"od":13.375,"weight":54.5,"wall":0.38,"drift":12.459},{"od":13.375,"weight":61.0,"wall":0.43,"drift":12.359},{"od":13.375,"weight":68.0,"wall":0.48,"drift":12.259},{"od":13.375,"weight":72.0,"wall":0.514,"drift":12.191},{"od":16.0,"weight":65.0,"wall":0.375,"drift":15.062},{"od":16.0,"weight":75.0,"wall":0.438,"drift":14.936},{"od":16.0,"weight":84.0,"wall":0.495,"drift":14.822},{"od":16.0,"weight":97.0,"wall":0.575,"drift":14.662},{"od":16.0,"weight":109.0,"wall":0.656,"drift":14.5},{"od":18.625,"weight":87.5,"wall":0.435,"drift":17.567},{"od":18.625,"weight":96.5,"wall":0.48,"drift":17.477},{"od":20.0,"weight":94.0,"wall":0.438,"drift":18.936},{"od":20.0,"weight":106.5,"wall":0.5,"drift":18.812},{"od":20.0,"weight":133.0,"wall":0.635,"drift":18.542}],"connections":[{"name":"STC","kind":"round","te":1.0,"be":1.0,"ce":1.0},{"name":"LTC","kind":"round","te":1.0,"be":1.0,"ce":1.0},{"name":"BTC","kind":"buttress","te":1.0,"be":1.0,"ce":1.0},{"name":"PREMIUM","kind":"efficiency","te":1.0,"be":1.0,"ce":1.0}],"thread_lengths":{"4.5|STC":1.27,"4.5|LTC":2.29,"5|STC":1.35,"5|LTC":2.5,"5.5|STC":1.43,"5.5|LTC":2.69,"6.625|STC":1.8,"6.625|LTC":3.2,"7|STC":2.02,"7|LTC":3.5,"7.625|STC":2.1,"7.625|LTC":3.7,"8.625|STC":2.2,"8.625|LTC":3.95,"9.625|STC":2.33,"9.625|LTC":4.24,"10.75|STC":2.6,"11.75|STC":2.7,"13.375|STC":3.22,"16|STC":3.4,"18.625|STC":3.5,"20|STC":3.6,"20|LTC":4.8},"btc_coupling_od":{"4.5":5.25,"5":5.8,"5.5":6.3,"6.625":7.39,"7":7.875,"7.625":8.5,"8.625":9.625,"9.625":10.625,"10.75":11.75,"11.75":12.75,"13.375":14.375,"16":17.0,"18.625":20.0,"20":21.0}};
+
+// Casing design engine - JavaScript port of the Python `casingdesign` package.
+// US oilfield units throughout: ft, psi, ppg, in, lb/ft, lbf. Pure functions; no DOM.
+/* global CATALOG_DATA */
+const Engine = (() => {
+  const PSI_PER_FT_PER_PPG = 0.052, E_STEEL = 30e6, ELASTIC_CONST = 46.95e6, WALL_TOL = 0.875;
+  const MIN_YIELD_FIT = 15000, STEEL_DENSITY = 0.2833;
+  const ppg2grad = ppg => PSI_PER_FT_PER_PPG * ppg, grad2ppg = g => g / PSI_PER_FT_PER_PPG;
+  const linspace = (a, b, n) => Array.from({length: n}, (_, i) => n === 1 ? a : a + (b - a) * i / (n - 1));
+  // numpy.interp: clamped piecewise-linear on sorted xs
+  function interp(x, xs, ys) {
+    if (x <= xs[0]) return ys[0]; const n = xs.length; if (x >= xs[n - 1]) return ys[n - 1];
+    let lo = 0, hi = n - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (xs[m] <= x) lo = m; else hi = m; }
+    const f = (x - xs[lo]) / (xs[hi] - xs[lo]); return ys[lo] + f * (ys[hi] - ys[lo]);
+  }
+  const interpArr = (arr, xs, ys) => arr.map(x => interp(x, xs, ys));
+  const key = x => String(+(+x).toPrecision(10));  // matches Python '%g' for catalog ODs
+
+  // ----------------------------------------------------------------- API 5C3 ratings
+  const geom = (od, wall) => ({od, wall, id: od - 2 * wall, dt: od / wall,
+    area: Math.PI / 4 * (od * od - (od - 2 * wall) ** 2)});
+  const burstRating = (g, yp) => WALL_TOL * 2 * yp * g.wall / g.od;
+  const bodyYield = (g, yp) => yp * g.area;
+  function collapseConstants(yp) {
+    const a = 2.8762 + 0.10679e-5 * yp + 0.21301e-10 * yp ** 2 - 0.53132e-16 * yp ** 3;
+    const b = 0.026233 + 0.50609e-6 * yp;
+    const c = -465.93 + 0.030867 * yp - 0.10483e-7 * yp ** 2 + 0.36989e-13 * yp ** 3;
+    const ba = b / a, x = 3 * ba / (2 + ba);
+    const f = ELASTIC_CONST * x ** 3 / (yp * (x - ba) * (1 - x) ** 2);
+    return {a, b, c, f, g: f * ba};
+  }
+  function collapseRating(g, yp) {
+    const dt = g.dt;
+    if (yp < MIN_YIELD_FIT) return Math.min(2 * yp * (dt - 1) / dt ** 2, ELASTIC_CONST / (dt * (dt - 1) ** 2));
+    const {a, b, c, f, g: gg} = collapseConstants(yp);
+    const bc = b + c / yp;
+    const dtYp = (Math.sqrt((a - 2) ** 2 + 8 * bc) + (a - 2)) / (2 * bc);
+    const dtPt = yp * (a - f) / (c + yp * (b - gg)), dtTe = (2 + b / a) / (3 * b / a);
+    if (dt <= dtYp) return 2 * yp * (dt - 1) / dt ** 2;
+    if (dt <= dtPt) return yp * (a / dt - b) - c;
+    if (dt <= dtTe) return yp * (f / dt - gg);
+    return ELASTIC_CONST / (dt * (dt - 1) ** 2);
+  }
+  function axialAdjustedYield(yp, sa) { const r = sa / yp; return yp * (Math.sqrt(1 - 0.75 * r * r) - 0.5 * r); }
+  function collapseWithAxial(g, yp, sa) {
+    if (sa <= 0) return collapseRating(g, yp); if (sa >= yp) return 0;
+    return collapseRating(g, axialAdjustedYield(yp, sa));
+  }
+  // triaxial
+  function lame(g, pi, pe, r) { const ri = g.id / 2, ro = g.od / 2, d = ro * ro - ri * ri;
+    const k = (pi * ri * ri - pe * ro * ro) / d, m = (pi - pe) * ri * ri * ro * ro / d; return [k - m / (r * r), k + m / (r * r)]; }
+  const vme = (sr, st, sa) => Math.sqrt(0.5 * ((sa - st) ** 2 + (st - sr) ** 2 + (sr - sa) ** 2));
+  function bendingStress(g, dls) { if (dls === 0) return 0; const R = 180 * 100 * 12 / (Math.PI * dls); return E_STEEL * (g.od / 2) / R; }
+  function maxVme(g, pi, pe, F, dls) {
+    const sa = F / g.area, sb = bendingStress(g, dls), ri = g.id / 2, ro = g.od / 2; const c = [];
+    let [sr, st] = lame(g, pi, pe, ri); c.push(vme(sr, st, sa));
+    [sr, st] = lame(g, pi, pe, ro); c.push(vme(sr, st, sa + sb), vme(sr, st, sa - sb));
+    [sr, st] = lame(g, pi, pe, ri); c.push(vme(sr, st, sa + sb * ri / ro), vme(sr, st, sa - sb * ri / ro));
+    return Math.max(...c);
+  }
+  // joints
+  function roundThreadJoint(g, yp, up, L) { const D = g.od, ajp = Math.PI / 4 * ((D - 0.1425) ** 2 - g.id ** 2);
+    const fracture = 0.95 * ajp * up, jump = 0.95 * ajp * L * (0.74 * D ** -0.59 * up / (0.5 * L + 0.14 * D) + yp / (L + 0.14 * D));
+    return Math.min(fracture, jump); }
+  function buttressJoint(g, yp, up, couplingOd) { const pipe = 0.95 * g.area * up * (1.008 - 0.0396 * (1.083 - yp / up) * g.od);
+    if (couplingOd == null) couplingOd = CATALOG_DATA.btc_coupling_od[key(g.od)]; if (couplingOd == null) return pipe;
+    return Math.min(pipe, 0.95 * Math.PI / 4 * (couplingOd ** 2 - g.od ** 2) * up); }
+
+  // ----------------------------------------------------------------- catalog
+  const grades = Object.fromEntries(CATALOG_DATA.grades.map(g => [g.name, g]));
+  const connections = Object.fromEntries(CATALOG_DATA.connections.map(c => [c.name, c]));
+  const pipes = CATALOG_DATA.pipes;
+  function spec(od, weight, gradeName, connName = 'BTC') {
+    const p = pipes.find(p => Math.abs(p.od - od) < 1e-6 && Math.abs(p.weight - weight) < 1e-6); if (!p) throw new Error(`no pipe ${od}" ${weight}#`);
+    const gr = grades[gradeName]; if (!gr) throw new Error(`unknown grade ${gradeName}`);
+    const cn = connections[connName]; if (!cn) throw new Error(`unknown connection ${connName}`);
+    const g = geom(p.od, p.wall), tl = CATALOG_DATA.thread_lengths[`${key(od)}|${connName}`];
+    if (cn.kind === 'round' && tl == null) throw new Error(`no ${connName} for ${od}"`);
+    const joint = cn.kind === 'round' ? roundThreadJoint(g, gr.min_yield, gr.min_tensile, tl) : cn.kind === 'buttress' ? buttressJoint(g, gr.min_yield, gr.min_tensile) : bodyYield(g, gr.min_yield) * cn.te;
+    const by = bodyYield(g, gr.min_yield);
+    return {pipe: p, grade: gr, connection: cn, geometry: g, od: p.od, weight: p.weight, wall: p.wall, id: g.id, yield: gr.min_yield,
+      label: `${p.od}" ${p.weight}# ${gr.name} ${cn.name}`, burst: burstRating(g, gr.min_yield) * cn.be, collapse: collapseRating(g, gr.min_yield) * cn.ce,
+      body_yield: by, joint_strength: joint, tension_rating: Math.min(by, joint)};
+  }
+  const pipesForOd = od => pipes.filter(p => Math.abs(p.od - od) < 1e-6);
+  function candidates(od, gradeNames, connName = 'BTC', sour = false) {
+    const names = gradeNames && gradeNames.length ? gradeNames.filter(g => grades[g]) : Object.keys(grades); const out = [];
+    for (const p of pipesForOd(od)) for (const gn of names) { if (sour && !grades[gn].sour) continue; try { out.push(spec(od, p.weight, gn, connName)); } catch { /* no such connection for this OD */ } }
+    return out;
+  }
+
+  // ----------------------------------------------------------------- well helpers
+  function trajectory(stations) {
+    const st = [...stations].map(s => ({md: +s.md, inclination: +s.inclination, azimuth: +s.azimuth})).sort((a, b) => a.md - b.md).filter((s, i, a) => i === 0 || s.md !== a[i - 1].md);
+    if (!st.length || st[0].md !== 0) st.unshift({md: 0, inclination: 0, azimuth: 0});
+    const md = st.map(s => s.md), inc = st.map(s => s.inclination), tvd = [0], dls = [0];
+    for (let i = 1; i < st.length; i++) { const i1 = inc[i - 1] * Math.PI / 180, i2 = inc[i] * Math.PI / 180, a1 = st[i - 1].azimuth * Math.PI / 180, a2 = st[i].azimuth * Math.PI / 180;
+      const dmd = md[i] - md[i - 1]; const cosdl = Math.cos(i2 - i1) - Math.sin(i1) * Math.sin(i2) * (1 - Math.cos(a2 - a1)); const dl = Math.acos(Math.max(-1, Math.min(1, cosdl)));
+      const rf = dl < 1e-9 ? 1 : 2 / dl * Math.tan(dl / 2); tvd.push(tvd[i - 1] + dmd / 2 * (Math.cos(i1) + Math.cos(i2)) * rf); dls.push(dmd > 0 ? dl * 180 / Math.PI / dmd * 100 : 0); }
+    const n = md.length;
+    const dlsAt = x => { let idx = 0; while (idx < n && md[idx] <= x) idx++; return dls[Math.min(Math.max(idx, 1), n - 1)]; };  // searchsorted(side=right) clipped
+    return {stations: st, td: md[n - 1], tvd: x => interp(x, md, tvd), inclination: x => interp(x, md, inc), dls: dlsAt};
+  }
+  const profileAt = (pts, t) => interp(t, pts.map(p => p.tvd), pts.map(p => p.value));
+  const profilePressure = (pts, t) => ppg2grad(profileAt(pts, t)) * t;
+  const temperature = (f, t) => f.surface_temperature_f + f.geothermal_gradient_f_per_100ft * t / 100;
+  function derateFactor(d, T) { if (!d || d.enabled === false) return 1; const slope = d.slope_per_f ?? 0.0003, ref = d.reference_f ?? 70, floor = d.floor ?? 0.8; return Math.max(floor, 1 - slope * Math.max(T - ref, 0)); }
+  const isLiner = s => s.type === 'liner';
+  function parentOf(well, liner) { if (!isLiner(liner)) return null; const hosts = well.strings.filter(s => s !== liner && s.od > liner.od && (s.hanger_md || 0) <= liner.hanger_md && liner.hanger_md < s.shoe_md); return hosts.length ? hosts.reduce((a, b) => a.od <= b.od ? a : b) : null; }
+  const linersOf = (well, parent) => well.strings.filter(s => isLiner(s) && parentOf(well, s) === parent).sort((a, b) => a.hanger_md - b.hanger_md);
+  function wellErrors(w) { const out = []; if ((w.trajectory.stations || []).length < 2) out.push('trajectory needs at least surface and TD');
+    if (!w.formation.pore_pressure.points.length || !w.formation.fracture_gradient.points.length) out.push('pore pressure and fracture gradient need at least one point each');
+    if (!w.strings.length) out.push('add at least one casing string');
+    for (const s of w.strings) { const h = s.hanger_md || 0; if (s.toc_md > s.shoe_md) out.push(`${s.name}: top of cement (${s.toc_md}) is below the shoe (${s.shoe_md})`);
+      if (h >= s.shoe_md) out.push(`${s.name}: shoe must be below the top of the string`); if (isLiner(s) && h <= 0) out.push(`${s.name}: a liner must hang below surface (liner top MD > 0)`);
+      if (!isLiner(s) && h > 0) out.push(`${s.name}: only liners have a top MD (set 0 or change type to liner)`); if (s.hole_size <= s.od) out.push(`${s.name}: hole size must exceed the casing OD`); }
+    return out; }
+  function wellWarnings(w) { const out = [], traj = trajectory(w.trajectory.stations);
+    for (const s of w.strings) { if (s.shoe_md > traj.td) out.push(`${s.name}: shoe ${s.shoe_md} ft is below the surveyed TD ${traj.td} ft`);
+      if (isLiner(s)) { const p = parentOf(w, s); if (!p) out.push(`${s.name}: no parent casing found covering the hanger at ${s.hanger_md} ft`);
+        else { if (s.toc_md > s.hanger_md) out.push(`${s.name}: TOC ${s.toc_md} ft is below the liner top ${s.hanger_md} ft (uncemented lap)`); if (p.shoe_md - s.hanger_md < 200) out.push(`${s.name}: only ${Math.round(p.shoe_md - s.hanger_md)} ft overlap inside ${p.name}`); } } }
+    return out; }
+
+  // ----------------------------------------------------------------- load cases
+  const depthGrid = (s, step = 50) => { const h = s.hanger_md || 0, n = Math.max(2, Math.round((s.shoe_md - h) / step) + 1); return linspace(h, s.shoe_md, n); };
+  const ctx = well => ({well, traj: trajectory(well.trajectory.stations), pp: well.formation.pore_pressure.points, fg: well.formation.fracture_gradient.points, gas: well.gas_gradient_psi_ft ?? 0.1});
+  const mudHyd = (c, md, ppg) => md.map(m => ppg2grad(ppg) * c.traj.tvd(m));
+  function annulusAsCemented(c, s, md) { const tocT = c.traj.tvd(s.toc_md), tailTopT = c.traj.tvd(Math.max(s.toc_md, s.shoe_md - s.tail_length));
+    const gm = ppg2grad(s.mud_weight), gl = ppg2grad(s.cement_lead_ppg), gt = ppg2grad(s.cement_tail_ppg);
+    return md.map(m => { const t = c.traj.tvd(m); return gm * Math.min(t, tocT) + gl * Math.min(Math.max(t - tocT, 0), tailTopT - tocT) + gt * Math.max(t - tailTopT, 0); }); }
+  const burstBackup = (c, s, md) => md.map(m => { const t = c.traj.tvd(m), mud = ppg2grad(s.mud_weight) * t; return m >= s.toc_md ? Math.min(mud, profilePressure(c.pp, t)) : mud; });
+  const collapseExternal = (c, s, md) => mudHyd(c, md, s.mud_weight);
+  const via = (src, s) => src === s ? '' : ` (via ${src.name})`;
+  function capProfile(c, s, md, internal, notes) { const shoeT = c.traj.tvd(s.shoe_md), pf = profilePressure(c.fg, shoeT); let pShoe;
+    if (s.shoe_md <= md[md.length - 1]) pShoe = interp(s.shoe_md, md, internal); else { const t = md.map(m => c.traj.tvd(m)), n = md.length; const grad = (internal[n - 1] - internal[n - 2]) / Math.max(t[n - 1] - t[n - 2], 1e-9); pShoe = internal[n - 1] + grad * (shoeT - t[n - 1]); }
+    if (pShoe > pf) { internal = internal.map(x => x - (pShoe - pf)); notes.push(`limited by frac at shoe (${pf.toFixed(0)} psi)`); }
+    if (s.max_surface_pressure != null && internal[0] > s.max_surface_pressure) { const d = internal[0] - s.max_surface_pressure; internal = internal.map(x => x - d); notes.push(`capped at ${s.max_surface_pressure.toFixed(0)} psi BOP rating`); }
+    return internal.map(x => Math.max(x, 0)); }
+  const mk = (name, kind, md, internal, external, axialState, description) => ({name, kind, md, internal, external, axial_state: axialState, description,
+    burst_load: internal.map((x, i) => Math.max(x - external[i], 0)), collapse_load: internal.map((x, i) => Math.max(external[i] - x, 0))});
+  function pressureTest(c, s, md) { if (s.pressure_test == null) return null; const int = mudHyd(c, md, s.mud_weight).map(x => x + s.pressure_test);
+    return mk('Pressure test', 'burst', md, int, annulusAsCemented(c, s, md), 'as_cemented', `${s.pressure_test.toFixed(0)} psi on ${s.mud_weight} ppg mud, green cement backup`); }
+  function gasKick(c, s, md, cid, src) { src = src || s; if (!['surface', 'intermediate', 'liner'].includes(src.type) || src.kick_volume_bbl == null) return null;
+    if (src.next_hole_mud_weight == null || src.next_section_td_md == null) return null;
+    const h0 = s.hanger_md || 0; cid = cid ?? s.od - 0.9; const cap = cid * cid / 1029.4; let hMd = Math.min(src.kick_volume_bbl / cap, s.shoe_md - h0);
+    const hT = c.traj.tvd(h0 + hMd) - c.traj.tvd(h0), tdT = c.traj.tvd(src.next_section_td_md), gMud = ppg2grad(src.next_hole_mud_weight), pForm = (gMud + ppg2grad(src.kick_intensity_ppg ?? 0.5)) * tdT;
+    const t0 = c.traj.tvd(h0), pSurf = pForm - gMud * (tdT - t0 - hT) - c.gas * hT;
+    let int = md.map(m => { const d = c.traj.tvd(m) - t0; return pSurf + (d <= hT ? c.gas * d : c.gas * hT + gMud * (d - hT)); });
+    const notes = [`${src.kick_volume_bbl} bbl gas at top of casing (ID ${cid.toFixed(2)} in, ${hMd.toFixed(0)} ft), ${src.kick_intensity_ppg ?? 0.5} ppg intensity, formation ${pForm.toFixed(0)} psi at ${src.next_section_td_md.toFixed(0)} ft MD`];
+    int = capProfile(c, src, md, int, notes); return mk('Gas kick' + via(src, s), 'burst', md, int, burstBackup(c, s, md), 'as_cemented', notes.join('; ')); }
+  function gasToSurface(c, s, md, src) { src = src || s; if (!['surface', 'intermediate', 'liner'].includes(src.type)) return null; if (isLiner(src) && src.next_section_td_md == null) return null;
+    if (src.kick_volume_bbl != null && !src.include_gas_to_surface) return null; const shoeT = c.traj.tvd(src.shoe_md), pf = profilePressure(c.fg, shoeT);
+    let int = md.map(m => pf - c.gas * (shoeT - c.traj.tvd(m))); const notes = [`frac at shoe ${pf.toFixed(0)} psi, gas gradient ${c.gas} psi/ft, pore/mud backup`];
+    int = capProfile(c, src, md, int, notes); return mk('Gas to surface' + via(src, s), 'burst', md, int, burstBackup(c, s, md), 'as_cemented', notes.join('; ')); }
+  function tubingLeak(c, s, md, src) { src = src || s; if (!['production', 'liner'].includes(src.type) || src.shut_in_tubing_pressure == null) return null;
+    const pf = src.packer_fluid_ppg ?? src.mud_weight, packerMd = src.packer_md ?? src.shoe_md, pT = c.traj.tvd(packerMd);
+    const int = md.map(m => { const t = c.traj.tvd(m); let v = src.shut_in_tubing_pressure + ppg2grad(pf) * Math.min(t, pT); if (t > pT) v += ppg2grad(pf) * (t - pT); return v; });
+    return mk('Tubing leak' + via(src, s), 'burst', md, int, burstBackup(c, s, md), 'as_cemented', `SITP ${src.shut_in_tubing_pressure.toFixed(0)} psi on ${pf} ppg packer fluid`); }
+  function stimulation(c, s, md, src) { src = src || s; if (src.frac_surface_pressure == null) return null; const ff = src.frac_fluid_ppg ?? 8.5;
+    const int = mudHyd(c, md, ff).map(x => x + src.frac_surface_pressure);
+    return mk('Stimulation' + via(src, s), 'burst', md, int, burstBackup(c, s, md), 'as_cemented', `${src.frac_surface_pressure.toFixed(0)} psi surface treating pressure on ${ff} ppg frac fluid`); }
+  const fullEvac = (c, s, md) => mk('Full evacuation', 'collapse', md, md.map(() => 0), collapseExternal(c, s, md), 'as_cemented', `empty casing, ${s.mud_weight} ppg mud backup outside`);
+  const cementing = (c, s, md) => mk('Cementing', 'collapse', md, mudHyd(c, md, s.mud_weight), annulusAsCemented(c, s, md), 'running', `lead ${s.cement_lead_ppg} / tail ${s.cement_tail_ppg} ppg outside, ${s.mud_weight} ppg displacement fluid inside`);
+  function lostReturns(c, s, md) { if (s.next_hole_mud_weight == null || s.next_section_td_md == null) return null; const tdT = c.traj.tvd(s.next_section_td_md), probe = linspace(c.traj.tvd(s.shoe_md), tdT, 50);
+    const pMin = Math.min(...probe.map(t => profilePressure(c.pp, t) / Math.max(t, 1))) * tdT, gn = ppg2grad(s.next_hole_mud_weight), level = Math.max(0, tdT - pMin / gn);
+    const int = md.map(m => gn * Math.max(c.traj.tvd(m) - level, 0));
+    return mk('Lost returns', 'collapse', md, int, collapseExternal(c, s, md), 'as_cemented', `${s.next_hole_mud_weight} ppg mud level drops to ${level.toFixed(0)} ft TVD`); }
+  const runningCase = (c, s, md) => { const p = mudHyd(c, md, s.mud_weight); return mk('Running + overpull', 'axial', md, p, p, 'running', `${(s.overpull ?? 100000).toFixed(0)} lbf overpull in ${s.mud_weight} ppg mud`); };
+  function standardLoadCases(well, s, step = 50, innerDiameter = null) { const c = ctx(well), md = depthGrid(s, step);
+    const cases = [pressureTest, gasToSurface, tubingLeak, stimulation, fullEvac, cementing, lostReturns, runningCase].map(b => b(c, s, md)).filter(Boolean);
+    const kick = gasKick(c, s, md, innerDiameter); if (kick) cases.splice(1, 0, kick);
+    for (const liner of linersOf(well, s)) { for (const b of [gasToSurface, tubingLeak, stimulation]) { const lc = b(c, s, md, liner); if (lc) cases.push(lc); } const k = gasKick(c, s, md, innerDiameter, liner); if (k) cases.push(k); }
+    return cases; }
+
+  // ----------------------------------------------------------------- axial
+  const weightPerFt = sp => sp.geometry.area * STEEL_DENSITY * 12;
+  function hangingWeight(md, s, traj, weightAt) { const h = s.hanger_md || 0, grid = linspace(h, s.shoe_md, 801), inc = grid.map(x => traj.inclination(x) * Math.PI / 180), cum = [0];
+    for (let i = 1; i < grid.length; i++) { const mid = 0.5 * (grid[i] + grid[i - 1]); cum.push(cum[i - 1] + (grid[i] - grid[i - 1]) * Math.cos(0.5 * (inc[i] + inc[i - 1])) * weightAt(mid)); }
+    const total = cum[cum.length - 1]; return md.map(m => total - interp(m, grid, cum)); }
+  function runningAxial(md, s, design, traj, overpull) { const pShoe = ppg2grad(s.mud_weight) * traj.tvd(s.shoe_md), fEnd = -pShoe * design.sections[design.sections.length - 1].spec.geometry.area;
+    const op = overpull ?? s.overpull ?? 100000; return hangingWeight(md, s, traj, design.weightAt).map(x => x + fEnd + op); }
+  function asCementedAxial(md, s, design, traj) { const shoeT = traj.tvd(s.shoe_md), tocT = traj.tvd(s.toc_md), tailTopT = traj.tvd(Math.max(s.toc_md, s.shoe_md - s.tail_length));
+    const pShoe = ppg2grad(s.mud_weight) * tocT + ppg2grad(s.cement_lead_ppg) * (tailTopT - tocT) + ppg2grad(s.cement_tail_ppg) * (shoeT - tailTopT);
+    const fEnd = -pShoe * design.sections[design.sections.length - 1].spec.geometry.area; return hangingWeight(md, s, traj, design.weightAt).map(x => x + fEnd); }
+
+  // ----------------------------------------------------------------- designs
+  function design(sections) { const secs = sections.map(x => ({top_md: x.top_md, bottom_md: x.bottom_md, spec: x.spec})); const bounds = secs.slice(0, -1).map(x => x.bottom_md);
+    const idx = m => { let i = 0; while (i < bounds.length && bounds[i] < m) i++; return i; };  // searchsorted(side=left)
+    const w = secs.map(x => weightPerFt(x.spec));
+    return {sections: secs, uniform: secs.length === 1, top_md: secs[0].top_md, bottom_md: secs[secs.length - 1].bottom_md,
+      label: secs.length === 1 ? secs[0].spec.label : secs.map(x => `${x.spec.label} (${x.top_md.toFixed(0)}-${x.bottom_md.toFixed(0)})`).join(' / '),
+      specAt: m => secs[idx(m)].spec, weightAt: m => w[idx(m)]}; }
+  const uniform = (s, sp) => design([{top_md: s.hanger_md || 0, bottom_md: s.shoe_md, spec: sp}]);
+
+  // ----------------------------------------------------------------- evaluation
+  function evaluateDesign(well, s, dsg, cases, step = 50) { const traj = trajectory(well.trajectory.stations);
+    cases = cases || standardLoadCases(well, s, step, dsg.sections[0].spec.id); const req = well.design_factors; const checks = [];
+    const safeDf = (r, l) => r.map((x, i) => l[i] > 0 ? x / l[i] : Infinity);
+    for (const c of cases) { const md = c.md, specs = md.map(m => dsg.specAt(m)), axial = c.axial_state === 'running' ? runningAxial(md, s, dsg, traj) : asCementedAxial(md, s, dsg, traj);
+      const area = specs.map(sp => sp.geometry.area), derate = md.map(m => derateFactor(well.yield_derating, temperature(well.formation, traj.tvd(m)))), yp = specs.map((sp, i) => sp.yield * derate[i]);
+      const sa = axial.map((f, i) => f / area[i]), dls = md.map(m => traj.dls(m));
+      const bR = specs.map((sp, i) => sp.burst * derate[i]); checks.push({case: c.name, check: 'burst', md, design_factor: safeDf(bR, c.burst_load), load: c.burst_load, rating: bR});
+      const cR = specs.map((sp, i) => collapseWithAxial(sp.geometry, yp[i], sa[i]) * sp.connection.ce); checks.push({case: c.name, check: 'collapse', md, design_factor: safeDf(cR, c.collapse_load), load: c.collapse_load, rating: cR});
+      const tL = axial.map((f, i) => Math.max(f, 0) + bendingStress(specs[i].geometry, dls[i]) * area[i]), tR = specs.map((sp, i) => sp.tension_rating * derate[i]); checks.push({case: c.name, check: 'tension', md, design_factor: safeDf(tR, tL), load: tL, rating: tR});
+      const v = md.map((m, i) => maxVme(specs[i].geometry, c.internal[i], c.external[i], axial[i], dls[i])); checks.push({case: c.name, check: 'triaxial', md, design_factor: safeDf(yp, v), load: v, rating: yp});
+      c.axial = axial; }
+    const summary = {};
+    for (const chk of ['burst', 'collapse', 'tension', 'triaxial']) { let best = null; for (const c of checks.filter(x => x.check === chk)) { let mi = 0; for (let i = 1; i < c.design_factor.length; i++) if (c.design_factor[i] < c.design_factor[mi]) mi = i; const v = c.design_factor[mi]; if (!best || v < best.min_df) best = {min_df: v, case: c.case, md: c.md[mi]}; }
+      summary[chk] = {min_df: best.min_df, required: req[chk], case: best.case, md: best.md, pass: best.min_df >= req[chk]}; }
+    const passMask = () => { const md = checks[0].md, ok = md.map(() => true); for (const c of checks) for (let i = 0; i < md.length; i++) if (!(c.design_factor[i] >= req[c.check] - 1e-9)) ok[i] = false; return ok; };
+    return {string: s.name, design: dsg, spec: dsg.sections[0].spec, checks, cases, summary, passes: Object.values(summary).every(v => v.pass), passMask,
+      temperature: {md: cases[0].md, temperature_f: cases[0].md.map(m => temperature(well.formation, traj.tvd(m))), yield_factor: cases[0].md.map(m => derateFactor(well.yield_derating, temperature(well.formation, traj.tvd(m))))}};
+  }
+  const evaluateString = (well, s, sp, step) => evaluateDesign(well, s, uniform(s, sp), null, step);
+
+  // ----------------------------------------------------------------- optimizer
+  const PRICE_INDEX = {'H-40': 0.95, 'J-55': 1.0, 'K-55': 1.0, 'M-65': 1.05, 'N-80': 1.1, 'L-80': 1.15, 'C-90': 1.35, 'R-95': 1.25, 'T-95': 1.4, 'C-110': 1.6, 'P-110': 1.35, 'Q-125': 1.6};
+  const costPerFt = (sp, prices) => sp.weight * ((prices || PRICE_INDEX)[sp.grade.name] ?? 1.5);
+  const designCost = (d, prices) => d.sections.reduce((a, x) => a + costPerFt(x.spec, prices) * (x.bottom_md - x.top_md), 0);
+  function optimizeString(well, s, opts = {}) { const out = []; for (const sp of candidates(s.od, opts.grades, opts.connection || 'BTC', well.formation.sour)) { const r = evaluateString(well, s, sp); if (r.passes) out.push({result: r, design: r.design, spec: sp, cost_per_ft: costPerFt(sp, opts.prices)}); }
+    out.sort((a, b) => a.cost_per_ft - b.cost_per_ft || a.spec.weight - b.spec.weight); return out.slice(0, opts.max_results ?? 5); }
+  function runs(idx) { const out = []; let start = 0; for (let i = 1; i <= idx.length; i++) if (i === idx.length || idx[i] !== idx[start]) { out.push([start, i, idx[start]]); start = i; } return out; }
+  function mergePlan(i, rs, lengths, costs) { const v = rs[i][2], nb = [i - 1, i + 1].filter(j => j >= 0 && j < rs.length), stronger = nb.filter(j => rs[j][2] >= v);
+    if (stronger.length) { const j = stronger.reduce((a, b) => costs[rs[a][2]] <= costs[rs[b][2]] ? a : b); return [(costs[rs[j][2]] - costs[v]) * lengths[i], i, rs[j][2]]; }
+    const j = nb.reduce((a, b) => (costs[v] - costs[rs[a][2]]) * lengths[a] <= (costs[v] - costs[rs[b][2]]) * lengths[b] ? a : b); return [(costs[v] - costs[rs[j][2]]) * lengths[j], j, v]; }
+  function enforceSections(choice, md, costs, minLen, maxSec) { choice = [...choice]; const step = md[1] - md[0];
+    for (;;) { const rs = runs(choice); if (rs.length === 1) return choice; const lengths = rs.map(([a, b]) => md[b - 1] - md[a] + step); const short = lengths.map((L, i) => [L, i]).filter(([L]) => L < minLen); let i;
+      if (short.length) i = short.reduce((a, b) => a[0] <= b[0] ? a : b)[1]; else if (rs.length > maxSec) { let best = Infinity; for (let k = 0; k < rs.length; k++) { const c = mergePlan(k, rs, lengths, costs)[0]; if (c < best) { best = c; i = k; } } } else return choice;
+      const [, target, value] = mergePlan(i, rs, lengths, costs); const [a, b] = rs[target]; for (let k = a; k < b; k++) choice[k] = value; } }
+  function designFromChoice(md, choice, specs, top, bottom) { const rs = runs(choice); return design(rs.map(([a, b, v], k) => ({top_md: k === 0 ? top : 0.5 * (md[a - 1] + md[a]), bottom_md: k === rs.length - 1 ? bottom : 0.5 * (md[b - 1] + md[b]), spec: specs[v]}))); }
+  function optimizeTapered(well, s, opts = {}) { const minLen = opts.min_section_length ?? 500, maxSec = opts.max_sections ?? 3, step = 50;
+    const cands = candidates(s.od, opts.grades, opts.connection || 'BTC', well.formation.sour); const costsAll = cands.map(c => costPerFt(c, opts.prices));
+    const order = cands.map((_, i) => i).sort((a, b) => costsAll[a] - costsAll[b] || cands[a].weight - cands[b].weight); const specs = order.map(i => cands[i]), costs = order.map(i => costsAll[i]);
+    const masks = specs.map(sp => evaluateDesign(well, s, uniform(s, sp), standardLoadCases(well, s, step, sp.id)).passMask()); const md = depthGrid(s, step);
+    if (!md.every((_, i) => masks.some(m => m[i]))) return null; let choice = md.map((_, i) => masks.findIndex(m => m[i]));
+    for (let it = 0; it < 10; it++) { choice = enforceSections(choice, md, costs, minLen, maxSec); const d = designFromChoice(md, choice, specs, s.hanger_md || 0, s.shoe_md);
+      const r = evaluateDesign(well, s, d, standardLoadCases(well, s, step, d.sections[0].spec.id)); const ok = r.passMask(); if (ok.every(Boolean)) return {result: r, design: d, spec: d.sections[0].spec, cost_per_ft: designCost(d, opts.prices) / (s.shoe_md - (s.hanger_md || 0))};
+      for (let i = 0; i < ok.length; i++) if (!ok[i]) { let nxt = -1; for (let k = choice[i] + 1; k < masks.length; k++) if (masks[k][i]) { nxt = k; break; } if (nxt < 0) return null; choice[i] = nxt; } }
+    return null; }
+
+  // ----------------------------------------------------------------- examples
+  const baseString = o => ({hanger_md: 0, cement_lead_ppg: 12.5, cement_tail_ppg: 15.8, tail_length: 500, next_hole_mud_weight: null, next_section_td_md: null, overpull: 100000, pressure_test: null,
+    kick_volume_bbl: null, kick_intensity_ppg: 0.5, max_surface_pressure: null, include_gas_to_surface: false, packer_md: null, packer_fluid_ppg: null, shut_in_tubing_pressure: null, frac_surface_pressure: null, frac_fluid_ppg: null, ...o});
+  const exampleBase = () => ({trajectory: {stations: [{md: 0, inclination: 0, azimuth: 0}, {md: 8000, inclination: 0, azimuth: 0}, {md: 9500, inclination: 90, azimuth: 90}, {md: 18000, inclination: 90, azimuth: 90}]},
+    formation: {pore_pressure: {points: [{tvd: 0, value: 8.6}, {tvd: 6000, value: 9.0}, {tvd: 9000, value: 11.0}]}, fracture_gradient: {points: [{tvd: 0, value: 12.0}, {tvd: 2000, value: 13.5}, {tvd: 9000, value: 16.5}]}, surface_temperature_f: 70, geothermal_gradient_f_per_100ft: 1.2, sour: false},
+    design_factors: {burst: 1.1, collapse: 1.0, tension: 1.6, triaxial: 1.25}, yield_derating: {enabled: true, slope_per_f: 0.0003, reference_f: 70, floor: 0.8}, prefs: {grades: ['J-55', 'K-55', 'N-80', 'L-80', 'P-110'], price_per_lb: null, currency: '$'}, gas_gradient_psi_ft: 0.1});
+  function exampleHorizontal() { return {...exampleBase(), name: 'Example Onshore Horizontal Well', strings: [
+    baseString({name: 'Surface', type: 'surface', od: 13.375, hole_size: 17.5, shoe_md: 2000, toc_md: 0, mud_weight: 9.0, cement_tail_ppg: 15.6, next_hole_mud_weight: 11.0, next_section_td_md: 8500, pressure_test: 1500}),
+    baseString({name: 'Intermediate', type: 'intermediate', od: 9.625, hole_size: 12.25, shoe_md: 8500, toc_md: 1500, mud_weight: 11.0, tail_length: 1000, next_hole_mud_weight: 12.0, next_section_td_md: 18000, pressure_test: 3500, overpull: 150000}),
+    baseString({name: 'Production', type: 'production', od: 5.5, hole_size: 8.5, shoe_md: 18000, toc_md: 7000, mud_weight: 12.0, cement_lead_ppg: 13.5, tail_length: 9500, pressure_test: 8000, overpull: 150000, packer_md: 8000, packer_fluid_ppg: 9.0, shut_in_tubing_pressure: 4500, frac_surface_pressure: 9500, frac_fluid_ppg: 8.6})]}; }
+  function exampleLiner() { const w = exampleHorizontal(); w.name = 'Example Onshore Well with Frac Liner'; w.strings = [w.strings[0], w.strings[1],
+    baseString({name: 'Production', type: 'production', od: 7.0, hole_size: 8.5, shoe_md: 11500, toc_md: 7000, mud_weight: 12.0, cement_lead_ppg: 13.5, tail_length: 3000, pressure_test: 6000, overpull: 150000, packer_md: 8000, packer_fluid_ppg: 9.0, shut_in_tubing_pressure: 4500}),
+    baseString({name: 'Liner', type: 'liner', od: 4.5, hole_size: 6.125, hanger_md: 10500, shoe_md: 18000, toc_md: 10500, mud_weight: 12.0, cement_lead_ppg: 15.8, tail_length: 7500, pressure_test: 8000, overpull: 60000, frac_surface_pressure: 9500, frac_fluid_ppg: 8.6})]; return w; }
+
+  return {geom, burstRating, collapseRating, collapseWithAxial, spec, candidates, pipes, pipesForOd, grades, connections, trajectory, profileAt, standardLoadCases, evaluateDesign, evaluateString,
+    design, uniform, optimizeString, optimizeTapered, costPerFt, designCost, wellErrors, wellWarnings, exampleHorizontal, exampleLiner, baseString, interp, PRICE_INDEX};
+})();
+if (typeof module !== 'undefined') module.exports = Engine;
+
+// SRDE Planner integration: when opened from the Planner as /pages/casing-design/#...&pwell=SRDE-001 the tool loads the well
+// from the hub (/api/plan/*), builds the design basis in engine units, and can publish the result back into the Planner's
+// 'casing' module. Inert outside the hub (no pwell in the hash, or not served under /pages/).
+(() => {
+const M_TO_FT = 3.280839895, KPAM_TO_PPG = 0.145037738 * 0.3048 / 0.052;   // 1 kPa/m = 0.8502 ppg EMW
+const OD_TALLY = {20: '20"', 16: '16"', 13.375: '13-3/8"', 11.75: '11-3/4"', 10.75: '10-3/4"', 9.625: '9-5/8"', 8.625: '8-5/8"', 7.625: '7-5/8"', 7: '7"', 6.625: '6-5/8"', 5.5: '5-1/2"', 5: '5"', 4.5: '4-1/2"'};
+const HOLE_TALLY = {26: '26"', 17.5: '17-1/2"', 16: '16"', 14.75: '14-3/4"', 12.25: '12-1/4"', 10.625: '10-5/8"', 9.875: '9-7/8"', 8.75: '8-3/4"', 8.5: '8-1/2"', 7.875: '7-7/8"', 6.75: '6-3/4"', 6.125: '6-1/8"', 6: '6"', 4.75: '4-3/4"'};
+const tallyToDec = s => { if (!s) return null; const m = String(s).match(/^(\d+)(?:-(\d+)\/(\d+))?/); return m ? +m[1] + (m[2] ? +m[2] / +m[3] : 0) : null; };
+const nearestKey = (map, v) => { let best = null; for (const k of Object.keys(map)) if (best == null || Math.abs(+k - v) < Math.abs(+best - v)) best = k; return best != null && Math.abs(+best - v) < 0.02 ? map[best] : ''; };
+const PWELL = decodeURIComponent((location.hash.match(/pwell=([^&]+)/) || [])[1] || '');
+const ON_HUB = /\/pages\//.test(location.pathname);
+if (!PWELL || !ON_HUB) return;
+
+async function hub(path, body) { const r = await fetch('/api/plan/' + path, body ? {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)} : {cache: 'no-store'}); let j = {}; try { j = await r.json(); } catch {} if (!r.ok) throw new Error(j.error || ('hub error ' + r.status)); return j; }
+const numv = (inputs, key) => { const r = (inputs || []).find(x => x.key === key); const v = r ? +r.value : NaN; return isFinite(v) && r.value !== '' ? v : null; };
+
+async function loadWell(id) {
+  const q = '?well=' + encodeURIComponent(id);
+  const [program, survey, casing, tops] = await Promise.all([hub('program' + q), hub('module' + q + '&module=survey').catch(() => null), hub('module' + q + '&module=casing').catch(() => null), hub('prog_tops' + q).catch(() => null)]);
+  let overlays = null; try { overlays = (await (await fetch('/pages/planner/data.json', {cache: 'no-store'})).json()).overlays; } catch {}
+  const basis = [];   // what came from where, with tags, shown to the user and carried in the publish
+  const inputs = program.inputs || [], g = program.geometry || {};
+  // --- trajectory (m -> ft)
+  let stations;
+  const sv = survey && survey.doc && survey.doc.data && survey.doc.data.stations;
+  if (sv && sv.length >= 2) { stations = sv.map(([md, inc, azi]) => ({md: md * M_TO_FT, inclination: inc, azimuth: azi})); basis.push({item: 'Trajectory', value: `${sv.length} survey stations (${survey.doc.data.survey_type || 'plan'})`, tag: 'S', source: 'Planner deviation-survey module'}); }
+  else { const kop = numv(inputs, 'kop') ?? g.kop_md ?? null, land = g.land_md ?? g.landing_md ?? null, lat = numv(inputs, 'lat_len') ?? 0;
+    if (land) { stations = [{md: 0, inclination: 0, azimuth: 0}, {md: (kop ?? land * 0.6) * M_TO_FT, inclination: 0, azimuth: 0}, {md: land * M_TO_FT, inclination: 90, azimuth: 0}, {md: (land + Math.max(lat, 100)) * M_TO_FT, inclination: 90, azimuth: 0}]; basis.push({item: 'Trajectory', value: `synthesised from design inputs: KOP ${Math.round(kop ?? land * 0.6)} m, landing ${Math.round(land)} m MD, lateral ${Math.round(lat)} m`, tag: 'S', source: 'Planner design inputs / well_calc.geometry (no survey module yet)'}); }
+    else { stations = [{md: 0, inclination: 0, azimuth: 0}, {md: 1000 * M_TO_FT, inclination: 0, azimuth: 0}]; basis.push({item: 'Trajectory', value: 'no survey and no landing depth: vertical 1,000 m placeholder', tag: 'S', source: '-'}); } }
+  // --- pressures and temperature
+  const pore_kpam = overlays && overlays.pressure ? +overlays.pressure.pore_kpa_m : 7.9, pore_tag = overlays && overlays.pressure ? overlays.pressure.pore_tag : 'T record / E reading';
+  const pore_ppg = +(pore_kpam * KPAM_TO_PPG).toFixed(2);
+  basis.push({item: 'Pore pressure', value: `${pore_kpam} kPa/m = ${pore_ppg} ppg EMW, constant with depth`, tag: pore_tag, source: 'Planner overlay (regional RFT)'});
+  const frac_ppg = 13.46;   // 0.70 psi/ft - an ASSUMPTION; no LOT/FIT exists in the concession (hazard H10)
+  basis.push({item: 'Fracture gradient', value: `${frac_ppg} ppg EMW (0.70 psi/ft) ASSUMED - no LOT/FIT held (H10). Edit on the Pressures step; confirm before publishing.`, tag: 'S assumed', source: 'none held', warn: true});
+  const ot = (overlays && overlays.temperature) || {}; const t0c = ot.intercept_c != null ? +ot.intercept_c : ot.surface_c != null ? +ot.surface_c : 18, tgc = ot.grad_c_per_m != null ? +ot.grad_c_per_m : ot.grad_c_m != null ? +ot.grad_c_m : 0.031;
+  const tsurf_f = +(t0c * 1.8 + 32).toFixed(1), tgrad_f100 = +(tgc * 1.8 * 30.48).toFixed(2);
+  basis.push({item: 'Temperature', value: `${t0c} °C + ${tgc} °C/m = ${tsurf_f} °F + ${tgrad_f100} °F/100 ft`, tag: ot.tag || 'S', source: 'Planner overlay (geotherm)'});
+  // --- strings: the current casing document if any, else the Nexus default rows
+  const doc = casing && casing.doc && casing.doc.data && casing.doc.data.strings && casing.doc.data.strings.length ? casing.doc.data : null;
+  let rows = doc ? doc.strings : null;
+  if (!rows) { try { rows = ((await (await fetch('/pages/planner/data.json', {cache: 'no-store'})).json()).design || {}).strings || null; } catch {} }
+  const depthM = key => key ? numv(inputs, key) : null;
+  const landM = g.land_md ?? g.landing_md ?? g.prod_shoe_md ?? null;
+  const strings = []; let prevShoe = 0;
+  const mw = Math.max(pore_ppg + 0.5, 8.6);
+  for (const r of (rows || [])) {
+    const kind = (r.kind || '').toLowerCase(); if (!['conductor', 'surface', 'intermediate', 'production', 'liner'].includes(kind)) continue;
+    const od = tallyToDec(r.od), hole = tallyToDec(r.hole) || (od ? od + 2.5 : null); if (!od) continue;
+    let shoe_m = depthM(r.depth_key); if (shoe_m == null && kind === 'production') shoe_m = landM; if (shoe_m == null && kind === 'surface') shoe_m = numv(inputs, 'surf_shoe'); if (shoe_m == null && kind === 'conductor') shoe_m = numv(inputs, 'cond_shoe');
+    if (shoe_m == null) { shoe_m = prevShoe + 300; basis.push({item: `${r.label || kind} shoe`, value: `no depth input - placed ${Math.round(shoe_m)} m`, tag: 'S', source: '-', warn: true}); }
+    const s = Engine.baseString({name: r.label || kind[0].toUpperCase() + kind.slice(1), type: kind, od, hole_size: hole, hanger_md: kind === 'liner' ? Math.max(0, prevShoe - 100) * M_TO_FT : 0, shoe_md: shoe_m * M_TO_FT, toc_md: kind === 'liner' ? Math.max(0, prevShoe - 100) * M_TO_FT : 0, mud_weight: +mw.toFixed(1), pressure_test: kind === 'conductor' ? null : 1500});
+    s._planner = {depth_key: r.depth_key || '', od_tally: r.od, hole_tally: r.hole, grade: r.grade, weight: r.weight_ppf, conn: r.conn};
+    strings.push(s); prevShoe = shoe_m;
+  }
+  for (let i = 0; i < strings.length - 1; i++) { const s = strings[i], nx = strings[i + 1]; if (['surface', 'intermediate', 'conductor'].includes(s.type) && nx.shoe_md > s.shoe_md) { s.next_hole_mud_weight = nx.mud_weight; s.next_section_td_md = nx.shoe_md; } }
+  basis.push({item: 'Mud weights', value: `${mw.toFixed(1)} ppg on every string (max(pore + 0.5, 8.6)) - planning default`, tag: 'S', source: '-', warn: true});
+  basis.push({item: 'Casing strings', value: doc ? `${strings.length} rows from the Planner casing module (${casing.doc.source === 'tool' ? 'published by ' + casing.doc.tool_id : 'entered in the Planner'})` : `${strings.length} rows from the Nexus default design`, tag: 'S', source: doc ? 'Planner casing module' : 'planner/data.json design.strings'});
+  const base = Engine.exampleHorizontal();
+  const well = {...base, name: `${id} casing design`, trajectory: {stations}, strings,
+    formation: {...base.formation, pore_pressure: {points: [{tvd: 0, value: pore_ppg}]}, fracture_gradient: {points: [{tvd: 0, value: frac_ppg}]}, surface_temperature_f: tsurf_f, geothermal_gradient_f_per_100ft: tgrad_f100},
+    planner: {well_id: id, slot: program.well, basis, frac_confirmed: false, loaded_at: new Date().toISOString()}};
+  return well;
+}
+
+function toPlannerDoc(well, design) {
+  const strings = [], an = [];
+  for (const st of design.strings) { const r = st.result; const s = well.strings.find(x => x.name === st.string) || {}; const pl = s._planner || {};
+    const secs = r ? r.design.sections : []; const label = st.string;
+    const purpose = r ? Object.entries(r.summary).map(([k, v]) => `${k} DF ${isFinite(v.min_df) ? v.min_df.toFixed(2) : 'inf'} (${v.case})`).join('; ') : 'no catalog pipe passes';
+    secs.forEach((x, i) => strings.push({kind: s.type || 'production', label: secs.length > 1 ? `${label} ${Math.round(x.top_md / M_TO_FT).toLocaleString()}-${Math.round(x.bottom_md / M_TO_FT).toLocaleString()} m` : label,
+      od: nearestKey(OD_TALLY, x.spec.od) || pl.od_tally || '', hole: nearestKey(HOLE_TALLY, s.hole_size) || pl.hole_tally || '', weight_ppf: String(x.spec.weight), grade: x.spec.grade.name,
+      conn: x.spec.connection.name === 'PREMIUM' ? 'premium' : x.spec.connection.name,
+      cement: i === secs.length - 1 ? `TOC ${Math.round((s.toc_md || 0) / M_TO_FT).toLocaleString()} m; lead ${s.cement_lead_ppg} / tail ${s.cement_tail_ppg} ppg; shoe ${Math.round(s.shoe_md / M_TO_FT).toLocaleString()} m MD` : '',
+      purpose: i === 0 ? purpose : '', depth_key: i === secs.length - 1 ? (pl.depth_key || (s.type === 'surface' ? 'surf_shoe' : s.type === 'conductor' ? 'cond_shoe' : '')) : ''}));
+    if (!secs.length) strings.push({kind: s.type || 'production', label, od: pl.od_tally || nearestKey(OD_TALLY, s.od), hole: pl.hole_tally || '', weight_ppf: '', grade: '', conn: '', cement: '', purpose, depth_key: pl.depth_key || ''});
+    an.push({name: st.string, od: s.od, pipe: r ? (r.design.uniform ? r.spec.label : 'tapered: ' + secs.map(x => x.spec.label).join(' / ')) : null, pass: !!(r && r.passes), overridden: !!st.overridden,
+      sections: secs.map(x => ({top_m: Math.round(x.top_md / M_TO_FT), bottom_m: Math.round(x.bottom_md / M_TO_FT), pipe: x.spec.label, burst_psi: Math.round(x.spec.burst), collapse_psi: Math.round(x.spec.collapse), joint_lbf: Math.round(x.spec.joint_strength)})),
+      summary: r ? Object.fromEntries(Object.entries(r.summary).map(([k, v]) => [k, {min_df: isFinite(v.min_df) ? +v.min_df.toFixed(3) : null, required: v.required, case: v.case, md_m: Math.round(v.md / M_TO_FT), pass: v.pass}])) : {},
+      cases: r ? r.cases.map(c => ({name: c.name, basis: c.description})) : []}); }
+  const f = well.formation, p = well.planner || {};
+  return {strings, analysis: {tool: 'casing-design', tool_version: 'v1', run_at: new Date().toISOString().slice(0, 16).replace('T', ' '),
+    frac_basis: p.frac_confirmed ? `E team-entered ${f.fracture_gradient.points.map(x => x.value).join('/')} ppg EMW` : `S assumed ${f.fracture_gradient.points.map(x => x.value).join('/')} ppg EMW (no LOT/FIT held, H10)`,
+    basis: {pore_ppg: f.pore_pressure.points.map(x => [x.tvd / M_TO_FT, x.value]), frac_ppg: f.fracture_gradient.points.map(x => [x.tvd / M_TO_FT, x.value]), surface_temperature_c: +((f.surface_temperature_f - 32) / 1.8).toFixed(1), geothermal_c_per_m: +(f.geothermal_gradient_f_per_100ft / 1.8 / 30.48).toFixed(4),
+      design_factors: well.design_factors, mud_weights_ppg: Object.fromEntries(well.strings.map(s => [s.name, s.mud_weight])), grades: well.prefs && well.prefs.grades, loaded: p.basis || []},
+    strings: an, warnings: design.warnings || [], units_note: 'engine ran in US oilfield units (ft, psi, ppg); depths published in metres'}};
+}
+
+window.PlannerMode = {well_id: PWELL, loadWell, toPlannerDoc, hub, plannerUrl: `/pages/planner/#program/design&well=${encodeURIComponent(PWELL)}`};
+})();
+
+// UI for the in-browser casing design app. Everything computes locally via Engine.
+(() => {
+const $ = s => document.querySelector(s); const app = $('#app');
+const h = (tag, attrs = {}, ...kids) => { const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) { if (k === 'class') el.className = v; else if (k.startsWith('on')) el[k] = v; else if (v !== false && v != null) el.setAttribute(k, v === true ? '' : v); }
+  for (const k of kids.flat()) if (k != null) el.append(k instanceof Node ? k : document.createTextNode(String(k))); return el; };
+const fmt = (x, d = 2) => x == null || !isFinite(x) ? '∞' : (+x).toLocaleString(undefined, {maximumFractionDigits: d, minimumFractionDigits: d});
+const fmt0 = x => x == null ? '—' : Math.round(x).toLocaleString();
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800); }
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+const ss = {get: k => { try { return sessionStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { sessionStorage.setItem(k, v); } catch {} }, del: k => { try { sessionStorage.removeItem(k); } catch {} }};
+
+// ------------------------------------------------------------ storage: db capability, else localStorage
+const Store = (() => {
+  let db = null, ready = null, mode = 'local';
+  const LS = 'casingdesign-projects';
+  const lsRead = () => { try { return JSON.parse(localStorage.getItem(LS) || '{}'); } catch { return {}; } };
+  const lsWrite = o => { try { localStorage.setItem(LS, JSON.stringify(o)); } catch {} };
+  async function init() { if (ready) return ready; ready = (async () => { try { db = window.claude?.use ? await window.claude.use('db') : null; } catch { db = null; } mode = db ? 'shared' : 'local'; return mode; })(); return ready; }
+  async function list() { await init(); if (db) { try { const snap = await db.collection('projects').get(); return snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a, b) => (b.updated || '').localeCompare(a.updated || '')); } catch (e) { console.warn('db list failed', e); } }
+    return Object.values(lsRead()).sort((a, b) => (b.updated || '').localeCompare(a.updated || '')); }
+  async function get(id) { await init(); if (db) { try { const d = await db.doc('projects/' + id).get(); if (d.exists) return {id, ...d.data()}; } catch (e) { console.warn('db get failed', e); } } return lsRead()[id] || null; }
+  async function save(p) { await init(); p.updated = new Date().toISOString(); const body = {name: p.name, well: p.well, design: p.design || {}, created: p.created, updated: p.updated};
+    if (db) { try { await db.doc('projects/' + p.id).set(body); return 'shared'; } catch (e) { console.warn('db save failed', e); } } const all = lsRead(); all[p.id] = {id: p.id, ...body}; lsWrite(all); return 'local'; }
+  async function remove(id) { await init(); if (db) { try { await db.doc('projects/' + id).delete(); } catch (e) { console.warn('db delete failed', e); } } const all = lsRead(); delete all[id]; lsWrite(all); }
+  return {init, list, get, save, remove, mode: () => mode};
+})();
+
+// ------------------------------------------------------------ validation (plain language)
+function validateWell(w) {
+  const out = [], err = (p, m) => out.push({path: p, level: 'error', msg: m}), warn = (p, m) => out.push({path: p, level: 'warn', msg: m});
+  const st = w.trajectory.stations; if (st.length < 2) err('trajectory', 'Add at least a surface station (MD 0) and TD.');
+  for (let i = 1; i < st.length; i++) if (st[i].md <= st[i - 1].md) err('trajectory', `Survey MD must increase: row ${i + 1} (${st[i].md}) is not below row ${i} (${st[i - 1].md}).`);
+  const td = Math.max(...st.map(s => s.md), 0);
+  for (const [name, pts] of [['pore pressure', w.formation.pore_pressure.points], ['fracture gradient', w.formation.fracture_gradient.points]]) { if (!pts.length) err(name, `Add at least one ${name} point.`); for (let i = 1; i < pts.length; i++) if (pts[i].tvd < pts[i - 1].tvd) err(name, `${name} points must be sorted by TVD (row ${i + 1}).`); }
+  const pp = w.formation.pore_pressure.points, fg = w.formation.fracture_gradient.points, at = (pts, t) => pts.length ? Engine.profileAt(pts, t) : 0;
+  for (const p of fg) if (at(pp, p.tvd) >= p.value) warn('fracture gradient', `At ${p.tvd} ft TVD the fracture gradient (${p.value} ppg) is not above pore pressure (${at(pp, p.tvd).toFixed(1)} ppg): no drilling window.`);
+  const strings = w.strings || []; if (!strings.length) err('strings', 'Add at least one casing string.');
+  let tvd; try { tvd = Engine.trajectory(st).tvd; } catch { tvd = x => x; }
+  strings.forEach((s, i) => { const n = s.name || `string ${i + 1}`, p = `strings.${i}.`;
+    if (!(s.od > 0)) err(p + 'od', `${n}: OD is required.`);
+    if (s.hole_size && s.hole_size <= s.od) err(p + 'hole_size', `${n}: hole size (${s.hole_size}") must be larger than the casing OD (${s.od}").`);
+    if (!(s.shoe_md > (s.hanger_md || 0))) err(p + 'shoe_md', `${n}: shoe MD must be below the top of the string.`);
+    if (s.toc_md > s.shoe_md) err(p + 'toc_md', `${n}: top of cement (${s.toc_md}) cannot be below the shoe (${s.shoe_md}).`);
+    if (s.type === 'liner' && !(s.hanger_md > 0)) err(p + 'hanger_md', `${n}: a liner hangs below surface. Enter the liner top MD.`);
+    if (s.type !== 'liner' && s.hanger_md > 0) err(p + 'hanger_md', `${n}: only liners have a top MD; set it to 0 or change the type to liner.`);
+    if (s.shoe_md > td) warn(p + 'shoe_md', `${n}: shoe (${s.shoe_md} ft) is below the last survey station (${td} ft); the hole is assumed to continue at the last inclination.`);
+    if (!(s.mud_weight > 0)) err(p + 'mud_weight', `${n}: mud weight is required.`);
+    else { const pore = at(pp, tvd(s.shoe_md)), frac = at(fg, tvd(s.shoe_md)); if (s.mud_weight < pore) warn(p + 'mud_weight', `${n}: mud weight ${s.mud_weight} ppg is below pore pressure at the shoe (${pore.toFixed(1)} ppg).`); if (frac && s.mud_weight > frac) warn(p + 'mud_weight', `${n}: mud weight ${s.mud_weight} ppg exceeds the fracture gradient at the shoe (${frac.toFixed(1)} ppg).`); }
+    if (i > 0 && s.type !== 'liner' && strings[i - 1].type !== 'liner' && s.od >= strings[i - 1].od) err(p + 'od', `${n}: OD (${s.od}") must be smaller than the string above (${strings[i - 1].od}").`);
+    if (i > 0 && s.shoe_md <= strings[i - 1].shoe_md) warn(p + 'shoe_md', `${n}: shoe is not below the previous string's shoe. Check the order of strings.`);
+    if (['surface', 'intermediate'].includes(s.type) && (!s.next_hole_mud_weight || !s.next_section_td_md)) warn(p + 'next_hole_mud_weight', `${n}: without "Next section mud weight" and "Next section TD" the lost-returns and kick cases are skipped.`);
+    if (s.type === 'production' && !s.frac_surface_pressure && !s.shut_in_tubing_pressure) warn(p + 'frac_surface_pressure', `${n}: no stimulation or tubing-leak pressure, so the production burst cases are skipped.`);
+    if (s.type === 'liner') { const parent = strings.filter(q => q !== s && q.od > s.od && (q.hanger_md || 0) <= s.hanger_md && s.hanger_md < q.shoe_md); if (!parent.length) err(p + 'hanger_md', `${n}: no larger string covers the liner top at ${s.hanger_md} ft.`); } });
+  return out;
+}
+
+// ------------------------------------------------------------ schematic + pressure window
+const Schematic = (() => { const NS = 'http://www.w3.org/2000/svg'; const el = (t, a = {}, ...k) => { const e = document.createElementNS(NS, t); for (const [x, y] of Object.entries(a)) e.setAttribute(x, y); for (const c of k) e.append(c); return e; };
+  function draw(container, well) { const strings = (well.strings || []).filter(s => s.shoe_md > 0 && s.od > 0); const W = 340, H = 440, top = 26, bottom = H - 16, cx = 120;
+    const maxMd = Math.max(1, ...strings.map(s => s.shoe_md), well.trajectory.stations.at(-1)?.md || 0); const y = md => top + (bottom - top) * md / maxMd; const maxOd = Math.max(...strings.map(s => Math.max(s.od, s.hole_size || 0)), 10); const hw = od => Math.max(3, od / maxOd * 60);
+    const svg = el('svg', {viewBox: `0 0 ${W} ${H}`, class: 'schematic', role: 'img', 'aria-label': 'well schematic'}); svg.append(el('line', {x1: 10, x2: W - 10, y1: top, y2: top, class: 'ground'}));
+    for (const s of [...strings].sort((a, b) => b.od - a.od)) { const hole = hw(s.hole_size || s.od + 1.5), od = hw(s.od), yt = y(s.hanger_md || 0), ys = Math.max(y(s.shoe_md), yt + 1), ytoc = Math.min(ys, y(Math.max(s.toc_md || 0, s.hanger_md || 0)));
+      svg.append(el('rect', {x: cx - hole, y: yt, width: 2 * hole, height: ys - yt, class: 'hole'}), el('rect', {x: cx - hole, y: ytoc, width: 2 * hole, height: ys - ytoc, class: 'cement'}), el('rect', {x: cx - od, y: yt, width: 2 * od, height: ys - yt, class: 'casing' + (s.type === 'liner' ? ' liner' : '')}));
+      const t = el('text', {x: cx + hole + 6, y: ys - 2, class: 'lbl'}); t.textContent = `${s.od}" ${s.type === 'liner' ? 'liner' : 'csg'} @ ${Math.round(s.shoe_md).toLocaleString()}'`; svg.append(t);
+      if (s.type === 'liner') { const t2 = el('text', {x: cx + hole + 6, y: yt + 10, class: 'lbl muted'}); t2.textContent = `top ${Math.round(s.hanger_md).toLocaleString()}'`; svg.append(t2); } }
+    const ax = el('text', {x: 10, y: 14, class: 'lbl muted'}); ax.textContent = 'MD, not to scale across OD'; svg.append(ax); container.replaceChildren(svg); }
+  function pressureWindow(container, well) { if (!window.Plotly) { container.textContent = 'Chart library not available.'; return; } const f = well.formation; let tvd; try { tvd = Engine.trajectory(well.trajectory.stations).tvd; } catch { tvd = x => x; }
+    const pp = f.pore_pressure.points, fg = f.fracture_gradient.points; const maxTvd = Math.max(...pp.map(p => p.tvd), ...fg.map(p => p.tvd), ...well.strings.map(s => tvd(s.shoe_md)), 1000);
+    const traces = [{x: pp.map(p => p.value), y: pp.map(p => p.tvd), name: 'Pore pressure', mode: 'lines+markers', line: {color: '#1f5fbf'}}, {x: fg.map(p => p.value), y: fg.map(p => p.tvd), name: 'Fracture gradient', mode: 'lines+markers', line: {color: '#b93a2d'}}];
+    for (const s of well.strings) { const t0 = tvd(s.hanger_md || 0), t1 = tvd(s.shoe_md); traces.push({x: [s.mud_weight, s.mud_weight], y: [t0, t1], name: `${s.name} mud ${s.mud_weight} ppg`, mode: 'lines', line: {color: '#1d7f49', width: 3}}); traces.push({x: [0, 25], y: [t1, t1], mode: 'lines', showlegend: false, line: {color: '#888', dash: 'dot', width: 1}, hoverinfo: 'skip'});
+      if (s.next_hole_mud_weight && s.next_section_td_md) traces.push({x: [s.next_hole_mud_weight, s.next_hole_mud_weight], y: [t1, tvd(s.next_section_td_md)], name: `next section ${s.next_hole_mud_weight} ppg`, mode: 'lines', line: {color: '#16a085', width: 3, dash: 'dash'}}); }
+    const allx = traces.flatMap(t => t.x).filter(x => x > 0 && x < 25); const ink = getComputedStyle(document.body).color;
+    Plotly.newPlot(container, traces, {margin: {l: 55, r: 10, t: 10, b: 45}, height: 440, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)', font: {color: ink, size: 11}, xaxis: {title: 'Equivalent mud weight (ppg)', range: [Math.min(...allx) - 1, Math.max(...allx) + 1], gridcolor: 'rgba(128,128,128,.25)'}, yaxis: {title: 'TVD (ft)', range: [maxTvd * 1.03, 0], gridcolor: 'rgba(128,128,128,.25)'}, legend: {orientation: 'h', y: -0.18, font: {size: 10}}}, {responsive: true, displaylogo: false}); }
+  return {draw, pressureWindow}; })();
+
+// ------------------------------------------------------------ editor
+const Editor = (() => {
+  let well = null, root = null, section = null, onChangeCb = () => {}, issues = [], rerender = null, pathCounter = 0;
+  const onChange = () => { onChangeCb(); clearTimeout(rerender); rerender = setTimeout(render, 200); };
+  const num = v => (v === '' || v == null) ? null : +v;
+  const STRING_FIELDS = [['name', 'Name', 'text', 'Shown on results and the report.'], ['type', 'Type', ['surface', 'intermediate', 'production', 'liner', 'conductor'], 'Decides which load cases apply.'], ['od', 'Casing OD (in)', 'num', 'Nominal outside diameter, e.g. 9.625 for 9-5/8".'], ['hole_size', 'Hole size (in)', 'num', 'Bit size the string is run in.'], ['hanger_md', 'Liner top MD (ft)', 'num', 'Liners only: measured depth of the liner hanger.'], ['shoe_md', 'Shoe MD (ft)', 'num', 'Measured depth of the casing shoe.'], ['toc_md', 'Top of cement MD (ft)', 'num', 'Above TOC the annulus holds mud; below it, cement.'], ['mud_weight', 'Mud weight (ppg)', 'num', 'Mud the string is run and cemented in.'], ['cement_lead_ppg', 'Lead slurry (ppg)', 'num', 'Lighter slurry above the tail.'], ['cement_tail_ppg', 'Tail slurry (ppg)', 'num', 'Heavier slurry across the shoe.'], ['tail_length', 'Tail length (ft)', 'num', 'Length of tail slurry above the shoe.'], ['overpull', 'Overpull (lbf)', 'num', 'Extra pull allowed at surface while running.'], ['pressure_test', 'Pressure test (psi)', 'num', 'Surface test pressure after cementing. Blank skips the case.']];
+  const DRILL_AHEAD = [['next_hole_mud_weight', 'Next section mud weight (ppg)', 'num', 'Heaviest mud used while drilling below this shoe.'], ['next_section_td_md', 'Next section TD MD (ft)', 'num', 'Depth drilled below this shoe before the next string.'], ['kick_volume_bbl', 'Kick volume (bbl)', 'num', 'Design influx volume. Blank for the conservative gas-to-surface case.'], ['kick_intensity_ppg', 'Kick intensity (ppg)', 'num', 'Formation pressure in excess of the mud weight.'], ['max_surface_pressure', 'BOP rating (psi)', 'num', 'Caps surface pressure in well-control cases.'], ['include_gas_to_surface', 'Also run gas-to-surface', 'bool', 'Keep the full gas column case as well.']];
+  const PRODUCTION = [['packer_md', 'Packer MD (ft)', 'num', 'Production packer depth.'], ['packer_fluid_ppg', 'Packer fluid (ppg)', 'num', 'Fluid left above the packer.'], ['shut_in_tubing_pressure', 'Shut-in tubing pressure (psi)', 'num', 'Applied on the packer fluid for the tubing-leak case. Blank skips it.'], ['frac_surface_pressure', 'Max treating pressure (psi)', 'num', 'Surface pressure while fracturing down the casing. Blank skips it.'], ['frac_fluid_ppg', 'Frac fluid (ppg)', 'num', 'Density of the fluid pumped.']];
+  const STD = [[20, 26], [16, 20], [13.375, 17.5], [10.75, 14.75], [9.625, 12.25], [7.625, 9.875], [7, 8.75], [5.5, 7.875], [4.5, 6.125]];
+  const GRADES = ['H-40', 'J-55', 'K-55', 'M-65', 'N-80', 'L-80', 'C-90', 'R-95', 'T-95', 'C-110', 'P-110', 'Q-125'], DEFAULT_GRADES = ['J-55', 'K-55', 'N-80', 'L-80', 'P-110'];
+  function input(obj, key, kind, path) { path = path || `auto.${pathCounter++}`;
+    if (Array.isArray(kind)) return h('select', {'data-path': path, id: 'f-' + path, onchange: e => { obj[key] = e.target.value; onChange(); }}, ...kind.map(o => h('option', {value: o, selected: obj[key] === o}, o)));
+    if (kind === 'bool') return h('input', {'data-path': path, id: 'f-' + path, type: 'checkbox', checked: !!obj[key], onchange: e => { obj[key] = e.target.checked; onChange(); }});
+    return h('input', {'data-path': path, id: 'f-' + path, type: kind === 'num' ? 'number' : 'text', step: 'any', value: obj[key] == null ? '' : obj[key], onchange: e => { obj[key] = kind === 'num' ? num(e.target.value) : e.target.value; onChange(); }}); }
+  const issueFor = p => issues.filter(i => i.path === p);
+  const fieldGrid = (obj, fields, pre = '') => h('div', {class: 'grid'}, ...fields.map(([k, label, kind, hint]) => { const probs = issueFor(pre + k); return h('label', {class: 'f' + (probs.some(p => p.level === 'error') ? ' bad' : probs.length ? ' warnish' : ''), title: hint || ''}, h('span', {}, label), input(obj, k, kind, pre + k), ...probs.map(p => h('small', {class: p.level === 'error' ? 'fail' : 'warn'}, p.msg))); }));
+  function table(rows, cols, factory, title) { const wrap = h('div', {class: 'tbl'}); const redraw = () => wrap.replaceChildren(h('div', {class: 'row'}, h('h3', {}, title), h('button', {onclick: () => { rows.push(factory(rows)); onChange(); redraw(); }}, '+ row')),
+      h('table', {class: 'edit'}, h('thead', {}, h('tr', {}, ...cols.map(c => h('th', {}, c[1])), h('th'))), h('tbody', {}, ...rows.map((r, i) => h('tr', {}, ...cols.map(([k]) => h('td', {}, input(r, k, 'num', `${title}.${i}.${k}`))), h('td', {}, h('button', {class: 'x', title: 'remove', onclick: () => { rows.splice(i, 1); onChange(); redraw(); }}, '×'))))))); redraw(); return wrap; }
+  function stringCard(s, i) { const pre = `strings.${i}.`, n = issues.filter(x => x.path.startsWith(pre)), nErr = n.filter(x => x.level === 'error').length;
+    const drillsAhead = ['surface', 'intermediate', 'conductor'].includes(s.type) || (s.type === 'liner' && s.next_section_td_md), produces = ['production', 'liner'].includes(s.type), main = STRING_FIELDS.filter(([k]) => k !== 'hanger_md' || s.type === 'liner');
+    return h('details', {open: true, class: 'string'}, h('summary', {}, h('span', {}, h('b', {}, `${s.name || 'string'} · ${s.od}" · ${s.type}`), nErr ? h('span', {class: 'badge fail', style: 'margin-left:8px'}, `${nErr} to fix`) : n.length ? h('span', {class: 'badge info', style: 'margin-left:8px'}, `${n.length} note${n.length > 1 ? 's' : ''}`) : null),
+        h('span', {}, i > 0 ? h('button', {class: 'link small', title: 'move up', onclick: e => { e.preventDefault(); [well.strings[i - 1], well.strings[i]] = [well.strings[i], well.strings[i - 1]]; onChange(); render(); }}, '↑') : null, h('button', {class: 'x', title: 'remove string', onclick: e => { e.preventDefault(); const btn = e.target; const c = h('span', {class: 'confirm'}, h('span', {class: 'small fail'}, `Remove ${s.name}?`), h('button', {class: 'small', onclick: ev => { ev.preventDefault(); well.strings.splice(i, 1); onChange(); render(); }}, 'Remove'), h('button', {class: 'small', onclick: ev => { ev.preventDefault(); c.replaceWith(btn); }}, 'Keep')); btn.replaceWith(c); }}, '×'))),
+      fieldGrid(s, main, pre), h('details', {open: drillsAhead || !!s.kick_volume_bbl, class: 'sub'}, h('summary', {}, h('span', {}, 'Drilling ahead below this string (well-control cases)'), h('span', {class: 'muted small'}, drillsAhead ? 'applies' : 'usually not for this type')), fieldGrid(s, DRILL_AHEAD, pre)),
+      h('details', {open: produces, class: 'sub'}, h('summary', {}, h('span', {}, 'Production and stimulation cases'), h('span', {class: 'muted small'}, produces ? 'applies' : 'usually not for this type')), fieldGrid(s, PRODUCTION, pre))); }
+  function newString() { const last = well.strings.at(-1); let tvd; try { tvd = Engine.trajectory(well.trajectory.stations).tvd; } catch { tvd = x => x; } const td = well.trajectory.stations.at(-1)?.md || 10000;
+    let od = 13.375, hole = 17.5, type = 'surface'; if (last) { const idx = STD.findIndex(([o]) => o <= last.od); const nxt = STD[Math.min(idx + 1, STD.length - 1)]; od = nxt[0]; hole = nxt[1]; type = 'production'; } if (last && last.type === 'production') type = 'liner';
+    const shoe = last ? Math.min(td, last.shoe_md + Math.max(2000, td - last.shoe_md)) : Math.min(2000, td); const pts = well.formation.pore_pressure.points, t = tvd(shoe); const pore = pts.length ? pts.reduce((v, p) => p.tvd <= t ? p.value : v, pts[0].value) : 9; const mw = Math.round((pore + 0.5) * 10) / 10;
+    if (last && ['surface', 'intermediate'].includes(last.type)) { last.next_hole_mud_weight = last.next_hole_mud_weight ?? mw; last.next_section_td_md = last.next_section_td_md ?? shoe; }
+    return Engine.baseString({name: `${od}" ${type}`, type, od, hole_size: hole, hanger_md: type === 'liner' ? Math.max(0, last.shoe_md - 500) : 0, shoe_md: shoe, toc_md: last ? Math.max(0, last.shoe_md - 500) : 0, mud_weight: mw}); }
+  const panel = (title, ...kids) => h('div', {class: 'panel'}, h('h2', {}, title), ...kids);
+  const stationFactory = rows => ({md: (rows.at(-1)?.md ?? 0) + 1000, inclination: rows.at(-1)?.inclination ?? 0, azimuth: rows.at(-1)?.azimuth ?? 0}); const ppFactory = d => rows => ({tvd: (rows.at(-1)?.tvd ?? 0) + 1000, value: rows.at(-1)?.value ?? d});
+  function gradePicker() { well.prefs = well.prefs || {}; well.prefs.grades = well.prefs.grades || [...DEFAULT_GRADES]; return h('div', {}, h('h3', {}, 'Grades to consider'), h('p', {class: 'muted small'}, 'The optimizer only picks from these. Sour wells automatically exclude non-sour grades.'),
+    h('div', {class: 'row'}, ...GRADES.map(g => h('label', {class: 'chip'}, h('input', {type: 'checkbox', id: 'grade-' + g, checked: well.prefs.grades.includes(g), onchange: e => { const set = new Set(well.prefs.grades); e.target.checked ? set.add(g) : set.delete(g); well.prefs.grades = GRADES.filter(x => set.has(x)); onChange(); }}), g)))); }
+  function pricing() { well.prefs = well.prefs || {}; const on = !!well.prefs.price_per_lb; return h('div', {}, h('h3', {}, 'Pricing'), h('p', {class: 'muted small'}, on ? 'Price per pound by grade. Costs are shown in money and the optimizer minimises them.' : 'Without prices the optimizer uses a relative cost index (carbon grades ≈ 1.0/lb, premium grades up to 1.6).'),
+    h('div', {class: 'row'}, h('label', {class: 'chip'}, h('input', {type: 'checkbox', id: 'use-prices', checked: on, onchange: e => { well.prefs.price_per_lb = e.target.checked ? Object.fromEntries((well.prefs.grades || Object.keys(Engine.PRICE_INDEX)).map(g => [g, +(Engine.PRICE_INDEX[g] * 1.1).toFixed(2)])) : null; onChange(); render(); }}), 'Use my prices'), on ? h('label', {class: 'f', style: 'width:90px'}, h('span', {}, 'Currency'), input(well.prefs, 'currency', 'text', 'prefs.currency')) : null),
+    on ? h('div', {class: 'grid'}, ...Object.keys(well.prefs.price_per_lb).map(g => h('label', {class: 'f'}, h('span', {}, `${g} (${well.prefs.currency || '$'}/lb)`), input(well.prefs.price_per_lb, g, 'num', 'prefs.price.' + g)))) : null); }
+  const issueList = p => issues.filter(i => i.path === p).map(i => h('div', {class: (i.level === 'error' ? 'fail' : 'warn') + ' small'}, (i.level === 'error' ? '✗ ' : '⚠ ') + i.msg));
+  function render() { if (!root || !well) return; pathCounter = 0; const active = document.activeElement, focusPath = active && root.contains(active) ? active.dataset.path : null, scrollY = window.scrollY; issues = validateWell(well); const w = well, parts = [];
+    if (!section || section === 'well') parts.push(panel('Well', h('div', {class: 'grid'}, ...['burst', 'collapse', 'tension', 'triaxial'].map(k => h('label', {class: 'f'}, h('span', {}, `Design factor: ${k}`), input(w.design_factors, k, 'num', 'df.' + k))), h('label', {class: 'f'}, h('span', {}, 'Gas gradient (psi/ft)'), input(w, 'gas_gradient_psi_ft', 'num', 'gas')), h('label', {class: 'f'}, h('span', {}, 'Sour service'), input(w.formation, 'sour', 'bool', 'sour')), h('label', {class: 'f'}, h('span', {}, 'Surface temperature (°F)'), input(w.formation, 'surface_temperature_f', 'num', 'tsurf')), h('label', {class: 'f'}, h('span', {}, 'Geothermal gradient (°F/100 ft)'), input(w.formation, 'geothermal_gradient_f_per_100ft', 'num', 'tgrad')), h('label', {class: 'f'}, h('span', {}, 'Derate yield for temperature'), input(w.yield_derating, 'enabled', 'bool', 'derate')), h('label', {class: 'f'}, h('span', {}, 'Derating slope (per °F)'), input(w.yield_derating, 'slope_per_f', 'num', 'slope'))), h('p', {class: 'muted small'}, 'Design factors are minimum rating ÷ load. The defaults are common onshore values; set them to your company standard.'), gradePicker(), pricing()),
+      panel('Trajectory', h('p', {class: 'muted small'}, 'Survey stations, minimum curvature between them. A vertical well needs only surface and TD.'), ...issueList('trajectory'), table(w.trajectory.stations, [['md', 'MD ft'], ['inclination', 'Inc °'], ['azimuth', 'Azi °']], stationFactory, 'Survey stations')));
+    if (!section || section === 'pressures') parts.push(h('div', {class: 'two'}, panel('Pore pressure and fracture gradient', h('p', {class: 'muted small'}, 'Equivalent mud weight versus TVD, interpolated linearly between points. The chart shows the drilling window with each string\'s mud weight.'), ...issueList('pore pressure'), ...issueList('fracture gradient'), table(w.formation.pore_pressure.points, [['tvd', 'TVD ft'], ['value', 'EMW ppg']], ppFactory(9), 'Pore pressure'), table(w.formation.fracture_gradient.points, [['tvd', 'TVD ft'], ['value', 'EMW ppg']], ppFactory(14), 'Fracture gradient')), panel('Pressure window', h('div', {id: 'pressure-window'}))));
+    if (!section || section === 'strings') parts.push(h('div', {class: 'two wide-left'}, panel('Casing program', h('p', {class: 'muted small'}, 'One card per string, shallowest first. Hover a label for what it means. Blank test, kick or production inputs skip those load cases.'), ...issueList('strings'), ...w.strings.map(stringCard), h('div', {class: 'row'}, h('button', {class: 'primary', onclick: () => { well.strings.push(newString()); onChange(); render(); }}, '+ Add next string'))), panel('Schematic', h('div', {id: 'schematic'}))));
+    root.replaceChildren(...parts); const sc = root.querySelector('#schematic'); if (sc) Schematic.draw(sc, w); const pw = root.querySelector('#pressure-window'); if (pw) Schematic.pressureWindow(pw, w);
+    if (focusPath) { const el = root.querySelector(`[data-path="${CSS.escape(focusPath)}"]`); if (el) el.focus({preventScroll: true}); } window.scrollTo(0, scrollY); }
+  return {mount(el, cb) { root = el; onChangeCb = cb; }, set(w, sec = null) { well = w; section = sec; render(); }, render};
+})();
+
+// ------------------------------------------------------------ EDM import (Landmark export)
+function importEdm(text) { const doc = new DOMParser().parseFromString(text, 'application/xml'); if (doc.querySelector('parsererror')) throw new Error('Not a valid XML file.');
+  const rows = tag => [...doc.getElementsByTagName(tag)].map(e => Object.fromEntries([...e.attributes].map(a => [a.name, a.value]))); const f = (a, k) => a[k] == null || a[k] === '' ? null : +a[k];
+  const wbs = rows('CD_WELLBORE'); if (!wbs.length) throw new Error('No CD_WELLBORE rows found. Is this a Landmark EDM export?'); const wells = Object.fromEntries(rows('CD_WELL').map(w => [w.well_id, w.well_common_name || '']));
+  const heads = [...rows('CD_DEFINITIVE_SURVEY_HEADER'), ...rows('CD_SURVEY_HEADER')]; const depth = {}; for (const hd of heads) depth[hd.wellbore_id] = Math.max(depth[hd.wellbore_id] || 0, f(hd, 'md_max') || 0);
+  const wb = wbs.reduce((a, b) => (depth[a.wellbore_id] || 0) >= (depth[b.wellbore_id] || 0) ? a : b), id = wb.wellbore_id, warnings = [];
+  let stations = null; for (const [ht, st, key] of [['CD_DEFINITIVE_SURVEY_HEADER', 'CD_DEFINITIVE_SURVEY_STATION', 'def_survey_header_id'], ['CD_SURVEY_HEADER', 'CD_SURVEY_STATION', 'survey_header_id']]) { const hs = rows(ht).filter(x => x.wellbore_id === id); if (!hs.length) continue;
+    const best = hs.reduce((a, b) => (f(a, 'md_max') || 0) >= (f(b, 'md_max') || 0) ? a : b), hid = best[key] || best.survey_header_id; const rs = rows(st).filter(r => (r[key] || r.survey_header_id) === hid).sort((a, b) => f(a, 'md') - f(b, 'md'));
+    const seen = new Set(), out = []; for (const r of rs) { const md = f(r, 'md'); if (md == null || seen.has(md)) continue; seen.add(md); out.push({md, inclination: f(r, 'inclination') || 0, azimuth: ((f(r, 'azimuth') || 0) % 360 + 360) % 360}); } if (out.length >= 2) { stations = out; if (ht.startsWith('CD_SURVEY')) warnings.push(`trajectory: no definitive survey; used '${best.survey_name || hid}'`); break; } }
+  if (!stations) throw new Error('No survey stations found for the wellbore.');
+  function profile(gt, rt, gk, vk, ek, label) { const gs = rows(gt).filter(g => g.wellbore_id === id); if (!gs.length) return null; const by = Object.fromEntries(gs.map(g => [g[gk], rows(rt).filter(r => r[gk] === g[gk])])); gs.sort((a, b) => ((b.phase === 'PLAN') - (a.phase === 'PLAN')) || (by[b[gk]].length - by[a[gk]].length)); const g = gs[0], pts = [];
+    for (const r of by[g[gk]].sort((a, b) => f(a, 'tvd') - f(b, 'tvd'))) { const tvd = f(r, 'tvd'); if (tvd == null) continue; const p = f(r, vk), emw = f(r, ek); let ppg; if (p != null && tvd > 0) ppg = p / tvd / 0.052; else if (emw != null) ppg = emw; else continue; if (pts.length && Math.abs(pts.at(-1).tvd - tvd) < 1e-6) continue; pts.push({tvd, value: ppg}); }
+    if (!pts.length) return null; if (pts[0].tvd > 0) pts.unshift({tvd: 0, value: pts[0].value}); warnings.push(`${label}: used group '${g.name || g[gk]}' (${g.phase || 'no phase'}, ${pts.length} points)`); return {points: pts}; }
+  let pore = profile('CD_PORE_PRESSURE_GROUP', 'CD_PORE_PRESSURE', 'pore_pressure_group_id', 'pore_pressure', 'pore_pressure_emw', 'pore pressure'), frac = profile('CD_FRAC_GRADIENT_GROUP', 'CD_FRAC_GRADIENT', 'frac_gradient_group_id', 'frac_gradient_pressure', 'frac_gradient_emw', 'fracture gradient');
+  if (!pore) { pore = {points: [{tvd: 0, value: 8.6}]}; warnings.push('pore pressure: none in file; assumed 8.6 ppg'); } if (!frac) { frac = {points: [{tvd: 0, value: 14.0}]}; warnings.push('fracture gradient: none in file; assumed 14.0 ppg: REVIEW'); }
+  let tsurf = 70, tgrad = 1.2; const tg = rows('CD_TEMP_GRADIENT_GROUP').filter(g => g.wellbore_id === id); if (tg.length) { const g = tg.reduce((a, b) => (b.phase === 'PLAN' && a.phase !== 'PLAN') ? b : a); const rs = rows('CD_TEMP_GRADIENT').filter(r => r.temp_gradient_group_id === g.temp_gradient_group_id).map(r => [f(r, 'tvd') || 0, f(r, 'temperature')]).filter(x => x[1] != null);
+    if (rs.length >= 2) { const n = rs.length, sx = rs.reduce((a, r) => a + r[0], 0), sy = rs.reduce((a, r) => a + r[1], 0), sxx = rs.reduce((a, r) => a + r[0] * r[0], 0), sxy = rs.reduce((a, r) => a + r[0] * r[1], 0); const slope = (n * sxy - sx * sy) / (n * sxx - sx * sx || 1); tgrad = slope * 100; tsurf = (sy - slope * sx) / n; warnings.push(`temperature: linear fit to ${n} points, ${tsurf.toFixed(0)} F + ${tgrad.toFixed(2)} F/100 ft`); } } else warnings.push('temperature: none in file; assumed 70 F + 1.2 F/100 ft');
+  const asm = rows('CD_ASSEMBLY').filter(a => a.wellbore_id === id && ['casing', 'liner', 'conductor'].includes((a.string_type || '').toLowerCase()) && f(a, 'md_assembly_base')).sort((a, b) => f(a, 'md_assembly_base') - f(b, 'md_assembly_base'));
+  const comps = rows('CD_ASSEMBLY_COMP'); const traj = Engine.trajectory(stations); const casings = asm.filter(a => (a.string_type || '').toLowerCase() !== 'liner').sort((a, b) => (f(b, 'assembly_size') || 0) - (f(a, 'assembly_size') || 0));
+  const strings = [], specs = {}, stored = [];
+  for (const a of asm) { const st = (a.string_type || '').toLowerCase(); let type = 'liner'; if (st !== 'liner') { if (st === 'conductor') type = 'conductor'; else { const i = casings.indexOf(a); type = i === 0 && casings.length > 1 ? 'surface' : i === casings.length - 1 ? 'production' : 'intermediate'; } }
+    const name = a.assembly_name || `${a.string_type} ${a.assembly_size}`, shoe = f(a, 'md_assembly_base'), top = type === 'liner' ? (f(a, 'md_assembly_top') || 0) : 0; let od = f(a, 'assembly_size') || 0;
+    const cs = comps.filter(c => c.assembly_id === a.assembly_id && ['CAS', 'CASING', 'LIN', 'TUB', ''].includes((c.sect_type_code || '').toUpperCase())); let best = null; for (const c of cs) { if (f(c, 'od_body') == null || f(c, 'id_body') == null) continue; if (!best || (f(c, 'od_body') - f(c, 'id_body')) > (f(best, 'od_body') - f(best, 'id_body'))) best = c; } if (!od && best) od = f(best, 'od_body');
+    const hole = f(a, 'hole_size') || od + 1.5, mw = Math.round((Engine.profileAt(pore.points, traj.tvd(Math.min(shoe, traj.td))) + 0.5) * 10) / 10;
+    strings.push(Engine.baseString({name, type, od, hole_size: hole, hanger_md: top, shoe_md: shoe, toc_md: top, mud_weight: mw}));
+    if (best) { const m = (best.grade || '').trim().toUpperCase().match(/^([A-Z]+)-?(\d+)/); const grade = m ? `${m[1]}-${m[2]}` : ''; const wall = (f(best, 'od_body') - f(best, 'id_body')) / 2; const cands = Engine.pipesForOd(od); const pipe = cands.length ? cands.reduce((p, q) => Math.abs(q.wall - wall) < Math.abs(p.wall - wall) ? q : p) : null;
+      const cn = (best.connection_name || '').toUpperCase(); const conn = cn.includes('BTC') || cn.includes('BUTT') ? 'BTC' : cn.includes('LTC') ? 'LTC' : cn.includes('STC') ? 'STC' : 'PREMIUM';
+      if (!pipe || Math.abs(pipe.wall - wall) > 0.01) warnings.push(`${name}: no catalog pipe for OD ${od} wall ${wall.toFixed(3)}; pipe not resolved`); else if (!Engine.grades[grade]) warnings.push(`${name}: grade '${best.grade}' not in catalog; pipe not resolved`); else { try { Engine.spec(od, pipe.weight, grade, conn); specs[name] = {weight: pipe.weight, grade, connection: conn}; } catch { specs[name] = {weight: pipe.weight, grade, connection: 'BTC'}; warnings.push(`${name}: connection '${best.connection_name}' mapped to BTC`); } }
+      stored.push({string: name, burst: f(best, 'pipe_pressure_burst'), collapse: f(best, 'pressure_collapse'), axial: f(best, 'axial_rating')}); } else warnings.push(`${name}: no casing components; pipe not resolved`);
+    warnings.push(`${name}: mud weight assumed ${mw} ppg (pore + 0.5), TOC at string top, cement 12.5/15.8 ppg: REVIEW`); }
+  for (let i = 0; i < strings.length - 1; i++) { const s = strings[i], nx = strings[i + 1]; if (['surface', 'intermediate', 'liner'].includes(s.type) && nx.shoe_md > s.shoe_md) { s.next_hole_mud_weight = nx.mud_weight; s.next_section_td_md = nx.shoe_md; } }
+  const base = Engine.exampleHorizontal(); const wname = wells[wb.well_id] || '', wbn = wb.wellbore_name || ''; const name = wbn.startsWith(wname) ? wbn : `${wname} ${wbn}`.trim() || id;
+  return {well: {...base, name, trajectory: {stations}, formation: {...base.formation, pore_pressure: pore, fracture_gradient: frac, surface_temperature_f: tsurf, geothermal_gradient_f_per_100ft: tgrad}, strings}, specs, warnings, stored};
+}
+
+// ------------------------------------------------------------ app
+const STEPS = [['well', 'Well & design basis'], ['pressures', 'Pressures'], ['strings', 'Casing program'], ['design', 'Design'], ['report', 'Report']];
+const GUIDE = {well: ['Set the design factors your company uses (defaults are typical onshore values).', 'Enter the survey: surface and TD are enough for a vertical well; add stations for build and lateral sections.', 'Untick grades you would not run; the optimizer only picks from the ticked ones.'],
+  pressures: ['Pore pressure and fracture gradient as equivalent mud weight versus true vertical depth.', 'Two or three points per curve are usually enough.', 'The chart shows the drilling window; each string\'s mud weight should sit inside it.'],
+  strings: ['One card per string from the surface down. "+ Add next string" proposes the next standard size.', 'Fill the "drilling ahead" fields for strings you drill below, and the production fields for the production string or liner.', 'Blank test, kick or production fields skip those load cases. Red notes must be fixed; amber ones are advice.'],
+  design: ['Each card is the cheapest pipe that passes every load case; tapered strings are proposed when they save money.', 'Open "Choose a different pipe" to pick from the passing alternatives, or "Show loads & plots" to see what governs.', 'Everything is computed in your browser; nothing is sent anywhere unless you press "Publish to Planner" (hub only).'],
+  report: ['A complete record of the design basis, load cases and results for this well.', 'Select all and copy into a document, or screenshot sections, to share it.']};
+let project = null, designData = null, saveTimer = null, dirty = false;
+function guide(step) { const key = 'guide-hidden-' + step; let hidden = false; try { hidden = localStorage.getItem(key) === '1'; } catch {} const box = h('div', {class: 'guide'});
+  const draw = () => box.replaceChildren(h('div', {class: 'row', style: 'justify-content:space-between'}, h('b', {}, step === 'design' || step === 'report' ? 'What you are looking at' : 'What to enter here'), h('button', {class: 'link small', onclick: () => { hidden = !hidden; try { localStorage.setItem(key, hidden ? '1' : '0'); } catch {} draw(); }}, hidden ? 'show' : 'hide')), hidden ? null : h('ul', {}, ...GUIDE[step].map(t => h('li', {}, t)))); draw(); return box; }
+function route() { const m = (location.hash || '').match(/^#p-([a-z0-9]+)-(\w+)$/); if (m) openProject(m[1], m[2]); else if (window.PlannerMode && /pwell=/.test(location.hash)) plannerStart(); else renderHome(); }
+window.addEventListener('hashchange', route);
+async function renderHome() { project = null; designData = null; $('#save-state').textContent = ''; app.replaceChildren(h('div', {class: 'panel hero'}, h('h2', {style: 'font-size:20px'}, 'Design casing strings for an onshore well'), h('p', {}, 'Loading your wells…')));
+  const list = await Store.list(); const mode = Store.mode();
+  app.replaceChildren(h('div', {class: 'panel hero'}, h('h2', {style: 'font-size:20px'}, 'Design casing strings for an onshore well'), h('p', {}, 'Enter the well, pressures and casing program; the optimizer picks the cheapest API 5CT pipe that passes every load case and shows you why. All calculations run in your browser.'),
+      h('div', {class: 'row', style: 'justify-content:center'}, h('button', {class: 'primary big', id: 'new-example', onclick: () => newProject(Engine.exampleHorizontal())}, '+ New well from example'), h('button', {class: 'big', id: 'new-liner', onclick: () => newProject(Engine.exampleLiner())}, '+ Example with frac liner'),
+        h('label', {class: 'big', style: 'padding:12px 16px;border:1px solid var(--line);border-radius:7px;cursor:pointer', for: 'edm'}, 'Import Landmark EDM…', h('input', {type: 'file', id: 'edm', accept: '.xml,text/xml', hidden: true, onchange: e => importFile(e.target.files[0])})))),
+    h('div', {class: 'panel how'}, h('h2', {}, 'How it works'), h('ol', {}, h('li', {}, h('b', {}, 'Describe the well'), ': trajectory, pore and fracture pressure, casing points and mud weights. Start from an example and change what differs.'), h('li', {}, h('b', {}, 'Design'), ': every API 5CT pipe in the catalog is checked against the burst, collapse, tension and triaxial load cases for each string; the cheapest that passes is recommended.'), h('li', {}, h('b', {}, 'Review'), ': see the governing load case and design factor per string, swap pipe if you prefer, and read the report.'))),
+    h('div', {class: 'panel'}, h('div', {class: 'row', style: 'justify-content:space-between'}, h('h2', {style: 'margin:0'}, 'Your wells'), h('span', {class: 'muted small'}, mode === 'shared' ? 'saved with this artifact' : 'saved in this browser only')),
+      list.length ? h('ul', {class: 'projects'}, ...list.map(p => h('li', {}, h('a', {href: `#p-${p.id}-well`}, p.name), h('span', {class: 'muted small'}, `${(p.well?.strings || []).length} strings · updated ${new Date(p.updated).toLocaleString()}`), h('span', {class: 'spacer'}), h('a', {href: `#p-${p.id}-report`, class: 'small'}, 'report'),
+        h('button', {class: 'x', title: 'delete', onclick: e => { const btn = e.target; const c = h('span', {class: 'confirm'}, h('span', {class: 'small fail'}, 'Delete?'), h('button', {class: 'small', onclick: async () => { await Store.remove(p.id); renderHome(); }}, 'Delete'), h('button', {class: 'small', onclick: () => c.replaceWith(btn)}, 'Keep')); btn.replaceWith(c); }}, '×'))))
+      : h('div', {class: 'empty'}, 'No wells yet. Start from an example above; every field can be changed.'))); }
+async function newProject(well, design = {}, hashStep = 'well') { const p = {id: uid(), name: well.name, well, design, created: new Date().toISOString()}; await Store.save(p); project = p; location.hash = `#p-${p.id}-${hashStep}`; }
+async function importFile(file) { if (!file) return; try { const r = importEdm(await file.text()); ss.set('import-notes', JSON.stringify(r.warnings)); await newProject(r.well, r.specs, 'strings'); } catch (e) { toast(e.message); } }
+async function openProject(id, step) { if (!project || project.id !== id) { project = await Store.get(id); designData = null; if (!project) { location.hash = '#home'; return; } } renderProject(step); }
+function markDirty() { dirty = true; designData = null; $('#save-state').textContent = 'unsaved…'; clearTimeout(saveTimer); saveTimer = setTimeout(save, 800); }
+async function save() { if (!project || !dirty) return; const mode = await Store.save(project); dirty = false; $('#save-state').textContent = mode === 'shared' ? 'saved' : 'saved (this browser)'; }
+const plannerPid = () => 'pw' + String(PlannerMode.well_id).toLowerCase().replace(/[^a-z0-9]/g, '');
+async function plannerStart(reload = false) { const PM = window.PlannerMode; const pid = plannerPid();
+  app.replaceChildren(h('div', {class: 'panel hero'}, h('h2', {style: 'font-size:20px'}, `Loading ${PM.well_id} from the Planner…`), h('p', {class: 'muted'}, 'Reading the program, survey, casing module and pressure/temperature overlays.')));
+  try { const existing = reload ? null : await Store.get(pid);
+    if (existing) { project = existing; designData = null; location.hash = `#p-${pid}-well`; return; }
+    const well = await PM.loadWell(PM.well_id); const p = {id: pid, name: well.name, well, design: {}, created: new Date().toISOString()}; await Store.save(p); project = p; designData = null; location.hash = `#p-${pid}-well`; }
+  catch (e) { app.replaceChildren(h('div', {class: 'panel'}, h('h2', {}, 'Could not load the well from the Planner'), h('div', {class: 'err'}, e.message), h('div', {class: 'row'}, h('button', {onclick: () => plannerStart(reload)}, 'Try again'), h('a', {href: PM.plannerUrl}, '← Back to the Planner')))); } }
+function plannerPanel(w, step) { const PM = window.PlannerMode, pl = w.planner; if (!PM || !pl) return null; const warnCount = (pl.basis || []).filter(b => b.warn).length;
+  const det = h('details', {class: 'panel planner', open: step === 'well' ? '' : null}, h('summary', {}, h('b', {}, `Planner basis: ${pl.well_id}`), h('span', {class: 'muted small'}, ` · loaded ${new Date(pl.loaded_at).toLocaleString()}${warnCount ? ` · ${warnCount} assumption${warnCount > 1 ? 's' : ''} to review` : ''}`)),
+    h('p', {class: 'small muted'}, 'Every input below came from the hub with its truth tag (T measured, E engineering, S scenario/assumed, C consensus). Change anything on the steps; the tags of what you edit become E (team-entered) on publish.'),
+    h('div', {class: 'tbl'}, h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Item'), h('th', {}, 'Value'), h('th', {}, 'Tag'), h('th', {}, 'Source'))), h('tbody', {}, ...(pl.basis || []).map(b => h('tr', {class: b.warn ? 'warn' : ''}, h('td', {}, b.item), h('td', {}, (b.warn ? '⚠ ' : '') + b.value), h('td', {}, h('span', {class: 'tag'}, b.tag)), h('td', {class: 'small muted'}, b.source)))))),
+    h('label', {class: 'row small'}, h('input', {type: 'checkbox', checked: pl.frac_confirmed ? '' : null, onchange: e => { pl.frac_confirmed = e.target.checked; markDirty(); }}), 'I have reviewed the fracture gradient on the Pressures step and it reflects the team’s engineering estimate (publishes tagged E instead of S assumed)'),
+    h('div', {class: 'row'}, h('a', {href: PM.plannerUrl}, '← Back to the Planner'), h('button', {class: 'link small', onclick: () => { if (confirm('Reload the well from the Planner? Your edits and pipe selections for this well will be replaced.')) plannerStart(true); }}, 'Reload from Planner')));
+  return det; }
+function publishButton(el) { const PM = window.PlannerMode, w = project.well; if (!PM || !w.planner) return null; const box = h('span', {});
+  const run = async () => { box.replaceChildren(h('span', {class: 'muted small'}, 'Publishing…'));
+    try { await save(); const data = PM.toPlannerDoc(w, designData); const r = await PM.hub('module_publish', {well: PM.well_id, module: 'casing', data, tool_id: 'casing-design', tool_ref: `${location.pathname}#p-${project.id}-design`});
+      box.replaceChildren(h('span', {class: 'pass small'}, `✓ Published to the Planner casing module${r && r.version ? ' (v' + r.version + ')' : ''} · `), h('a', {href: PM.plannerUrl, class: 'small'}, 'open in Planner')); toast('Published to the Planner'); }
+    catch (e) { box.replaceChildren(h('span', {class: 'fail small'}, 'Publish failed: ' + e.message + ' '), h('button', {class: 'small', onclick: run}, 'Retry')); } };
+  const ask = () => { if (w.planner.frac_confirmed) return run();
+    box.replaceChildren(h('span', {class: 'confirm'}, h('span', {class: 'warn small'}, 'Fracture gradient is still an assumption (no LOT/FIT held). Publish tagged "S assumed"?'), h('button', {class: 'small', onclick: run}, 'Publish as S'), h('button', {class: 'small', onclick: () => box.replaceChildren(btn)}, 'Cancel'))); };
+  const btn = h('button', {class: 'primary', onclick: ask}, 'Publish to Planner'); box.append(btn); return box; }
+function renderProject(step) { const w = project.well;
+  app.replaceChildren(h('div', {class: 'row', style: 'justify-content:space-between'}, h('input', {value: project.name, id: 'project-name', 'aria-label': 'well name', style: 'font-size:18px;font-weight:600;border:none;background:none;padding:4px 0;min-width:200px;flex:1', onchange: e => { project.name = e.target.value; markDirty(); }}),
+      h('div', {class: 'row'}, h('button', {onclick: () => copyText(JSON.stringify(w, null, 2), 'Well JSON copied')}, 'Copy JSON'))),
+    h('div', {class: 'steps'}, ...STEPS.map(([k, label], i) => h('button', {'aria-current': k === step ? 'step' : null, class: STEPS.findIndex(s => s[0] === step) > i ? 'done' : '', onclick: () => location.hash = `#p-${project.id}-${k}`}, `${i + 1}. ${label}`))), plannerPanel(w, step), guide(step), h('div', {id: 'step'}));
+  const el = $('#step');
+  if (step === 'design') renderDesign(el); else if (step === 'report') renderReport(el); else { const ed = h('div', {id: 'editor'}); el.append(ed); Editor.mount(ed, markDirty); Editor.set(w, step);
+    const notes = ss.get('import-notes'); if (notes && step === 'strings') { el.prepend(h('div', {class: 'panel'}, h('h2', {}, 'Imported from EDM: please review'), h('ul', {class: 'small warn'}, ...JSON.parse(notes).map(n => h('li', {}, n))))); ss.del('import-notes'); }
+    const nav = h('div', {class: 'row', style: 'justify-content:flex-end'}); const refresh = () => { const errs = validateWell(project.well).filter(i => i.level === 'error'); nav.replaceChildren(...[errs.length ? h('span', {class: 'fail small'}, `${errs.length} thing${errs.length > 1 ? 's' : ''} to fix before designing`) : null, h('button', {class: 'primary', disabled: step === 'strings' && errs.length > 0, onclick: () => { const i = STEPS.findIndex(s => s[0] === step); location.hash = `#p-${project.id}-${STEPS[i + 1][0]}`; }}, step === 'strings' ? 'Design my well →' : 'Next →')].filter(Boolean)); };
+    refresh(); el.addEventListener('change', () => setTimeout(refresh, 300)); el.append(nav); } }
+async function copyText(text, msg) { try { await navigator.clipboard.writeText(text); toast(msg); } catch { const ta = h('textarea', {style: 'width:100%;height:200px'}, text); app.prepend(ta); ta.select(); toast('Select and copy the text above'); } }
+
+function computeDesign(well, choices) { const errors = Engine.wellErrors(well); if (errors.length) throw new Error('fix before designing: ' + errors.join('; ')); const grades = well.prefs?.grades?.filter(g => Engine.grades[g]); const prices = well.prefs?.price_per_lb ? Object.fromEntries(Object.entries(well.prefs.price_per_lb).filter(([, v]) => v > 0)) : null; const out = [];
+  for (const s of well.strings) { const uniform = Engine.optimizeString(well, s, {grades: grades?.length ? grades : null, prices, max_results: 3}); const tapered = Engine.optimizeTapered(well, s, {grades: grades?.length ? grades : null, prices});
+    let rec = null; if (tapered && (!uniform.length || tapered.cost_per_ft < uniform[0].cost_per_ft - 1e-9)) rec = {kind: 'tapered', design: tapered.design, cost_per_ft: tapered.cost_per_ft, summary: tapered.result.summary}; else if (uniform.length) rec = {kind: 'uniform', design: uniform[0].design, cost_per_ft: uniform[0].cost_per_ft, summary: uniform[0].result.summary};
+    const ch = choices?.[s.name]; let dsg = null; if (ch) dsg = ch.sections ? Engine.design(ch.sections.map(x => ({top_md: x.top_md, bottom_md: x.bottom_md, spec: Engine.spec(s.od, x.weight, x.grade, x.connection || 'BTC')}))) : Engine.uniform(s, Engine.spec(s.od, ch.weight, ch.grade, ch.connection || 'BTC')); else if (rec) dsg = rec.design;
+    const result = dsg ? Engine.evaluateDesign(well, s, dsg) : null; out.push({string: s.name, od: s.od, top_md: s.hanger_md || 0, shoe_md: s.shoe_md, length: s.shoe_md - (s.hanger_md || 0), recommended: rec, overridden: !!ch, cost_per_ft: dsg ? Engine.designCost(dsg, prices) / Math.max(s.shoe_md - (s.hanger_md || 0), 1) : null, alternatives: uniform, result}); }
+  return {well: well.name, strings: out, warnings: Engine.wellWarnings(well), priced: !!prices, currency: well.prefs?.currency || '$'}; }
+async function renderDesign(el) { el.replaceChildren(h('div', {class: 'panel'}, 'Running the optimizer for every string…')); await save();
+  const errs = validateWell(project.well).filter(i => i.level === 'error'); if (errs.length) { el.replaceChildren(h('div', {class: 'panel'}, h('h2', {}, 'Fix these first'), ...errs.map(e => h('div', {class: 'fail'}, '✗ ' + e.msg)), h('div', {class: 'row'}, h('button', {onclick: () => location.hash = `#p-${project.id}-strings`}, '← Back to casing program')))); return; }
+  await new Promise(r => setTimeout(r, 20)); try { if (!designData) designData = computeDesign(project.well, project.design && Object.keys(project.design).length ? project.design : null); } catch (e) { el.replaceChildren(h('div', {class: 'panel'}, h('div', {class: 'err'}, e.message))); return; }
+  const d = designData, allPass = d.strings.every(s => s.result && s.result.passes);
+  el.replaceChildren(h('div', {class: 'panel'}, h('div', {class: 'row', style: 'justify-content:space-between'}, h('h2', {style: 'margin:0'}, allPass ? '✓ Every string passes' : '✗ Some strings need attention'), h('div', {class: 'row'}, h('button', {class: 'link', onclick: () => { project.design = {}; markDirty(); designData = null; renderDesign(el); }}, 'Reset to recommendations'), h('button', {class: 'primary', onclick: () => location.hash = `#p-${project.id}-report`}, 'Open report'), publishButton(el))), ...(d.warnings || []).map(w => h('div', {class: 'warn small'}, '⚠ ' + w))),
+    h('div', {class: 'cards'}, ...d.strings.map(stringCard)), h('div', {id: 'detail'})); }
+function stringCard(s) { const r = s.result, rec = s.recommended, card = h('div', {class: 'card'});
+  card.append(h('div', {class: 'row', style: 'justify-content:space-between'}, h('h3', {}, `${s.string} · ${s.od}"`), r ? h('span', {class: 'badge ' + (r.passes ? 'pass' : 'fail')}, r.passes ? 'PASS' : 'FAIL') : h('span', {class: 'badge fail'}, 'NO PIPE PASSES')));
+  if (!r) { card.append(h('p', {class: 'muted small'}, 'No catalog pipe meets the design factors over the full length. Consider a larger OD, a shallower shoe, or a different load basis.')); return card; }
+  const money = c => designData.priced ? `${designData.currency}${fmt(c, 2)}/ft · ${designData.currency}${fmt0(c * s.length)} total` : `cost index ${fmt(c, 1)}/ft`;
+  card.append(h('div', {class: 'pipe'}, r.design.uniform ? r.spec.label : 'Tapered: ' + r.design.sections.map(x => x.spec.label).join(' / ')), h('div', {class: 'small muted'}, (s.overridden ? 'your selection' : rec ? (rec.kind === 'tapered' ? 'cheapest passing design (tapered)' : 'cheapest passing pipe') : '') + (s.cost_per_ft != null ? ' · ' + money(s.cost_per_ft) : '')),
+    h('div', {class: 'dfs'}, ...Object.entries(r.summary).map(([k, v]) => h('div', {class: 'df'}, k, h('b', {class: v.pass ? 'pass' : 'fail'}, fmt(v.min_df)), h('span', {class: 'muted'}, `≥ ${v.required} · ${v.case}`)))));
+  if (!r.design.uniform) card.append(h('table', {}, h('tbody', {}, ...r.design.sections.map(x => h('tr', {}, h('td', {}, `${fmt0(x.top_md)}–${fmt0(x.bottom_md)} ft`), h('td', {}, x.spec.label))))));
+  const pipes = Engine.pipesForOd(s.od), cur = r.design.sections[0].spec; const wt = h('select', {id: 'wt-' + s.string}, ...pipes.map(p => h('option', {value: p.weight, selected: p.weight === cur.weight}, p.weight + '#'))), gr = h('select', {id: 'gr-' + s.string}, ...Object.keys(Engine.grades).map(g => h('option', {selected: g === cur.grade.name}, g))), cn = h('select', {id: 'cn-' + s.string}, ...Object.keys(Engine.connections).map(c => h('option', {selected: c === cur.connection.name}, c)));
+  const apply = async () => { project.design = project.design || {}; project.design[s.string] = {weight: +wt.value, grade: gr.value, connection: cn.value}; dirty = true; designData = null; await save(); renderDesign($('#step')); };
+  card.append(h('details', {}, h('summary', {}, 'Choose a different pipe', h('span', {class: 'muted small'}, `${s.alternatives.length} passing uniform options`)), h('div', {class: 'row'}, wt, gr, cn, h('button', {onclick: apply}, 'Use')), s.alternatives.length ? h('table', {}, h('tbody', {}, ...s.alternatives.map(a => h('tr', {}, h('td', {}, a.design.label), h('td', {class: 'muted small'}, money(a.cost_per_ft)), h('td', {}, h('button', {class: 'link', onclick: () => { wt.value = a.spec.weight; gr.value = a.spec.grade.name; cn.value = a.spec.connection.name; apply(); }}, 'use')))))) : null));
+  card.append(h('button', {class: 'link', onclick: () => showDetail(s)}, 'Show loads & plots ↓')); return card; }
+function showDetail(s) { const r = s.result, det = $('#detail'); det.replaceChildren(h('div', {class: 'panel'}, h('h2', {}, `${s.string}: load cases vs rating`), h('div', {class: 'tbl'}, h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Load case'), h('th', {}, 'Basis'))), h('tbody', {}, ...r.cases.map(c => h('tr', {}, h('td', {}, c.name), h('td', {class: 'small muted'}, c.description)))))), h('div', {class: 'plots'}, h('div', {class: 'plot', id: 'p-burst'}), h('div', {class: 'plot', id: 'p-collapse'}), h('div', {class: 'plot', id: 'p-tension'}), h('div', {class: 'plot', id: 'p-vme'}))));
+  if (!window.Plotly) { det.append(h('p', {class: 'muted'}, 'Chart library not available.')); return; } plotCheck('p-burst', r, 'burst', 'Burst: differential pressure (psi)'); plotCheck('p-collapse', r, 'collapse', 'Collapse: differential pressure (psi)'); plotCheck('p-tension', r, 'tension', 'Tension: axial load (lbf)'); plotEllipse('p-vme', r); det.scrollIntoView({behavior: 'smooth'}); }
+const palette = ['#1f5fbf', '#d35400', '#1d7f49', '#8e44ad', '#b93a2d', '#16a085', '#7f8c8d', '#b7950b'];
+const layoutBase = (title, xTitle) => ({title: {text: title, font: {size: 13}}, margin: {l: 60, r: 20, t: 40, b: 50}, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)', font: {color: getComputedStyle(document.body).color}, xaxis: {title: xTitle, gridcolor: 'rgba(128,128,128,.25)', zeroline: false}, yaxis: {title: 'MD (ft)', autorange: 'reversed', gridcolor: 'rgba(128,128,128,.25)'}, legend: {orientation: 'h', y: -0.2, font: {size: 11}}});
+function plotCheck(id, r, check, title) { const req = r.summary[check].required, checks = r.checks.filter(c => c.check === check && c.load.some(x => x > 0)); const traces = checks.map((c, i) => ({x: c.load, y: c.md, name: c.case, mode: 'lines', line: {color: palette[i % palette.length], width: 2}})); const rating = r.checks.find(c => c.check === check);
+  traces.push({x: rating.rating.map(x => x / req), y: rating.md, name: `Rating / DF ${req}`, mode: 'lines', line: {color: getComputedStyle(document.body).color, dash: 'dash', width: 2}}, {x: rating.rating, y: rating.md, name: 'Rating', mode: 'lines', line: {color: '#888', dash: 'dot', width: 1}}); Plotly.newPlot(id, traces, layoutBase(title, title.split(':')[1]), {responsive: true, displaylogo: false}); }
+function plotEllipse(id, r) { const s = r.spec, Yp = s.yield, req = r.summary.triaxial.required, ro = s.od / 2, ri = s.id / 2, area = Math.PI * (ro * ro - ri * ri), k = (ro * ro + ri * ri) / (ro * ro - ri * ri), Y = Yp / req, xs = [], up = [], dn = [];
+  for (let i = 0; i <= 200; i++) { const sa = -Y * 2 / Math.sqrt(3) + i * (2 * Y * 2 / Math.sqrt(3)) / 200, disc = Y * Y - 0.75 * sa * sa; if (disc < 0) continue; const root = Math.sqrt(disc); xs.push(sa * area / 1000); up.push((sa / 2 + root) / k); dn.push((sa / 2 - root) / k); }
+  const ink = getComputedStyle(document.body).color; const traces = [{x: xs.concat([...xs].reverse()), y: up.concat([...dn].reverse()), mode: 'lines', name: `Triaxial limit / DF ${req}`, line: {color: ink, width: 2}}, {x: [-s.body_yield / 1000, s.tension_rating / 1000, s.tension_rating / 1000, -s.body_yield / 1000, -s.body_yield / 1000], y: [s.burst / r.summary.burst.required, s.burst / r.summary.burst.required, -s.collapse / r.summary.collapse.required, -s.collapse / r.summary.collapse.required, s.burst / r.summary.burst.required], mode: 'lines', name: 'API uniaxial limits / DF', line: {color: '#888', dash: 'dash'}}];
+  r.cases.forEach((c, i) => traces.push({x: c.axial.map(f => f / 1000), y: c.internal.map((p, j) => p - c.external[j]), mode: 'markers', name: c.name, marker: {size: 5, color: palette[i % palette.length]}}));
+  Plotly.newPlot(id, traces, {title: {text: 'Design envelope (triaxial, inner wall; top section)', font: {size: 13}}, margin: {l: 60, r: 20, t: 40, b: 50}, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)', font: {color: ink}, xaxis: {title: 'Axial load (klbf, tension +)', gridcolor: 'rgba(128,128,128,.25)', zeroline: true}, yaxis: {title: 'Differential pressure Pi − Pe (psi)', gridcolor: 'rgba(128,128,128,.25)', zeroline: true}, legend: {orientation: 'h', y: -0.2, font: {size: 11}}}, {responsive: true, displaylogo: false}); }
+
+async function renderReport(el) { el.replaceChildren(h('div', {class: 'panel'}, 'Preparing the report…')); await save(); await new Promise(r => setTimeout(r, 20));
+  const w = project.well; let d; try { d = designData || (designData = computeDesign(w, project.design && Object.keys(project.design).length ? project.design : null)); } catch (e) { el.replaceChildren(h('div', {class: 'panel'}, h('div', {class: 'err'}, e.message))); return; }
+  const f = w.formation, dfs = w.design_factors, traj = Engine.trajectory(w.trajectory.stations); const tbl = (head, rows) => h('div', {class: 'tbl'}, h('table', {}, h('thead', {}, h('tr', {}, ...head.map(x => h('th', {}, x)))), h('tbody', {}, ...rows.map(r => h('tr', {}, ...r.map(c => h('td', {}, c)))))));
+  const sections = d.strings.map(st => { const r = st.result; if (!r) return h('div', {}, h('h3', {}, st.string), h('p', {class: 'fail'}, 'No catalog pipe passes.')); const status = r.passes ? 'PASS' : 'FAIL';
+    return h('div', {}, h('h3', {}, `${st.string}: ${st.od}" from ${fmt0(st.top_md)} to ${fmt0(st.shoe_md)} ft MD `, h('span', {class: status.toLowerCase()}, status)), h('p', {class: 'muted small'}, `Pipe: ${st.overridden ? 'user selection' : 'optimizer recommendation'}.`),
+      tbl(['MD (ft)', 'Pipe', 'ID (in)', 'Burst (psi)', 'Collapse (psi)', 'Body yield (lbf)', 'Joint (lbf)'], r.design.sections.map(x => [`${fmt0(x.top_md)}–${fmt0(x.bottom_md)}`, x.spec.label, x.spec.id.toFixed(3), fmt0(x.spec.burst), fmt0(x.spec.collapse), fmt0(x.spec.body_yield), fmt0(x.spec.joint_strength)])),
+      tbl(['Check', 'Min DF', 'Required', 'Governing case', 'MD (ft)', ''], Object.entries(r.summary).map(([k, v]) => [k, fmt(v.min_df), fmt(v.required), v.case, fmt0(v.md), h('span', {class: v.pass ? 'pass' : 'fail'}, v.pass ? 'PASS' : 'FAIL')])),
+      h('details', {}, h('summary', {}, `Load cases applied (${r.cases.length})`), h('ul', {class: 'small'}, ...r.cases.map(c => h('li', {}, h('b', {}, c.name), ': ' + c.description))))); });
+  el.replaceChildren(h('div', {class: 'panel report'}, h('h1', {}, `Casing design report: ${w.name}`), h('p', {class: 'meta'}, `Generated ${new Date().toLocaleString()} · API TR 5C3 ratings; load cases per onshore convention · computed in the browser`),
+    h('h2', {}, 'Design basis'), h('p', {}, `Design factors: burst ${dfs.burst}, collapse ${dfs.collapse}, tension ${dfs.tension}, triaxial ${dfs.triaxial}. Gas gradient ${w.gas_gradient_psi_ft} psi/ft. Surface temperature ${f.surface_temperature_f} °F, geothermal gradient ${f.geothermal_gradient_f_per_100ft} °F/100 ft; yield derating ${w.yield_derating?.enabled === false ? 'off' : 'on'}. ${f.sour ? 'Sour service.' : ''}`),
+    h('div', {class: 'two'}, h('div', {}, h('h3', {}, 'Pore pressure (EMW)'), tbl(['TVD (ft)', 'ppg'], f.pore_pressure.points.map(p => [fmt0(p.tvd), p.value]))), h('div', {}, h('h3', {}, 'Fracture gradient (EMW)'), tbl(['TVD (ft)', 'ppg'], f.fracture_gradient.points.map(p => [fmt0(p.tvd), p.value])))),
+    h('h3', {}, 'Trajectory'), tbl(['MD (ft)', 'Inc (°)', 'Azi (°)', 'TVD (ft)'], traj.stations.map(s => [fmt0(s.md), s.inclination, s.azimuth, fmt0(traj.tvd(s.md))])),
+    h('h3', {}, 'Casing program'), tbl(['String', 'Type', 'OD', 'Hole', 'Top MD', 'Shoe MD', 'TOC MD', 'Mud ppg', 'Cement lead/tail'], w.strings.map(s => [s.name, s.type, s.od, s.hole_size, fmt0(s.hanger_md || 0), fmt0(s.shoe_md), fmt0(s.toc_md), s.mud_weight, `${s.cement_lead_ppg}/${s.cement_tail_ppg}`])),
+    d.warnings.length ? h('div', {}, h('h2', {}, 'Warnings'), h('ul', {}, ...d.warnings.map(x => h('li', {class: 'warn'}, x)))) : null, h('h2', {}, 'Results'), ...sections,
+    h('p', {class: 'muted small', style: 'margin-top:24px'}, 'Ratings per API TR 5C3 (burst: Barlow with 87.5 % wall; collapse: four-regime with axial-stress correction; joint strength: API round-thread and buttress formulas; triaxial: von Mises at inner/outer fibre with bending). This report is a design aid and does not replace engineering review.'),
+    h('div', {class: 'row'}, h('button', {onclick: () => copyText(el.innerText, 'Report text copied')}, 'Copy report text'))));
+}
+Store.init().then(route);
+})();
+
+</script>
+</body>
+</html>
