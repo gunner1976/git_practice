@@ -1,0 +1,56 @@
+# Daily AI script bot configuration.
+# Edit the feed list freely; any RSS or Atom URL works.
+
+feeds:
+  - name: The Verge AI
+    url: https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
+  - name: TechCrunch AI
+    url: https://techcrunch.com/category/artificial-intelligence/feed/
+  - name: VentureBeat AI
+    url: https://venturebeat.com/category/ai/feed/
+  - name: MIT Technology Review AI
+    url: https://www.technologyreview.com/topic/artificial-intelligence/feed
+  - name: Ars Technica AI
+    url: https://arstechnica.com/ai/feed/
+  - name: Wired AI
+    url: https://www.wired.com/feed/tag/ai/latest/rss
+  - name: OpenAI News
+    url: https://openai.com/news/rss.xml
+  - name: Google AI Blog
+    url: https://blog.google/technology/ai/rss/
+  - name: Hugging Face Blog
+    url: https://huggingface.co/blog/feed.xml
+
+# Local timezone that decides "today" for the doc title and the once-per-day guard.
+timezone: America/Edmonton
+
+# Only stories published within this many hours are considered.
+lookback_hours: 24
+
+# Number of stories in the roundup.
+top_n: 5
+
+# Upper bound on candidates sent to the model (newest first). RSS summaries
+# are stripped of HTML and capped at max_summary_chars each.
+max_candidates: 120
+max_summary_chars: 600
+
+# Titles of stories used in the last N days are shown to the model so it
+# can skip follow-ups of the same event reported under a different URL.
+recent_history_days: 7
+
+anthropic:
+  model: claude-opus-5-5
+  effort: high
+  max_tokens: 16000
+
+google:
+  # The Drive folder is looked up by name. Set DRIVE_FOLDER_ID in the
+  # environment to skip the lookup (recommended if names could collide).
+  folder_name: AI Channel Scripts
+  doc_title_prefix: AI Daily Script
+
+# SQLite file that remembers which stories were already used.
+database: data/stories.db
+
+feed_timeout_seconds: 20

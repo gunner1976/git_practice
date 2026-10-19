@@ -1,0 +1,67 @@
+name: Daily AI script
+
+on:
+  schedule:
+    # GitHub cron is UTC-only. 06:00 America/Edmonton is 12:00 UTC during
+    # daylight time (MDT) and 13:00 UTC during standard time (MST), so both
+    # fire; --not-before-hour 6 plus the once-per-day guard make exactly one
+    # of them produce a script, and a late-starting run still works.
+    - cron: "0 12 * * *"
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Write a new script even if today's already exists"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write # commit data/stories.db back so used stories persist
+
+concurrency:
+  group: daily-script
+  cancel-in-progress: false
+
+jobs:
+  write-script:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Generate script and Google Doc
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_IMPERSONATE_USER: ${{ vars.GOOGLE_IMPERSONATE_USER }}
+          # Optional: personal-Gmail mode (see README). Takes precedence when set.
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_REFRESH_TOKEN: ${{ secrets.GOOGLE_OAUTH_REFRESH_TOKEN }}
+          DRIVE_FOLDER_ID: ${{ vars.DRIVE_FOLDER_ID }}
+        run: |
+          if [ "${{ inputs.force }}" = "true" ]; then
+            python -m scriptbot --force
+          else
+            python -m scriptbot --not-before-hour 6
+          fi
+
+      - name: Persist story history
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/stories.db
+          if git diff --cached --quiet; then
+            echo "No database changes."
+          else
+            git commit -m "Update story history ($(TZ=America/Edmonton date +%F))"
+            git push
+          fi
