@@ -1,0 +1,6 @@
+anthropic>=2.1
+numpy
+scipy
+matplotlib
+pyyaml
+pytest

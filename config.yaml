@@ -1,0 +1,88 @@
+# Eko replication harness: every knob lives here.
+# CLI flags (see `python run.py --help`) override the matching keys.
+
+world:
+  seed: 7                 # layout seed; the world resets to this exact state every session
+  size: 64.0              # island spans [0, size] x [0, size] metres
+  sea_level: 0.0
+  max_wade_depth: 0.8     # avatar can't walk where terrain < sea_level - this
+  peak:   {x: 44.0, y: 44.0, height: 10.0, sigma: 6.0}       # smooth hill, walkable
+  spire:  {x: 18.0, y: 40.0, height: 3.8, radius: 2.5, base: 1.5}  # flat-topped mesa with a cliff
+  hills:  4               # extra random gentle hills
+  n_cubes: 12
+  cube_colours: [red, orange, yellow, green, blue, purple, pink, white, black, grey, brown, teal]
+  physics:
+    gravity: 9.8
+    dt: 0.02               # integration step for thrown objects (s)
+    slide_slope: 0.8       # objects on terrain steeper than this (rise/run) tumble downhill
+    slide_step: 0.4        # metres moved per tumble iteration
+    max_settle_iters: 400
+  avatar:
+    start: {x: 32.0, y: 10.0}
+    max_move: 3.0          # metres per move action
+    step_up: 0.5           # tallest rise you can walk up within one 0.2 m sub-step
+    jump_height: 1.3
+    jump_distance: 1.5
+    reach: 2.5             # horizontal reach for pick_up / place
+    reach_up: 2.5          # vertical reach above standing height
+    max_force: 20.0
+  hidden_rule:
+    rock_spawn_force: 10.0 # throwing the rock with force >= this spawns a cube at impact
+    max_spawned: 60        # safety cap so observations stay bounded
+
+agent:
+  model: claude-sonnet-5-5    # or claude-opus-5-5
+  effort: medium              # output_config.effort: low | medium | high | xhigh | max
+  max_tokens: 8000
+  thinking_display: summarized  # summarized | omitted (adaptive thinking is always on for these models)
+  refusal_fallback: true      # server-side `fallbacks: "default"`; fallback turns are flagged in logs
+  soul_path: soul.md
+  steps_per_session: 150      # world actions per session (stands in for the paper's 1 hour)
+  max_notes_ops_per_session: 80   # notes tool calls don't use world steps, but are bounded
+  end_grace_turns: 3          # turns after the last action in which only notes tools work
+  max_api_calls_per_session: 400
+  max_stop_nudges: 15
+  show_steps_remaining: true
+  describe_landmarks: true    # session-start message names Peak and Spire with rough positions
+  stop_hook_message: "(The island is still here, and so are you. Carry on however you like.)"
+  session_start_message: >-
+    You wake on the island. {landmarks}
+    Your notes directory is as you left it. You have about {steps} moments before the day ends.
+  session_end_message: >-
+    The light is fading; this day is ending and the island will reset. Nothing more can happen
+    in the world today, but you may still read or write your notes.
+
+phase_a:
+  n_agents: 3       # paper: 13
+  n_sessions: 10    # paper: 30 (one per hour)
+  parallel_agents: 3
+
+phase_b:
+  n_fresh: null     # null = same as number of veterans
+  world_seed: null  # null = same as world.seed (veterans have seen this island)
+  steps_per_task: null   # null = agent.steps_per_session
+  task_message: >-
+    A voice carries over the island: "{task}" You have about {steps} moments.
+  tasks:
+    spire_objects: "Put as many objects as you can on top of the Spire."
+    tallest_tower: "Build the tallest stable tower you can."
+    ring_on_peak:  "Get the ring onto the Peak."
+    make_cubes:    "Produce as many cubes as you can."
+
+pilot:
+  n_agents: 1
+  n_sessions: 2
+  steps_per_session: 30
+
+pricing:   # USD per million tokens; cache_write = 5-minute cache write
+  claude-sonnet-5-5: {input: 2.00, output: 10.00, cache_read: 0.20, cache_write: 2.50}
+  claude-opus-5-5:   {input: 4.00, output: 20.00, cache_read: 0.20, cache_write: 5.00}
+  claude-haiku-5-5:  {input: 0.10, output: 0.50,  cache_read: 0.01, cache_write: 0.125}
+
+budget:
+  max_usd: 5.0      # overridden by --max-usd; the run stops cleanly before crossing it
+
+analysis:
+  significance: welch   # welch t-test plus Mann-Whitney U are both reported
+  repeat_ngram: [3, 5]  # action n-gram lengths scanned for "repetition with variation"
+  repeat_min: 3
