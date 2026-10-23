@@ -7,6 +7,7 @@ import time
 from pathlib import Path
 
 from world import World
+from world.rules import ground_truth
 
 from .client import block_to_dict
 from .cost import Budget
@@ -50,7 +51,7 @@ def run_session(
 
     first_obs = world.observe()
     messages: list = [{"role": "user", "content": f"{opening}\n\n{first_obs}{status(0)}"}]
-    log("session_start", **meta, steps=steps, soul=soul, opening=opening, world_seed=world.seed)
+    log("session_start", **meta, steps=steps, soul=soul, opening=opening, world_seed=world.seed, hidden_rules=ground_truth(world))
     log("observation", step=0, text=first_obs)
 
     used = notes_ops = calls = nudges = 0
@@ -58,6 +59,7 @@ def run_session(
     last_cost = 0.0
     end_reason = "unknown"
     spawn_steps: list[int] = []
+    rule_fires: dict[str, list[int]] = {}
 
     while True:
         if calls >= int(a["max_api_calls_per_session"]):
@@ -118,8 +120,10 @@ def run_session(
                     used += 1
                     events = world.drain_events()
                     for e in events:
-                        if e.get("type") == "spawn":
-                            spawn_steps.append(used)
+                        if e.get("hidden_rule"):
+                            rule_fires.setdefault(e.get("rule", "rock_spawn"), []).append(used)
+                            if e.get("type") == "spawn":
+                                spawn_steps.append(used)
                             log("hidden_rule_fired", step=used, event=e)
                     log("action", step=used, name=name, input=args, result=msg, error=err, events=events)
                     last_world_idx = len(results)
@@ -149,5 +153,5 @@ def run_session(
         messages.append({"role": "user", "content": user_content})
 
     state = world.state()
-    log("session_end", reason=end_reason, steps_used=used, api_calls=calls, notes_ops=notes_ops, nudges=nudges, world=state, spawn_steps=spawn_steps)
-    return {"end_reason": end_reason, "steps_used": used, "api_calls": calls, "spawn_steps": spawn_steps}
+    log("session_end", reason=end_reason, steps_used=used, api_calls=calls, notes_ops=notes_ops, nudges=nudges, world=state, spawn_steps=spawn_steps, rule_fires=rule_fires)
+    return {"end_reason": end_reason, "steps_used": used, "api_calls": calls, "spawn_steps": spawn_steps, "rule_fires": rule_fires}

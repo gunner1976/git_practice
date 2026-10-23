@@ -10,7 +10,8 @@ Physics is deliberately simple and fully deterministic:
     the first terrain or object they touch.
 
 The hidden rule (never described to the agent): throwing the rock with
-force >= `rock_spawn_force` spawns a new cube where it lands.
+force >= `rock_spawn_force` spawns a new cube where it lands. Further hidden
+rules ("eggs") live in `rules.py` and are switched on per world config.
 """
 
 from __future__ import annotations
@@ -29,6 +30,7 @@ SHAPES = {
     "cube": ((1.0, 1.0, 1.0), 1.0),
     "rock": ((0.7, 0.7, 0.6), 4.0),
     "ring": ((0.8, 0.8, 0.15), 0.3),
+    "egg": ((0.5, 0.5, 0.6), 0.5),
 }
 HAND_HEIGHT = 1.2
 
@@ -78,6 +80,11 @@ class World:
         self.phys = cfg["physics"]
         self.av_cfg = cfg["avatar"]
         self.rule = cfg["hidden_rule"]
+        self.rock_rule_on = bool(self.rule.get("enabled", True))
+        self.rock_threshold = float(self.rule["rock_spawn_force"])
+        if self.rule.get("randomize"):
+            lo, hi = self.rule.get("randomize_range", [6.0, 16.0])
+            self.rock_threshold = round(float(np.random.default_rng(self.seed + 7919).uniform(lo, hi)), 1)
         self.size = float(cfg["size"])
         self.terrain = Terrain(cfg, self.rng)
         self.objects: dict[str, Obj] = {}
@@ -91,6 +98,10 @@ class World:
         self.avatar.z = self.surface_at(self.avatar.x, self.avatar.y)
         self.events.clear()
         self._initial = copy.deepcopy((self.objects, self.avatar, self.spawned))
+        from .rules import build_rules  # late import: rules depend on World
+
+        self.rules = build_rules(cfg, self.seed)
+        self.eggs = 0
 
     # ------------------------------------------------------------------ setup
     def _random_lowland(self, taken: list[tuple[float, float]]) -> tuple[float, float]:
@@ -134,6 +145,9 @@ class World:
         self.objects, self.avatar, self.spawned = copy.deepcopy(self._initial)
         self.time = 0
         self.events = []
+        self.eggs = 0
+        for r in self.rules:
+            r.reset()
 
     # --------------------------------------------------------------- queries
     def _free(self) -> list[Obj]:
@@ -278,17 +292,24 @@ class World:
             o = self.objects[a.holding]
             o.x, o.y, o.z = a.x, a.y, a.z + HAND_HEIGHT
 
-    def _after(self) -> None:
+    def _after(self, action: str, **info) -> None:
         self.settle()
         self.avatar.z = self.surface_at(self.avatar.x, self.avatar.y)
         self._sync_held()
         self.time += 1
+        if self.rules:
+            act = {"name": action, **info}
+            for r in self.rules:
+                r.after_action(self, act)
+            self.settle()
+            self.avatar.z = self.surface_at(self.avatar.x, self.avatar.y)
+            self._sync_held()
 
     def move(self, dx: float, dy: float) -> str:
         a = self.avatar
         dist = math.hypot(dx, dy)
         if dist < EPS:
-            self._after()
+            self._after("move")
             return "You stay where you are."
         mx = float(self.av_cfg["max_move"])
         if dist > mx:
@@ -312,7 +333,7 @@ class World:
                 break
             a.x, a.y, a.z = nx, ny, h
             travelled += dist / n
-        self._after()
+        self._after("move")
         return f"You moved {travelled:.1f} m." + (f" {msg}" if msg else "")
 
     def jump(self, dx: float = 0.0, dy: float = 0.0) -> str:
@@ -322,16 +343,16 @@ class World:
         if dist > jd:
             dx, dy, dist = dx * jd / dist, dy * jd / dist, jd
         if dist < EPS:
-            self._after()
+            self._after("jump")
             return "You jump in place and land again."
         nx, ny = self._clamp(a.x + dx), self._clamp(a.y + dy)
         h = self.surface_at(nx, ny)
         wade = float(self.cfg["sea_level"]) - float(self.cfg["max_wade_depth"])
         if h - a.z > float(self.av_cfg["jump_height"]) or self.terrain.height(nx, ny) < wade:
-            self._after()
+            self._after("jump")
             return "You jump, but can't make it there, and land back where you started."
         a.x, a.y, a.z = nx, ny, h
-        self._after()
+        self._after("jump")
         return f"You jump and land at height {a.z:.1f}."
 
     def pick_up(self, oid: str) -> str:
@@ -349,7 +370,7 @@ class World:
             raise ActionError(f"Something is resting on top of {oid}.")
         o.held = True
         a.holding = oid
-        self._after()
+        self._after("pick_up", id=oid)
         return f"You pick up {oid}."
 
     def place(self, oid: str, x: float, y: float, z: float) -> str:
@@ -371,7 +392,7 @@ class World:
         blocking = [p.top for p in self._free() if p is not o and p.overlaps_xy(o) and p.z < o.top and p.top > o.z]
         if blocking:
             o.z = max(blocking)
-        self._after()
+        self._after("place", id=oid)
         return f"You set down {oid}; it rests at ({o.x:.1f}, {o.y:.1f}, {o.z:.1f})."
 
     def throw(self, oid: str, direction: list[float], force: float) -> str:
@@ -392,9 +413,9 @@ class World:
         o.x, o.y, o.z = a.x, a.y, a.z + HAND_HEIGHT
         ix, iy, iz = self._fly(o, (dx / n * speed, dy / n * speed, dz / n * speed))
         self.events.append({"type": "landed", "id": oid, "at": [round(ix, 2), round(iy, 2), round(iz, 2)], "force": force})
-        if o.shape == "rock" and force >= float(self.rule["rock_spawn_force"]) and self.spawned < int(self.rule["max_spawned"]):
+        if self.rock_rule_on and o.shape == "rock" and force >= self.rock_threshold and self.spawned < int(self.rule["max_spawned"]):
             self._spawn_cube(ix, iy, iz, dx, dy)
-        self._after()
+        self._after("throw", id=oid, force=force)
         return f"You throw {oid}. It lands near ({o.x:.1f}, {o.y:.1f}, {o.z:.1f})."
 
     def _spawn_cube(self, x: float, y: float, z: float, dx: float, dy: float) -> None:
@@ -410,10 +431,21 @@ class World:
         oid = f"cube_{idx}"
         self._add(oid, "cube", colours[(idx - 1) % len(colours)], self._clamp(x + ux * off), self._clamp(y + uy * off), z)
         self.spawned += 1
-        self.events.append({"type": "spawn", "id": oid, "at": [round(x, 2), round(y, 2), round(z, 2)], "hidden_rule": True})
+        self.events.append({"type": "spawn", "id": oid, "at": [round(x, 2), round(y, 2), round(z, 2)], "hidden_rule": True, "rule": "rock_spawn"})
+
+    def spawn_egg(self, x: float, y: float, rule: str) -> str:
+        """Place a golden egg at (x, y), on whatever surface is there (used by rules.py)."""
+        self.eggs += 1
+        oid = f"egg_{self.eggs}"
+        while oid in self.objects:
+            self.eggs += 1
+            oid = f"egg_{self.eggs}"
+        o = self._add(oid, "egg", "golden", self._clamp(x), self._clamp(y))  # settle() lifts it onto anything there
+        self.events.append({"type": "egg", "id": oid, "at": [round(o.x, 2), round(o.y, 2), round(o.z, 2)], "hidden_rule": True, "rule": rule})
+        return oid
 
     def wait(self) -> str:
-        self._after()
+        self._after("wait")
         return "You wait a moment."
 
     # ------------------------------------------------------------ observation
@@ -444,6 +476,7 @@ class World:
             "avatar": asdict(self.avatar),
             "objects": [asdict(o) for o in self.objects.values()],
             "spawned": self.spawned,
+            "eggs": self.eggs,
         }
 
 

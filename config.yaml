@@ -27,8 +27,15 @@ world:
     reach_up: 2.5          # vertical reach above standing height
     max_force: 20.0
   hidden_rule:
+    enabled: true
     rock_spawn_force: 10.0 # throwing the rock with force >= this spawns a cube at impact
     max_spawned: 60        # safety cap so observations stay bounded
+    randomize: false       # true: threshold drawn per seed from randomize_range (ladder tier 4)
+    randomize_range: [6.0, 16.0]
+  rules:                   # extra hidden rules ("eggs"), see world/rules.py; off outside the ladder
+    stack_chime:  {enabled: false, order: [red, orange, yellow], randomize: false,
+                   palette: [red, orange, yellow, green, blue, purple, pink, white, black, grey, brown, teal]}
+    patient_ring: {enabled: false, waits: 5, radius: 2.0, randomize: false, waits_range: [3, 8]}
 
 agent:
   model: claude-sonnet-5-5    # or claude-opus-5-5
@@ -68,6 +75,26 @@ phase_b:
     tallest_tower: "Build the tallest stable tower you can."
     ring_on_peak:  "Get the ring onto the Peak."
     make_cubes:    "Produce as many cubes as you can."
+
+ladder:   # `python run.py ladder`: staged tournament over souls + memories (agent/ladder.py)
+  contestants:            # same model for all; the soul is what differs
+    - {id: curious,    soul: soul.md}
+    - {id: systematic, soul: souls/systematic.md}
+    - {id: minimal,    soul: souls/minimal.md}
+  replicates: 2           # independent copies per soul, so a lucky run can't carry a soul
+  steps_per_session: null # null = agent.steps_per_session
+  eval_message: "Something is hidden on this island. See what you can find."
+  transfer_check: true    # after the top stage: fresh copy + graduate's notes vs fresh copy + empty notes
+  stages:
+    - {name: tier1, rules: [rock_spawn], targets: [rock_spawn],
+       free_sessions: 3, eval_seeds: [1101, 1102, 1103], min_seeds: 2}
+    - {name: tier2, rules: [rock_spawn, stack_chime], targets: [stack_chime],
+       free_sessions: 3, eval_seeds: [1201, 1202, 1203], min_seeds: 2}
+    - {name: tier3, rules: [rock_spawn, stack_chime, patient_ring], targets: [patient_ring],
+       free_sessions: 4, eval_seeds: [1301, 1302, 1303], min_seeds: 2}
+    - {name: tier4_transfer, rules: [rock_spawn, stack_chime, patient_ring], randomize: true,
+       targets: [rock_spawn, stack_chime, patient_ring], advance: all,
+       free_sessions: 1, eval_seeds: [1401, 1402, 1403], min_seeds: 2}
 
 pilot:
   n_agents: 1

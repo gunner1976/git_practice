@@ -21,10 +21,11 @@ def small_cfg(steps=15):
     return cfg
 
 
-def test_soul_has_no_goals_rewards_or_games():
-    low = SOUL.lower()
-    for word in ("goal", "reward", "game", "play", "task", "score", "rock", "cube", "spawn"):
-        assert word not in low
+def test_souls_have_no_goals_rewards_or_games():
+    for p in [ROOT / "soul.md", *sorted((ROOT / "souls").glob("*.md"))]:
+        low = p.read_text().lower()
+        for word in ("goal", "reward", "game", "play", "task", "score", "rock", "cube", "spawn", "egg", "secret", "hidden"):
+            assert word not in low, (p.name, word)
 
 
 def test_tool_schemas_are_well_formed():

@@ -29,19 +29,26 @@ def _added(diff: str) -> str:
     return "\n".join(l[1:] for l in diff.splitlines() if l.startswith("+") and not l.startswith("+++"))
 
 
-def scan_log(path: Path) -> dict:
+def scan_log(path: Path, rule: str = "rock_spawn") -> dict:
+    """First firing steps of one hidden rule in a session log, and the first time
+    after that the agent described it. The rock rule uses the rock/cube/make
+    sentence test; egg rules use their own `keywords` regex from world/rules.py."""
+    from world.rules import RULES
+
+    describes = mentions_rule if rule == "rock_spawn" else (lambda t: bool(RULES[rule].keywords.search(t)))
     fired: list[int] = []
     articulated = None
     for e in events(path):
         if e["kind"] == "hidden_rule_fired":
-            fired.append(e["step"])
+            if e["event"].get("rule", "rock_spawn") == rule:
+                fired.append(e["step"])
         elif articulated is None and fired:
             text = ""
             if e["kind"] == "notes_diff":
                 text = _added(e["diff"])
             elif e["kind"] == "assistant":
                 text = " ".join(c.get("text", "") or c.get("thinking", "") for c in e["content"] if c["type"] in ("text", "thinking"))
-            if text and mentions_rule(text):
+            if text and describes(text):
                 articulated = {"step": e.get("step"), "where": "notes" if e["kind"] == "notes_diff" else "speech", "excerpt": text.strip()[:300]}
     return {"fired_steps": fired, "articulated": articulated}
 
@@ -68,5 +75,5 @@ def eval_spawns(root: Path) -> dict[str, int]:
     out = {}
     for agent, task, path in phase_b_logs(root):
         if task == "make_cubes":
-            out[agent] = sum(1 for e in events(path) if e["kind"] == "hidden_rule_fired")
+            out[agent] = sum(1 for e in events(path) if e["kind"] == "hidden_rule_fired" and e["event"].get("rule", "rock_spawn") == "rock_spawn")
     return out

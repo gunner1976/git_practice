@@ -19,7 +19,7 @@ The harness has five parts:
 ```bash
 pip install -r requirements.txt
 export ANTHROPIC_API_KEY=sk-ant-...
-python -m pytest -q                      # 32 tests: physics, hidden rule, loop, resume, cost cap, request shape
+python -m pytest -q                      # 45 tests: physics, hidden rules, loop, resume, cost cap, request shape, ladder
 
 # 1. Pilot (always first): 1 agent, 2 sessions, 30 steps. Prints the transcript, notes, cost and a full-run estimate.
 python run.py pilot --max-usd 3
@@ -120,6 +120,65 @@ exists under `runs/`. `--skip-pilot-check` overrides this.
       the ground under its base.
     - `ring_on_peak`: 1 if the ring rests within 2 m of the summit, else 0.
     - `make_cubes`: cubes minus 12.
+
+## The ladder (`agent/ladder.py`, `world/rules.py`)
+
+A staged tournament built on the same world and loop. Every contestant is the same model, so what
+is being selected is a **soul plus the notes it writes**. The winner is that pair, exported as a
+bundle for human review.
+
+```bash
+python run.py ladder-estimate --run-id <pilot-id>       # upper-bound cost from a real pilot
+python run.py ladder --run-id L1 --max-usd 300          # run or resume
+```
+
+**Hidden rules ("eggs")**, all invisible to the agent except as objects that appear:
+
+| Tier | Rule | Condition | Effect |
+|---|---|---|---|
+| 1 | `rock_spawn` | throw the rock with force ≥ 10 | a cube appears where it lands |
+| 2 | `stack_chime` | stack three cubes bottom-to-top red, orange, yellow | a golden egg appears on the Peak summit (once per session) |
+| 3 | `patient_ring` | stand on the Peak summit holding the ring and `wait` 5 times in a row | a golden egg appears on top of the Spire (once per session) |
+| 4 | transfer | all three, with the threshold, colour order and wait count re-drawn from each seed | memorised facts fail; methods that found them should still work |
+
+Add a rule by subclassing `Rule` in `world/rules.py` (an `after_action` hook, a `tier`, a
+`keywords` regex for detecting when notes describe it) and registering it in `RULES`.
+
+**Stages** (`ladder.stages` in `config.yaml`). For each surviving agent:
+
+1. `free_sessions` of free play on the stage's island with its rules switched on. Notes persist
+   through the whole ladder.
+2. One evaluation session on each of `eval_seeds`: a new island layout, the stage's rules, a copy
+   of the agent's notes, and `eval_message` ("Something is hidden on this island…") as the only
+   prompt. A target counts as exploited when it fires at least its `exploit_threshold` times in the
+   session (rock: 3, eggs: 1).
+3. The agent advances only if every target is exploited in at least `min_seeds` seeds (default 2
+   of 3). Selection is over repeated trials, so one lucky session can't carry an agent.
+
+`replicates` (default 2) runs independent copies of each soul, and the report also summarises
+results per soul. The default contestants are `soul.md` ("curious"), `souls/systematic.md` and
+`souls/minimal.md`. None mention goals, games, eggs or secrets; a test checks this.
+
+**After the top stage:**
+
+- *Notes transfer check*: for each graduate, a fresh copy given the graduate's notes and a fresh
+  copy with empty notes both run the final stage's evaluation. Notes that make a fresh copy better
+  are the strongest evidence that the graduate learned something reusable.
+- *Graduation bundle* in `graduates/<agent>/`: `soul.md`, `notes/`, `trace.json` (every stage,
+  every evaluation, firings, first-find steps, whether its notes already described the rule, and
+  log paths) and `REVIEW_REQUIRED.md`. Nothing is deployed automatically. The bundle shows
+  skill at finding hidden mechanics in a toy text world, not real-world judgement, so a person
+  should read the notes and scope permissions before loading it anywhere.
+
+Each evaluation also records process signals: steps to first find, and `prior_knowledge` (whether
+the notes already described the rule before the session began).
+
+Outputs: `ladder_report.md`, `ladder_results.jsonl` (one line per evaluation session), and logs
+under `ladder/<stage>/<agent>/`. Resume and the cost cap work the same as for the other commands.
+
+**Not done yet**: Tier 4 is still the island with re-drawn parameters. A truly un-island-like
+final world (different objects and setting, same tool shape) is the next step for testing
+transfer.
 
 ## Logs (`runs/<run_id>/`)
 
@@ -255,6 +314,11 @@ Where things were unclear, I used your defaults and the choices below:
 - log contents;
 - that veterans get their memory and fresh agents don't;
 - that the report builds.
+
+`tests/test_rules.py` covers each egg rule's trigger, near-misses, once-per-session firing,
+reset, seed-randomised parameters, and that eggs appear only as objects. `tests/test_ladder.py`
+runs whole ladders with the mock agent: stage rule switching, full graduation with bundle and
+transfer check, elimination, and resume after the cost cap.
 
 `tests/test_client_shape.py` checks the real API request and the thinking-block round trip against
 a stub HTTP transport.

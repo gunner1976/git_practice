@@ -7,6 +7,8 @@
   python run.py all      --run-id main --max-usd 120 # Phase A then Phase B
   python run.py analyze  --run-id main               # stats, discovery, play markers, report.md + charts
   python run.py estimate --run-id <pilot-id>         # re-print the full-run estimate from a pilot
+  python run.py ladder-estimate --run-id <pilot-id>  # upper-bound cost of the ladder from a pilot
+  python run.py ladder   --run-id L1 --max-usd 300   # staged egg-hunt tournament over souls + memories
 
 Re-running any command with the same --run-id resumes it.
 """
@@ -152,14 +154,57 @@ def cmd_estimate(args) -> None:
     print(format_estimate(e, cfg["agent"]["steps_per_session"], cfg["pricing"][e["model"]]))
 
 
+def ladder_sessions(cfg: dict) -> int:
+    """Upper bound on sessions in a ladder run (every agent clears every stage)."""
+    lad = cfg["ladder"]
+    n = len(lad["contestants"]) * int(lad.get("replicates", 1))
+    per_agent = sum(int(s["free_sessions"]) + len(s["eval_seeds"]) for s in lad["stages"])
+    transfer = 2 * len(lad["stages"][-1]["eval_seeds"]) if lad.get("transfer_check", True) else 0
+    return n * (per_agent + transfer)
+
+
+def cmd_ladder(args) -> None:
+    from agent.ladder import Ladder, ladder_summary
+
+    _require_pilot(args)
+    cfg = load_cfg(args)
+    if args.steps:
+        cfg["ladder"]["steps_per_session"] = args.steps
+    lad = Ladder(ROOT / "runs" / args.run_id, cfg, max_usd=args.max_usd if args.max_usd is not None else cfg["budget"]["max_usd"], mock=args.mock, base_dir=ROOT)
+    lad.set_meta(kind="ladder", mock=lad.mock)
+    print(f"Ladder: {len(lad.agents())} agents, at most {ladder_sessions(lad.cfg)} sessions.")
+    graduates = lad.run(parallel=args.parallel or lad.cfg["phase_a"]["parallel_agents"])
+    text = ladder_summary(lad.root)
+    (lad.root / "ladder_report.md").write_text(text)
+    print(text)
+    print(f"Graduates: {', '.join(graduates) if graduates else 'none'}")
+    report_stop(lad)
+
+
+def cmd_ladder_estimate(args) -> None:
+    cfg = load_cfg(args)
+    if args.steps:
+        cfg["ladder"]["steps_per_session"] = args.steps
+    steps = int(cfg["ladder"].get("steps_per_session") or cfg["agent"]["steps_per_session"])
+    n = ladder_sessions(cfg)
+    from agent.estimate import session_cost, session_model
+
+    model = args.model or cfg["agent"]["model"]
+    m = session_model(ROOT / "runs" / args.run_id)
+    per = session_cost(m, steps, cfg["pricing"][model])
+    print(f"Ladder upper bound: {n} sessions x ~${per:.2f} ({model}, {steps} steps) = ~${n * per:.2f}"
+          f" (range ${0.6 * n * per:.2f}-${1.8 * n * per:.2f}); eliminations make the real figure lower.")
+
+
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name, fn in [("pilot", cmd_pilot), ("freeplay", cmd_freeplay), ("eval", cmd_eval), ("all", cmd_all), ("analyze", cmd_analyze), ("estimate", cmd_estimate)]:
+    for name, fn in [("pilot", cmd_pilot), ("freeplay", cmd_freeplay), ("eval", cmd_eval), ("all", cmd_all), ("analyze", cmd_analyze), ("estimate", cmd_estimate),
+                     ("ladder", cmd_ladder), ("ladder-estimate", cmd_ladder_estimate)]:
         p = sub.add_parser(name)
         p.set_defaults(fn=fn)
         p.add_argument("--config", default=str(ROOT / "config.yaml"))
-        p.add_argument("--run-id", required=name in ("freeplay", "eval", "all", "analyze", "estimate"))
+        p.add_argument("--run-id", required=name in ("freeplay", "eval", "all", "analyze", "estimate", "ladder", "ladder-estimate"))
         p.add_argument("--max-usd", type=float, help="hard spend cap for this run (USD)")
         p.add_argument("--model", help="e.g. claude-sonnet-5-5 or claude-opus-5-5")
         p.add_argument("--effort", choices=["low", "medium", "high", "xhigh", "max"])
