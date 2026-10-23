@@ -42,7 +42,7 @@ The Mexican government portals cannot be reached from this session. The egress p
 
 **Status at handover (2017 cédulas).** TEC-2 and TEC-7 were closed, "hermético", with heads partially dismantled. Both were accepted without integrity studies because they form part of the development plan. The TEC-2 last-production line reads QL 19 m³/d at 80 % water (15 Jan 2016). That is 120 bbl/d liquid, about 24 bbl/d oil and 96 bbl/d water, so the inventory's "95 bpd" for TEC-2 is the water rate, not oil. TEC-7's last line is 18.7 bbl/d at 45 % water.
 
-**G-57 is narrowed.** TEC-7 was operated as a produced-water injector under ASEA authorisation ASEA/UGI/DGGEERC/1712/2019, with compliance reports for 2020 and 2021. Volumes and pressures are still missing.
+**G-57 is narrowed.** TEC-7 was operated as a produced-water injector under ASEA authorisation ASEA/UGI/DGGEERC/1712/2019, with compliance reports for 2020 and 2021. Volumes and pressures are still missing. The June 2019 repair gives an indicative injectivity, from Tonalli's ASEA notice of a major repair (18 Jun 2019) and the stimulation report of 23 Jun 2019: the interval took 0.5–1 bpm at 250–440 psi surface pressure (about 700–1,400 bbl/d on a short test).
 
 **G-45 is unchanged.** The Nov-2020 PPI value is still not readable.
 
