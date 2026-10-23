@@ -1,0 +1,179 @@
+"""Rebuild every session of a run frame by frame for the replay viewer.
+
+The world is deterministic, so feeding each logged action back through `World`
+reproduces the island exactly; every replayed result is checked against the
+logged one and the first mismatch (if any) is reported with the session.
+"""
+
+from __future__ import annotations
+
+import json
+import math
+from pathlib import Path
+
+import yaml
+
+from agent.tools import run_world_tool
+from world import World
+from world.island import HAND_HEIGHT
+
+from .load import events, phase_a_sessions, phase_b_logs
+
+GRID = 128  # heightmap samples per side
+
+
+def _r(v: float) -> float:
+    return round(float(v), 2)
+
+
+class _TracingWorld(World):
+    """World that keeps a coarse sample of each throw's flight for drawing."""
+
+    def _fly(self, o, vel):
+        x0, y0, z0 = o.x, o.y, o.z
+        ix, iy, iz = super()._fly(o, vel)
+        g = float(self.phys["gravity"])
+        total = math.hypot(ix - x0, iy - y0)
+        hv = math.hypot(vel[0], vel[1])
+        path = [[_r(x0), _r(y0), _r(z0)]]
+        if hv > 1e-6 and total > 0.05:
+            tend = total / hv
+            for i in range(1, 12):
+                t = tend * i / 12
+                path.append([_r(x0 + vel[0] * t), _r(y0 + vel[1] * t), _r(z0 + vel[2] * t - 0.5 * g * t * t)])
+        else:  # straight up (or nearly): show the rise and fall in place
+            tup = max(vel[2], 0.0) / g
+            path.append([_r(x0), _r(y0), _r(z0 + 0.5 * g * tup * tup)])
+        path.append([_r(ix), _r(iy), _r(iz)])
+        self.last_flight = path
+        return ix, iy, iz
+
+
+def _snapshot(w: World) -> dict:
+    a = w.avatar
+    return {
+        "a": [_r(a.x), _r(a.y), _r(a.z), a.holding],
+        "o": {o.id: [_r(o.x), _r(o.y), _r(o.z), int(o.held)] for o in w.objects.values()},
+    }
+
+
+def _objects_meta(w: World) -> dict:
+    return {o.id: [o.shape, o.colour, _r(o.sx), _r(o.sy), _r(o.sz)] for o in w.objects.values()}
+
+
+def terrain_grid(w: World) -> dict:
+    n, size = GRID, w.size
+    rows = []
+    for j in range(n):
+        y = (j + 0.5) * size / n
+        rows.append([round(w.terrain.height((i + 0.5) * size / n, y), 2) for i in range(n)])
+    px, py, pz = w.terrain.peak_summit
+    sx, sy, sz = w.terrain.spire_summit
+    return {
+        "n": n, "size": size, "h": rows,
+        "sea": float(w.cfg["sea_level"]), "wade": float(w.cfg["sea_level"]) - float(w.cfg["max_wade_depth"]),
+        "peak": [_r(px), _r(py), _r(pz)], "spire": [_r(sx), _r(sy), _r(sz), _r(w.terrain.spire_radius)],
+    }
+
+
+def replay_session(path: Path, wcfg: dict, notes_start: dict[str, str]) -> dict:
+    recs = events(path)
+    start = next(r for r in recs if r["kind"] == "session_start")
+    w = _TracingWorld(wcfg, seed=start.get("world_seed"))
+    w.reset()
+    meta = _objects_meta(w)
+    frames = [{"step": 0, **_snapshot(w)}]
+    timeline: list[dict] = []
+    notes = dict(notes_start)
+    diverged = None
+    end = {}
+    cost = 0.0
+    for r in recs:
+        k = r["kind"]
+        fi = len(frames) - 1
+        if k == "assistant":
+            cost += float(r.get("cost_usd") or 0.0)
+            for c in r.get("content", []):
+                if c.get("type") == "text" and c.get("text", "").strip():
+                    timeline.append({"f": fi, "k": "say", "t": c["text"].strip()})
+                elif c.get("type") == "thinking" and c.get("thinking", "").strip():
+                    timeline.append({"f": fi, "k": "think", "t": c["thinking"].strip()})
+        elif k == "action":
+            msg, err = run_world_tool(w, r["name"], r["input"])
+            w.drain_events()
+            if diverged is None and msg != r["result"]:
+                diverged = {"step": r["step"], "logged": r["result"], "replayed": msg}
+            fr = {"step": r["step"], **_snapshot(w)}
+            if r["name"] == "throw" and not err and getattr(w, "last_flight", None):
+                fr["fly"] = [r["input"]["id"], w.last_flight]
+                w.last_flight = None
+            spawns = [e["id"] for e in r.get("events", []) if e.get("type") in ("spawn", "egg")]
+            if spawns:
+                fr["spawn"] = spawns
+                for oid in spawns:
+                    if oid in w.objects:
+                        meta[oid] = _objects_meta(w)[oid]
+            frames.append(fr)
+            timeline.append({"f": len(frames) - 1, "k": "act", "t": f"{r['name']}({_args(r['input'])})", "r": r["result"], "e": int(bool(r["error"]))})
+            for e in r.get("events", []):
+                if e.get("hidden_rule"):
+                    timeline.append({"f": len(frames) - 1, "k": "rule", "t": e.get("rule", "hidden rule"), "id": e.get("id")})
+        elif k == "tool_call":
+            if r["name"] == "write_note" and not r.get("error"):
+                p, content = r["input"].get("path"), r["input"].get("content", "")
+                notes[p] = content
+                timeline.append({"f": fi, "k": "note", "p": p, "t": content})
+            elif r["name"] == "read_note":
+                timeline.append({"f": fi, "k": "read", "p": r["input"].get("path")})
+        elif k == "stop_hook":
+            timeline.append({"f": fi, "k": "nudge", "n": r.get("n")})
+        elif k == "score":
+            end["score"] = r.get("score")
+        elif k == "session_end":
+            end.update(reason=r.get("reason"), steps=r.get("steps_used"), calls=r.get("api_calls"))
+        elif k == "notes_final":
+            notes = r.get("files", notes)
+    return {
+        "opening": start.get("opening", ""), "objects": meta, "frames": frames, "timeline": timeline,
+        "notes_start": notes_start, "end": end, "cost": round(cost, 4), "diverged": diverged,
+        "final_notes": notes,
+    }
+
+
+def _args(d: dict) -> str:
+    parts = []
+    for k, v in d.items():
+        parts.append(f"{k}={json.dumps(v) if not isinstance(v, str) else v}")
+    return ", ".join(parts)
+
+
+def build(root: Path) -> dict:
+    root = Path(root)
+    cfg = yaml.safe_load((root / "config.yaml").read_text())
+    wcfg = cfg["world"]
+    sessions = []
+    end_notes: dict[str, dict] = {}
+    for agent, items in phase_a_sessions(root).items():
+        notes: dict[str, str] = {}
+        for k, p in items:
+            s = replay_session(p, wcfg, notes)
+            notes = s.pop("final_notes")
+            sessions.append({"id": f"{agent}/A{k:02d}", "agent": agent, "phase": "A", "label": f"Day {k}", **s})
+        end_notes[agent] = notes
+    tasks = cfg.get("phase_b", {}).get("tasks", {})
+    for agent, task, p in phase_b_logs(root):
+        s = replay_session(p, wcfg, end_notes.get(agent, {}) if agent.startswith("agent_") else {})
+        s.pop("final_notes")
+        sessions.append({"id": f"{agent}/{task}", "agent": agent, "phase": "B", "label": task, "task": tasks.get(task, ""), **s})
+    w = World(wcfg)
+    return {"run": root.name, "terrain": terrain_grid(w), "hand": HAND_HEIGHT, "sessions": sessions}
+
+
+def write_viewer(root: Path) -> Path:
+    data = build(root)
+    tpl = (Path(__file__).with_name("viewer.html")).read_text()
+    html = tpl.replace("/*__DATA__*/null", json.dumps(data, separators=(",", ":")).replace("</", "<\\/"))
+    out = Path(root) / "viewer.html"
+    out.write_text(html)
+    bad = [(s["id"], s["diverged"]) for s in data["sessions"] if s["diverged"]]
+    return out, len(data["sessions"]), bad

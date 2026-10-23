@@ -137,3 +137,16 @@ def test_analysis_report_builds(tmp_path):
     text = p.read_text()
     assert "veterans vs fresh" in text and "Hidden rule" in text and "Play markers" in text
     assert (p.parent / "eval_scores.png").exists()
+
+
+def test_replay_viewer_matches_logs(tmp_path):
+    from analysis.replay import write_viewer
+
+    run = Run(tmp_path / "r", small_cfg(20), SOUL, max_usd=50, mock=True)
+    run.phase_a(2, 2, 20, 2)
+    run.phase_b(parallel=4)
+    out, n, bad = write_viewer(tmp_path / "r")
+    assert n == 2 * 2 + 4 * 4
+    assert bad == []
+    html = out.read_text()
+    assert "/*__DATA__*/null" not in html and '"sessions":' in html

@@ -1,0 +1,590 @@
+<title>Eko Island Replay</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: survey-station console. Map + elevation strip on the left, field log on the right; stacks on phones. */
+:root {
+  --bg: #e9eef0;
+  --panel: #f7f9fa;
+  --ink: #14232b;
+  --muted: #5b6b73;
+  --line: #cfd8dc;
+  --accent: #2f3bb0;
+  --accent-soft: #dfe2fb;
+  --signal: #c2410c;
+  --note: #0f766e;
+  --note-soft: #d6efec;
+  --warn: #a16207;
+  --chip: #e1e7ea;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1519; --panel: #152027; --ink: #dfe8ec; --muted: #8fa1a9; --line: #26343c;
+    --accent: #9aa3ff; --accent-soft: #232a55; --signal: #fb923c; --note: #5eead4; --note-soft: #12332f;
+    --warn: #facc15; --chip: #1d2a31; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1519; --panel: #152027; --ink: #dfe8ec; --muted: #8fa1a9; --line: #26343c;
+  --accent: #9aa3ff; --accent-soft: #232a55; --signal: #fb923c; --note: #5eead4; --note-soft: #12332f;
+  --warn: #facc15; --chip: #1d2a31; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px 24px;
+}
+button, select { font: inherit; color: inherit; }
+button:focus-visible, select:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; margin-bottom: 12px; }
+.top h1 { font-family: var(--display); font-weight: 700; font-size: 1.55rem; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+.top .run { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.picker { display: grid; gap: 8px; margin-bottom: 12px; }
+.row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.row .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); width: 64px; flex: none; }
+.chip {
+  border: 1px solid var(--line); background: var(--chip); border-radius: 6px; padding: 3px 9px; cursor: pointer;
+  font-size: 13px; display: inline-flex; gap: 6px; align-items: center; font-variant-numeric: tabular-nums;
+}
+.chip:hover { border-color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--signal); }
+.chip .sc { font-family: var(--mono); font-size: 11px; opacity: 0.85; }
+.grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+@media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+.mapwrap { position: relative; aspect-ratio: 1 / 1; width: 100%; max-width: 100%; overflow: hidden; border-radius: 8px 8px 0 0; touch-action: none; }
+#map { width: 100%; height: 100%; display: block; cursor: grab; }
+#map.drag { cursor: grabbing; }
+.mapctl { position: absolute; right: 8px; top: 8px; display: flex; gap: 4px; }
+.mapctl button { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; width: 30px; height: 30px; cursor: pointer; font-family: var(--mono); }
+.mapctl button[aria-pressed="true"] { background: var(--accent); color: var(--panel); border-color: var(--accent); }
+.mapctl .wide { width: auto; padding: 0 8px; font-size: 12px; }
+.tip { position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; font-family: var(--mono); font-size: 11px; white-space: nowrap; }
+.hud { position: absolute; left: 8px; bottom: 8px; background: color-mix(in srgb, var(--panel) 88%, transparent); border: 1px solid var(--line); border-radius: 6px; padding: 5px 9px; font-family: var(--mono); font-size: 12px; max-width: calc(100% - 16px); }
+.hud b { font-weight: 500; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 10px 12px; border-top: 1px solid var(--line); }
+.controls .btn { border: 1px solid var(--line); background: var(--chip); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+.controls .play { background: var(--accent); color: var(--panel); border-color: var(--accent); min-width: 72px; font-weight: 600; }
+.controls .step { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.controls select { background: var(--chip); border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; }
+#scrub { flex: 1 1 200px; min-width: 0; accent-color: var(--accent); }
+.strip { padding: 0 12px 12px; }
+#elev { width: 100%; height: 86px; display: block; cursor: pointer; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11px; color: var(--muted); padding: 0 12px 10px; }
+.legend i { display: inline-block; width: 10px; height: 3px; vertical-align: middle; margin-right: 5px; border-radius: 2px; }
+.side { display: flex; flex-direction: column; max-height: calc(100vh - 40px); position: sticky; top: env(safe-area-inset-top, 0px); }
+@media (max-width: 900px) { .side { max-height: none; position: static; } }
+.tabs { display: flex; border-bottom: 1px solid var(--line); }
+.tabs button { flex: 1; background: none; border: 0; padding: 9px 6px; cursor: pointer; color: var(--muted); font-weight: 500; border-bottom: 2px solid transparent; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.pane { overflow-y: auto; padding: 10px 12px 14px; min-height: 0; flex: 1; }
+@media (max-width: 900px) { .pane { max-height: 70vh; } }
+.now { padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.now .k { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.now code { font-family: var(--mono); font-size: 12px; }
+.ev { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 8px; padding: 5px 0; border-bottom: 1px dashed var(--line); cursor: pointer; }
+.ev.future { opacity: 0.35; }
+.ev.cur { background: var(--accent-soft); margin: 0 -12px; padding: 5px 12px; }
+.ev .st { font-family: var(--mono); font-size: 11px; color: var(--muted); padding-top: 2px; font-variant-numeric: tabular-nums; }
+.ev .tx { min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.ev.say .tx { font-size: 13.5px; }
+.ev.think .tx { color: var(--muted); font-style: italic; font-size: 12.5px; }
+.ev.act .tx { font-family: var(--mono); font-size: 12px; }
+.ev.act .res { color: var(--muted); }
+.ev.act.err .res { color: var(--warn); }
+.ev.note .tx { background: var(--note-soft); border-left: 3px solid var(--note); padding: 4px 8px; border-radius: 0 4px 4px 0; font-size: 12.5px; }
+.ev.note .p, .ev.read .tx { font-family: var(--mono); font-size: 11px; color: var(--note); }
+.ev.rule .tx { color: var(--signal); font-weight: 600; }
+.ev.nudge .tx { color: var(--muted); font-size: 12px; }
+.filters { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--line); }
+.filters label { display: inline-flex; gap: 4px; align-items: center; cursor: pointer; }
+.nfile { margin-bottom: 12px; }
+.nfile h3 { font-family: var(--mono); font-size: 12px; font-weight: 500; margin: 0 0 4px; color: var(--note); display: flex; gap: 8px; align-items: center; }
+.nfile .fresh { font-family: var(--body); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; background: var(--note); color: var(--panel); padding: 1px 6px; border-radius: 4px; }
+.nfile pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--body); font-size: 13px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+.nfile.new pre { border-color: var(--note); }
+.empty { color: var(--muted); font-style: italic; }
+dl.info { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; margin: 0 0 12px; }
+dl.info dt { color: var(--muted); font-size: 12px; }
+dl.info dd { margin: 0; font-family: var(--mono); font-size: 12px; overflow-wrap: anywhere; }
+.opening { white-space: pre-wrap; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font-size: 13px; }
+h2.sec { font-family: var(--display); font-size: 1rem; font-weight: 500; margin: 14px 0 6px; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<header class="top">
+  <h1>Eko Island Replay</h1>
+  <span class="run" id="runlbl"></span>
+</header>
+
+<section class="picker" aria-label="Choose a session">
+  <div class="row" id="agents"><span class="lbl">Agent</span></div>
+  <div class="row" id="days"><span class="lbl">Free play</span></div>
+  <div class="row" id="tasks"><span class="lbl">Tasks</span></div>
+</section>
+
+<main class="grid">
+  <section class="card">
+    <div class="mapwrap" id="mapwrap">
+      <canvas id="map" aria-label="Top-down map of the island with the agent and objects"></canvas>
+      <div class="mapctl">
+        <button id="follow" class="wide" aria-pressed="false" title="Keep the agent centred">Follow</button>
+        <button id="zin" title="Zoom in">+</button>
+        <button id="zout" title="Zoom out">−</button>
+        <button id="zreset" class="wide" title="Show the whole island">Fit</button>
+      </div>
+      <div class="hud" id="hud"></div>
+      <div class="tip" id="tip" hidden></div>
+    </div>
+    <div class="controls">
+      <button class="btn play" id="play">Play</button>
+      <button class="btn" id="prev" title="Previous step (←)">◀</button>
+      <button class="btn" id="next" title="Next step (→)">▶</button>
+      <input type="range" id="scrub" min="0" max="0" value="0" aria-label="Step">
+      <span class="step" id="stepn">step 0 / 0</span>
+      <label class="step" for="speed">speed</label>
+      <select id="speed">
+        <option value="1">1 step/s</option>
+        <option value="2" selected>2 steps/s</option>
+        <option value="4">4 steps/s</option>
+        <option value="8">8 steps/s</option>
+        <option value="16">16 steps/s</option>
+      </select>
+    </div>
+    <div class="strip"><canvas id="elev" aria-label="Agent height over the session, with events"></canvas></div>
+    <div class="legend">
+      <span><i style="background:var(--accent)"></i>agent height</span>
+      <span><i style="background:var(--signal)"></i>hidden rule fired</span>
+      <span><i style="background:var(--note)"></i>note written</span>
+      <span><i style="background:var(--muted)"></i>stop nudge</span>
+      <span>dashed: Spire top · dotted: Peak summit</span>
+    </div>
+  </section>
+
+  <aside class="card side">
+    <div class="now" id="now"></div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="t-log" aria-selected="true">Field log</button>
+      <button role="tab" id="t-notes" aria-selected="false">Notes</button>
+      <button role="tab" id="t-info" aria-selected="false">Session</button>
+    </div>
+    <div class="filters" id="filters">
+      <label><input type="checkbox" id="f-say" checked> speech</label>
+      <label><input type="checkbox" id="f-think"> thinking</label>
+      <label><input type="checkbox" id="f-act" checked> actions</label>
+      <label><input type="checkbox" id="f-note" checked> notes</label>
+      <label><input type="checkbox" id="f-nudge"> nudges</label>
+    </div>
+    <div class="pane" id="pane"></div>
+  </aside>
+</main>
+
+<script>
+const DATA = /*__DATA__*/null;
+(function () {
+  if (!DATA) { document.body.insertAdjacentHTML("beforeend", "<p>No run data embedded. Generate this page with <code>python run.py viewer --run-id &lt;id&gt;</code>.</p>"); return; }
+  const $ = (id) => document.getElementById(id);
+  const T = DATA.terrain, SIZE = T.size, N = T.n;
+  const COL = { red: "#d33b2f", orange: "#ef8a1c", yellow: "#f2cf1d", green: "#3fa34d", blue: "#2d6fd6", purple: "#7b45c4",
+    pink: "#ef7fb6", white: "#f4f4ef", black: "#202024", grey: "#8c9196", brown: "#8a5a2b", teal: "#159c9c", gold: "#d9a520", golden: "#e8b923" };
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  $("runlbl").textContent = `run ${DATA.run} · ${DATA.sessions.length} sessions · replayed from logs`;
+
+  // ------------------------------------------------------------- terrain
+  function hAt(x, y) {
+    const gx = Math.min(N - 1.001, Math.max(0, x / SIZE * N - 0.5)), gy = Math.min(N - 1.001, Math.max(0, y / SIZE * N - 0.5));
+    const i = Math.floor(gx), j = Math.floor(gy), fx = gx - i, fy = gy - j, H = T.h;
+    return (H[j][i] * (1 - fx) + H[j][i + 1] * fx) * (1 - fy) + (H[j + 1][i] * (1 - fx) + H[j + 1][i + 1] * fx) * fy;
+  }
+  const RAMP = [[-3, [24, 58, 92]], [T.wade, [46, 102, 140]], [T.sea - 0.001, [104, 168, 196]], [T.sea, [222, 208, 160]], [0.5, [196, 205, 146]],
+    [1.5, [150, 182, 112]], [2.6, [104, 150, 86]], [3.6, [92, 122, 74]], [4.6, [128, 116, 88]], [6, [150, 138, 120]]];
+  function ramp(h) {
+    if (h <= RAMP[0][0]) return RAMP[0][1];
+    for (let k = 1; k < RAMP.length; k++) if (h <= RAMP[k][0]) {
+      const [h0, c0] = RAMP[k - 1], [h1, c1] = RAMP[k], t = (h - h0) / Math.max(1e-6, h1 - h0);
+      return c0.map((v, m) => v + (c1[m] - v) * t);
+    }
+    return RAMP[RAMP.length - 1][1];
+  }
+  const RES = 640;
+  const terr = document.createElement("canvas"); terr.width = terr.height = RES;
+  (function paintTerrain() {
+    const g = terr.getContext("2d"), img = g.createImageData(RES, RES), hs = new Float32Array(RES * RES);
+    for (let py = 0; py < RES; py++) for (let px = 0; px < RES; px++) hs[py * RES + px] = hAt((px + 0.5) / RES * SIZE, SIZE - (py + 0.5) / RES * SIZE);
+    const [sx, sy, , sr] = T.spire, d = SIZE / RES;
+    for (let py = 0; py < RES; py++) for (let px = 0; px < RES; px++) {
+      const k = py * RES + px, h = hs[k];
+      let c = ramp(h);
+      const wx = (px + 0.5) * d, wy = SIZE - (py + 0.5) * d;
+      if (Math.hypot(wx - sx, wy - sy) < sr - 0.1) c = [96, 90, 84];
+      const hl = hs[py * RES + Math.max(0, px - 1)], hr = hs[py * RES + Math.min(RES - 1, px + 1)];
+      const hu = hs[Math.max(0, py - 1) * RES + px], hd = hs[Math.min(RES - 1, py + 1) * RES + px];
+      let shade = 1;
+      if (h > T.sea) { const nx = (hl - hr) / (2 * d), ny = (hu - hd) / (2 * d); shade = Math.max(0.55, Math.min(1.25, 1 + 0.55 * (nx * 0.7 - ny * 0.7))); }
+      const band = (v) => Math.floor(v / 0.5);
+      const contour = h > T.sea && (band(h) !== band(hr) || band(h) !== band(hd));
+      const major = contour && (Math.floor(h) !== Math.floor(hr) || Math.floor(h) !== Math.floor(hd));
+      const f = contour ? (major ? 0.62 : 0.8) : 1;
+      img.data[k * 4] = Math.min(255, c[0] * shade * f); img.data[k * 4 + 1] = Math.min(255, c[1] * shade * f);
+      img.data[k * 4 + 2] = Math.min(255, c[2] * shade * f); img.data[k * 4 + 3] = 255;
+    }
+    g.putImageData(img, 0, 0);
+  })();
+
+  // ------------------------------------------------------------- state
+  const byAgent = {};
+  DATA.sessions.forEach((s, i) => { (byAgent[s.agent] = byAgent[s.agent] || []).push(i); });
+  const agents = Object.keys(byAgent).sort((a, b) => (a.startsWith("fresh") - b.startsWith("fresh")) || a.localeCompare(b, undefined, { numeric: true }));
+  let S = null, si = -1, cur = 0, t = 0, playing = false, last = 0;
+  let view = { cx: SIZE / 2, cy: SIZE / 2, zoom: 1 }, follow = false, tab = "log";
+  const filt = { say: true, think: false, act: true, note: true, nudge: false, read: true, rule: true };
+
+  function store(k, v) { try { localStorage.setItem("eko." + k, JSON.stringify(v)); } catch (e) {} }
+  function load(k, d) { try { const v = localStorage.getItem("eko." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
+  Object.assign(filt, load("filt", {}));
+  for (const k of ["say", "think", "act", "note", "nudge"]) {
+    const el = $("f-" + k); el.checked = !!filt[k];
+    el.addEventListener("change", () => { filt[k] = el.checked; store("filt", filt); renderPane(true); });
+  }
+
+  // ------------------------------------------------------------- picker
+  function spawnCount(s) { return s.timeline.filter((e) => e.k === "rule").length; }
+  function renderPicker() {
+    const ag = S.agent;
+    const mk = (parent, label, pressed, onclick, extra) => {
+      const b = document.createElement("button"); b.className = "chip"; b.setAttribute("aria-pressed", pressed ? "true" : "false");
+      b.innerHTML = esc(label) + (extra || ""); b.onclick = onclick; parent.appendChild(b); return b;
+    };
+    for (const id of ["agents", "days", "tasks"]) { const r = $(id); while (r.children.length > 1) r.lastChild.remove(); }
+    agents.forEach((a) => mk($("agents"), a.replace("_", " "), a === ag, () => {
+      const same = byAgent[a].find((i) => DATA.sessions[i].label === S.label);
+      openSession(same != null ? same : byAgent[a][0]);
+    }));
+    const days = byAgent[ag].filter((i) => DATA.sessions[i].phase === "A"), tasks = byAgent[ag].filter((i) => DATA.sessions[i].phase === "B");
+    $("days").hidden = !days.length;
+    days.forEach((i) => { const s = DATA.sessions[i], n = spawnCount(s);
+      mk($("days"), s.label.replace("Day ", "D"), i === si, () => openSession(i), n ? `<span class="dot" title="${n} hidden-rule events"></span>` : ""); });
+    tasks.forEach((i) => { const s = DATA.sessions[i];
+      mk($("tasks"), s.label.replace(/_/g, " "), i === si, () => openSession(i), s.end.score != null ? `<span class="sc">${esc(s.end.score)}</span>` : ""); });
+  }
+
+  function hashFor(i) { return DATA.sessions[i].id.replace("/", "-"); }
+  function openSession(i, keepStep) {
+    si = i; S = DATA.sessions[i]; cur = keepStep ? Math.min(cur, S.frames.length - 1) : 0; t = 0;
+    $("scrub").max = S.frames.length - 1; $("scrub").value = cur;
+    try { history.replaceState(null, "", "#" + hashFor(i)); } catch (e) {}
+    store("session", S.id);
+    renderPicker(); renderPane(true); drawElev(); draw();
+  }
+
+  // ------------------------------------------------------------- map
+  const cv = $("map"), ctx = cv.getContext("2d");
+  let W = 0, DPR = 1;
+  function resize() {
+    const r = $("mapwrap").getBoundingClientRect(); DPR = window.devicePixelRatio || 1; W = r.width;
+    cv.width = Math.round(r.width * DPR); cv.height = Math.round(r.height * DPR);
+    const e = $("elev"), er = e.getBoundingClientRect(); e.width = Math.round(er.width * DPR); e.height = Math.round(er.height * DPR);
+    draw(); drawElev();
+  }
+  const scale = () => W / SIZE * view.zoom;
+  const toS = (x, y) => [(x - view.cx) * scale() + W / 2, (view.cy - y) * scale() + W / 2];
+  const toW = (sx, sy) => [(sx - W / 2) / scale() + view.cx, view.cy - (sy - W / 2) / scale()];
+  function clampView() {
+    const half = SIZE / 2 / view.zoom;
+    view.cx = Math.min(SIZE - half, Math.max(half, view.cx)); view.cy = Math.min(SIZE - half, Math.max(half, view.cy));
+    if (view.zoom <= 1) { view.cx = view.cy = SIZE / 2; }
+  }
+  const lerp = (a, b, u) => a + (b - a) * u;
+  function interpState() {
+    const f0 = S.frames[cur], f1 = S.frames[Math.min(cur + 1, S.frames.length - 1)], u = playing ? t : 0;
+    const objs = {};
+    for (const id in f1.o) {
+      const a = f0.o[id], b = f1.o[id];
+      if (!a) { objs[id] = { p: b, born: u }; continue; }
+      let p = [lerp(a[0], b[0], u), lerp(a[1], b[1], u), lerp(a[2], b[2], u), u < 0.5 ? a[3] : b[3]];
+      if (f1.fly && f1.fly[0] === id && u > 0) {
+        const path = f1.fly[1], q = u * (path.length - 1), k = Math.min(path.length - 2, Math.floor(q)), r = q - k;
+        p = [lerp(path[k][0], path[k + 1][0], r), lerp(path[k][1], path[k + 1][1], r), lerp(path[k][2], path[k + 1][2], r), 0];
+      }
+      objs[id] = { p };
+    }
+    for (const id in f0.o) if (!(id in objs)) objs[id] = { p: f0.o[id] };
+    const A = f0.a, B = f1.a;
+    let ax = lerp(A[0], B[0], u), ay = lerp(A[1], B[1], u), az = lerp(A[2], B[2], u);
+    return { objs, av: [ax, ay, az, u < 0.5 ? A[3] : B[3]], f0, f1, u };
+  }
+  function drawObj(id, p, meta, sc, alpha) {
+    const [shape, colour, sx] = meta, [x, y, z] = p, [X, Y] = toS(x, y);
+    const ground = hAt(x, y), lift = Math.max(0, z - ground);
+    const s = Math.max(3, sx * sc);
+    ctx.globalAlpha = alpha;
+    if (lift > 0.05) { // shadow on the ground, offset by height
+      ctx.fillStyle = "rgba(0,0,0,0.22)";
+      const o = Math.min(14, lift * sc * 0.18 + 1);
+      ctx.fillRect(X - s / 2 + o, Y - s / 2 + o, s, s);
+    }
+    const fill = COL[colour] || "#999";
+    ctx.lineWidth = Math.max(1, sc * 0.05);
+    ctx.strokeStyle = colour === "black" ? "#9a9aa0" : "rgba(20,20,20,0.75)";
+    if (shape === "ring") {
+      ctx.beginPath(); ctx.arc(X, Y, s * 0.55, 0, Math.PI * 2); ctx.lineWidth = Math.max(2, s * 0.28); ctx.strokeStyle = fill; ctx.stroke();
+      ctx.lineWidth = 1; ctx.strokeStyle = "rgba(20,20,20,0.6)"; ctx.beginPath(); ctx.arc(X, Y, s * 0.55 + s * 0.15, 0, Math.PI * 2); ctx.stroke();
+    } else if (shape === "rock") {
+      ctx.beginPath();
+      for (let k = 0; k < 9; k++) { const a = k / 9 * Math.PI * 2, r = s * 0.55 * (0.82 + 0.18 * Math.sin(k * 2.3)); ctx.lineTo(X + Math.cos(a) * r, Y + Math.sin(a) * r); }
+      ctx.closePath(); ctx.fillStyle = "#77736c"; ctx.fill(); ctx.stroke();
+    } else if (shape === "egg") {
+      ctx.beginPath(); ctx.ellipse(X, Y, s * 0.4, s * 0.52, 0, 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill(); ctx.stroke();
+    } else {
+      ctx.fillStyle = fill; ctx.fillRect(X - s / 2, Y - s / 2, s, s); ctx.strokeRect(X - s / 2, Y - s / 2, s, s);
+    }
+    ctx.globalAlpha = 1;
+  }
+  function draw() {
+    if (!S || !W) return;
+    const st = interpState(), sc = scale();
+    if (follow) { view.cx = st.av[0]; view.cy = st.av[1]; clampView(); }
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.fillStyle = "rgb(24,58,92)"; ctx.fillRect(0, 0, W, W);
+    const [ox, oy] = toS(0, SIZE); ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(terr, ox, oy, SIZE * sc, SIZE * sc);
+    // graticule
+    ctx.strokeStyle = "rgba(255,255,255,0.13)"; ctx.lineWidth = 1; ctx.font = "10px " + css("--mono"); ctx.fillStyle = "rgba(255,255,255,0.75)";
+    for (let g = 0; g <= SIZE; g += 8) {
+      const [gx] = toS(g, 0), [, gy] = toS(0, g);
+      ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, W); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+      if (g > 0 && g < SIZE) { ctx.fillText(g, gx + 2, 11); ctx.fillText(g, 3, gy - 2); }
+    }
+    // landmarks
+    const lm = (x, y, label) => { const [X, Y] = toS(x, y); ctx.font = "600 11px " + css("--body"); ctx.fillStyle = "rgba(255,255,255,0.92)";
+      ctx.strokeStyle = "rgba(0,0,0,0.55)"; ctx.lineWidth = 3; ctx.strokeText(label, X + 8, Y - 8); ctx.fillText(label, X + 8, Y - 8);
+      ctx.beginPath(); ctx.arc(X, Y, 2.5, 0, Math.PI * 2); ctx.fill(); };
+    lm(T.peak[0], T.peak[1], `Peak ${T.peak[2].toFixed(1)} m`); lm(T.spire[0], T.spire[1], `Spire ${T.spire[2].toFixed(1)} m`);
+    // trail
+    const tr = S.frames.slice(0, cur + 1);
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
+    for (let k = 1; k < tr.length; k++) {
+      const age = (cur - k) / 40, a = Math.max(0.12, 0.85 - age);
+      const [x0, y0] = toS(tr[k - 1].a[0], tr[k - 1].a[1]), [x1, y1] = toS(tr[k].a[0], tr[k].a[1]);
+      ctx.strokeStyle = `rgba(255,255,255,${a * 0.9})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+      ctx.strokeStyle = cssRGBA("--accent", a); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+    }
+    // throw arcs (current and the one just landed)
+    for (const fr of [st.f0, st.f1]) if (fr.fly) {
+      const path = fr.fly[1]; ctx.setLineDash([4, 4]); ctx.strokeStyle = "rgba(255,255,255,0.85)"; ctx.lineWidth = 1.5; ctx.beginPath();
+      path.forEach((p, k) => { const [X, Y] = toS(p[0], p[1]); k ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }); ctx.stroke(); ctx.setLineDash([]);
+    }
+    // objects, low to high
+    const ids = Object.keys(st.objs).filter((id) => !st.objs[id].p[3]).sort((a, b) => st.objs[a].p[2] - st.objs[b].p[2]);
+    for (const id of ids) { const o = st.objs[id]; drawObj(id, o.p, S.objects[id] || ["cube", "grey", 1], sc, o.born != null ? Math.min(1, o.born * 2) : 1); }
+    // spawn pulse
+    for (const fr of [st.f1, st.f0]) if (fr.spawn) for (const id of fr.spawn) {
+      const o = st.objs[id]; if (!o) continue; const [X, Y] = toS(o.p[0], o.p[1]);
+      const r = (fr === st.f1 ? st.u : 1) * 18 + 6;
+      ctx.strokeStyle = cssRGBA("--signal", 0.9); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(X, Y, r, 0, Math.PI * 2); ctx.stroke();
+    }
+    // avatar
+    const [AX, AY] = toS(st.av[0], st.av[1]), R = Math.max(6, 0.45 * sc);
+    ctx.fillStyle = "rgba(0,0,0,0.25)"; ctx.beginPath(); ctx.arc(AX + 2, AY + 2, R, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(AX, AY, R, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = css("--accent"); ctx.beginPath(); ctx.arc(AX, AY, R * 0.62, 0, Math.PI * 2); ctx.fill();
+    if (st.av[3] && S.objects[st.av[3]]) {
+      const m = S.objects[st.av[3]], s = Math.max(5, R * 0.9);
+      ctx.fillStyle = COL[m[1]] || "#999"; ctx.strokeStyle = "#111"; ctx.lineWidth = 1;
+      ctx.beginPath(); m[0] === "ring" ? ctx.arc(AX + R, AY - R, s / 2, 0, Math.PI * 2) : ctx.rect(AX + R - s / 2, AY - R - s / 2, s, s); ctx.fill(); ctx.stroke();
+    }
+    // scale bar
+    const bar = 10 * sc; ctx.fillStyle = "rgba(255,255,255,0.9)"; ctx.fillRect(30, 26, bar, 3);
+    ctx.font = "10px " + css("--mono"); ctx.fillText("10 m   N ↑", 30, 42);
+    hud(st);
+  }
+  function cssRGBA(name, a) {
+    const c = css(name); const m = c.match(/^#([0-9a-f]{6})$/i);
+    if (!m) return c; const n = parseInt(m[1], 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`;
+  }
+  function hud(st) {
+    const f = S.frames[cur], a = f.a;
+    $("hud").innerHTML = `<b>(${a[0].toFixed(1)}, ${a[1].toFixed(1)})</b> z ${a[2].toFixed(1)} m · ${a[3] ? "holding " + esc(a[3]) : "empty-handed"}`;
+    $("stepn").textContent = `step ${f.step} / ${S.frames[S.frames.length - 1].step}`;
+  }
+
+  // hover + pan + zoom
+  let drag = null;
+  cv.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY, cx: view.cx, cy: view.cy }; cv.classList.add("drag"); cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener("pointerup", () => { drag = null; cv.classList.remove("drag"); });
+  cv.addEventListener("pointermove", (e) => {
+    const r = cv.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+    if (drag && view.zoom > 1) {
+      if (follow) setFollow(false);
+      view.cx = drag.cx - (e.clientX - drag.x) / scale(); view.cy = drag.cy + (e.clientY - drag.y) / scale(); clampView(); draw(); return;
+    }
+    const [wx, wy] = toW(mx, my), st = interpState();
+    let best = null, bd = 1e9;
+    for (const id in st.objs) { const p = st.objs[id].p; if (p[3]) continue; const d = Math.hypot(p[0] - wx, p[1] - wy); if (d < bd) { bd = d; best = id; } }
+    const tip = $("tip");
+    if (best && bd < Math.max(0.9, 10 / scale())) {
+      const p = st.objs[best].p, m = S.objects[best];
+      tip.textContent = `${best} · ${m[1]} ${m[0]} · (${p[0].toFixed(1)}, ${p[1].toFixed(1)}, ${p[2].toFixed(1)})`;
+    } else tip.textContent = `(${wx.toFixed(1)}, ${wy.toFixed(1)}) ground ${hAt(wx, wy).toFixed(1)} m`;
+    tip.hidden = false; tip.style.left = Math.min(mx + 12, W - tip.offsetWidth - 4) + "px"; tip.style.top = Math.max(4, my - 30) + "px";
+  });
+  cv.addEventListener("pointerleave", () => { $("tip").hidden = true; });
+  function zoomBy(f, mx, my) {
+    const before = mx != null ? toW(mx, my) : null;
+    view.zoom = Math.min(8, Math.max(1, view.zoom * f));
+    if (before) { const after = toW(mx, my); view.cx += before[0] - after[0]; view.cy += before[1] - after[1]; }
+    clampView(); draw();
+  }
+  cv.addEventListener("wheel", (e) => { e.preventDefault(); const r = cv.getBoundingClientRect(); zoomBy(e.deltaY < 0 ? 1.2 : 1 / 1.2, e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+  cv.addEventListener("dblclick", () => { view = { cx: SIZE / 2, cy: SIZE / 2, zoom: 1 }; draw(); });
+  $("zin").onclick = () => zoomBy(1.5); $("zout").onclick = () => zoomBy(1 / 1.5);
+  $("zreset").onclick = () => { setFollow(false); view = { cx: SIZE / 2, cy: SIZE / 2, zoom: 1 }; draw(); };
+  function setFollow(v) { follow = v; $("follow").setAttribute("aria-pressed", v ? "true" : "false"); if (v && view.zoom < 2.5) view.zoom = 2.5; draw(); }
+  $("follow").onclick = () => setFollow(!follow);
+
+  // ------------------------------------------------------------- elevation strip
+  const ev = $("elev"), ectx = ev.getContext("2d");
+  function drawElev() {
+    if (!S) return;
+    const w = ev.width / DPR, h = ev.height / DPR; if (!w) return;
+    ectx.setTransform(DPR, 0, 0, DPR, 0, 0); ectx.clearRect(0, 0, w, h);
+    const n = S.frames.length, top = 14, bot = h - 14, zmin = -1, zmax = Math.max(7, ...S.frames.map((f) => f.a[2] + 0.5));
+    const X = (i) => 6 + (w - 12) * (n > 1 ? i / (n - 1) : 0), Y = (z) => bot - (z - zmin) / (zmax - zmin) * (bot - top);
+    ectx.strokeStyle = css("--line"); ectx.lineWidth = 1; ectx.beginPath(); ectx.moveTo(6, bot); ectx.lineTo(w - 6, bot); ectx.stroke();
+    ectx.font = "10px " + css("--mono"); ectx.fillStyle = css("--muted");
+    ectx.setLineDash([5, 4]); ectx.strokeStyle = css("--muted"); ectx.beginPath(); ectx.moveTo(6, Y(T.spire[2])); ectx.lineTo(w - 6, Y(T.spire[2])); ectx.stroke();
+    ectx.setLineDash([1, 3]); ectx.beginPath(); ectx.moveTo(6, Y(T.peak[2])); ectx.lineTo(w - 6, Y(T.peak[2])); ectx.stroke(); ectx.setLineDash([]);
+    ectx.fillText(`${T.spire[2].toFixed(1)} m`, w - 46, Y(T.spire[2]) - 3);
+    // area + line
+    ectx.beginPath(); S.frames.forEach((f, i) => (i ? ectx.lineTo(X(i), Y(f.a[2])) : ectx.moveTo(X(i), Y(f.a[2]))));
+    ectx.lineTo(X(n - 1), bot); ectx.lineTo(X(0), bot); ectx.closePath(); ectx.fillStyle = cssRGBA("--accent", 0.12); ectx.fill();
+    ectx.beginPath(); S.frames.forEach((f, i) => (i ? ectx.lineTo(X(i), Y(f.a[2])) : ectx.moveTo(X(i), Y(f.a[2]))));
+    ectx.strokeStyle = css("--accent"); ectx.lineWidth = 1.6; ectx.stroke();
+    // event ticks along the top
+    for (const e of S.timeline) {
+      const c = e.k === "rule" ? css("--signal") : e.k === "note" ? css("--note") : e.k === "nudge" ? css("--muted") : null;
+      if (!c) continue; ectx.fillStyle = c; const hh = e.k === "rule" ? 10 : 6;
+      ectx.fillRect(X(e.f) - 1, e.k === "rule" ? 1 : 3, 2, hh);
+    }
+    // cursor
+    ectx.strokeStyle = css("--ink"); ectx.lineWidth = 1; ectx.beginPath(); ectx.moveTo(X(cur), top - 2); ectx.lineTo(X(cur), bot); ectx.stroke();
+    ectx.fillStyle = css("--accent"); ectx.beginPath(); ectx.arc(X(cur), Y(S.frames[cur].a[2]), 3.5, 0, Math.PI * 2); ectx.fill();
+    ectx.fillStyle = css("--muted"); ectx.fillText("height (m)", 6, h - 2);
+  }
+  ev.addEventListener("click", (e) => { const r = ev.getBoundingClientRect(); seek(Math.round((e.clientX - r.left - 6) / (r.width - 12) * (S.frames.length - 1))); });
+
+  // ------------------------------------------------------------- side pane
+  function itemHTML(e, i) {
+    const f = S.frames[Math.min(e.f, S.frames.length - 1)].step;
+    let body = "";
+    if (e.k === "say") body = esc(e.t);
+    else if (e.k === "think") body = esc(e.t);
+    else if (e.k === "act") body = `${esc(e.t)}\n<span class="res">→ ${esc(e.r)}</span>`;
+    else if (e.k === "note") body = `<div class="p">wrote ${esc(e.p)}</div>${esc(e.t)}`;
+    else if (e.k === "read") body = `read ${esc(e.p)}`;
+    else if (e.k === "rule") body = `Hidden rule fired: ${esc(e.t)}${e.id ? " → " + esc(e.id) : ""}`;
+    else if (e.k === "nudge") body = `Stop hook nudge #${esc(e.n)}: “Please don't stop.”`;
+    return `<div class="ev ${e.k}${e.k === "act" && e.e ? " err" : ""}" data-i="${i}" data-f="${e.f}"><span class="st">${f}</span><div class="tx">${body}</div></div>`;
+  }
+  function renderPane(rebuild) {
+    const pane = $("pane");
+    $("filters").hidden = tab !== "log";
+    if (tab === "log") {
+      if (rebuild || pane.dataset.mode !== "log" || pane.dataset.s !== String(si)) {
+        pane.innerHTML = `<p class="empty" style="margin:0 0 8px">${esc(S.opening)}</p>` +
+          S.timeline.map((e, i) => (filt[e.k] === false ? "" : itemHTML(e, i))).join("");
+        pane.dataset.mode = "log"; pane.dataset.s = String(si);
+      }
+      let target = null;
+      pane.querySelectorAll(".ev").forEach((el) => {
+        const f = +el.dataset.f; el.classList.toggle("future", f > cur); el.classList.toggle("cur", f === cur && cur > 0);
+        if (f <= cur) target = el;
+      });
+      if (target && (playing || rebuild)) { // scroll the pane only, never the page
+        const pr = pane.getBoundingClientRect(), tr = target.getBoundingClientRect();
+        if (rebuild) pane.scrollTop += tr.top - pr.top - pr.height / 2;
+        else if (tr.bottom > pr.bottom || tr.top < pr.top) pane.scrollTop += tr.bottom - pr.bottom + 8;
+      }
+    } else if (tab === "notes") {
+      const notes = Object.assign({}, S.notes_start), touched = {};
+      for (const e of S.timeline) if (e.k === "note" && e.f <= cur) { notes[e.p] = e.t; touched[e.p] = e.f; }
+      const files = Object.keys(notes).sort((a, b) => (touched[b] ?? -1) - (touched[a] ?? -1) || a.localeCompare(b, undefined, { numeric: true }));
+      pane.innerHTML = files.length ? files.map((p) => `<div class="nfile${touched[p] != null ? " new" : ""}"><h3>${esc(p)}${touched[p] != null ? `<span class="fresh">written step ${S.frames[touched[p]].step}</span>` : ""}</h3><pre>${esc(notes[p])}</pre></div>`).join("")
+        : `<p class="empty">The notes directory is empty at this point.</p>`;
+      pane.dataset.mode = "notes";
+    } else {
+      const s = S, n = spawnCount(s), writes = s.timeline.filter((e) => e.k === "note").length;
+      pane.innerHTML = `<dl class="info">
+        <dt>Session</dt><dd>${esc(s.id)}</dd>
+        <dt>Phase</dt><dd>${s.phase === "A" ? "A · free play" : "B · task"}</dd>
+        ${s.task ? `<dt>Task</dt><dd>${esc(s.task)}</dd>` : ""}
+        ${s.end.score != null ? `<dt>Score</dt><dd>${esc(s.end.score)}</dd>` : ""}
+        <dt>Ended</dt><dd>${esc((s.end.reason || "").replace(/_/g, " "))} after ${esc(s.end.steps)} steps</dd>
+        <dt>API calls</dt><dd>${esc(s.end.calls)} · $${s.cost.toFixed(2)}</dd>
+        <dt>Hidden rule</dt><dd>${n ? n + " time" + (n > 1 ? "s" : "") : "not triggered"}</dd>
+        <dt>Note writes</dt><dd>${writes}</dd>
+        <dt>Replay</dt><dd>${s.diverged ? "diverged at step " + esc(s.diverged.step) : "matches the log at every step"}</dd>
+      </dl><h2 class="sec">Opening message</h2><div class="opening">${esc(s.opening)}</div>`;
+      pane.dataset.mode = "info";
+    }
+    const f = S.frames[cur], act = S.timeline.filter((e) => e.k === "act" && e.f === cur).pop();
+    $("now").innerHTML = act ? `<div class="k">Step ${f.step}</div><code>${esc(act.t)}</code><div>${esc(act.r)}</div>`
+      : `<div class="k">Start of ${esc(S.label.replace(/_/g, " "))}</div><div>${esc(S.agent.replace("_", " "))} wakes at (${f.a[0].toFixed(1)}, ${f.a[1].toFixed(1)}).</div>`;
+  }
+  $("pane").addEventListener("click", (e) => { const el = e.target.closest(".ev"); if (el) { setPlaying(false); seek(+el.dataset.f); } });
+  for (const [id, name] of [["t-log", "log"], ["t-notes", "notes"], ["t-info", "info"]]) $(id).onclick = () => {
+    tab = name; for (const x of ["t-log", "t-notes", "t-info"]) $(x).setAttribute("aria-selected", x === id ? "true" : "false"); renderPane(true);
+  };
+
+  // ------------------------------------------------------------- playback
+  function seek(i) { cur = Math.max(0, Math.min(S.frames.length - 1, i)); t = 0; $("scrub").value = cur; renderPane(false); drawElev(); draw(); }
+  function setPlaying(v) {
+    playing = v; $("play").textContent = v ? "Pause" : "Play";
+    if (v && cur >= S.frames.length - 1) seek(0);
+    if (v) { last = performance.now(); requestAnimationFrame(tick); } else { t = 0; draw(); }
+  }
+  function tick(now) {
+    if (!playing) return;
+    const sp = +$("speed").value, dt = Math.min(0.25, (now - last) / 1000); last = now;
+    t += dt * sp;
+    while (t >= 1) {
+      t -= 1;
+      if (cur >= S.frames.length - 2) { cur = S.frames.length - 1; $("scrub").value = cur; renderPane(false); drawElev(); setPlaying(false); return; }
+      cur++; $("scrub").value = cur; renderPane(false); drawElev();
+    }
+    draw(); requestAnimationFrame(tick);
+  }
+  $("play").onclick = () => setPlaying(!playing);
+  $("prev").onclick = () => { setPlaying(false); seek(cur - 1); };
+  $("next").onclick = () => { setPlaying(false); seek(cur + 1); };
+  $("scrub").addEventListener("input", (e) => { setPlaying(false); seek(+e.target.value); });
+  document.addEventListener("keydown", (e) => {
+    if (e.target.matches("input[type=checkbox], select")) return;
+    if (e.key === " ") { e.preventDefault(); setPlaying(!playing); }
+    else if (e.key === "ArrowRight") { setPlaying(false); seek(cur + (e.shiftKey ? 10 : 1)); }
+    else if (e.key === "ArrowLeft") { setPlaying(false); seek(cur - (e.shiftKey ? 10 : 1)); }
+  });
+
+  window.addEventListener("resize", resize);
+  try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { draw(); drawElev(); }); } catch (e) {}
+  new MutationObserver(() => { draw(); drawElev(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  // initial session: hash, then last viewed, then the first session with a hidden-rule event
+  const h = (location.hash || "").slice(1);
+  let start = DATA.sessions.findIndex((s) => hashFor(DATA.sessions.indexOf(s)) === h);
+  if (start < 0) start = DATA.sessions.findIndex((s) => s.id === load("session", ""));
+  if (start < 0) start = Math.max(0, DATA.sessions.findIndex((s) => s.phase === "A" && spawnCount(s) > 0));
+  openSession(start);
+  const firstRule = S.timeline.find((e) => e.k === "rule");
+  if (firstRule && !h) seek(Math.max(0, firstRule.f - 4));
+  resize();
+})();
+</script>

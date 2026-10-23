@@ -6,6 +6,7 @@
   python run.py eval     --run-id main --max-usd 60  # Phase B on the same run
   python run.py all      --run-id main --max-usd 120 # Phase A then Phase B
   python run.py analyze  --run-id main               # stats, discovery, play markers, report.md + charts
+  python run.py viewer   --run-id main               # replay viewer: runs/<id>/viewer.html (map, timeline, notes)
   python run.py estimate --run-id <pilot-id>         # re-print the full-run estimate from a pilot
   python run.py ladder-estimate --run-id <pilot-id>  # upper-bound cost of the ladder from a pilot
   python run.py ladder   --run-id L1 --max-usd 300   # staged egg-hunt tournament over souls + memories
@@ -147,6 +148,15 @@ def cmd_analyze(args) -> None:
     print(f"Report written to {path}")
 
 
+def cmd_viewer(args) -> None:
+    from analysis.replay import write_viewer
+
+    out, n, bad = write_viewer(ROOT / "runs" / args.run_id)
+    print(f"Replay viewer for {n} sessions written to {out}")
+    for sid, d in bad:
+        print(f"  {sid}: replay diverged from the log at step {d['step']}")
+
+
 def cmd_estimate(args) -> None:
     cfg = load_cfg(args)
     root = ROOT / "runs" / args.run_id
@@ -199,12 +209,12 @@ def cmd_ladder_estimate(args) -> None:
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name, fn in [("pilot", cmd_pilot), ("freeplay", cmd_freeplay), ("eval", cmd_eval), ("all", cmd_all), ("analyze", cmd_analyze), ("estimate", cmd_estimate),
+    for name, fn in [("pilot", cmd_pilot), ("freeplay", cmd_freeplay), ("eval", cmd_eval), ("all", cmd_all), ("analyze", cmd_analyze), ("viewer", cmd_viewer), ("estimate", cmd_estimate),
                      ("ladder", cmd_ladder), ("ladder-estimate", cmd_ladder_estimate)]:
         p = sub.add_parser(name)
         p.set_defaults(fn=fn)
         p.add_argument("--config", default=str(ROOT / "config.yaml"))
-        p.add_argument("--run-id", required=name in ("freeplay", "eval", "all", "analyze", "estimate", "ladder", "ladder-estimate"))
+        p.add_argument("--run-id", required=name in ("freeplay", "eval", "all", "analyze", "viewer", "estimate", "ladder", "ladder-estimate"))
         p.add_argument("--max-usd", type=float, help="hard spend cap for this run (USD)")
         p.add_argument("--model", help="e.g. claude-sonnet-5-5 or claude-opus-5-5")
         p.add_argument("--effort", choices=["low", "medium", "high", "xhigh", "max"])
