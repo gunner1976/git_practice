@@ -279,3 +279,19 @@ def test_spire_and_peak_scoring():
     w.settle()
     assert score("spire_objects", w)["score"] == 2
     assert score("ring_on_peak", w)["score"] == 1
+
+
+def test_move_blocked_by_object_vs_terrain():
+    w = flat_world()
+    rock = put(w, "rock_1", 32.0, 30.0, 1.0)
+    w.settle()
+    assert rock.sz > float(w.av_cfg["step_up"])
+    r = w.move(3, 0)
+    assert r.endswith("An object blocks your way.")
+    assert w.avatar.x < 32.0
+
+    w = flat_world()
+    w.terrain.height = lambda x, y: 3.0 if x > 31.0 else 1.0
+    r = w.move(3, 0)
+    assert r.endswith("Something too steep blocks your way.")
+    assert w.avatar.x < 31.0

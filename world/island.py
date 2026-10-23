@@ -329,7 +329,10 @@ class World:
                 break
             h = self.surface_at(nx, ny)
             if h - a.z > step_up:
-                msg = "Something too steep blocks your way."
+                if self.terrain.height(nx, ny) - a.z > step_up:
+                    msg = "Something too steep blocks your way."
+                else:
+                    msg = "An object blocks your way."
                 break
             a.x, a.y, a.z = nx, ny, h
             travelled += dist / n
