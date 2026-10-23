@@ -175,7 +175,7 @@ slide("Per-well production histories", [
     "TEC-2: 323 kbbl 1972-2016 with rising water from 2008; the 2018 workover test produced 8 m³/d oil at 90 % water and a skin of +196.",
     "TEC-10: 88 kbbl Jul 2018-Nov 2019 in the monthly record (44 kbbl in the daily file from Sep 2018), first full month 181 bbl/d, 78 bbl/d at 12 months; 2020-22 sales are commingled field volumes: 39 kbbl through the PEMEX settlements.",
     "GOR 400-800 scf/bbl through 1966-92 (cumulative 565), rising only where gas was field-allocated or at low tubing pressure on TEC-10 (docs/04 §5).",
-    "Gaps in the traces are missing months in the CNH record (66 runs), not shut-ins (G-34)."], "figures/19_well_histories.png", 8.6, size=10,
+    "Gaps in the traces are months absent from the CNH record (66 runs); the PEMEX well files show most pre-1985 runs were shut-in or workover months (TEC-2 and TEC-7 shut in for salt water 1957-71); post-1985 runs are unexplained (G-34)."], "figures/19_well_histories.png", 8.6, size=10,
     notes="data/processed/tecolutla_production.csv; docs/04_production_database.md; data/processed/production_summary.json.")
 
 # ---------- 3 Pressure ----------
