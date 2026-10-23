@@ -48,6 +48,8 @@ The Mexican government portals cannot be reached from this session. The egress p
 
 **G-49 is narrowed.** Secondary sources say pre-2025 contracts keep their terms, and the CNH Feb 2025 suspension of evaluation periods and transition programmes applies to Tecolutla. The DOF wording is unverified.
 
+**G-34 is narrowed.** The PEMEX production expedientes ("informe de mediciones y movimientos por pozo", 1956–1984) show that most pre-1985 gap runs are shut-in or workover months, not lost data. For example, TEC-2 and TEC-7 were shut in for high salt water from 1957 until their 1971 workovers. No monthly volumes could be read inside the gaps. The files stop in 1985, so the 1978–79 run and every later run (TEC-7 1990–2006, TEC-2 1999–2006) remain open. Per-run results are in `data/processed/tecolutla_production_gaps_pemex.csv`.
+
 **G-58 is new and minor.** The 1971 PEMEX elevation references (TEC-2 E.R. 3.80 m, TEC-7 E.M.R. 4.80 m) differ by 0.2 m from the KBs used in the repository.
 
 ## What would close the rest
