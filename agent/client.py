@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import random
 import re
 from types import SimpleNamespace
@@ -11,12 +12,24 @@ from types import SimpleNamespace
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
 
 
+KEY_VARS = ("EKO_API_KEY", "ANTHROPIC_API_KEY")
+
+
+def api_key_from_env() -> str:
+    """The harness's own key. EKO_API_KEY comes first so the key never has to live in
+    ANTHROPIC_API_KEY, which Claude Code reserves for its own sign-in."""
+    for var in KEY_VARS:
+        if os.environ.get(var):
+            return os.environ[var]
+    raise RuntimeError(f"No API key found: set one of {', '.join(KEY_VARS)} (see README, Quick start)")
+
+
 class AnthropicClient:
     def __init__(self, model: str, effort: str, max_tokens: int, refusal_fallback: bool, thinking_display: str = "summarized"):
         import anthropic  # imported lazily so tests and mock runs don't need a key
 
         self.anthropic = anthropic
-        self.client = anthropic.Anthropic(max_retries=4)  # reads ANTHROPIC_API_KEY
+        self.client = anthropic.Anthropic(api_key=api_key_from_env(), max_retries=4)
         self.model = model
         self.effort = effort
         self.max_tokens = max_tokens

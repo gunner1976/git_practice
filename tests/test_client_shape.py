@@ -56,3 +56,18 @@ def test_no_fallback_uses_plain_messages():
     _client(seen, fallback=False).create("s", ALL_TOOLS, [{"role": "user", "content": "hi"}])
     assert "fallbacks" not in seen[0][1]
     assert "beta" not in str(seen[0][0].url)
+
+
+def test_api_key_env_order(monkeypatch):
+    import pytest
+
+    from agent.client import api_key_from_env
+
+    monkeypatch.delenv("EKO_API_KEY", raising=False)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    with pytest.raises(RuntimeError):
+        api_key_from_env()
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "b")
+    assert api_key_from_env() == "b"
+    monkeypatch.setenv("EKO_API_KEY", "a")
+    assert api_key_from_env() == "a"

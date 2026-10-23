@@ -18,7 +18,7 @@ The harness has five parts:
 
 ```bash
 pip install -r requirements.txt
-export ANTHROPIC_API_KEY=sk-ant-...
+export EKO_API_KEY=sk-ant-...           # ANTHROPIC_API_KEY also works
 python -m pytest -q                      # 45 tests: physics, hidden rules, loop, resume, cost cap, request shape, ladder
 
 # 1. Pilot (always first): 1 agent, 2 sessions, 30 steps. Prints the transcript, notes, cost and a full-run estimate.
