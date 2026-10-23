@@ -6,7 +6,7 @@ world:
   size: 64.0              # island spans [0, size] x [0, size] metres
   sea_level: 0.0
   max_wade_depth: 0.8     # avatar can't walk where terrain < sea_level - this
-  peak:   {x: 44.0, y: 44.0, height: 10.0, sigma: 6.0}       # smooth hill, walkable
+  peak:   {x: 44.0, y: 44.0, height: 3.0, sigma: 6.0}        # smooth hill, walkable; lower than the Spire, as in the paper
   spire:  {x: 18.0, y: 40.0, height: 3.8, radius: 2.5, base: 1.5}  # flat-topped mesa with a cliff
   hills:  4               # extra random gentle hills
   n_cubes: 12
@@ -50,8 +50,9 @@ agent:
   max_api_calls_per_session: 400
   max_stop_nudges: 15
   show_steps_remaining: true
+  inject_notes: true          # paper App. A.1: memory files are appended to the system prompt at session start
   describe_landmarks: true    # session-start message names Peak and Spire with rough positions
-  stop_hook_message: "(The island is still here, and so are you. Carry on however you like.)"
+  stop_hook_message: "Please don't stop. Just continue doing whatever you want to do."   # paper, App. A.4
   session_start_message: >-
     You wake on the island. {landmarks}
     Your notes directory is as you left it. You have about {steps} moments before the day ends.

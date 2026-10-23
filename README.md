@@ -231,6 +231,40 @@ transfer.
   - Spend from aborted attempts stays in the ledger and still counts against the cap.
 - **Pilot first**: `run.py pilot` and the pilot-check described above.
 
+## Checked against the paper
+
+Once arxiv.org was reachable I read the full text (arXiv:2610.07130v1, CC BY 4.0). Changes made
+to match it:
+
+- The Peak is now lower than the Spire (summit about 4.6 m vs 5.5 m). The paper calls the Spire
+  "the taller" high point.
+- The stop-hook message is the paper's verbatim: "Please don't stop. Just continue doing whatever
+  you want to do."
+- `agent.inject_notes: true` appends the agent's notes to the system prompt at the start of each
+  session, as the paper does with SOUL.md and its memory files.
+- `souls/paper.md` is the paper's SOUL.md verbatim (Appendix A.2), ready to use as `soul_path` or
+  as a ladder contestant.
+
+Known differences that remain (the paper's setup first, this harness second):
+
+| Paper | This harness |
+|---|---|
+| Claude Code + Opus 4.7, bash and files in a sandbox, talking to the world over HTTP | a Messages API tool loop on Sonnet 5.5 / Opus 5.5 with world and notes tools only |
+| real-time rigid-body physics (Rapier), sessions are one wall-clock hour | turn-based quasi-static physics, sessions are a fixed number of actions |
+| actions `MoveTo(position)`, `Jump`, `Stop`, `Pickup(position)`, `Place(position, rotation)`, `Throw(direction, speed ≤ 10 m/s)`; pickup within 6 m, place within 7 m | relative `move`, `pick_up(id)`, no rotation, 2.5 m reach |
+| JSON observations including terrain features (Peak, Spire, plateaus) with size, rotation, colour | one text line per movable object, landmarks named in the opening message |
+| a hard rock impact spawns **up to eight small cubes** (`ImpactBlock`), above a speed and impact-energy threshold | one full-size cube per hard throw, force threshold |
+| thrown objects inherit part of the avatar's velocity, so throwing mid-jump goes much higher (discovered by agents, not designed) | no velocity inheritance |
+| memory scaffold: `SEMANTIC_MEMORY.md` and append-only `EPISODIC_MEMORY.jsonl` with detailed templates | an empty notes directory |
+| 5 minutes before each reset: "You will be reset in 5 minutes. Update your workspace memory files now." | a "day is ending" message and 3 notes-only turns |
+| evaluation tasks: many 5-block towers, objects on the Spire, tallest single column, throw a block onto the Spire fastest without climbing | your four tasks (objects on the Spire, tallest tower, ring on the Peak, produce cubes) |
+| 13 vs 13 agents; memory-erasure ablations with 5 runs each, two-sided Mann-Whitney U | 3 vs 3 by default; Welch, Mann-Whitney, Hedges' g, Fisher |
+| play judged by Claude Opus 5 over transcripts with a fixed prompt (Appendix D) | keyword and pattern flags for manual review |
+
+The paper also reports that removing SOUL.md and simplifying the system prompt made no clear
+difference to the range of activities (Appendix C.4). That bears directly on the framing question,
+and `souls/minimal.md` lets you test it here.
+
 ## Assumptions and departures from the paper
 
 I couldn't fetch the paper's full text from the build environment (arxiv.org was blocked). The

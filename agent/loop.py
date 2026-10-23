@@ -49,6 +49,11 @@ def run_session(
     def status(used: int) -> str:
         return f"\nMoments left today: {steps - used}" if show_left else ""
 
+    if a.get("inject_notes"):
+        # paper App. A.1: memory is appended to the system prompt at each session start
+        files = notes.dump()
+        if files:
+            soul = soul + "\n\n# Your notes as they were when this day began\n" + "\n".join(f"\n## {k}\n{v}" for k, v in files.items())
     first_obs = world.observe()
     messages: list = [{"role": "user", "content": f"{opening}\n\n{first_obs}{status(0)}"}]
     log("session_start", **meta, steps=steps, soul=soul, opening=opening, world_seed=world.seed, hidden_rules=ground_truth(world))
