@@ -28,7 +28,13 @@ plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 8, "axes.edgecol
 # columns: well, item (conductor|surface|intermediate|production|liner|open_hole|tubing|packer|plug|perf), od_in, weight_lbft, grade,
 #          top_mmd, base_mmd, status, source
 rows = [
- # TEC-2 (1956 discovery well). Casing strings not stated in any package source (Tonalli 2019 estado mecanico is a drawing only).
+ # TEC-2 (1956 discovery well). Casing from the PEMEX weekly drilling reports (Forma 19, Apr-Jun 1956) and the
+ # 2017 CNH clause-3.3 cedula; PEMEX depths are from the rotary table (E.R. 3.80 m on the Oct 1971 schematic).
+ ("TEC-2","surface",9.625,36,"J-55",0,607.9,"cemented, 37,500 kg Portland (24 Apr 1956)","TECOLUTLA_2_Daily Drilling Reports.pdf (1oHDmwaM), tally 607.87 m"),
+ ("TEC-2","production",6.625,24,"N-80/J-55 20-24",0,2307.4,"cemented, 25,000 kg (17 May 1956)","TECOLUTLA_2_Daily Drilling Reports.pdf, tally 2,307.38 m"),
+ ("TEC-2","liner",4.5,11.6,"J-55",2288.7,2375,"cemented, 5,000 kg (28 May 1956)","TECOLUTLA_2_Daily Drilling Reports.pdf; CNH cedula Tec-2 (1P4eFDsW)"),
+ ("TEC-2","tubing",2.875,None,None,0,2295,"2 7/8 in to 2,295 m (2017)","CNH cedula Tec-2 (1P4eFDsW)"),
+ ("TEC-2","plug",None,None,None,2366,2375,"cement bottom plug (1956)","TECOLUTLA_2_Daily Drilling Reports.pdf"),
  ("TEC-2","perf",None,None,None,2307.4,2311,"active 2019","Tecolutla Perforations Information.csv"),
  ("TEC-2","plug",None,None,None,2330,2331,"bridge plug","Tecolutla Perforations Information.csv"),
  ("TEC-2","perf",None,None,None,2335,2339,"squeezed","Tecolutla Perforations Information.csv"),
@@ -37,11 +43,12 @@ rows = [
  ("TEC-2","perf",None,None,None,2353,2354,"squeezed","Tecolutla Perforations Information.csv"),
  ("TEC-2","perf",None,None,None,2019,2020,"2019 RTG 1 11/16 in shallow shot (interval per Tonalli 2019 estado mecanico text)","TON_estado_mecanico_tec_2_20190219.pdf (1RxpD0jw)"),
  ("TEC-2","td",None,None,None,0,2375,"TD","Tecolutla Well Header Information.csv"),
- ("TEC-2","casing_unknown",None,None,None,0,2375,"casing strings not in the package (G-54)","-"),
- # TEC-3 (1956, salt water, plugged)
- ("TEC-3","open_hole",None,None,None,2376.8,2380.8,"open hole","Tecolutla Perforations Information.csv"),
- ("TEC-3","td",None,None,None,0,2381,"TD; plugged 1956 (salt water)","Well header CSV; TEC-6 informe final"),
- ("TEC-3","casing_unknown",None,None,None,0,2381,"casing strings not in the package (G-54)","-"),
+  # TEC-3 (1956, water-invaded on test, plugged 7 Mar 1956). PEMEX estado mecanico (updated 19 May 2006) in the 2017 CNH cedula.
+ ("TEC-3","surface",9.625,36,"J-55",0,501.35,"cemented","PEMEX estado mecanico TEC-3 (1XtyXmV6); CNH cedula Tec-3 (1PpxStcY)"),
+ ("TEC-3","open_hole",8.625,None,None,501.35,2380.5,"open hole 8 5/8 in","PEMEX estado mecanico TEC-3 (1XtyXmV6)"),
+ ("TEC-3","plug",None,None,None,571.7,625,"cement plug","PEMEX estado mecanico TEC-3 (1XtyXmV6)"),
+ ("TEC-3","plug",None,None,None,2310,2380.5,"cement plug (bottom)","PEMEX estado mecanico TEC-3 (1XtyXmV6)"),
+ ("TEC-3","td",None,None,None,0,2380.5,"TD; plugged 7 Mar 1956 (water on formation test)","PEMEX estado mecanico TEC-3; header CSV gives 2,381"),
  # TEC-5 (1956, structurally low, plugged)
  ("TEC-5","surface",9.625,36,"J-55",0,501.35,"cemented","BLOQUE_TECOLUTLA_5_ESTADO_MECANICO.pdf (1VCktsVx)"),
  ("TEC-5","open_hole",8.625,None,None,501.35,2562.1,"open hole 8 5/8 in, plugged 28 Jul 1956","BLOQUE_TECOLUTLA_5_ESTADO_MECANICO.pdf"),
@@ -140,7 +147,7 @@ for ax, w in zip(axes, order):
     ax.grid(axis="y", color=GRID, lw=0.6); ax.set_axisbelow(True)
     for s in ("top", "right", "bottom"): ax.spines[s].set_visible(False)
 axes[0].set_ylabel("Depth, m MD below KB")
-fig.suptitle("Wellbore schematics, Tecolutla field (colour = active perforations; grey = squeezed/inactive; black = plugs; dotted = open hole or unknown casing). Depth to scale, diameters not.", fontsize=9, color=INK)
+fig.suptitle("Wellbore schematics, Tecolutla field (colour = active perforations; grey = squeezed/inactive; black = plugs; dotted = open hole). Depth to scale, diameters not.", fontsize=9, color=INK)
 fig.tight_layout(); fig.savefig(FIG / "18_wellbore_schematics.png", dpi=170, facecolor=SURF); plt.close(fig)
 
 # ---------------- figure 19: per-well histories -----------------

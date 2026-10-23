@@ -1,4 +1,9 @@
 well,item,od_in,weight_lbft,grade,top_mmd,base_mmd,status,source,kb_m
+TEC-2,surface,9.625,36.0,J-55,0.0,607.9,"cemented, 37,500 kg Portland (24 Apr 1956)","TECOLUTLA_2_Daily Drilling Reports.pdf (1oHDmwaM), tally 607.87 m",4.0
+TEC-2,production,6.625,24.0,N-80/J-55 20-24,0.0,2307.4,"cemented, 25,000 kg (17 May 1956)","TECOLUTLA_2_Daily Drilling Reports.pdf, tally 2,307.38 m",4.0
+TEC-2,liner,4.5,11.6,J-55,2288.7,2375.0,"cemented, 5,000 kg (28 May 1956)",TECOLUTLA_2_Daily Drilling Reports.pdf; CNH cedula Tec-2 (1P4eFDsW),4.0
+TEC-2,tubing,2.875,,,0.0,2295.0,"2 7/8 in to 2,295 m (2017)",CNH cedula Tec-2 (1P4eFDsW),4.0
+TEC-2,plug,,,,2366.0,2375.0,cement bottom plug (1956),TECOLUTLA_2_Daily Drilling Reports.pdf,4.0
 TEC-2,perf,,,,2307.4,2311.0,active 2019,Tecolutla Perforations Information.csv,4.0
 TEC-2,plug,,,,2330.0,2331.0,bridge plug,Tecolutla Perforations Information.csv,4.0
 TEC-2,perf,,,,2335.0,2339.0,squeezed,Tecolutla Perforations Information.csv,4.0
@@ -7,10 +12,11 @@ TEC-2,perf,,,,2345.0,2349.0,squeezed,Tecolutla Perforations Information.csv,4.0
 TEC-2,perf,,,,2353.0,2354.0,squeezed,Tecolutla Perforations Information.csv,4.0
 TEC-2,perf,,,,2019.0,2020.0,2019 RTG 1 11/16 in shallow shot (interval per Tonalli 2019 estado mecanico text),TON_estado_mecanico_tec_2_20190219.pdf (1RxpD0jw),4.0
 TEC-2,td,,,,0.0,2375.0,TD,Tecolutla Well Header Information.csv,4.0
-TEC-2,casing_unknown,,,,0.0,2375.0,casing strings not in the package (G-54),-,4.0
-TEC-3,open_hole,,,,2376.8,2380.8,open hole,Tecolutla Perforations Information.csv,6.0
-TEC-3,td,,,,0.0,2381.0,TD; plugged 1956 (salt water),Well header CSV; TEC-6 informe final,6.0
-TEC-3,casing_unknown,,,,0.0,2381.0,casing strings not in the package (G-54),-,6.0
+TEC-3,surface,9.625,36.0,J-55,0.0,501.35,cemented,PEMEX estado mecanico TEC-3 (1XtyXmV6); CNH cedula Tec-3 (1PpxStcY),6.0
+TEC-3,open_hole,8.625,,,501.35,2380.5,open hole 8 5/8 in,PEMEX estado mecanico TEC-3 (1XtyXmV6),6.0
+TEC-3,plug,,,,571.7,625.0,cement plug,PEMEX estado mecanico TEC-3 (1XtyXmV6),6.0
+TEC-3,plug,,,,2310.0,2380.5,cement plug (bottom),PEMEX estado mecanico TEC-3 (1XtyXmV6),6.0
+TEC-3,td,,,,0.0,2380.5,TD; plugged 7 Mar 1956 (water on formation test),"PEMEX estado mecanico TEC-3; header CSV gives 2,381",6.0
 TEC-5,surface,9.625,36.0,J-55,0.0,501.35,cemented,BLOQUE_TECOLUTLA_5_ESTADO_MECANICO.pdf (1VCktsVx),4.0
 TEC-5,open_hole,8.625,,,501.35,2562.1,"open hole 8 5/8 in, plugged 28 Jul 1956",BLOQUE_TECOLUTLA_5_ESTADO_MECANICO.pdf,4.0
 TEC-5,plug,,,,477.8,525.0,cement plug,BLOQUE_TECOLUTLA_5_ESTADO_MECANICO.pdf,4.0
