@@ -300,13 +300,21 @@ class PaperWorld(World):
     def _shatter(self, x: float, y: float, z: float, k: int) -> None:
         self.impacts += 1
         n = 0
+        legacy = bool(self.pcfg.get("legacy_impact_ids"))
+        start = sum(1 for o in self.objects.values() if o.shape == "impact")
         for i in range(k):
             ang = 2 * math.pi * i / k + 0.37 * self.impacts
             r = 0.75 + 0.25 * (i % 2)
-            n += 1
-            while f"impact_{n}" in self.objects or f"impact_{n}" in self.lost:
+            if legacy:
+                # runs made before this was fixed numbered new debris by counting what was left,
+                # which could reuse the id of a piece still on the island and silently replace it;
+                # kept only so those runs replay exactly
+                oid = f"impact_{start + i + 1}"
+            else:
                 n += 1
-            oid = f"impact_{n}"
+                while f"impact_{n}" in self.objects or f"impact_{n}" in self.lost:
+                    n += 1
+                oid = f"impact_{n}"
             o = self._add(oid, "impact", "stone", self._clamp(x + math.cos(ang) * r), self._clamp(y + math.sin(ang) * r))
             o.z = max(z, self.terrain.height(o.x, o.y))
             self.spawned += 1
