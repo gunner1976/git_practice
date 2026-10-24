@@ -1,0 +1,13 @@
+{
+ "per_call": {
+  "input": 2.710369487485101,
+  "output": 175.5196662693683,
+  "cache_read": 29278.65315852205,
+  "cache_write": 600.7497020262217
+ },
+ "seconds": 12092.199999999999,
+ "calls": 839,
+ "model": "claude-sonnet-5-5",
+ "source_run": "pilot-20261024-005431",
+ "note": "Sonnet 5.5, paper-style free play, 1 agent x 10 days of 20 min (world resets)."
+}

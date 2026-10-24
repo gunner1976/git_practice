@@ -160,8 +160,10 @@ def token_profile(root: Path) -> dict:
 
 def price_watch(root: Path, pricing: dict, agents: int = 1000, days: int = 10, day_minutes: float = 20, budget: float = 100.0) -> str:
     """Cost of `agents` x `days` free-play days for every priced model, using the token profile
-    measured in `root` (so the behaviour assumed is that run's). Batch = 50% off."""
-    p = token_profile(root)
+    measured in `root` (a run directory, or a saved profile .json) - so the behaviour assumed is
+    that run's. Batch = 50% off."""
+    root = Path(root)
+    p = json.loads(root.read_text()) if root.suffix == ".json" else token_profile(root)
     calls_per_day = p["calls"] / (p["seconds"] / (day_minutes * 60))
     agent_days = agents * days
     lines = [f"Profile from {Path(root).name} ({p['model']}): {calls_per_day:.0f} calls per {day_minutes:g}-minute day; per call "

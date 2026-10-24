@@ -211,7 +211,8 @@ def cmd_price_watch(args) -> None:
         name, vals = spec.split("=", 1)
         i, o, cr, cw = (float(v) for v in vals.split(","))
         pricing[name] = {"input": i, "output": o, "cache_read": cr, "cache_write": cw}
-    print(price_watch(ROOT / "runs" / (args.run_id or "pilot-20261024-005431"), pricing, agents=args.agents or 1000,
+    src = Path(args.profile) if args.profile else ROOT / "runs" / args.run_id if args.run_id else ROOT / "analysis/profiles/sonnet-paper-freeplay.json"
+    print(price_watch(src, pricing, agents=args.agents or 1000,
                       days=args.sessions or 10, budget=args.max_usd or 100.0))
 
 
@@ -287,6 +288,7 @@ def main(argv=None) -> None:
         p.add_argument("--mock", action="store_true", help="use the scripted mock model (no API calls)")
         p.add_argument("--skip-pilot-check", action="store_true")
         if name == "price-watch":
+            p.add_argument("--profile", help="saved token profile .json (default: analysis/profiles/sonnet-paper-freeplay.json)")
             p.add_argument("--price", action="append", metavar="MODEL=IN,OUT,CACHE_READ,CACHE_WRITE", help="price a model not in config.yaml (USD per million tokens)")
         if name == "viewer":
             p.add_argument("--include", action="append", metavar="RUN_ID", help="also show this run (same island); repeatable")

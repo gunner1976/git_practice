@@ -1,0 +1,13 @@
+{
+ "per_call": {
+  "input": 2.3454281567489113,
+  "output": 330.6400580551524,
+  "cache_read": 13294.422351233672,
+  "cache_write": 2238.6676342525398
+ },
+ "seconds": 23530.2,
+ "calls": 689,
+ "model": "claude-haiku-5-5",
+ "source_run": "m-haiku-think",
+ "note": "Haiku 5.5 at low effort with the trimming fix, 10 agents x 2 days of 20 min."
+}
