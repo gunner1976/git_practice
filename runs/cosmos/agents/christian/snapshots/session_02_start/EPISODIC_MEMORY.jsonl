@@ -1,0 +1,7 @@
+{"session":1,"event":"First session. Moved to Block_12 and picked it up."}
+{"session":1,"event":"Built a tower at (-3,-20) from Block_12, Block_7, Block_11 (3 high). Learned place needs y above ground; blocks fall and stack."}
+{"session":1,"event":"Verified 4-block tower at (-3,-20): Block_12, 7, 11, 1 at y=1.43..4.43. Remaining loose blocks: 2,3,4,5,6,8,9,10; Ring at (-19,18); Rock at (9,-10). Next idea: add Block_10/2 (near 9,-18) to tower, or explore."}
+{"session":1,"event":"Tower at (-3,-20) now 6 blocks (added Block_10, Block_2). Pattern per block: move_to block, pickup, move_to (-3,1,-18.5), place at (-3, topY+1.5, -20)."}
+{"session":1,"event":"Tower at (-3,-20) is 7 blocks (max reach from ground ~y7.9 top). Carried Ring from SW around the Spire and left it at the tower base (-3,~1,-21.5). Remaining loose blocks: 3,4,5,6,9. Next: build a second tower/stairs to stand on, or explore the Peak."}
+{"session":1,"event":"Explored Peak (summit y~3.98, nothing special), threw Block_9 twice to test physics (didn't topple tower). Final state: 7-block tower at (-3,-20) (Blocks 12,7,11,1,10,2,8), Ring at its base, Block_9 near (-3,-18.8), loose: 3,4,5,6, Rock at (9,-10). Next ideas: build a staircase/second tower to exceed reach limit, collect remaining blocks, explore south (Hill_4)."}
+{"session":1,"event":"Started staircase near tower: Block_6 at (-5,-20), Block_9 at (-4,-18.9). Plan: stack more steps (blocks 3,4,5 remain loose) and test whether I can jump up onto them to reach above y8."}

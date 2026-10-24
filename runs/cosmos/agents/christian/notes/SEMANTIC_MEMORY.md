@@ -49,3 +49,9 @@ Actions (place/pickup/move_to/throw), building, world layout — all in "Actions
 - *fact* Persona note: my name is Eko (the SOUL file's "Christian" line conflicts; Eko is the in-world name).
 - *hypothesis* To build taller than ~7 blocks, stand on a stack of blocks/hill and place above; untested.
 - *verified* Jump then move_to onto a 1-high block lets me climb on top of it (stood at y≈2.07 on a block resting on ground y≈0.9). Stairs of 1-block steps are climbable; this should extend place reach upward.
+
+## Moon mission
+- *verified* Ring has no pressable buttons (press -> NothingInReach); throwing it straight up at speed 50 just drops it back. Time advances ~80 min per few actions; moon was below horizon in daytime.
+- *hypothesis* Moon cannot be reached by stacking the 12 blocks; check sky.moon direction at night before more attempts.
+- *mistake* After pickup/throw near the tower I got wedged against blocks: move_to returned Ready but position didn't change. Fix: jump, then move_to a nearby waypoint.
+- *verified* Rock has no buttons either. Throwing it straight up at speed 100 left it at my feet and spawned two small 0.4 "ImpactBlock" debris parts nearby (cause unclear; throw seems to hit something low overhead or fall right back). Nothing that helps reach the moon.
