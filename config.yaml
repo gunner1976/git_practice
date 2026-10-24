@@ -41,7 +41,7 @@ agent:
   model: claude-sonnet-5-5    # or claude-opus-5-5
   effort: medium              # output_config.effort: low | medium | high | xhigh | max
   max_tokens: 8000
-  thinking_display: summarized  # summarized | omitted (adaptive thinking is always on for these models)
+  thinking_display: summarized  # summarized | omitted | off (off = thinking disabled; Haiku 5.5 only, at effort high or below)
   refusal_fallback: true      # server-side `fallbacks: "default"`; fallback turns are flagged in logs
   soul_path: soul.md
   steps_per_session: 150      # world actions per session (stands in for the paper's 1 hour)

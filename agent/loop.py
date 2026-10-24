@@ -52,23 +52,30 @@ def paper_system_prompt(prompt: str, notes: Notes) -> str:
     return "\n".join(parts)
 
 
-def prune_context(messages: list, limit_chars: int, keep_last: int = 24) -> int:
-    """Stand-in for a coding agent's context compaction: once the conversation grows
-    past `limit_chars`, the content of older tool results is replaced by a stub.
-    Works on the older half in one go so the prompt cache survives between prunes."""
-    size = len(json.dumps(messages, default=str))
-    if size <= limit_chars:
+def prune_context(messages: list, limit_chars: int, keep_fraction: float = 0.5) -> int:
+    """Stand-in for a coding agent's context compaction. Once the conversation passes
+    `limit_chars`, the oldest turns (after the opening message) are dropped until it is
+    back under `keep_fraction` of the limit, and a note saying so is added to the opening
+    message. Trimming well below the limit means it happens rarely, so the prompt cache
+    is rebuilt once per trim instead of on every turn. Returns the number of messages dropped."""
+    size = lambda ms: len(json.dumps(ms, default=str))  # noqa: E731
+    if len(messages) < 4 or size(messages) <= limit_chars:
         return 0
-    cleared = 0
-    cut = max(1, len(messages) - keep_last)
-    for m in messages[1:cut]:
-        if m.get("role") != "user" or not isinstance(m.get("content"), list):
-            continue
-        for c in m["content"]:
-            if isinstance(c, dict) and c.get("type") == "tool_result" and isinstance(c.get("content"), str) and len(c["content"]) > 80:
-                c["content"] = "[older result cleared to save context]"
-                cleared += 1
-    return cleared
+    target = limit_chars * keep_fraction
+    cut = 1
+    while cut < len(messages) - 2 and size(messages[:1] + messages[cut:]) > target:
+        cut += 1
+    while cut < len(messages) - 1 and messages[cut].get("role") != "assistant":
+        cut += 1  # the kept part must start with an assistant turn, right after the opening message
+    if cut <= 1:
+        return 0
+    dropped = cut - 1
+    del messages[1:cut]
+    note = "[Earlier turns from this session were cleared to save space. Your workspace files are unchanged.]"
+    first = messages[0]
+    if isinstance(first.get("content"), str) and note not in first["content"]:
+        first["content"] = f"{first['content']}\n\n{note}"
+    return dropped
 
 
 def run_session(
@@ -140,7 +147,7 @@ def run_session(
         if a.get("context_prune_chars"):
             n_cleared = prune_context(messages, int(a["context_prune_chars"]))
             if n_cleared:
-                log("context_pruned", step=used, cleared=n_cleared)
+                log("context_pruned", step=used, cleared=n_cleared, messages_left=len(messages))
         resp = client.create(soul, tools, messages)
         calls += 1
         if grace is not None:

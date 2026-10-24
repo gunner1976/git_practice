@@ -43,7 +43,7 @@ def render(path: Path, max_obs_lines: int = 20) -> str:
         elif k == "reset_warning":
             out.append(f"  - *(reset warning sent at {e['clock'] / 60:.1f} min)*")
         elif k == "context_pruned":
-            out.append(f"  - *(context: {e['cleared']} older tool results cleared)*")
+            out.append(f"  - *(context trimmed: {e['cleared']} older messages dropped)*")
         elif k == "notes_diff":
             out += ["```diff", e["diff"].rstrip()[:3000], "```"]
         elif k == "observation" and e["step"] == 0:

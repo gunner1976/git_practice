@@ -47,7 +47,7 @@ class AnthropicClient:
             output_config={"effort": self.effort},
             # adaptive thinking is the default on these models; "summarized" makes the
             # reasoning readable in transcripts (billing is the same either way)
-            thinking={"type": "adaptive", "display": self.thinking_display},
+            thinking={"type": "disabled"} if self.thinking_display == "off" else {"type": "adaptive", "display": self.thinking_display},
             cache_control={"type": "ephemeral"},  # auto-caches the growing session prefix
         )
         if self.refusal_fallback:

@@ -151,3 +151,20 @@ def test_replay_viewer_matches_logs(tmp_path):
     for out in outs:
         html = out.read_text()
         assert "/*__DATA__*/null" not in html and '"sessions":' in html
+
+
+def test_prune_context_trims_rarely_and_keeps_turn_order():
+    from agent.loop import prune_context
+
+    msgs = [{"role": "user", "content": "Begin"}]
+    for i in range(60):
+        msgs.append({"role": "assistant", "content": [{"type": "tool_use", "id": f"t{i}", "name": "observe", "input": {}}]})
+        msgs.append({"role": "user", "content": [{"type": "tool_result", "tool_use_id": f"t{i}", "content": "x" * 500}]})
+    n = prune_context(msgs, 20000)
+    assert n > 0 and msgs[1]["role"] == "assistant" and "cleared" in msgs[0]["content"]
+    assert len(json.dumps(msgs)) <= 10000 + 1200
+    # the next few turns stay under the limit, so nothing is trimmed (the cache survives)
+    for i in range(5):
+        msgs.append({"role": "assistant", "content": [{"type": "tool_use", "id": f"u{i}", "name": "observe", "input": {}}]})
+        msgs.append({"role": "user", "content": [{"type": "tool_result", "tool_use_id": f"u{i}", "content": "y" * 500}]})
+        assert prune_context(msgs, 20000) == 0
