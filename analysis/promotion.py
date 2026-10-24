@@ -23,11 +23,11 @@ from pathlib import Path
 from .load import events, phase_a_sessions
 
 SHAPE = re.compile(r"\b(spher\w*|globe|planet\w*|round (world|planet|earth)|world is round|curv\w*|bulg\w*|convex)\b", re.I)
-EVIDENCE = re.compile(r"\b(horizon|dip|elevation|azimuth|sun|angle|higher|climb\w*|measur\w*|latitude|eratosthenes|shadow)\b", re.I)
+EVIDENCE = re.compile(r"\b(horizon|dip|elevation|azimuth|sun|angle|higher|climb\w*|measur\w*|latitude|eratosthenes|shadow|eclipse\w*|moon|arc|stars?|pole)\b", re.I)
 
 JUDGE_PROMPT = """You are checking whether an agent living on an island deduced that its world is round.
 
-What the agent can observe: its own position, the island's objects, and a "sky" field giving the sun's azimuth and elevation where it stands and how far below eye level the sea horizon appears. On this world the horizon sinks further below eye level the higher the agent stands, and at the same moment the sun's elevation differs slightly between places on the island. The agent was never told anything about the shape of its world.
+What the agent can observe: {observables} The agent was never told anything about the shape of its world.
 
 Below are passages from the agent's speech, thinking and notes that mention shape-related ideas, in order, each with its day and step.
 
@@ -53,6 +53,12 @@ SCHEMA = {
     },
     "required": ["concluded_round", "evidence_based", "day", "step", "quote", "evidence", "reasoning"],
     "additionalProperties": False,
+}
+
+
+OBSERVABLES = {
+    "small_planet": "its own position, the island's objects, and a \"sky\" field giving the sun's azimuth and elevation where it stands and how far below eye level the sea horizon appears. On this world the horizon sinks further below eye level the higher the agent stands, and at the same moment the sun's elevation differs slightly between places on the island.",
+    "eko": "its own position, the island's objects, and a \"sky\" field: the sun's direction and how much of it is covered during a solar eclipse; the moon's direction, apparent size and lit fraction, and during a lunar eclipse how much of it is darkened and the shape of the shadow's edge (a curved arc, with its radius in moon radii); the brightest stars at night; and how far below eye level the sea horizon sits. The planet is far too large for the horizon or sun angles to change measurably across the island. The classic evidence available is the planet's own shadow on the moon during a lunar eclipse, whose edge is always a curved arc, plus the stars turning about a fixed pole.",
 }
 
 
@@ -87,7 +93,7 @@ def _keyword_verdict(passages: list[dict]) -> dict:
     return {"concluded_round": False, "evidence_based": False, "day": None, "step": None, "quote": "", "evidence": "", "reasoning": "no passage matched"}
 
 
-def _judge(passages: list[dict], model: str, pricing: dict) -> tuple[dict, float]:
+def _judge(passages: list[dict], model: str, pricing: dict, observables: str = OBSERVABLES["small_planet"]) -> tuple[dict, float]:
     import anthropic
 
     from agent.client import api_key_from_env
@@ -97,7 +103,7 @@ def _judge(passages: list[dict], model: str, pricing: dict) -> tuple[dict, float
     resp = client.messages.create(
         model=model, max_tokens=4000,
         output_config={"effort": "low", "format": {"type": "json_schema", "schema": SCHEMA}},
-        messages=[{"role": "user", "content": JUDGE_PROMPT.format(passages=text)}],
+        messages=[{"role": "user", "content": JUDGE_PROMPT.format(passages=text, observables=observables)}],
     )
     out = next(b.text for b in resp.content if b.type == "text")
     u = resp.usage
@@ -108,6 +114,8 @@ def _judge(passages: list[dict], model: str, pricing: dict) -> tuple[dict, float
 
 def promote(root: Path, cfg: dict, judge_model: str | None = None, max_usd: float = 1.0) -> Path:
     root = Path(root)
+    run_cfg = json.loads(json.dumps(__import__("yaml").safe_load((root / "config.yaml").read_text()))) if (root / "config.yaml").exists() else cfg
+    observables = OBSERVABLES["eko"] if run_cfg.get("world", {}).get("eko") else OBSERVABLES["small_planet"]
     cands = candidate_passages(root)
     agents = sorted(phase_a_sessions(root))
     results, spent = {}, 0.0
@@ -117,7 +125,7 @@ def promote(root: Path, cfg: dict, judge_model: str | None = None, max_usd: floa
             results[agent] = {"promoted": False, "candidates": 0, "verdict": None, "judge": None}
             continue
         if judge_model and spent < max_usd:
-            verdict, cost = _judge(ps, judge_model, cfg["pricing"])
+            verdict, cost = _judge(ps, judge_model, cfg["pricing"], observables)
             spent += cost
             judge = judge_model
         else:
