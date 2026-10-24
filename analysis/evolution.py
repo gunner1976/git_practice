@@ -136,6 +136,8 @@ def build_evolution(root: Path) -> Path:
         rows = []
         for k, p in items:
             log = events(p)
+            if not any(r["kind"] == "session_end" for r in log):
+                continue  # cut short (cost cap or crash); it is re-run from scratch on resume
             final = next((r["files"] for r in log if r["kind"] == "notes_final"), {})
             s = by_id[f"{agent}/A{k:02d}"]
             rows.append({"day": k, **session_metrics(s, data["terrain"], log, before, final)})
