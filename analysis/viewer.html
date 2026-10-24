@@ -162,6 +162,10 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .ev.note .p, .ev.read .tx { font-family: var(--mono); font-size: 11px; color: var(--note); }
 .ev.rule .tx { color: var(--signal); font-weight: 600; }
 .ev.nudge .tx { color: var(--muted); font-size: 12px; }
+.ev.calc .tx { font-family: var(--mono); font-size: 12px; }
+.ev.calc .res { color: var(--accent); }
+.ev.answer .tx { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 4px 8px; border-radius: 0 4px 4px 0; }
+.ev.answer .p { font-family: var(--mono); font-size: 11px; color: var(--accent); }
 .nfile { margin-bottom: 12px; }
 .nfile h3 { font-family: var(--mono); font-size: 12px; font-weight: 500; margin: 0 0 4px; color: var(--note); display: flex; gap: 8px; align-items: center; }
 .nfile .fresh { font-family: var(--body); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; background: var(--note); color: var(--panel); padding: 1px 6px; border-radius: 4px; }
@@ -713,6 +717,8 @@ const DATA = /*__DATA__*/null;
     else if (e.k === "read") body = `read ${esc(e.p)}`;
     else if (e.k === "rule") body = `Hidden rule fired: ${esc(e.t)}${e.id ? " → " + esc(e.id) : ""}`;
     else if (e.k === "nudge") body = `Stop hook nudge #${esc(e.n)}`;
+    else if (e.k === "calc") body = `calculate ${esc(e.t)}\n<span class="res">= ${esc(e.r)}</span>`;
+    else if (e.k === "answer") body = `<div class="p">answered the voice</div><b>${esc(e.t)}</b>\n${esc(e.r)}`;
     return `<div class="ev ${e.k}${e.k === "act" && e.e ? " err" : ""}" data-f="${e.f}"><span class="st">${f}</span><div class="tx">${body}</div></div>`;
   }
   function renderPane(rebuild) {

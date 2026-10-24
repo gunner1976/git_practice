@@ -14,7 +14,7 @@ from world.rules import ground_truth
 from .client import block_to_dict
 from .cost import Budget, usage_dict
 from .notes import Notes
-from .tools import run_notes_tool, run_world_tool, tool_set
+from .tools import calculate, extra_tools, run_notes_tool, run_world_tool, tool_set
 
 
 class JsonlLog:
@@ -98,6 +98,9 @@ def run_session(
         world.set_state(start_state, avatar=bool(cfg["world"].get("persist_avatar", True)))
     show_left = bool(a["show_steps_remaining"])
     tools, world_names, notes_names, query_names = tool_set(cfg)
+    extras = extra_tools(cfg)
+    tools = tools + extras
+    extra_names = {t["name"] for t in extras}
     clk = a.get("clock")  # paper mode: the session is an hour of simulated wall-clock time
     clock = 0.0
     warned = False
@@ -220,6 +223,23 @@ def run_session(
                             log("hidden_rule_fired", step=used, event=e)
                     log("action", step=used, name=name, input=args, result=msg, error=err, events=events, **({"clock": round(clock, 1)} if clk else {}))
                     last_world_idx = len(results)
+            elif name in extra_names:
+                if clk:
+                    clock += float(clk["query_seconds"])
+                if name == "calculate":
+                    try:
+                        msg, err = calculate(str(args.get("expression", ""))), False
+                    except Exception as e:  # noqa: BLE001 - any bad expression goes back to the agent
+                        msg, err = f"Could not evaluate: {e}", True
+                else:  # answer
+                    try:
+                        value = float(args["value"])
+                        msg, err = "The voice hears your answer.", False
+                        log("answer", step=used, value=value, units=str(args.get("units", "")), explanation=str(args.get("explanation", "")),
+                            **({"clock": round(clock, 1)} if clk else {}))
+                    except (KeyError, TypeError, ValueError):
+                        msg, err = "An answer needs a numeric value.", True
+                log("tool_call", step=used, name=name, input=args, result=msg[:4000], error=err)
             elif name in query_names:
                 msg, err = world.observe_json({"time": now_iso()}), False
                 if clk:

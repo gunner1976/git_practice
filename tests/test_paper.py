@@ -237,3 +237,31 @@ def test_price_watch_reports_every_model(tmp_path):
     text = price_watch(tmp_path / "r", {**cfg["pricing"], "free-model": {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0}})
     assert "10,000 agent-days" in text and "claude-sonnet-5-5" in text
     assert "free-model" in text and "UNDER budget" in text
+
+
+def test_calculator_is_arithmetic_only():
+    from agent.tools import calculate
+
+    assert calculate("2*pi*10") == "62.8318530718"
+    assert calculate("sum([hypot(3,4), 5])") == "10.0"
+    for bad in ('__import__("os")', "open('x')", "().__class__", "9**999", "x"):
+        with pytest.raises(Exception):
+            calculate(bad)
+
+
+def test_math_challenge_flow_and_report(tmp_path):
+    from analysis.challenges import challenge_report
+    from analysis.replay import write_viewer
+
+    cfg = run.read_cfg(ROOT / "configs/math_perimeter.yaml")
+    cfg["agent"]["clock"].update(session_seconds=300, warn_before_seconds=60)
+    r = Run(tmp_path / "r", cfg, (ROOT / "paper/system_prompt.md").read_text(), max_usd=50, mock=True)
+    r.phase_a(2, 1, 150, 2)
+    log = [json.loads(l) for l in (tmp_path / "r/phase_a/agent_1/session_01.jsonl").read_text().splitlines()]
+    assert log[0]["opening"].startswith("Begin") and "perimeter of the island" in log[0]["opening"]
+    assert any(e["kind"] == "answer" and e["value"] == 175.9 for e in log)
+    assert any(e["kind"] == "tool_call" and e["name"] == "calculate" and e["result"].startswith("175.9") for e in log)
+    text = challenge_report(tmp_path / "r").read_text()
+    assert "True answer:** 179.0" in text and "175.9 m" in text and "-1.8%" in text
+    outs, n, bad = write_viewer(tmp_path / "r")
+    assert bad == [] and '"k":"answer"' in outs[0].read_text()

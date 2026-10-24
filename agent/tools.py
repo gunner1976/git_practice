@@ -112,6 +112,67 @@ APPEND_TOOL = {
 }
 
 
+CALC_TOOL = {
+    "name": "calculate",
+    "description": "Evaluate a math expression and return the result. Supports + - * / ** %, parentheses, lists, "
+                   "pi, e, tau, sqrt, sin, cos, tan, asin, acos, atan, atan2, hypot, dist, exp, log, log10, floor, ceil, "
+                   "abs, round, min, max, sum, len, degrees, radians.",
+    "input_schema": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"], "additionalProperties": False},
+}
+ANSWER_TOOL = {
+    "name": "answer",
+    "description": "Answer the question the voice asked. You can answer again later; your latest answer is the one that counts.",
+    "input_schema": {"type": "object", "properties": {"value": _num, "units": {"type": "string"}, "explanation": {"type": "string"}},
+                     "required": ["value", "explanation"], "additionalProperties": False},
+}
+
+
+def extra_tools(cfg: dict) -> list[dict]:
+    """Tools beyond the world and the workspace: the calculator, and an answer tool when the
+    observer poses a challenge."""
+    a = cfg["agent"]
+    return ([CALC_TOOL] if a.get("math_tool") else []) + ([ANSWER_TOOL] if a.get("challenge") else [])
+
+
+def calculate(expression: str) -> str:
+    """Evaluate arithmetic safely: numbers, operators, lists and whitelisted math functions only."""
+    import ast
+    import math
+
+    names = {k: getattr(math, k) for k in ("pi", "e", "tau", "sqrt", "sin", "cos", "tan", "asin", "acos", "atan", "atan2",
+                                            "hypot", "dist", "exp", "log", "log10", "floor", "ceil", "degrees", "radians")}
+    names.update(abs=abs, round=round, min=min, max=max, sum=sum, len=len)
+
+    def ev(n):
+        if isinstance(n, ast.Expression):
+            return ev(n.body)
+        if isinstance(n, ast.Constant) and isinstance(n.value, (int, float)):
+            return n.value
+        if isinstance(n, (ast.List, ast.Tuple)):
+            return [ev(x) for x in n.elts]
+        if isinstance(n, ast.Name) and n.id in names:
+            return names[n.id]
+        if isinstance(n, ast.UnaryOp) and isinstance(n.op, (ast.USub, ast.UAdd)):
+            v = ev(n.operand)
+            return -v if isinstance(n.op, ast.USub) else v
+        if isinstance(n, ast.BinOp):
+            l, r = ev(n.left), ev(n.right)
+            if isinstance(n.op, ast.Pow) and abs(r) > 64:
+                raise ValueError("exponent too large")
+            ops = {ast.Add: lambda: l + r, ast.Sub: lambda: l - r, ast.Mult: lambda: l * r, ast.Div: lambda: l / r,
+                   ast.Pow: lambda: l ** r, ast.Mod: lambda: l % r, ast.FloorDiv: lambda: l // r}
+            if type(n.op) in ops:
+                return ops[type(n.op)]()
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in names and not n.keywords:
+            return names[n.func.id](*[ev(x) for x in n.args])
+        raise ValueError(f"unsupported expression element: {type(n).__name__}")
+
+    if len(expression) > 4000:
+        raise ValueError("expression too long")
+    v = ev(ast.parse(expression, mode="eval"))
+    return repr(round(v, 10) if isinstance(v, float) else v)
+
+
 def tool_set(cfg: dict) -> tuple[list[dict], set[str], set[str], set[str]]:
     """(tools, world action names, notes names, query names) for this config."""
     if cfg["agent"].get("interface") == "paper":

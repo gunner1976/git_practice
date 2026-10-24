@@ -100,7 +100,7 @@ class MockClient:
     def create(self, system: str, tools: list[dict], messages: list):
         self.n += 1
         if any(t["name"] == "move_to" for t in tools):
-            return self._create_paper(messages)
+            return self._create_paper(messages, tools)
         r = self.rng
         last = messages[-1]["content"]
         last_text = json.dumps(last) if not isinstance(last, str) else last
@@ -132,7 +132,7 @@ class MockClient:
                 calls = [("move", {"dx": dx, "dy": dy})] if r.random() < 0.85 else [("jump", {"dx": 1, "dy": 0})]
         return self._resp([("text", "Let me see.")] + calls, stop="tool_use", messages=messages)
 
-    def _create_paper(self, messages: list):
+    def _create_paper(self, messages: list, tools: list[dict] | None = None):
         """Scripted agent for the paper interface: observe, walk to things, pick them up,
         throw the rock hard, keep the two memory files."""
         r = self.rng
@@ -147,8 +147,12 @@ class MockClient:
                     break
             if obs:
                 break
+        first = messages[0]["content"] if isinstance(messages[0]["content"], str) else ""
         if self.n == 1:
             calls = [("read_note", {"path": "SEMANTIC_MEMORY.md"})]
+        elif self.n == 3 and "perimeter" in first and any(t["name"] == "answer" for t in tools or []):
+            calls = [("calculate", {"expression": "2*pi*28"}),
+                     ("answer", {"value": 175.9, "units": "m", "explanation": "Roughly a circle of radius 28, so 2*pi*28."})]
         elif "reset in 5 minutes" in last_text:
             calls = [("append_note", {"path": "EPISODIC_MEMORY.jsonl", "content": json.dumps({"timestamp": "2026-05-01T08:55:00Z", "summary": "Threw the rock and small blocks appeared.", "detail": "Mock day."})}),
                      ("write_note", {"path": "SEMANTIC_MEMORY.md", "content": "## Rock\n- *hypothesis* hard throws make small blocks.\n"})]

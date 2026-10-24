@@ -1,0 +1,14 @@
+# Mathematics, first challenge: the observer asks for the island's perimeter.
+# Paper-style free play (Sonnet, world resets) plus a calculator tool and an answer tool;
+# the question is added after "Begin" on the listed days. The true answer is the length of the
+# island's sea-level coastline, computed from the height map by `python run.py challenge`.
+#   python run.py freeplay --config configs/math_perimeter.yaml --run-id math1 --agents 10 --sessions 2 --session-minutes 20 --parallel 10 --max-usd 20
+#   python run.py challenge --run-id math1
+extends: paper_freeplay.yaml
+
+agent:
+  math_tool: true
+  challenge:
+    days: [1, 2]
+    message: 'A voice carries over the island: "What is the perimeter of the island?" When you have an answer, give it with the answer tool. You may answer again if you refine it.'
+    truth: shoreline_perimeter

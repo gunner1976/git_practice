@@ -116,7 +116,7 @@ class Run:
             log_path = self.root / "phase_a" / agent / f"session_{k:02d}.jsonl"
             _archive_partial(log_path)
             log = JsonlLog(log_path)
-            opening = self._opening(world, steps)
+            opening = self._opening(world, steps, session=k)
             wdir = self.root / "agents" / agent / "world"
             start_state = None
             if self.cfg["world"].get("persist") and k > 1:
@@ -144,10 +144,13 @@ class Run:
             finally:
                 log.close()
 
-    def _opening(self, world: World, steps: int, task: str | None = None) -> str:
+    def _opening(self, world: World, steps: int, task: str | None = None, session: int | None = None) -> str:
         a = self.cfg["agent"]
         lm = world.landmarks_text() if a["describe_landmarks"] else ""
         text = a["session_start_message"].format(landmarks=lm, steps=steps).strip()
+        ch = a.get("challenge")
+        if ch and session is not None and (not ch.get("days") or session in ch["days"]):
+            text += "\n\n" + ch["message"].strip()
         if task:
             text += "\n\n" + self.cfg["phase_b"]["task_message"].format(task=task, steps=steps).strip()
         return text

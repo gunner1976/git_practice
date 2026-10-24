@@ -135,6 +135,11 @@ def replay_session(path: Path, wcfg: dict, notes_start: dict[str, str]) -> dict:
                     content_full = content
                 notes[p] = content_full
                 timeline.append({"f": fi, "k": "note", "p": p, "t": content, **({"append": 1} if r["name"] == "append_note" else {})})
+            elif r["name"] == "calculate":
+                timeline.append({"f": fi, "k": "calc", "t": r["input"].get("expression", ""), "r": r["result"], "e": int(bool(r.get("error")))})
+            elif r["name"] == "answer" and not r.get("error"):
+                inp = r["input"]
+                timeline.append({"f": fi, "k": "answer", "t": f"{inp.get('value')} {inp.get('units', '')}".strip(), "r": inp.get("explanation", "")})
             elif r["name"] == "read_note":
                 timeline.append({"f": fi, "k": "read", "p": r["input"].get("path")})
         elif k == "stop_hook":
