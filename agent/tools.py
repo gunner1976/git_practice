@@ -82,9 +82,49 @@ ALL_TOOLS = WORLD_TOOLS + NOTES_TOOLS
 WORLD_NAMES = {t["name"] for t in WORLD_TOOLS}
 NOTES_NAMES = {t["name"] for t in NOTES_TOOLS}
 
+# The paper's interface (App. A.6): its API.md is only a table of action schemas, so
+# these descriptions say what each action takes and nothing about reach or physics.
+_vec3 = {"type": "array", "items": _num, "minItems": 3, "maxItems": 3}
+PAPER_WORLD_TOOLS = [
+    {"name": "move_to", "description": "MoveTo. Data: {\"position\": [x, y, z]} (y is up).",
+     "input_schema": {"type": "object", "properties": {"position": _vec3}, "required": ["position"], "additionalProperties": False}},
+    {"name": "jump", "description": "Jump. Data: {}.",
+     "input_schema": {"type": "object", "properties": {}, "additionalProperties": False}},
+    {"name": "stop", "description": "Stop. Data: {}.",
+     "input_schema": {"type": "object", "properties": {}, "additionalProperties": False}},
+    {"name": "pickup", "description": "Pickup. Data: {\"position\": [x, y, z]}.",
+     "input_schema": {"type": "object", "properties": {"position": _vec3}, "required": ["position"], "additionalProperties": False}},
+    {"name": "place", "description": "Place. Data: {\"position\": [x, y, z], \"rotation\"?: {\"yaw\": deg, \"pitch\": deg, \"roll\": deg}}.",
+     "input_schema": {"type": "object", "properties": {"position": _vec3, "rotation": {"type": "object", "properties": {"yaw": _num, "pitch": _num, "roll": _num}, "additionalProperties": False}},
+                      "required": ["position"], "additionalProperties": False}},
+    {"name": "throw", "description": "Throw. Data: {\"direction\": [x, y, z], \"speed\": n}.",
+     "input_schema": {"type": "object", "properties": {"direction": _vec3, "speed": _num}, "required": ["direction", "speed"], "additionalProperties": False}},
+]
+PAPER_QUERY_TOOLS = [
+    {"name": "observe", "description": "Get Observation: the full world state as JSON (your player and every entity on the island).",
+     "input_schema": {"type": "object", "properties": {}, "additionalProperties": False}},
+]
+APPEND_TOOL = {
+    "name": "append_note",
+    "description": "Append text to the end of a file in your workspace (creates it if missing).",
+    "input_schema": {"type": "object", "properties": {"path": {"type": "string"}, "content": {"type": "string"}},
+                     "required": ["path", "content"], "additionalProperties": False},
+}
+
+
+def tool_set(cfg: dict) -> tuple[list[dict], set[str], set[str], set[str]]:
+    """(tools, world action names, notes names, query names) for this config."""
+    if cfg["agent"].get("interface") == "paper":
+        notes = [dict(t, description=t["description"].replace("notes directory", "workspace")) for t in NOTES_TOOLS] + [APPEND_TOOL]
+        return (PAPER_WORLD_TOOLS + PAPER_QUERY_TOOLS + notes, {t["name"] for t in PAPER_WORLD_TOOLS},
+                {t["name"] for t in notes}, {t["name"] for t in PAPER_QUERY_TOOLS})
+    return ALL_TOOLS, WORLD_NAMES, NOTES_NAMES, set()
+
 
 def run_world_tool(w: World, name: str, args: dict) -> tuple[str, bool]:
     """Returns (message, is_error)."""
+    if hasattr(w, "dispatch"):
+        return w.dispatch(name, args)
     try:
         if name == "move":
             return w.move(float(args["dx"]), float(args["dy"])), False
@@ -116,6 +156,9 @@ def run_notes_tool(n: Notes, name: str, args: dict) -> tuple[str, bool, dict | N
         if name == "write_note":
             diff = n.write(str(args["path"]), str(args["content"]))
             return f"Wrote {args['path']}.", False, diff
+        if name == "append_note":
+            diff = n.append(str(args["path"]), str(args["content"]))
+            return f"Appended to {args['path']}.", False, diff
     except NotesError as e:
         return str(e), True, None
     except KeyError as e:

@@ -6,6 +6,7 @@
   python run.py eval     --run-id main --max-usd 60  # Phase B on the same run
   python run.py all      --run-id main --max-usd 120 # Phase A then Phase B
   python run.py analyze  --run-id main               # stats, discovery, play markers, report.md + charts
+  python run.py evolve   --run-id main               # day-by-day change in each agent's free play: runs/<id>/evolution/
   python run.py viewer   --run-id main               # replay viewers: runs/<id>/viewer.html (2D) and viewer3d.html (3D)
   python run.py estimate --run-id <pilot-id>         # re-print the full-run estimate from a pilot
   python run.py ladder-estimate --run-id <pilot-id>  # upper-bound cost of the ladder from a pilot
@@ -27,13 +28,28 @@ import yaml
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-from agent.estimate import estimate, format_estimate  # noqa: E402
+from agent.estimate import estimate, format_clock_estimate, format_estimate  # noqa: E402
 from agent.runner import Run  # noqa: E402
 from analysis.transcript import render  # noqa: E402
 
 
+def _merge(base: dict, over: dict) -> dict:
+    out = dict(base)
+    for k, v in over.items():
+        out[k] = _merge(out[k], v) if isinstance(v, dict) and isinstance(out.get(k), dict) else v
+    return out
+
+
+def read_cfg(path: Path) -> dict:
+    """A config may name another with `extends:`; its keys override that base."""
+    path = Path(path)
+    cfg = yaml.safe_load(path.read_text())
+    base = cfg.pop("extends", None)
+    return _merge(read_cfg(path.parent / base), cfg) if base else cfg
+
+
 def load_cfg(args) -> dict:
-    cfg = yaml.safe_load(Path(args.config).read_text())
+    cfg = read_cfg(Path(args.config))
     if args.model:
         cfg["agent"]["model"] = args.model
     if getattr(args, "effort", None):
@@ -48,8 +64,8 @@ def load_cfg(args) -> dict:
         cfg["phase_a"]["parallel_agents"] = args.parallel
     if not 1 <= cfg["phase_a"]["n_agents"] <= 13:
         sys.exit("n_agents must be between 1 and 13")
-    if not 1 <= cfg["phase_a"]["n_sessions"] <= 30:
-        sys.exit("n_sessions must be between 1 and 30")
+    if not 1 <= cfg["phase_a"]["n_sessions"] <= 500:
+        sys.exit("n_sessions must be between 1 and 500")
     return cfg
 
 
@@ -79,6 +95,10 @@ def cmd_pilot(args) -> None:
     cfg["phase_a"].update(n_agents=p["n_agents"], n_sessions=p["n_sessions"], parallel_agents=1)
     full_steps = int(cfg["agent"]["steps_per_session"])
     cfg["agent"]["steps_per_session"] = p["steps_per_session"]
+    if cfg["agent"].get("clock") and p.get("session_seconds"):
+        full_secs = float(cfg["agent"]["clock"]["session_seconds"])
+        cfg["agent"]["clock"]["session_seconds"] = p["session_seconds"]
+        cfg["agent"]["clock"]["warn_before_seconds"] = float(cfg["agent"]["clock"]["warn_before_seconds"]) * p["session_seconds"] / full_secs
     args.run_id = args.run_id or time.strftime("pilot-%Y%m%d-%H%M%S")
     run = open_run(args, cfg)
     run.set_meta(kind="pilot", mock=run.mock)
@@ -94,14 +114,20 @@ def cmd_pilot(args) -> None:
             parts += [f"### {f.relative_to(run.root)}", "```", f.read_text().rstrip(), "```", ""]
     parts.append(f"## Cost\n\nPilot spend: **${run.budget.spent:.4f}** over {run.budget.calls} API calls.\n")
     full_cfg = load_cfg(args)
+    if full_cfg["agent"].get("clock"):
+        parts += ["## Estimated cost of the configured free play", "", "```", format_clock_estimate(run.root, full_cfg), "```"]
+        full_cfg = None
     try:
+        if full_cfg is None:
+            raise ValueError("free play only")
         est = estimate(run.root, full_cfg, model=run.cfg["agent"]["model"])
         parts += ["## Estimated cost of the full default run", "", "```", format_estimate(est, full_steps, full_cfg["pricing"][est["model"]]), "```"]
         if full_cfg["agent"]["model"] != "claude-opus-5-5":
             e2 = estimate(run.root, full_cfg, model="claude-opus-5-5")
             parts.append(f"\nSame run on claude-opus-5-5: ~${e2['total_usd']:.2f} (range ${e2['range_usd'][0]:.2f}-${e2['range_usd'][1]:.2f}).")
     except ValueError as e:
-        parts.append(f"(no estimate: {e})")
+        if str(e) != "free play only":
+            parts.append(f"(no estimate: {e})")
     text = "\n".join(parts)
     (run.root / "pilot_report.md").write_text(text)
     print(text)
@@ -121,6 +147,11 @@ def cmd_freeplay(args) -> None:
     cfg = load_cfg(args)
     run = open_run(args, cfg)
     run.set_meta(kind="full", mock=run.mock)
+    if args.sessions and args.sessions > run.cfg["phase_a"]["n_sessions"]:
+        # more days for the same agents: they pick up from the memory they wrote
+        run.cfg["phase_a"]["n_sessions"] = args.sessions
+        (run.root / "config.yaml").write_text(yaml.safe_dump(run.cfg, sort_keys=False))
+        print(f"Extending free play to {args.sessions} days per agent.")
     pa = run.cfg["phase_a"]
     run.phase_a(pa["n_agents"], pa["n_sessions"], run.cfg["agent"]["steps_per_session"], pa["parallel_agents"])
     report_stop(run)
@@ -148,6 +179,12 @@ def cmd_analyze(args) -> None:
     print(f"Report written to {path}")
 
 
+def cmd_evolve(args) -> None:
+    from analysis.evolution import build_evolution
+
+    print(f"Evolution report written to {build_evolution(ROOT / 'runs' / args.run_id)}")
+
+
 def cmd_viewer(args) -> None:
     from analysis.replay import write_viewer
 
@@ -160,6 +197,9 @@ def cmd_viewer(args) -> None:
 def cmd_estimate(args) -> None:
     cfg = load_cfg(args)
     root = ROOT / "runs" / args.run_id
+    if cfg["agent"].get("clock"):
+        print(format_clock_estimate(root, cfg))
+        return
     e = estimate(root, cfg, model=args.model)
     print(format_estimate(e, cfg["agent"]["steps_per_session"], cfg["pricing"][e["model"]]))
 
@@ -209,12 +249,12 @@ def cmd_ladder_estimate(args) -> None:
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name, fn in [("pilot", cmd_pilot), ("freeplay", cmd_freeplay), ("eval", cmd_eval), ("all", cmd_all), ("analyze", cmd_analyze), ("viewer", cmd_viewer), ("estimate", cmd_estimate),
+    for name, fn in [("pilot", cmd_pilot), ("freeplay", cmd_freeplay), ("eval", cmd_eval), ("all", cmd_all), ("analyze", cmd_analyze), ("viewer", cmd_viewer), ("evolve", cmd_evolve), ("estimate", cmd_estimate),
                      ("ladder", cmd_ladder), ("ladder-estimate", cmd_ladder_estimate)]:
         p = sub.add_parser(name)
         p.set_defaults(fn=fn)
         p.add_argument("--config", default=str(ROOT / "config.yaml"))
-        p.add_argument("--run-id", required=name in ("freeplay", "eval", "all", "analyze", "viewer", "estimate", "ladder", "ladder-estimate"))
+        p.add_argument("--run-id", required=name in ("freeplay", "eval", "all", "analyze", "viewer", "evolve", "estimate", "ladder", "ladder-estimate"))
         p.add_argument("--max-usd", type=float, help="hard spend cap for this run (USD)")
         p.add_argument("--model", help="e.g. claude-sonnet-5-5 or claude-opus-5-5")
         p.add_argument("--effort", choices=["low", "medium", "high", "xhigh", "max"])

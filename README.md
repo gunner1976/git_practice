@@ -265,6 +265,48 @@ The paper also reports that removing SOUL.md and simplifying the system prompt m
 difference to the range of activities (Appendix C.4). That bears directly on the framing question,
 and `souls/minimal.md` lets you test it here.
 
+## Free play as in the paper (`configs/paper_freeplay.yaml`)
+
+This config mirrors the paper's free play (App. A-B) for watching what agents do with no task, and
+how that changes as they get more days:
+
+```
+python run.py pilot    --config configs/paper_freeplay.yaml --max-usd 3
+python run.py freeplay --config configs/paper_freeplay.yaml --run-id paper1 --max-usd 60
+python run.py freeplay --config configs/paper_freeplay.yaml --run-id paper1 --sessions 20 --max-usd 120  # more days, same agents
+python run.py evolve   --run-id paper1     # day-by-day metrics, chart and diary: runs/paper1/evolution/
+python run.py viewer   --run-id paper1     # 2D and 3D replays
+```
+
+What it takes from the paper:
+
+- **Prompts**: the paper's system prompt (A.1, with the bash/curl lines replaced by the tool names),
+  its SOUL.md verbatim (A.2), the first user message "Begin", the stop-hook message, and "You will be
+  reset in 5 minutes. Update your workspace memory files now." five simulated minutes before the end.
+- **Memory**: the workspace starts with SOUL.md, EPISODIC_MEMORY.md and SEMANTIC_MEMORY.md exactly as
+  in A.3. Each session's system prompt carries SOUL.md and SEMANTIC_MEMORY.md in full plus the
+  timestamp and summary of every EPISODIC_MEMORY.jsonl line. An `append_note` tool stands in for
+  appending with the shell.
+- **Time**: a session is one simulated hour. Each model turn costs 8 s plus 0.025 s per output token,
+  each action 1 s plus walking time at 4 m/s, and each file or observe call 0.5 s. There is no countdown;
+  the agent sees a `time` field in observations, which it can use for episodic timestamps. Once the
+  conversation passes ~60k tokens, older tool results are cleared, standing in for compaction.
+- **World** (`world/paper.py`): `move_to(position)`, `jump`, `stop`, `pickup(position)` within 6 m,
+  `place(position, rotation)` within 7 m (`Occupied` if blocked), `throw(direction, speed)` with speed
+  clamped to 10 m/s plus an upward impulse, and `observe` returning JSON with y up, the origin at the
+  island centre, and names like `Block_3`, `Rock`, `Ring`, `Peak`, `Spire`. Results use the paper's
+  `lastActionResult` codes. A jump keeps you in the air until your next action, so jump then move lets
+  you climb a ledge up to the jump height, and jump then throw inherits part of the jump's velocity. A hard
+  rock impact (impact speed at least 12 m/s and energy at least 288 J) spawns up to eight small
+  `ImpactBlock`s; ground throws at full speed make one or two, mid-jump throws more. Objects that end up
+  in the sea are lost until the next reset.
+
+What still differs: the agent is a tool loop on Sonnet 5.5 (not Claude Code with bash on Opus 4.7),
+actions resolve instantly in turn order rather than in real time, observations come from `observe`
+instead of every action, physics is the same quasi-static box model as the replication, and the island
+layout is this harness's own. The paper's LLM activity labelling and play scoring (App. C.1, C.6, D) are
+not wired in yet; `evolve` reports mechanical measures only.
+
 ## Assumptions and departures from the paper
 
 I couldn't fetch the paper's full text from the build environment (arxiv.org was blocked). The

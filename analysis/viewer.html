@@ -193,7 +193,7 @@ const DATA = /*__DATA__*/null;
   const $ = (id) => document.getElementById(id);
   const T = DATA.terrain, SIZE = T.size, N = T.n;
   const COL = { red: "#d33b2f", orange: "#ef8a1c", yellow: "#f2cf1d", green: "#3fa34d", blue: "#2d6fd6", purple: "#7b45c4",
-    pink: "#ef7fb6", white: "#f4f4ef", black: "#202024", grey: "#8c9196", brown: "#8a5a2b", teal: "#159c9c", gold: "#d9a520", golden: "#e8b923" };
+    pink: "#ef7fb6", white: "#f4f4ef", black: "#202024", grey: "#8c9196", brown: "#8a5a2b", teal: "#159c9c", stone: "#9e9484", gold: "#d9a520", golden: "#e8b923" };
   const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   $("runlbl").textContent = `run ${DATA.run} · ${DATA.sessions.length} sessions · replayed from logs`;
@@ -488,7 +488,7 @@ const DATA = /*__DATA__*/null;
     if (e.k === "say") body = esc(e.t);
     else if (e.k === "think") body = esc(e.t);
     else if (e.k === "act") body = `${esc(e.t)}\n<span class="res">→ ${esc(e.r)}</span>`;
-    else if (e.k === "note") body = `<div class="p">wrote ${esc(e.p)}</div>${esc(e.t)}`;
+    else if (e.k === "note") body = `<div class="p">${e.append ? "appended to" : "wrote"} ${esc(e.p)}</div>${esc(e.t)}`;
     else if (e.k === "read") body = `read ${esc(e.p)}`;
     else if (e.k === "rule") body = `Hidden rule fired: ${esc(e.t)}${e.id ? " → " + esc(e.id) : ""}`;
     else if (e.k === "nudge") body = `Stop hook nudge #${esc(e.n)}: “Please don't stop.”`;
@@ -515,7 +515,7 @@ const DATA = /*__DATA__*/null;
       }
     } else if (tab === "notes") {
       const notes = Object.assign({}, S.notes_start), touched = {};
-      for (const e of S.timeline) if (e.k === "note" && e.f <= cur) { notes[e.p] = e.t; touched[e.p] = e.f; }
+      for (const e of S.timeline) if (e.k === "note" && e.f <= cur) { const o = notes[e.p] || ""; notes[e.p] = e.append ? o + (o && !o.endsWith("\n") ? "\n" : "") + e.t : e.t; touched[e.p] = e.f; }
       const files = Object.keys(notes).sort((a, b) => (touched[b] ?? -1) - (touched[a] ?? -1) || a.localeCompare(b, undefined, { numeric: true }));
       pane.innerHTML = files.length ? files.map((p) => `<div class="nfile${touched[p] != null ? " new" : ""}"><h3>${esc(p)}${touched[p] != null ? `<span class="fresh">written step ${S.frames[touched[p]].step}</span>` : ""}</h3><pre>${esc(notes[p])}</pre></div>`).join("")
         : `<p class="empty">The notes directory is empty at this point.</p>`;

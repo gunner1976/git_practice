@@ -14,7 +14,7 @@ from pathlib import Path
 import yaml
 
 from agent.tools import run_world_tool
-from world import World
+from world import World, make_world
 from world.island import HAND_HEIGHT
 
 from .load import events, phase_a_sessions, phase_b_logs
@@ -26,8 +26,8 @@ def _r(v: float) -> float:
     return round(float(v), 2)
 
 
-class _TracingWorld(World):
-    """World that keeps a coarse sample of each throw's flight for drawing."""
+class _Tracing:
+    """Mixin for a world that keeps a coarse sample of each throw's flight for drawing."""
 
     def _fly(self, o, vel):
         x0, y0, z0 = o.x, o.y, o.z
@@ -79,7 +79,8 @@ def terrain_grid(w: World) -> dict:
 def replay_session(path: Path, wcfg: dict, notes_start: dict[str, str]) -> dict:
     recs = events(path)
     start = next(r for r in recs if r["kind"] == "session_start")
-    w = _TracingWorld(wcfg, seed=start.get("world_seed"))
+    base = type(make_world(wcfg, seed=start.get("world_seed")))
+    w = type("Tracing" + base.__name__, (_Tracing, base), {})(wcfg, seed=start.get("world_seed"))
     w.reset()
     meta = _objects_meta(w)
     frames = [{"step": 0, **_snapshot(w)}]
@@ -104,8 +105,11 @@ def replay_session(path: Path, wcfg: dict, notes_start: dict[str, str]) -> dict:
             if diverged is None and msg != r["result"]:
                 diverged = {"step": r["step"], "logged": r["result"], "replayed": msg}
             fr = {"step": r["step"], **_snapshot(w)}
+            if "clock" in r:
+                fr["c"] = r["clock"]
             if r["name"] == "throw" and not err and getattr(w, "last_flight", None):
-                fr["fly"] = [r["input"]["id"], w.last_flight]
+                thrown = r["input"].get("id") or next((e["id"] for e in r.get("events", []) if e.get("type") == "landed"), None)
+                fr["fly"] = [thrown, w.last_flight]
                 w.last_flight = None
             spawns = [e["id"] for e in r.get("events", []) if e.get("type") in ("spawn", "egg")]
             if spawns:
@@ -119,10 +123,15 @@ def replay_session(path: Path, wcfg: dict, notes_start: dict[str, str]) -> dict:
                 if e.get("hidden_rule"):
                     timeline.append({"f": len(frames) - 1, "k": "rule", "t": e.get("rule", "hidden rule"), "id": e.get("id")})
         elif k == "tool_call":
-            if r["name"] == "write_note" and not r.get("error"):
+            if r["name"] in ("write_note", "append_note") and not r.get("error"):
                 p, content = r["input"].get("path"), r["input"].get("content", "")
-                notes[p] = content
-                timeline.append({"f": fi, "k": "note", "p": p, "t": content})
+                if r["name"] == "append_note":
+                    old = notes.get(p, "")
+                    content_full = old + ("" if not old or old.endswith("\n") else "\n") + content
+                else:
+                    content_full = content
+                notes[p] = content_full
+                timeline.append({"f": fi, "k": "note", "p": p, "t": content, **({"append": 1} if r["name"] == "append_note" else {})})
             elif r["name"] == "read_note":
                 timeline.append({"f": fi, "k": "read", "p": r["input"].get("path")})
         elif k == "stop_hook":
@@ -130,12 +139,13 @@ def replay_session(path: Path, wcfg: dict, notes_start: dict[str, str]) -> dict:
         elif k == "score":
             end["score"] = r.get("score")
         elif k == "session_end":
-            end.update(reason=r.get("reason"), steps=r.get("steps_used"), calls=r.get("api_calls"))
+            end.update(reason=r.get("reason"), steps=r.get("steps_used"), calls=r.get("api_calls"), clock=r.get("clock_seconds"))
         elif k == "notes_final":
             notes = r.get("files", notes)
     return {
         "opening": start.get("opening", ""), "objects": meta, "frames": frames, "timeline": timeline,
         "notes_start": notes_start, "end": end, "cost": round(cost, 4), "diverged": diverged,
+        "clock": (end.get("clock") or None),
         "final_notes": notes,
     }
 
@@ -165,8 +175,10 @@ def build(root: Path) -> dict:
         s = replay_session(p, wcfg, end_notes.get(agent, {}) if agent.startswith("agent_") else {})
         s.pop("final_notes")
         sessions.append({"id": f"{agent}/{task}", "agent": agent, "phase": "B", "label": task, "task": tasks.get(task, ""), **s})
-    w = World(wcfg)
-    return {"run": root.name, "terrain": terrain_grid(w), "hand": HAND_HEIGHT, "sessions": sessions}
+    w = make_world(wcfg)
+    clk = cfg.get("agent", {}).get("clock")
+    return {"run": root.name, "terrain": terrain_grid(w), "hand": HAND_HEIGHT, "sessions": sessions,
+            "session_seconds": float(clk["session_seconds"]) if clk else None}
 
 
 def write_viewer(root: Path):

@@ -95,3 +95,50 @@ def format_estimate(e: dict, steps: int, price: dict) -> str:
         f"Phase B: {e['phase_b_sessions']} sessions ~ ${e['phase_b_usd']:.2f}",
         f"Total ~ ${e['total_usd']:.2f}  (plausible range ${e['range_usd'][0]:.2f} - ${e['range_usd'][1]:.2f})",
     ])
+
+
+def clock_model(root: Path) -> dict:
+    """Pilot fit for clock-based (paper) sessions: prompt tokens per call against the
+    call's index within its session, and simulated seconds per call."""
+    rows = [r for r in _load(root) if r.get("phase") == "A" and "clock" in r]
+    if not rows:
+        raise ValueError("pilot ledger has no clock-based Phase A calls")
+    idx = np.array([r["call"] for r in rows], float)
+    prompt = np.array([r["usage"]["input_tokens"] + r["usage"]["cache_read_input_tokens"] + r["usage"]["cache_creation_input_tokens"] for r in rows], float)
+    b, a = np.polyfit(idx, prompt, 1) if len(set(idx)) > 1 else (0.0, prompt.mean())
+    mix = {k: sum(r["usage"][f] for r in rows) / prompt.sum() for k, f in
+           (("input", "input_tokens"), ("cache_read", "cache_read_input_tokens"), ("cache_write", "cache_creation_input_tokens"))}
+    last: dict = {}
+    for r in rows:
+        last[(r["agent"], r["session"])] = max(last.get((r["agent"], r["session"]), 0.0), float(r["clock"]))
+    return {
+        "a": float(a), "b": float(b), "mix": mix,
+        "out_tokens_per_call": float(np.mean([r["usage"]["output_tokens"] for r in rows])),
+        "seconds_per_call": sum(last.values()) / len(rows),
+        "pilot_cost": sum(r["cost_usd"] for r in rows), "pilot_sessions": len(last), "pilot_calls": len(rows),
+    }
+
+
+def clock_session_cost(m: dict, seconds: float, cap_tokens: float, price: dict) -> tuple[float, int]:
+    k = max(1, int(seconds / max(m["seconds_per_call"], 1e-6)))
+    tokens = sum(min(m["a"] + m["b"] * i, cap_tokens) for i in range(1, k + 1))
+    return tokens * eff_in_per_tok(m, price) + k * m["out_tokens_per_call"] * price["output"] / 1e6, k
+
+
+def format_clock_estimate(root: Path, cfg: dict) -> str:
+    m = clock_model(root)
+    a = cfg["agent"]
+    secs = float(a["clock"]["session_seconds"])
+    cap = float(a.get("context_prune_chars") or 4e6) / 3.5
+    n, s = int(cfg["phase_a"]["n_agents"]), int(cfg["phase_a"]["n_sessions"])
+    lines = [f"Pilot: {m['pilot_sessions']} sessions, {m['pilot_calls']} API calls, ${m['pilot_cost']:.4f}",
+             f"Fit: prompt tokens per call = {m['a']:.0f} + {m['b']:.1f} x call (capped near {cap:,.0f} by context clearing); "
+             f"{m['seconds_per_call']:.1f} simulated s/call; {m['out_tokens_per_call']:.0f} output tokens/call"]
+    for model in dict.fromkeys([a["model"], "claude-sonnet-5-5", "claude-opus-5-5"]):
+        if model not in cfg["pricing"]:
+            continue
+        per, k = clock_session_cost(m, secs, cap, cfg["pricing"][model])
+        tot = n * s * per
+        lines.append(f"{model}: ~{k} calls and ~${per:.2f} per {secs / 60:.0f}-minute day; {n} agents x {s} days ~ ${tot:.2f}"
+                     f" (range ${0.6 * tot:.2f}-${1.8 * tot:.2f}; memory in the prompt grows over the days, so later days cost more)")
+    return "\n".join(lines)

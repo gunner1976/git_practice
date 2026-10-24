@@ -227,7 +227,7 @@ const DATA = /*__DATA__*/null;
 
   const T = DATA.terrain, SIZE = T.size, N = T.n, HALF = SIZE / 2, HAND = DATA.hand || 1.2;
   const COL = { red: 0xd33b2f, orange: 0xef8a1c, yellow: 0xf2cf1d, green: 0x3fa34d, blue: 0x2d6fd6, purple: 0x7b45c4, pink: 0xef7fb6,
-    white: 0xf4f4ef, black: 0x26262b, grey: 0x8c9196, brown: 0x8a5a2b, teal: 0x159c9c, gold: 0xe0aa22, golden: 0xf0c030 };
+    white: 0xf4f4ef, black: 0x26262b, grey: 0x8c9196, brown: 0x8a5a2b, teal: 0x159c9c, stone: 0x9e9484, gold: 0xe0aa22, golden: 0xf0c030 };
   const AGENT_COL = { agent_1: "#5b5ff0", agent_2: "#f0644b", agent_3: "#18a999", fresh_1: "#e0a526", fresh_2: "#c05bd6", fresh_3: "#6c8a9b" };
   const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -525,8 +525,9 @@ const DATA = /*__DATA__*/null;
   const SKY = [[0, 0xbfe3ff, 0xfff1d6, 0.75], [0.25, 0x9fd3f0, 0xffffff, 1.0], [0.7, 0x9cc9e6, 0xfff4e0, 0.95], [0.88, 0xf2b07a, 0xffc48a, 0.75], [1, 0x6a5a86, 0xff9a6a, 0.45]];
   const tmpA = new THREE.Color(), tmpB = new THREE.Color();
   function sky() {
-    const total = Math.max(S.frames[S.frames.length - 1].step, 150), step = lerp(S.frames[cur].step, S.frames[Math.min(cur + 1, S.frames.length - 1)].step, playing ? t : 0);
-    const d = Math.min(1, step / total);
+    const F0 = S.frames[cur], F1 = S.frames[Math.min(cur + 1, S.frames.length - 1)];
+    const d = DATA.session_seconds ? Math.min(1, lerp(F0.c || 0, F1.c || F0.c || 0, playing ? t : 0) / DATA.session_seconds)
+      : Math.min(1, lerp(F0.step, F1.step, playing ? t : 0) / Math.max(S.frames[S.frames.length - 1].step, 150));
     let k = 1; while (k < SKY.length - 1 && SKY[k][0] < d) k++;
     const [d0, s0, l0, i0] = SKY[k - 1], [d1, s1, l1, i1] = SKY[k], u = (d - d0) / Math.max(1e-6, d1 - d0);
     const skyC = tmpA.set(s0).lerp(tmpB.set(s1), u).clone();
@@ -589,11 +590,13 @@ const DATA = /*__DATA__*/null;
   function updateHud() {
     const f = S.frames[cur], total = Math.max(S.end.steps || 0, S.frames[S.frames.length - 1].step, 150);
     const madeSoFar = S.timeline.filter((e) => e.k === "rule" && e.f <= cur).length, notesSoFar = S.timeline.filter((e) => e.k === "note" && e.f <= cur).length;
-    const left = Math.max(0, 150 - f.step);
+    const SS = DATA.session_seconds, clockNow = f.c || 0;
+    const left = SS ? Math.max(0, SS - clockNow) : Math.max(0, 150 - f.step), full = SS || 150;
+    const leftLbl = SS ? `Time left · ${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, "0")}` : `Moments left · ${left}`;
     $("hud").innerHTML = `<div class="who"><i style="background:${AGENT_COL[S.agent] || "#5b5ff0"}"></i>Eko · ${esc(nice(S.agent))}</div>
       <div class="what">${S.phase === "A" ? esc(S.label) + " · free play" : "Task: " + esc(S.task || S.label)}</div>
-      <span style="color:#93a6b0;font-size:10px;letter-spacing:.08em;text-transform:uppercase">Moments left · ${left}</span>
-      <div class="meter"><b style="width:${(left / 150 * 100).toFixed(1)}%"></b></div>
+      <span style="color:#93a6b0;font-size:10px;letter-spacing:.08em;text-transform:uppercase">${leftLbl}</span>
+      <div class="meter"><b style="width:${(left / full * 100).toFixed(1)}%"></b></div>
       <div class="stats"><div><span>Step</span>${f.step}</div><div><span>Cubes made</span>${madeSoFar}</div><div><span>Notes</span>${notesSoFar}</div>
       ${S.phase === "B" && S.end.score != null ? `<div><span>Final score</span>${esc(S.end.score)}</div>` : ""}
       <div><span>Holding</span>${f.a[3] ? esc(f.a[3]) : "–"}</div><div><span>Height</span>${f.a[2].toFixed(1)} m</div></div>`;
@@ -644,7 +647,7 @@ const DATA = /*__DATA__*/null;
     let body = "";
     if (e.k === "say" || e.k === "think") body = esc(e.t);
     else if (e.k === "act") body = `${esc(e.t)}\n<span class="res">→ ${esc(e.r)}</span>`;
-    else if (e.k === "note") body = `<div class="p">wrote ${esc(e.p)}</div>${esc(e.t)}`;
+    else if (e.k === "note") body = `<div class="p">${e.append ? "appended to" : "wrote"} ${esc(e.p)}</div>${esc(e.t)}`;
     else if (e.k === "read") body = `read ${esc(e.p)}`;
     else if (e.k === "rule") body = `Hidden rule fired: ${esc(e.t)}${e.id ? " → " + esc(e.id) : ""}`;
     else if (e.k === "nudge") body = `Stop hook nudge #${esc(e.n)}`;
@@ -663,7 +666,7 @@ const DATA = /*__DATA__*/null;
         if (rebuild) pane.scrollTop += tr.top - pr.top - pr.height / 2; else if (tr.bottom > pr.bottom || tr.top < pr.top) pane.scrollTop += tr.bottom - pr.bottom + 8; }
     } else if (tab === "notes") {
       const notes = Object.assign({}, S.notes_start), touched = {};
-      for (const e of S.timeline) if (e.k === "note" && e.f <= cur) { notes[e.p] = e.t; touched[e.p] = e.f; }
+      for (const e of S.timeline) if (e.k === "note" && e.f <= cur) { const o = notes[e.p] || ""; notes[e.p] = e.append ? o + (o && !o.endsWith("\n") ? "\n" : "") + e.t : e.t; touched[e.p] = e.f; }
       const files = Object.keys(notes).sort((a, b) => (touched[b] ?? -1) - (touched[a] ?? -1) || a.localeCompare(b, undefined, { numeric: true }));
       pane.innerHTML = files.length ? files.map((p) => `<div class="nfile${touched[p] != null ? " new" : ""}"><h3>${esc(p)}${touched[p] != null ? `<span class="fresh">written step ${S.frames[touched[p]].step}</span>` : ""}</h3><pre>${esc(notes[p])}</pre></div>`).join("")
         : `<p class="empty">The notes directory is empty at this point.</p>`;

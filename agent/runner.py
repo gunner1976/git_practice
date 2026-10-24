@@ -28,7 +28,7 @@ from pathlib import Path
 
 import yaml
 
-from world import World, score
+from world import World, make_world, score
 
 from .client import make_client
 from .cost import Budget, BudgetExceeded
@@ -51,6 +51,7 @@ class Run:
             cfg_file.write_text(yaml.safe_dump(cfg, sort_keys=False))
             soul_file.write_text(soul)
         self.cfg, self.soul, self.mock = cfg, soul, mock
+        self.base_dir = Path(__file__).resolve().parents[1]
         pricing = dict(cfg["pricing"])
         if mock:
             pricing["mock"] = pricing[cfg["agent"]["model"]]
@@ -80,7 +81,7 @@ class Run:
         return make_client(self.cfg, self.mock, seed=seed)
 
     def _world(self, seed: int | None = None) -> World:
-        return World(self.cfg["world"], seed=seed)
+        return make_world(self.cfg["world"], seed=seed)
 
     # --------------------------------------------------------------- phase A
     def phase_a(self, n_agents: int, n_sessions: int, steps: int, parallel: int) -> None:
@@ -92,6 +93,13 @@ class Run:
     def _agent_free_play(self, agent: str, n_sessions: int, steps: int) -> None:
         notes = Notes(self.root / "agents" / agent / "notes")
         snaps = self.root / "agents" / agent / "snapshots"
+        tpl = self.cfg["agent"].get("workspace_template")
+        if tpl and not notes.list() and not (snaps / "session_01_start").exists():
+            # paper App. A.2-A.3: SOUL.md and the two memory-file headers are there on day one
+            src = Path(tpl) if Path(tpl).is_absolute() else self.base_dir / tpl
+            for f in sorted(src.iterdir()):
+                if f.is_file():
+                    notes.write(f.name, f.read_text())
         client = self._client(seed=zlib.crc32(agent.encode()))
         world = self._world()
         for k in range(1, n_sessions + 1):

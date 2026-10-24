@@ -6,7 +6,7 @@ import difflib
 import shutil
 from pathlib import Path
 
-MAX_FILE_CHARS = 40_000
+MAX_FILE_CHARS = 400_000
 
 
 class NotesError(Exception):
@@ -45,6 +45,12 @@ class Notes:
         p.write_text(content)
         diff = "".join(difflib.unified_diff(old.splitlines(True), content.splitlines(True), f"a/{rel}", f"b/{rel}"))
         return {"path": rel, "diff": diff, "chars_before": len(old), "chars_after": len(content)}
+
+    def append(self, rel: str, content: str) -> dict:
+        p = self._path(rel)
+        old = p.read_text() if p.is_file() else ""
+        sep = "" if not old or old.endswith("\n") else "\n"
+        return self.write(rel, old + sep + content)
 
     def snapshot(self, dest: Path) -> None:
         if dest.exists():

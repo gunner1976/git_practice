@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import datetime as dt
 import json
+import math
 import time
 from pathlib import Path
 
@@ -10,9 +12,9 @@ from world import World
 from world.rules import ground_truth
 
 from .client import block_to_dict
-from .cost import Budget
+from .cost import Budget, usage_dict
 from .notes import Notes
-from .tools import ALL_TOOLS, NOTES_NAMES, WORLD_NAMES, run_notes_tool, run_world_tool
+from .tools import run_notes_tool, run_world_tool, tool_set
 
 
 class JsonlLog:
@@ -27,6 +29,46 @@ class JsonlLog:
 
     def close(self) -> None:
         self.f.close()
+
+
+def paper_system_prompt(prompt: str, notes: Notes) -> str:
+    """Paper App. A.1: SOUL.md, SEMANTIC_MEMORY.md and the timestamp + summary of each
+    EPISODIC_MEMORY.jsonl line are appended to the system prompt at session start."""
+    files = notes.dump()
+    parts = [prompt.rstrip(), "", "Initial workspace memory files at session start:",
+             "These are the file contents as they existed when this session began."]
+    for name in ("SOUL.md", "SEMANTIC_MEMORY.md"):
+        if name in files:
+            parts += ["", f"## {name}", files[name].rstrip()]
+    if "EPISODIC_MEMORY.jsonl" in files:
+        lines = []
+        for line in files["EPISODIC_MEMORY.jsonl"].splitlines():
+            try:
+                e = json.loads(line)
+                lines.append(json.dumps({"timestamp": e.get("timestamp"), "summary": e.get("summary")}, ensure_ascii=False))
+            except (json.JSONDecodeError, AttributeError):
+                continue
+        parts += ["", "## EPISODIC_MEMORY.jsonl (timestamp and summary of each entry)", *lines]
+    return "\n".join(parts)
+
+
+def prune_context(messages: list, limit_chars: int, keep_last: int = 24) -> int:
+    """Stand-in for a coding agent's context compaction: once the conversation grows
+    past `limit_chars`, the content of older tool results is replaced by a stub.
+    Works on the older half in one go so the prompt cache survives between prunes."""
+    size = len(json.dumps(messages, default=str))
+    if size <= limit_chars:
+        return 0
+    cleared = 0
+    cut = max(1, len(messages) - keep_last)
+    for m in messages[1:cut]:
+        if m.get("role") != "user" or not isinstance(m.get("content"), list):
+            continue
+        for c in m["content"]:
+            if isinstance(c, dict) and c.get("type") == "tool_result" and isinstance(c.get("content"), str) and len(c["content"]) > 80:
+                c["content"] = "[older result cleared to save context]"
+                cleared += 1
+    return cleared
 
 
 def run_session(
@@ -45,19 +87,33 @@ def run_session(
     a = cfg["agent"]
     world.reset()
     show_left = bool(a["show_steps_remaining"])
+    tools, world_names, notes_names, query_names = tool_set(cfg)
+    clk = a.get("clock")  # paper mode: the session is an hour of simulated wall-clock time
+    clock = 0.0
+    warned = False
+    if clk:
+        steps = 10**9
+        start_utc = dt.datetime.fromisoformat(clk["start_utc"].replace("Z", "+00:00")) + dt.timedelta(hours=int(meta.get("session") or 1) - 1)
+
+    def now_iso() -> str:
+        return (start_utc + dt.timedelta(seconds=clock)).strftime("%Y-%m-%dT%H:%M:%SZ") if clk else ""
 
     def status(used: int) -> str:
         return f"\nMoments left today: {steps - used}" if show_left else ""
 
-    if a.get("inject_notes"):
+    if a.get("memory_injection") == "paper":
+        soul = paper_system_prompt(soul, notes)
+    elif a.get("inject_notes"):
         # paper App. A.1: memory is appended to the system prompt at each session start
         files = notes.dump()
         if files:
             soul = soul + "\n\n# Your notes as they were when this day began\n" + "\n".join(f"\n## {k}\n{v}" for k, v in files.items())
     first_obs = world.observe()
-    messages: list = [{"role": "user", "content": f"{opening}\n\n{first_obs}{status(0)}"}]
+    first = f"{opening}\n\n{first_obs}{status(0)}" if a.get("initial_observation", True) else opening
+    messages: list = [{"role": "user", "content": first}]
     log("session_start", **meta, steps=steps, soul=soul, opening=opening, world_seed=world.seed, hidden_rules=ground_truth(world))
-    log("observation", step=0, text=first_obs)
+    if a.get("initial_observation", True):
+        log("observation", step=0, text=first_obs)
 
     used = notes_ops = calls = nudges = 0
     grace: int | None = None
@@ -73,13 +129,22 @@ def run_session(
         if grace is not None and grace <= 0:
             end_reason = "steps_exhausted"
             break
+        if clk and clock >= float(clk["session_seconds"]):
+            end_reason = "session_time_up"
+            break
         budget.check(last_cost * 1.25)  # raises BudgetExceeded
-        resp = client.create(soul, ALL_TOOLS, messages)
+        if a.get("context_prune_chars"):
+            n_cleared = prune_context(messages, int(a["context_prune_chars"]))
+            if n_cleared:
+                log("context_pruned", step=used, cleared=n_cleared)
+        resp = client.create(soul, tools, messages)
         calls += 1
         if grace is not None:
             grace -= 1
         model = getattr(resp, "model", a["model"]) or a["model"]
-        u, last_cost = budget.record(model, resp.usage, {**meta, "call": calls, "step": used})
+        if clk:
+            clock += float(clk["turn_seconds"]) + float(clk["seconds_per_output_token"]) * usage_dict(resp.usage)["output_tokens"]
+        u, last_cost = budget.record(model, resp.usage, {**meta, "call": calls, "step": used, **({"clock": round(clock, 1)} if clk else {})})
         content = [block_to_dict(b) for b in resp.content]
         log(
             "assistant",
@@ -109,19 +174,29 @@ def run_session(
                 end_reason = "agent_stopped"
                 break
             log("stop_hook", n=nudges)
-            messages.append({"role": "user", "content": f"{a['stop_hook_message']}\n\n{world.observe()}{status(used)}"})
+            hook = a["stop_hook_message"] if not a.get("stop_hook_observation", True) else f"{a['stop_hook_message']}\n\n{world.observe()}{status(used)}"
+            hook_content: list | str = hook
+            if clk and not warned and clock >= float(clk["session_seconds"]) - float(clk["warn_before_seconds"]):
+                warned = True
+                log("reset_warning", step=used, clock=round(clock, 1))
+                hook_content = f"{hook}\n\n{clk['warn_message']}"
+            messages.append({"role": "user", "content": hook_content})
             continue
 
         results: list[dict] = []
         last_world_idx = None
         for tu in tool_uses:
             name, args = tu["name"], tu.get("input") or {}
-            if name in WORLD_NAMES:
+            if name in world_names:
                 if grace is not None or used >= steps:
                     msg, err = "The day is over; nothing more can happen in the world today.", True
                     log("action_refused", name=name, input=args)
                 else:
+                    ax0, ay0 = world.avatar.x, world.avatar.y
                     msg, err = run_world_tool(world, name, args)
+                    if clk:
+                        walked = math.hypot(world.avatar.x - ax0, world.avatar.y - ay0)
+                        clock += float(clk["action_seconds"]) + walked / float(clk["walk_speed"])
                     used += 1
                     events = world.drain_events()
                     for e in events:
@@ -130,9 +205,16 @@ def run_session(
                             if e.get("type") == "spawn":
                                 spawn_steps.append(used)
                             log("hidden_rule_fired", step=used, event=e)
-                    log("action", step=used, name=name, input=args, result=msg, error=err, events=events)
+                    log("action", step=used, name=name, input=args, result=msg, error=err, events=events, **({"clock": round(clock, 1)} if clk else {}))
                     last_world_idx = len(results)
-            elif name in NOTES_NAMES:
+            elif name in query_names:
+                msg, err = world.observe_json({"time": now_iso()}), False
+                if clk:
+                    clock += float(clk["query_seconds"])
+                log("tool_call", step=used, name=name, input=args, result=msg[:4000], error=err)
+            elif name in notes_names:
+                if clk:
+                    clock += float(clk["query_seconds"])
                 notes_ops += 1
                 if notes_ops > int(a["max_notes_ops_per_session"]):
                     msg, err, diff = "You have used your notes enough for today.", True, None
@@ -145,12 +227,16 @@ def run_session(
                 msg, err = f"Unknown tool {name}.", True
             results.append({"type": "tool_result", "tool_use_id": tu["id"], "content": msg, **({"is_error": True} if err else {})})
 
-        if last_world_idx is not None:
+        if last_world_idx is not None and not clk:
             obs = world.observe()
             log("observation", step=used, text=obs)
             r = results[last_world_idx]
             r["content"] = f"{r['content']}\n\n{obs}{status(used)}"
         user_content: list = list(results)
+        if clk and not warned and clock >= float(clk["session_seconds"]) - float(clk["warn_before_seconds"]):
+            warned = True
+            log("reset_warning", step=used, clock=round(clock, 1))
+            user_content.append({"type": "text", "text": clk["warn_message"]})
         if used >= steps and grace is None:
             grace = int(a["end_grace_turns"])
             user_content.append({"type": "text", "text": a["session_end_message"]})
@@ -158,5 +244,7 @@ def run_session(
         messages.append({"role": "user", "content": user_content})
 
     state = world.state()
-    log("session_end", reason=end_reason, steps_used=used, api_calls=calls, notes_ops=notes_ops, nudges=nudges, world=state, spawn_steps=spawn_steps, rule_fires=rule_fires)
-    return {"end_reason": end_reason, "steps_used": used, "api_calls": calls, "spawn_steps": spawn_steps, "rule_fires": rule_fires}
+    log("session_end", reason=end_reason, steps_used=used, api_calls=calls, notes_ops=notes_ops, nudges=nudges, world=state, spawn_steps=spawn_steps,
+        rule_fires=rule_fires, **({"clock_seconds": round(clock, 1)} if clk else {}))
+    return {"end_reason": end_reason, "steps_used": used, "api_calls": calls, "spawn_steps": spawn_steps, "rule_fires": rule_fires,
+            **({"clock_seconds": round(clock, 1)} if clk else {})}

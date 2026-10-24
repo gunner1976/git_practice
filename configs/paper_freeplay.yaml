@@ -1,0 +1,60 @@
+# Free play as in the paper (Cloos et al. 2026, App. A-B), on top of ../config.yaml.
+#   python run.py pilot    --config configs/paper_freeplay.yaml --max-usd 3
+#   python run.py freeplay --config configs/paper_freeplay.yaml --run-id paper1 --max-usd 60
+#   python run.py freeplay --config configs/paper_freeplay.yaml --run-id paper1 --sessions 20 --max-usd 120   # more days, same agents
+extends: ../config.yaml
+
+world:
+  hidden_rule: {enabled: false}      # replaced by the paper's rock impact below
+  paper:
+    enabled: true
+    max_move_distance: 60.0          # MoveTo walks the whole way unless something blocks it
+    pickup_range: 6.0                # paper: pickups succeed within 6 m
+    pickup_snap: 1.5                 # how close the given position must be to an object's centre
+    place_range: 7.0                 # paper: placements within 7 m
+    max_throw_speed: 10.0            # paper: speed clamped to [0, 10] m/s
+    throw_up_impulse: 2.0            # paper: "an upward impulse"
+    inherit_fraction: 0.8            # paper: "a fraction of the player's current velocity"
+    impact:                          # paper: a hard rock impact spawns up to eight small cubes
+      enabled: true
+      min_speed: 12.0                # m/s at impact (a hard throw: ~8+ m/s, more from a height or mid-jump)
+      min_energy: 288.0              # J (rock mass 4 kg)
+      energy_per_block: 40.0
+      max_blocks: 8
+
+agent:
+  model: claude-sonnet-5-5
+  interface: paper
+  soul_path: paper/system_prompt.md          # the paper's A.1 text, adapted to tools instead of bash/curl
+  workspace_template: paper/workspace        # SOUL.md, EPISODIC_MEMORY.md, SEMANTIC_MEMORY.md (A.2-A.3)
+  memory_injection: paper                    # SOUL + SEMANTIC in full + episodic summaries in the system prompt
+  inject_notes: false
+  describe_landmarks: false
+  session_start_message: "Begin"
+  initial_observation: false
+  stop_hook_observation: false
+  show_steps_remaining: false
+  end_grace_turns: 0
+  max_stop_nudges: 100000
+  max_api_calls_per_session: 1500
+  max_notes_ops_per_session: 100000
+  context_prune_chars: 240000                # ~60k tokens, then older tool results are cleared
+  clock:                                     # each session is one hour of simulated wall-clock time
+    session_seconds: 3600
+    turn_seconds: 8.0                        # latency of one model turn
+    seconds_per_output_token: 0.025          # generation time (~40 tokens/s, thinking included)
+    action_seconds: 1.0
+    walk_speed: 4.0                          # m/s while walking
+    query_seconds: 0.5                       # observe and workspace file operations
+    warn_before_seconds: 300
+    warn_message: "You will be reset in 5 minutes. Update your workspace memory files now."
+    start_utc: "2026-05-01T08:00:00Z"        # session k starts k-1 hours later
+
+phase_a:
+  n_agents: 3
+  n_sessions: 10
+
+pilot:
+  n_agents: 1
+  n_sessions: 2
+  session_seconds: 1200                      # 20-minute days keep the pilot cheap

@@ -99,6 +99,8 @@ class MockClient:
 
     def create(self, system: str, tools: list[dict], messages: list):
         self.n += 1
+        if any(t["name"] == "move_to" for t in tools):
+            return self._create_paper(messages)
         r = self.rng
         last = messages[-1]["content"]
         last_text = json.dumps(last) if not isinstance(last, str) else last
@@ -128,6 +130,51 @@ class MockClient:
                 self.target = None
             else:
                 calls = [("move", {"dx": dx, "dy": dy})] if r.random() < 0.85 else [("jump", {"dx": 1, "dy": 0})]
+        return self._resp([("text", "Let me see.")] + calls, stop="tool_use", messages=messages)
+
+    def _create_paper(self, messages: list):
+        """Scripted agent for the paper interface: observe, walk to things, pick them up,
+        throw the rock hard, keep the two memory files."""
+        r = self.rng
+        last = messages[-1]["content"]
+        last_text = json.dumps(last) if not isinstance(last, str) else last
+        obs = None
+        for m in reversed(messages):
+            c = m["content"] if isinstance(m, dict) else None
+            for x in (c if isinstance(c, list) else []):
+                if isinstance(x, dict) and isinstance(x.get("content"), str) and x["content"].startswith('{"tick"') and '"world"' in x["content"]:
+                    obs = json.loads(x["content"])
+                    break
+            if obs:
+                break
+        if self.n == 1:
+            calls = [("read_note", {"path": "SEMANTIC_MEMORY.md"})]
+        elif "reset in 5 minutes" in last_text:
+            calls = [("append_note", {"path": "EPISODIC_MEMORY.jsonl", "content": json.dumps({"timestamp": "2026-05-01T08:55:00Z", "summary": "Threw the rock and small blocks appeared.", "detail": "Mock day."})}),
+                     ("write_note", {"path": "SEMANTIC_MEMORY.md", "content": "## Rock\n- *hypothesis* hard throws make small blocks.\n"})]
+        elif obs is None or self.n % 6 == 0:
+            calls = [("observe", {})]
+        elif r.random() < 0.05:
+            return self._resp([("text", "Hmm.")], stop="end_turn", messages=messages)
+        else:
+            me = obs["player"]
+            ents = {e["name"]: e for e in obs["world"]["entities"] if not e["anchored"]}
+            if me["holding"]:
+                sp = 10 if me["holding"] == "Rock" else r.choice([4, 7])
+                calls = [("throw", {"direction": [r.uniform(-1, 1), 0.8, r.uniform(-1, 1)], "speed": sp})]
+                if r.random() < 0.3:
+                    calls = [("jump", {})] + calls
+            else:
+                if self.target not in ents:
+                    self.target = "Rock" if r.random() < 0.6 else r.choice(sorted(ents) or ["Rock"])
+                tgt = ents.get(self.target)
+                if tgt is None:
+                    calls = [("observe", {})]
+                elif math.dist(tgt["position"], me["position"]) <= 4:
+                    calls = [("pickup", {"position": tgt["position"]}), ("observe", {})]
+                    self.target = None
+                else:
+                    calls = [("move_to", {"position": tgt["position"]}), ("observe", {})]
         return self._resp([("text", "Let me see.")] + calls, stop="tool_use", messages=messages)
 
     def _resp(self, items, stop, messages):

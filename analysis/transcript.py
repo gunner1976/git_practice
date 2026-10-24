@@ -31,9 +31,19 @@ def render(path: Path, max_obs_lines: int = 20) -> str:
             out.append(f"  - step {e['step']}: {e['result']}{' (error)' if e['error'] else ''}")
         elif k == "hidden_rule_fired":
             out.append(f"  - **[hidden rule fired: {e['event']['id']} spawned]**")
+        elif k == "tool_call" and e["name"] == "observe":
+            try:
+                n = len(json.loads(e["result"])["world"]["entities"])
+                out.append(f"  - world `observe` -> {n} entities")
+            except (json.JSONDecodeError, KeyError):
+                out.append("  - world `observe` -> (truncated in log)")
         elif k == "tool_call":
             res = e["result"].replace("\n", " / ")
             out.append(f"  - notes `{e['name']}` -> {res[:300]}")
+        elif k == "reset_warning":
+            out.append(f"  - *(reset warning sent at {e['clock'] / 60:.1f} min)*")
+        elif k == "context_pruned":
+            out.append(f"  - *(context: {e['cleared']} older tool results cleared)*")
         elif k == "notes_diff":
             out += ["```diff", e["diff"].rstrip()[:3000], "```"]
         elif k == "observation" and e["step"] == 0:
@@ -44,7 +54,8 @@ def render(path: Path, max_obs_lines: int = 20) -> str:
         elif k == "session_ending":
             out.append("  - *(session-end message sent; notes-only grace turns)*")
         elif k == "session_end":
-            out += ["", f"*Session ended: {e['reason']}, {e['steps_used']} steps, {e['api_calls']} API calls.*"]
+            clock = f", {e['clock_seconds'] / 60:.0f} simulated minutes" if e.get("clock_seconds") else ""
+            out += ["", f"*Session ended: {e['reason']}, {e['steps_used']} steps, {e['api_calls']} API calls{clock}.*"]
         elif k == "aborted":
             out += ["", f"*ABORTED: {e['reason']} {e.get('detail', '')}*"]
         elif k == "score":
