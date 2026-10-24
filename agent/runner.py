@@ -60,6 +60,8 @@ class Run:
         self.state_path = self.root / "state.json"
         self.state = json.loads(self.state_path.read_text()) if self.state_path.exists() else {"phase_a": {}, "phase_b": {}}
         self.stopped_reason: str | None = None
+        self.board = None   # the phone switchboard (world/phone.py), when the mission reward is a phone
+        self.dawn = None    # optional (agent, session) -> text added to that day's opening (agent/cosmos.py)
 
     # -------------------------------------------------------------- state io
     def _save(self) -> None:
@@ -87,15 +89,20 @@ class Run:
     def phase_a(self, n_agents: int, n_sessions: int, steps: int, parallel: int) -> None:
         self.set_meta(phase_a={"n_agents": n_agents, "n_sessions": n_sessions, "steps": steps})
         agents = [f"agent_{i + 1}" for i in range(n_agents)]
-        self.board = None
+        self.free_play(agents, n_sessions, steps, parallel)
+
+    def free_play(self, agents: list[str], n_sessions: int | dict, steps: int, parallel: int) -> None:
+        """Each named agent plays up to day `n_sessions` (or its own entry, if a dict); days already
+        done are skipped. Phone partners are paired in the order of `agents`."""
         if (self.cfg["world"].get("mission") or {}).get("reward") == "phone":
             from world.phone import Switchboard
 
             # calls are live, so both ends of every pair must be running at the same time
             self.board = Switchboard(agents, ring_seconds=float(self.cfg["world"]["mission"].get("ring_seconds", 120)))
-            parallel = n_agents
-        with ThreadPoolExecutor(max_workers=max(1, min(parallel, n_agents))) as ex:
-            list(ex.map(lambda ag: self._agent_free_play(ag, n_sessions, steps), agents))
+            parallel = len(agents)
+        upto = n_sessions if isinstance(n_sessions, dict) else {a: n_sessions for a in agents}
+        with ThreadPoolExecutor(max_workers=max(1, min(parallel, len(agents)))) as ex:
+            list(ex.map(lambda ag: self._agent_free_play(ag, upto[ag], steps), agents))
 
     def _agent_free_play(self, agent: str, n_sessions: int, steps: int) -> None:
         notes = Notes(self.root / "agents" / agent / "notes")
@@ -109,7 +116,7 @@ class Run:
                     notes.write(f.name, f.read_text())
         client = self._client(seed=zlib.crc32(agent.encode()))
         world = self._world()
-        board = getattr(self, "board", None)
+        board = self.board
         if board is not None:
             board.attach(agent, world)
         for k in range(1, n_sessions + 1):
@@ -127,6 +134,9 @@ class Run:
             _archive_partial(log_path)
             log = JsonlLog(log_path)
             opening = self._opening(world, steps, session=k)
+            extra = self.dawn(agent, k) if self.dawn else None
+            if extra:
+                opening += "\n\n" + extra.strip()
             wdir = self.root / "agents" / agent / "world"
             start_state = None
             if self.cfg["world"].get("persist") and k > 1:

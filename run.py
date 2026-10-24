@@ -219,6 +219,28 @@ def cmd_promote(args) -> None:
     print(f"Promotions written to {promote(ROOT / 'runs' / args.run_id, cfg, judge_model=model, max_usd=args.max_usd or 1.0)}")
 
 
+def cmd_cosmos(args) -> None:
+    """The persistent universe: create it (founders), add agents, or live more days."""
+    from agent.cosmos import FOUNDERS, Cosmos
+
+    if args.config == str(ROOT / "config.yaml"):
+        args.config = str(ROOT / "configs/cosmos.yaml")
+    args.run_id = args.run_id or "cosmos"
+    cfg = load_cfg(args)
+    soul = Path(cfg["agent"]["soul_path"] if Path(cfg["agent"]["soul_path"]).is_absolute() else ROOT / cfg["agent"]["soul_path"]).read_text()
+    c = Cosmos(ROOT / "runs" / args.run_id, cfg, soul, max_usd=args.max_usd or 0.0, mock=args.mock)
+    if not c.agents:
+        print("Founders join: " + ", ".join(c.name(a) for a in c.add(FOUNDERS)))
+    if args.add:
+        print("Joined: " + ", ".join(c.name(a) for a in c.add([n for n in args.add.split(",") if n.strip()])))
+    if args.days:
+        found = c.advance(args.days, judge_model=None if c.run.mock else (args.judge_model or "claude-haiku-5-5"))
+        for d in found:
+            print(f"Discovery: {d['name']} on day {d['day']}" + (" (shared at the next dawn)" if d["shared"] else "") + (" (assisted)" if d["assisted_by"] else ""))
+        report_stop(c.run)
+    print(c.status())
+
+
 def cmd_challenge(args) -> None:
     from analysis.challenges import challenge_report
 
@@ -297,7 +319,7 @@ def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name, fn in [("pilot", cmd_pilot), ("freeplay", cmd_freeplay), ("eval", cmd_eval), ("all", cmd_all), ("analyze", cmd_analyze), ("viewer", cmd_viewer), ("evolve", cmd_evolve), ("estimate", cmd_estimate),
-                     ("ladder", cmd_ladder), ("ladder-estimate", cmd_ladder_estimate), ("price-watch", cmd_price_watch), ("challenge", cmd_challenge), ("promote", cmd_promote), ("traits", cmd_traits)]:
+                     ("ladder", cmd_ladder), ("ladder-estimate", cmd_ladder_estimate), ("price-watch", cmd_price_watch), ("challenge", cmd_challenge), ("promote", cmd_promote), ("traits", cmd_traits), ("cosmos", cmd_cosmos)]:
         p = sub.add_parser(name)
         p.set_defaults(fn=fn)
         p.add_argument("--config", default=str(ROOT / "config.yaml"))
@@ -315,6 +337,10 @@ def main(argv=None) -> None:
         if name == "price-watch":
             p.add_argument("--profile", help="saved token profile .json (default: analysis/profiles/sonnet-paper-freeplay.json)")
             p.add_argument("--price", action="append", metavar="MODEL=IN,OUT,CACHE_READ,CACHE_WRITE", help="price a model not in config.yaml (USD per million tokens)")
+        if name == "cosmos":
+            p.add_argument("--days", type=int, default=0, help="days every agent lives in this call (0: just create / add / show status)")
+            p.add_argument("--add", help="comma-separated names of new agents to add")
+            p.add_argument("--judge-model", help="promotion judge (default claude-haiku-5-5)")
         if name == "viewer":
             p.add_argument("--include", action="append", metavar="RUN_ID", help="also show this run (same island); repeatable")
     args = ap.parse_args(argv)

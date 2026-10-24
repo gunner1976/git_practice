@@ -1,0 +1,110 @@
+{
+ "agents": [
+  {
+   "id": "christian",
+   "name": "Christian",
+   "joined_after_days": {}
+  },
+  {
+   "id": "vern",
+   "name": "Vern",
+   "joined_after_days": {
+    "christian": 0
+   }
+  },
+  {
+   "id": "keats",
+   "name": "Keats",
+   "joined_after_days": {
+    "christian": 0,
+    "vern": 0
+   }
+  },
+  {
+   "id": "jamie",
+   "name": "Jamie",
+   "joined_after_days": {
+    "christian": 0,
+    "vern": 0,
+    "keats": 0
+   }
+  },
+  {
+   "id": "ryan",
+   "name": "Ryan",
+   "joined_after_days": {
+    "christian": 0,
+    "vern": 0,
+    "keats": 0,
+    "jamie": 0
+   }
+  },
+  {
+   "id": "fitch",
+   "name": "Fitch",
+   "joined_after_days": {
+    "christian": 0,
+    "vern": 0,
+    "keats": 0,
+    "jamie": 0,
+    "ryan": 0
+   }
+  },
+  {
+   "id": "jason",
+   "name": "Jason",
+   "joined_after_days": {
+    "christian": 0,
+    "vern": 0,
+    "keats": 0,
+    "jamie": 0,
+    "ryan": 0,
+    "fitch": 0
+   }
+  },
+  {
+   "id": "stu",
+   "name": "Stu",
+   "joined_after_days": {
+    "christian": 0,
+    "vern": 0,
+    "keats": 0,
+    "jamie": 0,
+    "ryan": 0,
+    "fitch": 0,
+    "jason": 0
+   }
+  },
+  {
+   "id": "eric",
+   "name": "Eric",
+   "joined_after_days": {
+    "christian": 0,
+    "vern": 0,
+    "keats": 0,
+    "jamie": 0,
+    "ryan": 0,
+    "fitch": 0,
+    "jason": 0,
+    "stu": 0
+   }
+  },
+  {
+   "id": "kip",
+   "name": "Kip",
+   "joined_after_days": {
+    "christian": 0,
+    "vern": 0,
+    "keats": 0,
+    "jamie": 0,
+    "ryan": 0,
+    "fitch": 0,
+    "jason": 0,
+    "stu": 0,
+    "eric": 0
+   }
+  }
+ ],
+ "discoveries": [],
+ "heard": {}
+}

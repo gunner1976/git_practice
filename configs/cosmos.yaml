@@ -1,0 +1,13 @@
+# The cosmos (agent/cosmos.py): one universe of named agents that never starts over. Each agent has
+# its own twin of planet EKO and its world persists from day to day; the mission phone links phone
+# partners on twin planets; a verified reasoning discovery is shared with everyone at the next dawn.
+#   python run.py cosmos --max-usd 10            # one more day for every agent
+extends: eko_phone.yaml
+
+world:
+  persist: true          # each day starts where the last one ended
+  persist_avatar: true   # and the agent wakes where it was
+
+agent:
+  clock:
+    session_seconds: 1200   # a 20-minute day, as in eko1
