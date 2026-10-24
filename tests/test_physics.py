@@ -295,3 +295,16 @@ def test_move_blocked_by_object_vs_terrain():
     r = w.move(3, 0)
     assert r.endswith("Something too steep blocks your way.")
     assert w.avatar.x < 31.0
+
+
+def test_irregular_island_outline():
+    from analysis.challenges import shoreline_perimeter
+
+    base = dict(CFG)
+    shaped = {**CFG, "island_shape": {"lobes": [[3, 0.12, 20]], "bays": [{"angle": 0, "depth": 0.5, "width": 11}], "seabed_steepness": 4.0}}
+    w0, w1 = World(base), World(shaped)
+    t = w1.terrain
+    assert t.radius_at(0.0) < 0.6 * t.radius_at(math.pi)          # the bay cuts deep into the east side
+    assert w0.terrain.radius_at(1.0) == w0.terrain.island_r          # no shape: the usual round island
+    assert t.height(t.cx + t.radius_at(math.pi) + 1, t.cy) < -0.8    # steep seabed: no wading beyond the shore
+    assert shoreline_perimeter(shaped) > shoreline_perimeter(base)

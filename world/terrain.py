@@ -34,6 +34,12 @@ class Terrain:
         self.size = float(cfg["size"])
         self.cx = self.cy = self.size / 2
         self.island_r = self.size * 0.44
+        shape = cfg.get("island_shape") or {}
+        # optional irregular outline: the island's radius varies with direction (lobes), bays cut
+        # into it, and the seabed can drop off faster beyond the shore
+        self.lobes = [tuple(map(float, l)) for l in shape.get("lobes", [])]  # (k, amplitude, phase_deg)
+        self.bays = [(math.radians(float(b["angle"])), float(b["depth"]), math.radians(float(b["width"]))) for b in shape.get("bays", [])]
+        self.seabed_steepness = float(shape.get("seabed_steepness", 1.0))
         p, s = cfg["peak"], cfg["spire"]
         self.peak = Hill(p["x"], p["y"], p["height"], p["sigma"])
         self.spire_xy = (float(s["x"]), float(s["y"]))
@@ -45,15 +51,26 @@ class Terrain:
             x, y = rng.uniform(8, self.size - 8, size=2)
             if math.dist((x, y), (p["x"], p["y"])) < 12 or math.dist((x, y), self.spire_xy) < 9:
                 continue
-            if math.dist((x, y), (self.cx, self.cy)) > self.island_r * 0.8:
+            if math.dist((x, y), (self.cx, self.cy)) > self.radius_at(math.atan2(y - self.cy, x - self.cx)) * 0.8:
                 continue
             self.hills.append(Hill(float(x), float(y), float(rng.uniform(0.8, 2.2)), float(rng.uniform(3, 5))))
         self.spire_top = self._ground(*self.spire_xy) + float(s["height"])
 
+    def radius_at(self, theta: float) -> float:
+        """The island's base radius in direction theta (radians, 0 = +x/east, counter-clockwise)."""
+        f = 1.0 + sum(a * math.cos(k * theta + math.radians(ph)) for k, a, ph in self.lobes)
+        for ang, depth, width in self.bays:
+            d = math.atan2(math.sin(theta - ang), math.cos(theta - ang))
+            f -= depth * math.exp(-0.5 * (d / width) ** 2)
+        return self.island_r * max(0.15, f)
+
     def _ground(self, x: float, y: float) -> float:
         """Terrain without the Spire."""
         r = math.hypot(x - self.cx, y - self.cy)
-        h = 2.5 * (1 - (r / self.island_r) ** 2)
+        big_r = self.radius_at(math.atan2(y - self.cy, x - self.cx)) if (self.lobes or self.bays) else self.island_r
+        h = 2.5 * (1 - (r / big_r) ** 2)
+        if h < 0:
+            h *= self.seabed_steepness
         h += self.peak(x, y)
         for hill in self.hills:
             h += hill(x, y)

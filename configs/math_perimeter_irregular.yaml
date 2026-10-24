@@ -1,0 +1,16 @@
+# The perimeter challenge on an irregular island: a lobed outline, a bay to the east, a narrow inlet
+# to the southwest and a shallower cove to the north, with the seabed dropping off steeply past the
+# shore (so the waterline, not the map edge, is where walking stops). Coastline 198.8 m for seed 7;
+# a circle fitted to its area gives ~166 m, so the "assume a circle" shortcut is ~16% short.
+#   python run.py freeplay --config configs/math_perimeter_irregular.yaml --run-id math2 --agents 10 --sessions 2 --session-minutes 20 --parallel 10 --max-usd 15
+#   python run.py challenge --run-id math2
+extends: math_perimeter.yaml
+
+world:
+  island_shape:
+    lobes: [[2, 0.08, 60], [3, 0.12, 20], [5, 0.07, 0]]   # [k, amplitude, phase in degrees]: radius x (1 + a cos(k*theta + phase))
+    bays:                                                  # angle 0 = east, counter-clockwise; depth as a fraction of the radius
+      - {angle: 0, depth: 0.55, width: 11}
+      - {angle: 225, depth: 0.45, width: 5}
+      - {angle: 110, depth: 0.25, width: 8}
+    seabed_steepness: 4.0
