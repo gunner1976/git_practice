@@ -241,6 +241,8 @@ def run_session(
                         msg, err = "An answer needs a numeric value.", True
                 log("tool_call", step=used, name=name, input=args, result=msg[:4000], error=err)
             elif name in query_names:
+                if clk and hasattr(world, "day_fraction"):
+                    world.day_fraction = min(1.0, clock / float(clk["session_seconds"]))
                 msg, err = world.observe_json({"time": now_iso()}), False
                 if clk:
                     clock += float(clk["query_seconds"])

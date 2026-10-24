@@ -1,0 +1,15 @@
+# The water world on a small round planet (radius 2 km), so its shape can be found from the island.
+# Observations gain a "sky": the sun's azimuth and elevation where you stand, and how far below eye
+# level the sea horizon sits. On this planet the horizon is ~3 degrees down from the beach and ~5 from
+# the Spire top, and at any moment the sun stands ~1.5 degrees higher at one end of the island than the
+# other. Each day runs from sunrise to sunset. Nothing in the prompts mentions planets or shapes.
+#   python run.py freeplay --config configs/round_world.yaml --run-id round1 --agents 10 --sessions 3 --session-minutes 20 --parallel 10 --max-usd 30
+#   python run.py promote --run-id round1 --max-usd 1
+extends: waterworld.yaml
+
+world:
+  planet:
+    radius: 2000.0          # metres
+    latitude: 20.0          # of the island's centre (degrees north)
+    sun_declination: 0.0    # equinox
+    eye_height: 1.6

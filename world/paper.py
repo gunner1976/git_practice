@@ -50,6 +50,13 @@ class PaperWorld(World):
         self.last_result = "Ready"
         self.impacts = 0
         self.lost: list[str] = []
+        # a round planet (world/sky.py), if configured: the sky in observations shows its shape
+        self.planet = None
+        if cfg.get("planet"):
+            from .sky import Planet
+
+            self.planet = Planet(cfg["planet"], (self.terrain.cx, self.terrain.cy))
+        self.day_fraction = 0.5  # set by the session loop from its clock
 
     def reset(self) -> None:
         super().reset()
@@ -117,6 +124,12 @@ class PaperWorld(World):
             ents.append({"name": self.name_of(o), "entity_type": "part", "position": self.to_paper(o.x, o.y, o.z + o.sz / 2), "size": [_r(o.sx), _r(o.sz), _r(o.sy)],
                          "shape": "block" if o.shape in ("cube", "impact") else o.shape, "color": RGB.get(o.colour, [0.5, 0.5, 0.5]), "anchored": False})
         obs = {"tick": self.time, "game_status": "active", **(extra or {}), "player": self._player(), "other_players": [], "world": {"entities": ents}}
+        if self.planet is not None:
+            a = self.avatar
+            az, el = self.planet.sun(a.x, a.y, self.day_fraction)
+            ground = self.terrain.height(a.x, a.y) if a.z <= self.terrain.height(a.x, a.y) + 1e-6 else a.z
+            obs["sky"] = {"sun": {"azimuth_deg": round(az, 2), "elevation_deg": round(el, 2)},
+                          "sea_horizon": {"angle_below_eye_level_deg": round(self.planet.horizon_dip(max(ground, a.z)), 2)}}
         return json.dumps(obs, separators=(",", ":"))
 
     # ------------------------------------------------------------ helpers

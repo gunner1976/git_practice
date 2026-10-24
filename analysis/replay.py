@@ -193,7 +193,7 @@ def build_many(roots: list[Path]) -> dict:
     """Several runs of the same island in one viewer, with a run picker."""
     parts = [build(r) for r in roots]
     first = parts[0]
-    runs, sessions = [], []
+    runs, sessions, promos = [], [], {}
     for root, d in zip(roots, parts):
         if (d["terrain"]["size"], d["terrain"]["n"]) != (first["terrain"]["size"], first["terrain"]["n"]):
             raise ValueError(f"{Path(root).name} uses a different map size; give it its own viewer")
@@ -202,9 +202,15 @@ def build_many(roots: list[Path]) -> dict:
         runs.append({"run": d["run"], "kind": kind, "session_seconds": d["session_seconds"], "sessions": len(d["sessions"])})
         for s in d["sessions"]:
             sessions.append({**s, "run": d["run"], "session_seconds": d["session_seconds"]})
+        pp = Path(root) / "promotions.json"
+        if pp.exists():
+            for agent, r in json.loads(pp.read_text())["agents"].items():
+                if r.get("promoted"):
+                    promos[f"{d['run']}|{agent}"] = {"day": r["verdict"].get("day"), "step": r["verdict"].get("step"),
+                                                     "quote": r["verdict"].get("quote", ""), "evidence": r["verdict"].get("evidence", "")}
     terrains = {d["run"]: d["terrain"] for d in parts[1:] if d["terrain"] != first["terrain"]}  # runs on a different island
     return {"run": first["run"], "runs": runs, "terrain": first["terrain"], "terrains": terrains, "hand": first["hand"],
-            "sessions": sessions, "session_seconds": None}
+            "sessions": sessions, "session_seconds": None, "promotions": promos}
 
 
 def write_viewer(root: Path, include: list[Path] | None = None):

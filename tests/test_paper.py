@@ -1,4 +1,5 @@
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -286,3 +287,29 @@ def test_water_world_has_no_edge():
     assert "cube_1" not in w.objects and "cube_1" in w.lost  # and sank
     w.move_to(w.to_paper(40.0, -100.0, 0))  # try to walk out to sea
     assert w.avatar.y > 0 and w.terrain.height(w.avatar.x, w.avatar.y) > -1.0
+
+
+def test_round_world_sky_and_promotion_flow(tmp_path):
+    from analysis.promotion import promote
+    from world.sky import Planet
+
+    cfg = run.read_cfg(ROOT / "configs/round_world.yaml")
+    w = make_world(cfg["world"])
+    w.reset()
+    p = w.planet
+    _, south = p.sun(32, 8, 0.5)
+    _, north = p.sun(32, 56, 0.5)
+    assert south - north == pytest.approx(48 / 2000 * 180 / math.pi, abs=0.05)  # Eratosthenes across the island
+    assert p.horizon_dip(5.7) > p.horizon_dip(0.5) > 0  # the horizon sinks as you climb
+    assert "sky" in json.loads(w.observe_json())
+    cfg["agent"]["clock"].update(session_seconds=300, warn_before_seconds=60)
+    r = Run(tmp_path / "r", cfg, (ROOT / "paper/system_prompt.md").read_text(), max_usd=50, mock=True)
+    r.phase_a(1, 1, 150, 1)
+    notes = tmp_path / "r/phase_a/agent_1/session_01.jsonl"
+    with notes.open("a") as f:  # a hand-made deduction, to exercise the detector without an API call
+        f.write(json.dumps({"kind": "tool_call", "step": 7, "name": "append_note", "input": {"path": "SEMANTIC_MEMORY.md",
+                "content": "- *verified* The horizon dips 2.6 deg from the beach but 4.9 deg from the Spire: the ground is curved, a sphere."}, "result": "ok", "error": False}) + "\n")
+    out = promote(tmp_path / "r", cfg, judge_model=None)
+    res = json.loads((tmp_path / "r/promotions.json").read_text())["agents"]["agent_1"]
+    assert res["promoted"] and res["verdict"]["step"] == 7 and "unverified" in res["judge"]
+    assert "**yes**" in out.read_text()

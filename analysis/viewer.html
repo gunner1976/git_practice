@@ -65,6 +65,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 }
 .hudcard .who { display: flex; align-items: center; gap: 8px; font-family: var(--display); font-weight: 800; font-size: 17px; letter-spacing: -0.01em; }
 .hudcard .who i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; }
+.hudcard .promo { font-family: var(--body); font-size: 11px; font-weight: 600; background: linear-gradient(135deg, #ffd166, #ff8a4c); color: #2a1404; padding: 1px 8px; border-radius: 999px; }
 .hudcard .what { color: #b9c7cf; margin: 1px 0 8px; max-width: 260px; }
 .meter { height: 8px; border-radius: 6px; background: rgba(255,255,255,0.15); overflow: hidden; margin: 3px 0 7px; }
 .meter b { display: block; height: 100%; background: linear-gradient(90deg, #ffd166, #ff8a4c); border-radius: 6px; transition: width 0.2s; }
@@ -674,7 +675,10 @@ const DATA = /*__DATA__*/null;
     const SS = S.session_seconds, clockNow = f.c || 0;
     const left = SS ? Math.max(0, SS - clockNow) : Math.max(0, 150 - f.step), full = SS || 150;
     const leftLbl = SS ? `Time left · ${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, "0")}` : `Moments left · ${left}`;
-    $("hud").innerHTML = `<div class="who"><i style="background:${AGENT_COL[S.agent] || "#5b5ff0"}"></i>Eko · ${esc(nice(S.agent))}</div>
+    const pr = (DATA.promotions || {})[akey(S)];
+    const dayNo = parseInt((S.label.match(/\d+/) || ["0"])[0], 10);
+    const promoted = pr && S.phase === "A" && (dayNo > pr.day || (dayNo === pr.day && f.step >= pr.step));
+    $("hud").innerHTML = `<div class="who"><i style="background:${AGENT_COL[S.agent] || "#5b5ff0"}"></i>Eko · ${esc(nice(S.agent))}${promoted ? ' <span class="promo" title="' + esc(pr.evidence) + '">★ promoted</span>' : ""}</div>
       <div class="what">${S.phase === "A" ? esc(S.label) + " · free play" : "Task: " + esc(S.task || S.label)}</div>
       <span style="color:#93a6b0;font-size:10px;letter-spacing:.08em;text-transform:uppercase">${leftLbl}</span>
       <div class="meter"><b style="width:${(left / full * 100).toFixed(1)}%"></b></div>

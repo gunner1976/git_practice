@@ -315,6 +315,20 @@ the shore to a 60 m ocean floor (`island_shape.ocean_floor`). Walking still stop
 deep. The paper's island had boundary walls, so this is a departure from it, kept in its own config;
 `configs/math_waterworld.yaml` adds the perimeter challenge.
 
+## A round world, and promotion for finding it (`configs/round_world.yaml`)
+
+The water world on a 2 km planet (`world.planet`, see `world/sky.py`). Observations gain a `sky`: the
+sun's azimuth and elevation where the agent stands, and how far below eye level the sea horizon sits.
+On this planet the horizon is ~2.6 degrees down from the beach and ~4.9 from the Spire top, and at any
+moment the sun stands ~1.4 degrees higher at the south end of the island than the north; each day runs
+from sunrise to sunset. Physics on the island stays flat. Nothing in the prompts mentions planets.
+
+`python run.py promote --run-id <id>` promotes agents that deduce the world is round by reasoning from
+their own observations: shape-related passages from speech, thinking and notes are judged by Claude
+Haiku (`--model` to change it, `--mock` for a keyword rule) on two counts, a firm conclusion and an
+evidence-based one; assuming "planets are spheres" does not count. Results go to `promotions.json`/`.md`
+and the replay shows a badge from the moment of the deduction.
+
 ## Assumptions and departures from the paper
 
 I couldn't fetch the paper's full text from the build environment (arxiv.org was blocked). The

@@ -11,6 +11,7 @@
   python run.py estimate --run-id <pilot-id>         # re-print the full-run estimate from a pilot
   python run.py ladder-estimate --run-id <pilot-id>  # upper-bound cost of the ladder from a pilot
   python run.py challenge --run-id <id>              # score the observer's question and show how each agent reached its answer
+  python run.py promote --run-id <id> --max-usd 1     # promote agents that reasoned their way to a round world (Haiku judge)
   python run.py price-watch                          # is 1000 agents x 10 days under $100 yet, per model (--price adds models)
   python run.py ladder   --run-id L1 --max-usd 300   # staged egg-hunt tournament over souls + memories
 
@@ -201,6 +202,14 @@ def cmd_viewer(args) -> None:
         print(f"  {sid}: replay diverged from the log at step {d['step']}")
 
 
+def cmd_promote(args) -> None:
+    from analysis.promotion import promote
+
+    cfg = load_cfg(args)
+    model = None if args.mock else (args.model or "claude-haiku-5-5")
+    print(f"Promotions written to {promote(ROOT / 'runs' / args.run_id, cfg, judge_model=model, max_usd=args.max_usd or 1.0)}")
+
+
 def cmd_challenge(args) -> None:
     from analysis.challenges import challenge_report
 
@@ -279,11 +288,11 @@ def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name, fn in [("pilot", cmd_pilot), ("freeplay", cmd_freeplay), ("eval", cmd_eval), ("all", cmd_all), ("analyze", cmd_analyze), ("viewer", cmd_viewer), ("evolve", cmd_evolve), ("estimate", cmd_estimate),
-                     ("ladder", cmd_ladder), ("ladder-estimate", cmd_ladder_estimate), ("price-watch", cmd_price_watch), ("challenge", cmd_challenge)]:
+                     ("ladder", cmd_ladder), ("ladder-estimate", cmd_ladder_estimate), ("price-watch", cmd_price_watch), ("challenge", cmd_challenge), ("promote", cmd_promote)]:
         p = sub.add_parser(name)
         p.set_defaults(fn=fn)
         p.add_argument("--config", default=str(ROOT / "config.yaml"))
-        p.add_argument("--run-id", required=name in ("freeplay", "eval", "all", "analyze", "viewer", "evolve", "challenge", "estimate", "ladder", "ladder-estimate"))
+        p.add_argument("--run-id", required=name in ("freeplay", "eval", "all", "analyze", "viewer", "evolve", "challenge", "promote", "estimate", "ladder", "ladder-estimate"))
         p.add_argument("--max-usd", type=float, help="hard spend cap for this run (USD)")
         p.add_argument("--model", help="e.g. claude-sonnet-5-5 or claude-opus-5-5")
         p.add_argument("--effort", choices=["low", "medium", "high", "xhigh", "max"])
