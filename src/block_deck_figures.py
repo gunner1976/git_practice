@@ -41,7 +41,8 @@ rows = [
  ("TEC-2","plug",None,None,None,2341,2342,"bridge plug","Tecolutla Perforations Information.csv"),
  ("TEC-2","perf",None,None,None,2345,2349,"squeezed","Tecolutla Perforations Information.csv"),
  ("TEC-2","perf",None,None,None,2353,2354,"squeezed","Tecolutla Perforations Information.csv"),
- ("TEC-2","perf",None,None,None,2019,2020,"2019 RTG 1 11/16 in shallow shot (interval per Tonalli 2019 estado mecanico text)","TON_estado_mecanico_tec_2_20190219.pdf (1RxpD0jw)"),
+ ("TEC-2","perf",None,None,None,2319,2320,"active; Feb 2019 add-perf, RTG 1 11/16 in 3 spm (estado mecanico text reads 2019-2020, a typo; G-59)","Activities performed in Tecolutla.xlsx (1PawcesN); TON_estado_mecanico_tec_2_20190219.pdf (1RxpD0jw)"),
+ ("TEC-2","plug",None,None,None,2322.5,2323.5,"permanent plug May 2019, shuts off wet deeper perfs","Activities performed in Tecolutla.xlsx (1PawcesN)"),
  ("TEC-2","td",None,None,None,0,2375,"TD","Tecolutla Well Header Information.csv"),
   # TEC-3 (1956, water-invaded on test, plugged 7 Mar 1956). PEMEX estado mecanico (updated 19 May 2006) in the 2017 CNH cedula.
  ("TEC-3","surface",9.625,36,"J-55",0,501.35,"cemented","PEMEX estado mecanico TEC-3 (1XtyXmV6); CNH cedula Tec-3 (1PpxStcY)"),

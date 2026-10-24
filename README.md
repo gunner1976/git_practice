@@ -64,6 +64,7 @@ See `docs/task_queue.md`. Work is committed after each task.
 | 15 (realised price) | `docs/15_pemex_settlements.md` | `data/processed/price/`, `data/processed/drive_text/PEMEX_Delivery-Reception_settlements_2020-2022.csv` | `figures/17_realised_price.png` |
 | 16 (block history deck) | `docs/16_block_history_deck.md`, `docs/Tecolutla_Block_and_Development_History.pptx` | `data/processed/wells/casing_strings.csv`, `data/processed/deck_notes/` | `figures/18_wellbore_schematics.png`, `figures/19_well_histories.png`, `figures/20_block_timeline.png` |
 | 17 (government records) | `docs/17_government_records.md` | `data/processed/wells/casing_strings.csv` (TEC-2/TEC-3 strings) | `figures/18_wellbore_schematics.png` (regenerated) |
+| 18 (Kinjal briefing) | `docs/18_kinjal_briefing.md` | — | uses figures 05, 07, 09, 10, 15, 18, 19 |
 
 Gap register: `docs/gaps.md`. Rerun everything with the scripts in `src/` in task order; each script reads only `data/raw/` and earlier `data/processed/` outputs.
 

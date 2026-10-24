@@ -66,3 +66,8 @@ Each item: Drive id, title, what it says. Verbatim renderings for the large file
 - 18-XZwHrGKz9NVG76y2eVjEvEUzUuw4PR `Tecolutla-7 Schematic Sep 1971.pdf` (PEMEX Poza Rica): E.M.R. 4.80 m, ground 1.34 m; 9 5/8" 600.5 m; 6 5/8" 2,306.5; liner 2,281.2–2,340; spud 21 Nov 1956, completed 22 Jan 1957; X 175,426.75 Y 84,538.80 (PEMEX grid).
 - 1yqY55qQG4yx_ubG89r3f0oe9Ec-HC-tY, 1DblNjvezUTzyp73OqzAdNxeEViUdM_5P ASEA compliance reports, TEC-7 produced-water injection, May–Nov 2020 and Jun–Nov 2021: authorisation ASEA/UGI/DGGEERC/1712/2019 (15 Nov 2019); MIA 1077/2017 extended 26 Oct 2020 – 26 Oct 2023; one motor pump; no volumes.
 - 1nu0xjN2oJW9CDIbPp5wU9_mLhsT_URrG `CNH_DGM_VHP.xlsx` (Oct 2022: TEC-10DES 0 days); 1Tl6W3WCgtqkGxTlraqLtY-QHNfdxqBPG `CNH_DGM_BALANCES.xlsx` (Nov 2022: inventory 238, extracted 678 oil / 1,582 water, delivered 916 bbl at CAB Poza Rica; 0.9 MMcf flared).
+
+## Read for task 18 (2026-10-24)
+
+- 1PawcesNTey9NYEkRvJHdybIETY8vaTGQ `Activities performed in Tecolutla.xlsx` (Tonalli operations log, 2018–2019, saved Aug 2022): TEC-2 workovers (paraffin 2018; Feb 2019 RTG perf 2,319–2,320 m; May 2019 permanent plug 2,322.5 m, packer 2,292.65 m), TEC-7 Jun 2019 workover, test 100 % water, injection by triplex pump from 7 Aug 2019; TEC-10 drilling, completion (zones A1/A2 no flow; C1/C2 flowing), APSOL-AP organic clean-ups; TEC-11 drilling and completion problems; 2019 activity table; 2019 stimulation table (six APSOL-AP jobs, 2–3 m³).
+- 1974i04rU2wMb73auSql8T3JiHZGznv_O `Tecolutla Discussion with Jaguar (Sep 1st, 2022) Final.pdf`: per-well interval/cumulative tables and 2018–2019 test rates for TEC-2, TEC-7, TEC-10, TEC-11 (El Abra and Tantoyuca); TEC-10 75,832 bbl to Dec 2021; TEC-2 9,958 bbl since 2018.
