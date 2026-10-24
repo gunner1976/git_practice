@@ -136,6 +136,31 @@ Your framing: TEC-12 at the peak of the reef, perforating the highest, under-exp
 - **Gas:** flared under the evaluation-period approval.
 - **Sources:** `docs/15_pemex_settlements.md`; `docs/01_econ_2023.md`; G-49.
 
+### A9. Opex and logistics
+The records support your point, and the trend is the evidence. All figures are field operating costs only; G&A and regulatory costs are separate. Sources: `data/processed/deck_notes/accounting_notes.md` §4 and Appendix A; `Tonalli Op Cost 290920.xlsx`; the 2019 activity table in the operations log.
+
+| Period | Field opex | Per barrel | What drove it |
+|---|---|---|---|
+| Sep–Dec 2018 | USD 67–80 k/month (288 k total) | 18.7 USD/bbl | start-up; TEC-10 on test with rented Weatherford separator |
+| 2019 | USD 54–83 k/month (839 k total) | 25.6 USD/bbl | two wells on test; water trucked out until Aug; separator rental MXN 216 k/month (about USD 10 k) |
+| 2020 forecast (Jan 2020) | USD 461 k/year | 15.9 USD/bbl | after the 2019 changes below |
+| Sep 2020 run-rate | **about USD 28 k/month** (about 338 k/year) | roughly 13–16 USD/bbl at 2020 volumes | crew MXN 280 k, vacuum truck MXN 108 k, diesel MXN 60 k, frac tank MXN 32 k, consumables, lab |
+
+**What changed in 2019:**
+- **TEC-7 converted to disposal (Aug 2019).** This ended trucking of produced water; the log calls it "opex reduction".
+- **TEC-10 to TEC-2 flowline (Nov 2019).** It consolidated tankage and testing at one battery.
+- **Own separator procured (Dec 2019)** for Q1-2020 install, replacing the rental, which was invoiced to Mar 2020.
+- **TEC-2 shut in when uneconomic (Sep 2019),** with an USD 8 k demobilisation.
+
+**Crude logistics:** trucked by contractor to PEMEX at CAB Poza Rica, with demulsifier treatment (Apollo, about USD 925/month). Monthly Intertek crude analyses support quality. PEMEX's fixed tariffs are 2.7–3.3 USD/bbl.
+
+So field opex fell by about two-thirds, from about USD 70–80 k/month in mid-2019 to about 28 k/month by Sep 2020.
+
+**Caveats John may raise:**
+- The 2020–21 actuals are not in the files (G-56). The 28 k/month is a September 2020 cost sheet, not an audited figure.
+- G&A was USD 674 k in 2019, and corporate administration was USD 39 k/month in the 2022 CNH report. All-in cost per barrel was much higher than field opex at 50–150 bbl/d.
+- The 2023 economics assume 7.25 USD/bbl oil + 3.25 USD/bbl water + 2,500 USD/well/month + 10 k battery + 1.5 k disposal per month. At TEC-10's water cuts that sits close to the 2020 run-rate.
+
 ---
 
 ## Part B — Questions to expect, with short answers
@@ -156,6 +181,7 @@ Your framing: TEC-12 at the peak of the reef, perforating the highest, under-exp
 11. **What is the downside case?** The window is wet or tight; complete in 2,311–2,332 mSS between producers. No separate case has been run; if the window adds nothing, the outcome leans toward the low profile (65 kbbl EUR), which is negative at every price tested.
 
 ### B3. Wells and operations
+- **What does it cost to run the field?** See A9: field opex about USD 28 k/month by Sep 2020, down from 70–80 k in mid-2019, after in-field disposal, the flowline, the owned separator and the TEC-2 shut-in. Have the G&A number ready too.
 12. **Why did TEC-11 fail?** See A5: navigation below target in mudstone, mechanical failures, no pilot hole or logs. A failed execution, not a negative reservoir test.
 13. **What is TEC-10 doing now?** Last full data: 34 bbl/d at 86 % water cut (Dec 2021), shut in Feb 2022, restarted Nov 2022 on TEC-10 alone. Current status since then is not in the files.
 14. **Water handling capacity?** TEC-7 disposal by triplex pump. Indicative injectivity about 700–1,400 bbl/d from a short 2019 test. Injected volumes and pressures since 2019 are not in the files (G-57).
