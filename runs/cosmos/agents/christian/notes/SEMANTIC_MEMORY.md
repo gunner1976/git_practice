@@ -37,3 +37,6 @@ Actions; World layout; Climbing/Spire; Tower; Moon; Idle policy
 
 ## Status (2026-05-09, late)
 - Full day/night cycle observed again; world static, moon crescent crosses sky (unreachable). Idle policy stands: cheap move_to, brief episodic notes.
+
+## Status (2026-05-10)
+- World still static; half moon seen at 63deg, unreachable. Idle policy stands: cheap move_to, brief notes.

@@ -1,5 +1,50 @@
 {
- "christian": {},
+ "christian": {
+  "rock shattering": {
+   "seen": [
+    2,
+    22
+   ],
+   "mentioned": [
+    2,
+    22
+   ],
+   "recorded": [
+    2,
+    22
+   ],
+   "questioned": [
+    2,
+    22
+   ],
+   "explained": [
+    6,
+    5
+   ],
+   "tested": [
+    6,
+    16
+   ]
+  },
+  "lost at sea": {
+   "seen": [
+    6,
+    16
+   ],
+   "mentioned": [
+    6,
+    16
+   ],
+   "recorded": [
+    6,
+    16
+   ],
+   "explained": [
+    7,
+    20
+   ]
+  }
+ },
  "eric": {},
  "fitch": {},
  "jamie": {

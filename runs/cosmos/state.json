@@ -198,6 +198,15 @@
    "spawn_steps": [],
    "rule_fires": {},
    "clock_seconds": 1206.3
+  },
+  "christian/11": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 43,
+   "api_calls": 101,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1204.1
   }
  },
  "phase_b": {},
