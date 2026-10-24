@@ -65,6 +65,7 @@ See `docs/task_queue.md`. Work is committed after each task.
 | 16 (block history deck) | `docs/16_block_history_deck.md`, `docs/Tecolutla_Block_and_Development_History.pptx` | `data/processed/wells/casing_strings.csv`, `data/processed/deck_notes/` | `figures/18_wellbore_schematics.png`, `figures/19_well_histories.png`, `figures/20_block_timeline.png` |
 | 17 (government records) | `docs/17_government_records.md` | `data/processed/wells/casing_strings.csv` (TEC-2/TEC-3 strings) | `figures/18_wellbore_schematics.png` (regenerated) |
 | 18 (Kinjal briefing) | `docs/18_kinjal_briefing.md` | — | uses figures 05, 07, 09, 10, 15, 18, 19 |
+| 19 (technical overview deck) | `docs/Tecolutla_Technical_Overview.pptx` (23 slides; Q&A in speaker notes) | `src/build_overview_deck.py`, `src/overview_figures.py` | `figures/22_interval_ladder.png`, `figures/23_field_opex.png` |
 
 Gap register: `docs/gaps.md`. Rerun everything with the scripts in `src/` in task order; each script reads only `data/raw/` and earlier `data/processed/` outputs.
 

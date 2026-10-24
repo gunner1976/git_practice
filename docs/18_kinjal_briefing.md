@@ -1,5 +1,7 @@
 # 18 — Technical overview and question prep: Kinjal (John Tominey)
 
+Companion deck: `docs/Tecolutla_Technical_Overview.pptx` (23 slides, built by `src/build_overview_deck.py`). Each slide's speaker notes carry the questions expected on that slide, with answers and sources.
+
 Prepared for Kevin Gunning ahead of a technical presentation of Tecolutla to John Tominey (Kinjal, kinjalgas.com). This is a prep document, not a handout. Part C lists the weak spots John is likely to find, so do not send this file on as is.
 
 Web search returned nothing on Kinjal or kinjalgas.com, so the questions below are generic for an engineer doing technical diligence. The company name suggests a gas focus, so the gas-cap and H2S questions in B4 are worth extra preparation.
