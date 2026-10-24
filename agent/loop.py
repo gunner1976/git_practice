@@ -133,6 +133,7 @@ def run_session(
     first = f"{opening}\n\n{first_obs}{status(0)}" if a.get("initial_observation", True) else opening
     messages: list = [{"role": "user", "content": first}]
     log("session_start", **meta, steps=steps, soul=soul, opening=opening, world_seed=world.seed, hidden_rules=ground_truth(world),
+        **({"achievements": dict(world.achievements)} if getattr(world, "mission", None) else {}),
         **({"start_state": world.state()} if start_state else {}))
     if a.get("initial_observation", True):
         log("observation", step=0, text=first_obs)
@@ -230,6 +231,9 @@ def run_session(
                                 spawn_steps.append(used)
                             log("hidden_rule_fired", step=used, event=e)
                     log("action", step=used, name=name, input=args, result=msg, error=err, events=events, **({"clock": round(clock, 1)} if clk else {}))
+                    for e in events:
+                        if e.get("type") == "achievement":
+                            log("achievement", step=used, name=e["name"])
                     last_world_idx = len(results)
             elif name in extra_names:
                 if clk:
@@ -254,6 +258,12 @@ def run_session(
                 if clk and eko is not None:
                     world.sky_tau = eko_tau()
                 msg, err = world.observe_json({"time": now_iso()}), False
+                seen = world.drain_events() if getattr(world, "mission", None) else []
+                if seen:  # an observation can complete a trial (the eclipse) or reveal the tablet
+                    log("world_events", step=used, events=seen)
+                    for e in seen:
+                        if e.get("type") == "achievement":
+                            log("achievement", step=used, name=e["name"])
                 if clk:
                     clock += float(clk["query_seconds"])
                 log("tool_call", step=used, name=name, input=args, result=msg[:20000], error=err)  # keep what the agent saw (the night sky is long)

@@ -122,12 +122,17 @@ class Run:
             if self.cfg["world"].get("persist") and k > 1:
                 prev = wdir / f"session_{k - 1:02d}_end.json"
                 start_state = json.loads(prev.read_text()) if prev.exists() else None
+            ach_path = self.root / "agents" / agent / "achievements.json"
+            if hasattr(world, "achievements"):  # mission trials carry over between days
+                world.achievements = json.loads(ach_path.read_text()) if ach_path.exists() else {}
             try:
                 res = run_session(
                     cfg=self.cfg, client=client, budget=self.budget, world=world, notes=notes, soul=self.soul,
                     log=log, steps=steps, opening=opening, meta={"phase": "A", "agent": agent, "session": k},
                     start_state=start_state,
                 )
+                if getattr(world, "mission", None):
+                    ach_path.write_text(json.dumps(world.achievements))
                 if self.cfg["world"].get("persist"):
                     wdir.mkdir(parents=True, exist_ok=True)
                     (wdir / f"session_{k:02d}_end.json").write_text(json.dumps(world.state()))

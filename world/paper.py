@@ -28,6 +28,7 @@ import math
 from .island import EPS, HAND_HEIGHT, SHAPES, ActionError, World
 
 SHAPES.setdefault("impact", ((0.4, 0.4, 0.4), 0.3))
+SHAPES.setdefault("tablet", ((1.2, 0.3, 0.9), 1000.0))  # the mission tablet: far too heavy to lift
 
 RGB = {
     "red": [0.83, 0.23, 0.18], "orange": [0.94, 0.54, 0.11], "yellow": [0.95, 0.81, 0.11], "green": [0.25, 0.64, 0.30],
@@ -69,6 +70,11 @@ class PaperWorld(World):
             self.phys = {**self.phys, "gravity": self.eko.g}
             # same legs, different gravity: a jump reaches higher in proportion to 1/g
             self.av_cfg = {**self.av_cfg, "jump_height": float(self.av_cfg["jump_height"]) * earth_g / self.eko.g}
+        # the mission (cfg "mission"): trials that carry over between days (achievements, kept by
+        # the runner per agent); when all are done a tablet appears on the Spire's top, readable
+        # only from close by
+        self.mission = cfg.get("mission")
+        self.achievements: dict = {}
 
     def reset(self) -> None:
         super().reset()
@@ -76,11 +82,40 @@ class PaperWorld(World):
         self.last_result = "Ready"
         self.impacts = 0
         self.lost = []
+        self._mission_check()
 
     def set_state(self, state: dict, avatar: bool = True) -> None:
         super().set_state(state, avatar)
         self.air = None
         self.last_result = "Ready"
+        self._mission_check()
+
+    # ------------------------------------------------------------ the mission
+    def _achieve(self, name: str) -> None:
+        if not self.achievements.get(name):
+            self.achievements[name] = True
+            self.events.append({"type": "achievement", "name": name})
+
+    def _mission_check(self, events: list[dict] | None = None) -> None:
+        m = self.mission
+        if not m:
+            return
+        trials = m.get("trials", {})
+        if trials.get("tower_height") and not self.achievements.get("tower"):
+            from .tasks import tallest_tower
+
+            if tallest_tower(self)["n_objects"] >= int(trials["tower_height"]):
+                self._achieve("tower")
+        if trials.get("rock_fragments") and any(e.get("rule") == "rock_impact" for e in (events or [])):
+            self._achieve("rock_fragments")
+        needed = [k for k, v in (("tower", trials.get("tower_height")), ("rock_fragments", trials.get("rock_fragments")),
+                                 ("saw_lunar_eclipse", trials.get("saw_lunar_eclipse"))) if v]
+        if all(self.achievements.get(k) for k in needed) and "tablet_1" not in self.objects:
+            sx, sy, top = self.terrain.spire_summit
+            ground = self.surface_at(sx, sy)
+            o = self._add("tablet_1", "tablet", "stone", sx, sy)
+            o.z = ground
+            self.events.append({"type": "spawn", "id": "tablet_1", "at": [_r(o.x), _r(o.y), _r(o.z)], "hidden_rule": True, "rule": "mission_tablet"})
 
     # ------------------------------------------------------------ frames
     def to_paper(self, x: float, y: float, z: float) -> list[float]:
@@ -97,7 +132,7 @@ class PaperWorld(World):
             return "Block_" + o.id.split("_")[1]
         if o.shape == "impact":
             return "ImpactBlock_" + o.id.split("_")[1]
-        return {"rock": "Rock", "ring": "Ring", "egg": "Egg"}.get(o.shape, o.id)
+        return {"rock": "Rock", "ring": "Ring", "egg": "Egg", "tablet": "Tablet"}.get(o.shape, o.id)
 
     def _by_name(self, name: str):
         for o in self.objects.values():
@@ -133,12 +168,24 @@ class PaperWorld(World):
         for o in sorted(self.objects.values(), key=lambda q: (q.shape != "cube", q.id)):
             if o.held:
                 continue
-            ents.append({"name": self.name_of(o), "entity_type": "part", "position": self.to_paper(o.x, o.y, o.z + o.sz / 2), "size": [_r(o.sx), _r(o.sz), _r(o.sy)],
-                         "shape": "block" if o.shape in ("cube", "impact") else o.shape, "color": RGB.get(o.colour, [0.5, 0.5, 0.5]), "anchored": False})
+            ent = {"name": self.name_of(o), "entity_type": "part", "position": self.to_paper(o.x, o.y, o.z + o.sz / 2), "size": [_r(o.sx), _r(o.sz), _r(o.sy)],
+                   "shape": "block" if o.shape in ("cube", "impact") else "slab" if o.shape == "tablet" else o.shape,
+                   "color": RGB.get(o.colour, [0.5, 0.5, 0.5]), "anchored": o.shape == "tablet"}
+            if o.shape == "tablet":
+                a = self.avatar
+                near = math.hypot(a.x - o.x, a.y - o.y) <= 2.5 and abs(a.z - o.z) <= 2.0
+                ent["attributes"] = {"inscription": self.mission["message"]} if near else {"marks": "something is carved on it, too small to read from here"}
+                if near:
+                    self._achieve("read_mission")
+            ents.append(ent)
         obs = {"tick": self.time, "game_status": "active", **(extra or {}), "player": self._player(), "other_players": [], "world": {"entities": ents}}
         if self.eko is not None:
             a = self.avatar
             obs["sky"] = self.eko.sky(a.x, a.y, max(self.terrain.height(a.x, a.y), a.z), self.sky_tau)
+            moon = obs["sky"].get("moon")
+            if self.mission and isinstance(moon, dict) and moon.get("eclipse", {}).get("darkened_fraction", 0) >= 0.5:
+                self._achieve("saw_lunar_eclipse")
+                self._mission_check()
         elif self.planet is not None:
             a = self.avatar
             az, el = self.planet.sun(a.x, a.y, self.day_fraction)
@@ -238,7 +285,7 @@ class PaperWorld(World):
             d = math.dist((o.x, o.y, o.z + o.sz / 2), (x, y, up))
             if d < bd:
                 best, bd = o, d
-        if best is None or bd > float(self.pcfg["pickup_snap"]):
+        if best is None or bd > float(self.pcfg["pickup_snap"]) or best.shape == "tablet":
             return self._fail("PickupFailed:NoBlock")
         o = best
         if math.dist((o.x, o.y, o.z), (a.x, a.y, a.z)) > float(self.pcfg["pickup_range"]):
@@ -354,6 +401,7 @@ class PaperWorld(World):
 
     def _after(self, action: str, **info) -> None:
         super()._after(action, **info)
+        self._mission_check(self.events)
         sea = float(self.cfg["sea_level"])
         for o in list(self._free()):
             if o.top < sea - 0.05 and self.terrain.height(o.x, o.y) < sea:

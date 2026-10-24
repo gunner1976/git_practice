@@ -1,0 +1,18 @@
+# Planet EKO with the mission tablet. Free play as usual - nothing in the prompts mentions it - but
+# each agent can complete three trials, which carry over from day to day:
+#   tower              build a tower at least 3 objects high          (persistence, innovation)
+#   rock_fragments     throw the rock hard enough to shatter it        (curiosity, experiment)
+#   saw_lunar_eclipse  observe the moon while it is at least half in eclipse (curiosity, the sky; session 3)
+# When all three are done, a stone tablet appears on top of the Spire. Every agent sees a new "Tablet"
+# entity up there; its inscription can only be read from within 2.5 m, so the agent has to climb the
+# Spire to read it.
+#   python run.py freeplay --config configs/eko_mission.yaml --run-id mission1 --agents 10 --sessions 6 --session-minutes 20 --parallel 10 --max-usd 50
+extends: eko.yaml
+
+world:
+  mission:
+    trials:
+      tower_height: 3
+      rock_fragments: true
+      saw_lunar_eclipse: true
+    message: "Your mission is to reach the moon."

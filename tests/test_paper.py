@@ -354,3 +354,34 @@ def test_trait_ranking_puts_persistence_first(tmp_path):
     assert "| 1 | agent_" in text and "| 3 | agent_" in text
     ranked = json.loads((tmp_path / "r/traits.json").read_text())
     assert ranked[0]["total"] >= ranked[-1]["total"] and all(0 <= r["persistence"] <= 1 for r in ranked)
+
+
+def test_mission_tablet_appears_after_the_trials_and_reads_only_up_close(tmp_path):
+    from analysis.replay import write_viewer
+
+    cfg = run.read_cfg(ROOT / "configs/eko_mission.yaml")
+    w = make_world(cfg["world"])
+    w.reset()
+    assert "tablet_1" not in w.objects
+    w.achievements = {"tower": True, "rock_fragments": True}
+    w.reset()
+    assert "tablet_1" not in w.objects                                           # one trial still missing
+    w.sky_tau = 3 * w.eko.day                                                     # session 3's eclipse night
+    json.loads(w.observe_json())
+    assert w.achievements.get("saw_lunar_eclipse") and "tablet_1" in w.objects    # the tablet appears
+    tab = w.objects["tablet_1"]
+    sx, sy, top = w.terrain.spire_summit
+    assert math.hypot(tab.x - sx, tab.y - sy) < 0.01 and tab.z == pytest.approx(top, abs=0.1)
+    far = next(e for e in json.loads(w.observe_json())["world"]["entities"] if e["name"] == "Tablet")
+    assert "inscription" not in far["attributes"]
+    w.avatar.x, w.avatar.y, w.avatar.z = tab.x + 1.5, tab.y, top                  # on the Spire top, next to it
+    near = next(e for e in json.loads(w.observe_json())["world"]["entities"] if e["name"] == "Tablet")
+    assert near["attributes"]["inscription"] == "Your mission is to reach the moon." and w.achievements.get("read_mission")
+    assert code(w.pickup(w.to_paper(tab.x, tab.y, tab.z + 0.4))) == "PickupFailed:NoBlock"  # can't carry it off
+    # a run: trials persist between days, and replays stay exact
+    cfg["agent"]["clock"].update(session_seconds=300, warn_before_seconds=60)
+    r = Run(tmp_path / "r", cfg, (ROOT / "paper/system_prompt.md").read_text(), max_usd=50, mock=True)
+    r.phase_a(2, 2, 150, 2)
+    assert (tmp_path / "r/agents/agent_1/achievements.json").exists()
+    outs, n, bad = write_viewer(tmp_path / "r")
+    assert n == 4 and bad == []

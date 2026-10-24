@@ -83,8 +83,12 @@ def replay_session(path: Path, wcfg: dict, notes_start: dict[str, str]) -> dict:
     base = type(make_world(wcfg, seed=start.get("world_seed")))
     w = type("Tracing" + base.__name__, (_Tracing, base), {})(wcfg, seed=start.get("world_seed"))
     w.reset()
+    if start.get("achievements") is not None:  # mission trials already done on earlier days
+        w.achievements = dict(start["achievements"])
+        w._mission_check()
     if start.get("start_state"):  # a persistent world: start from how the previous day ended
         w.set_state(start["start_state"])
+    w.drain_events()
     meta = _objects_meta(w)
     frames = [{"step": 0, **_snapshot(w)}]
     timeline: list[dict] = []
@@ -142,6 +146,19 @@ def replay_session(path: Path, wcfg: dict, notes_start: dict[str, str]) -> dict:
                 timeline.append({"f": fi, "k": "answer", "t": f"{inp.get('value')} {inp.get('units', '')}".strip(), "r": inp.get("explanation", "")})
             elif r["name"] == "read_note":
                 timeline.append({"f": fi, "k": "read", "p": r["input"].get("path")})
+        elif k == "world_events":  # things an observation set off: a trial completed, the tablet appearing
+            for e in r.get("events", []):
+                if e.get("type") == "achievement":
+                    w.achievements[e["name"]] = True
+            w._mission_check()
+            spawned = [e["id"] for e in r.get("events", []) if e.get("type") == "spawn"]
+            if spawned:
+                for oid in spawned:
+                    if oid in w.objects:
+                        meta[oid] = _objects_meta(w)[oid]
+            w.drain_events()
+        elif k == "achievement":
+            timeline.append({"f": fi, "k": "rule", "t": "trial completed: " + r["name"].replace("_", " ")})
         elif k == "stop_hook":
             timeline.append({"f": fi, "k": "nudge", "n": r.get("n")})
         elif k == "score":
