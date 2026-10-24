@@ -1,0 +1,9 @@
+# Paper-style free play on Sonnet 5.5 with the cost fixes from cheap.yaml but the same model
+# and effort: older turns trimmed at ~15k tokens (rarely, so the prompt cache survives) and
+# 2 simulated minutes passing when the agent stops.
+extends: paper_freeplay.yaml
+
+agent:
+  context_prune_chars: 60000
+  clock:
+    idle_seconds: 120

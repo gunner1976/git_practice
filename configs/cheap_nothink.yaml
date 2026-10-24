@@ -1,0 +1,5 @@
+# configs/cheap.yaml with Haiku's thinking switched off (fewer output tokens, shorter history).
+extends: cheap.yaml
+
+agent:
+  thinking_display: "off"
