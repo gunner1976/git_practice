@@ -142,3 +142,36 @@ def format_clock_estimate(root: Path, cfg: dict) -> str:
         lines.append(f"{model}: ~{k} calls and ~${per:.2f} per {secs / 60:.0f}-minute day; {n} agents x {s} days ~ ${tot:.2f}"
                      f" (range ${0.6 * tot:.2f}-${1.8 * tot:.2f}; memory in the prompt grows over the days, so later days cost more)")
     return "\n".join(lines)
+
+
+def token_profile(root: Path) -> dict:
+    """Average tokens per call and calls per simulated agent-day, from a clock-based run's ledger."""
+    rows = [r for r in _load(root) if r.get("phase") == "A" and "clock" in r]
+    if not rows:
+        raise ValueError(f"{root} has no clock-based Phase A calls")
+    n = len(rows)
+    avg = {k: sum(r["usage"][f] for r in rows) / n for k, f in
+           (("input", "input_tokens"), ("output", "output_tokens"), ("cache_read", "cache_read_input_tokens"), ("cache_write", "cache_creation_input_tokens"))}
+    last: dict = {}
+    for r in rows:
+        last[(r["agent"], r["session"])] = max(last.get((r["agent"], r["session"]), 0.0), float(r["clock"]))
+    return {"per_call": avg, "seconds": sum(last.values()), "calls": n, "model": rows[0].get("model")}
+
+
+def price_watch(root: Path, pricing: dict, agents: int = 1000, days: int = 10, day_minutes: float = 20, budget: float = 100.0) -> str:
+    """Cost of `agents` x `days` free-play days for every priced model, using the token profile
+    measured in `root` (so the behaviour assumed is that run's). Batch = 50% off."""
+    p = token_profile(root)
+    calls_per_day = p["calls"] / (p["seconds"] / (day_minutes * 60))
+    agent_days = agents * days
+    lines = [f"Profile from {Path(root).name} ({p['model']}): {calls_per_day:.0f} calls per {day_minutes:g}-minute day; per call "
+             + ", ".join(f"{k} {v:,.0f}" for k, v in p["per_call"].items()) + " tokens",
+             f"Target: {agents} agents x {days} days = {agent_days:,} agent-days for under ${budget:,.0f}"
+             f" (= ${budget / agent_days:.4f} per agent-day)", "",
+             f"{'model':24s} {'per agent-day':>14s} {'total':>12s} {'with batch':>12s}  verdict"]
+    for model, pr in sorted(pricing.items(), key=lambda kv: kv[1]["output"]):
+        per = calls_per_day * sum(p["per_call"][k] * pr[k] for k in p["per_call"]) / 1e6
+        tot = per * agent_days
+        ok = "UNDER budget" if tot < budget else ("under with batch" if tot / 2 < budget else f"needs {tot / budget:.0f}x cheaper")
+        lines.append(f"{model:24s} {'$' + format(per, '.4f'):>14s} {'$' + format(tot, ',.0f'):>12s} {'$' + format(tot / 2, ',.0f'):>12s}  {ok}")
+    return "\n".join(lines)

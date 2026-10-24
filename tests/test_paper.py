@@ -226,3 +226,14 @@ def test_set_state_without_avatar_puts_held_object_down():
     w3 = pw()
     w3.set_state(st)
     assert w3.avatar.holding == "cube_1"
+
+
+def test_price_watch_reports_every_model(tmp_path):
+    from agent.estimate import price_watch
+
+    cfg = json.loads(json.dumps(CFG))
+    cfg["agent"]["clock"].update(session_seconds=300, warn_before_seconds=60)
+    Run(tmp_path / "r", cfg, (ROOT / "paper/system_prompt.md").read_text(), max_usd=50, mock=True).phase_a(1, 1, 150, 1)
+    text = price_watch(tmp_path / "r", {**cfg["pricing"], "free-model": {"input": 0, "output": 0, "cache_read": 0, "cache_write": 0}})
+    assert "10,000 agent-days" in text and "claude-sonnet-5-5" in text
+    assert "free-model" in text and "UNDER budget" in text

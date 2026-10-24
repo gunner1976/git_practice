@@ -10,6 +10,7 @@
   python run.py viewer   --run-id main               # replay viewer (3D world / 2D map toggle, rules over time): runs/<id>/viewer.html
   python run.py estimate --run-id <pilot-id>         # re-print the full-run estimate from a pilot
   python run.py ladder-estimate --run-id <pilot-id>  # upper-bound cost of the ladder from a pilot
+  python run.py price-watch                          # is 1000 agents x 10 days under $100 yet, per model (--price adds models)
   python run.py ladder   --run-id L1 --max-usd 300   # staged egg-hunt tournament over souls + memories
 
 Re-running any command with the same --run-id resumes it.
@@ -199,6 +200,21 @@ def cmd_viewer(args) -> None:
         print(f"  {sid}: replay diverged from the log at step {d['step']}")
 
 
+def cmd_price_watch(args) -> None:
+    """Is 1000 agents x 10 days under budget yet, for each priced model? --price adds models,
+    e.g. --price my-model=0.2,0.8,0.02,0.25 (USD per million: input, output, cache read, cache write)."""
+    from agent.estimate import price_watch
+
+    cfg = load_cfg(args)
+    pricing = dict(cfg["pricing"])
+    for spec in args.price or []:
+        name, vals = spec.split("=", 1)
+        i, o, cr, cw = (float(v) for v in vals.split(","))
+        pricing[name] = {"input": i, "output": o, "cache_read": cr, "cache_write": cw}
+    print(price_watch(ROOT / "runs" / (args.run_id or "pilot-20261024-005431"), pricing, agents=args.agents or 1000,
+                      days=args.sessions or 10, budget=args.max_usd or 100.0))
+
+
 def cmd_estimate(args) -> None:
     cfg = load_cfg(args)
     root = ROOT / "runs" / args.run_id
@@ -255,7 +271,7 @@ def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name, fn in [("pilot", cmd_pilot), ("freeplay", cmd_freeplay), ("eval", cmd_eval), ("all", cmd_all), ("analyze", cmd_analyze), ("viewer", cmd_viewer), ("evolve", cmd_evolve), ("estimate", cmd_estimate),
-                     ("ladder", cmd_ladder), ("ladder-estimate", cmd_ladder_estimate)]:
+                     ("ladder", cmd_ladder), ("ladder-estimate", cmd_ladder_estimate), ("price-watch", cmd_price_watch)]:
         p = sub.add_parser(name)
         p.set_defaults(fn=fn)
         p.add_argument("--config", default=str(ROOT / "config.yaml"))
@@ -270,6 +286,8 @@ def main(argv=None) -> None:
         p.add_argument("--session-minutes", type=float, help="length of a simulated day (clock-based configs)")
         p.add_argument("--mock", action="store_true", help="use the scripted mock model (no API calls)")
         p.add_argument("--skip-pilot-check", action="store_true")
+        if name == "price-watch":
+            p.add_argument("--price", action="append", metavar="MODEL=IN,OUT,CACHE_READ,CACHE_WRITE", help="price a model not in config.yaml (USD per million tokens)")
         if name == "viewer":
             p.add_argument("--include", action="append", metavar="RUN_ID", help="also show this run (same island); repeatable")
     args = ap.parse_args(argv)
