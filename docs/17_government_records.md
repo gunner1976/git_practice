@@ -56,3 +56,23 @@ The Mexican government portals cannot be reached from this session. The egress p
 
 - **Network access** to sih.hidrocarburos.gob.mx (per-well monthly production 2020–2022 for G-32/G-53; injection volumes for G-57), download.bls.gov or fred.stlouisfed.org (G-45), and dof.gob.mx or diputados.gob.mx (G-49). The environment's network access can be widened under the cloud environment settings.
 - **Requests to Tonalli/Jaguar:** the per-well VHP zips for 2020–2022, the TEC-7 injection log, the Petrel/SEG-Y package (G-55) and the 2020–2023 ledgers (G-56).
+
+
+## Update, 24 Oct 2026: network access widened
+
+**Now reachable:** www.gob.mx, dof.gob.mx, www.diputados.gob.mx, www.datos.gob.mx (CKAN API), www.eia.gov, www.banxico.org.mx, www.inegi.org.mx, fred.stlouisfed.org and kinjalgas.com.
+
+**Still unreachable, for reasons outside this environment:**
+- sih.hidrocarburos.gob.mx and hidrocarburos.gob.mx return Cloudflare 522 (origin server not responding).
+- cnih.cnh.gob.mx cannot be reached at all (proxy 502).
+- repodatos.atdt.gob.mx, the SENER open-data file host behind datos.gob.mx, returns Akamai "Access Denied" to this server's network.
+- download.bls.gov returns 403. FRED carries the same series, so this does not matter.
+
+The SENER datasets of interest are listed on datos.gob.mx: contract status 2025, contraprestaciones 2026, commercialisation 2026 and national production 2026. They can be downloaded from a normal browser in Mexico or Canada and placed on the Drive.
+
+**Results:**
+- G-45 closed: Nov-2020 PPI 309.4, escalation ×1.297 to Sep 2026.
+- G-49 narrowed on the primary LSH text (transitorios Décimo, Décimo Tercero).
+- G-60 raised: the area-based fiscal charges are understated in the economics.
+
+Files are saved under `data/raw/web_2026-10-24/` and listed in `data/manifest.csv`.

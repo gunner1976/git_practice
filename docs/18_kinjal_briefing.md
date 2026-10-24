@@ -4,7 +4,12 @@ Companion deck: `docs/Tecolutla_Technical_Overview.pptx` (23 slides, built by `s
 
 Prepared for Kevin Gunning ahead of a technical presentation of Tecolutla to John Tominey (Kinjal, kinjalgas.com). This is a prep document, not a handout. Part C lists the weak spots John is likely to find, so do not send this file on as is.
 
-Web search returned nothing on Kinjal or kinjalgas.com, so the questions below are generic for an engineer doing technical diligence. The company name suggests a gas focus, so the gas-cap and H2S questions in B4 are worth extra preparation.
+**Who Kinjal is** (kinjalgas.com and its Newsfile releases, read 24 Oct 2026):
+- Kinjal Corporation (Toronto; CEO Warren Levy, who was on the Jaguar side of the Sep 2022 Tecolutla review) is completing a reverse takeover of IFR.
+- **3 Sep 2026:** Petro Frontera (IFR) signed a definitive agreement to buy Jaguar's 57.37 % of Tonalli. IFR already holds 42.63 %, so the resulting issuer would own 100 % of Tonalli and the Tecolutla block. The deal is subject to TSXV, shareholder and Mexican approvals, including SENER.
+- **25 May 2026 release:** all Tonalli indebtedness is to be eliminated at closing, and a company-wide third-party reserve report covering Tecolutla is planned after closing.
+- Kinjal's portfolio is gas-weighted: the Misión field (Burgos), the Kinkan discovery on block CS.06, and A10.CS (Macuspana farm-in).
+- So John is likely assessing Tecolutla as an asset his company is about to own outright. Expect questions on reserves classification, the development plan and operating cost, more than on the sale itself.
 
 Every number below comes from the repository or the Drive files it cites. Where your outline differs from the records, Part A says so.
 
