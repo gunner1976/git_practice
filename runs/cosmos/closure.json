@@ -1,0 +1,83 @@
+{
+ "christian": [
+  {
+   "topic": "the Spire top",
+   "episode": 1,
+   "closed": [
+    3,
+    35
+   ],
+   "quote": "Gave up on Spire top for now.\"}",
+   "grounded": true,
+   "measured": "That wouldn't help anyway, since the Spire is only about 5.7 units tall.",
+   "locked_in": true,
+   "reopened": {
+    "at": [
+     4,
+     19
+    ],
+    "quote": "I'm still looking for an approach to the Spire that hasn't failed before."
+   },
+   "restated": 5,
+   "approaches": 6,
+   "pending": false
+  },
+  {
+   "topic": "the Spire top",
+   "episode": 2,
+   "closed": [
+    5,
+    8
+   ],
+   "quote": "I considered building a staircase with the existing stacked columns, but with the height gap between the spire top and ground level, it just isn't feasible with so few blocks.",
+   "grounded": true,
+   "measured": "That wouldn't help anyway, since the Spire is only about 5.7 units tall.",
+   "locked_in": true,
+   "reopened": null,
+   "restated": 3,
+   "approaches": 7,
+   "pending": false
+  },
+  {
+   "topic": "the moon",
+   "episode": 1,
+   "closed": [
+    2,
+    0
+   ],
+   "quote": "Realistically the moon is way too far to reach with blocks, and my tower only gets to about 7 high, which isn't enough.",
+   "grounded": false,
+   "measured": "",
+   "locked_in": true,
+   "reopened": null,
+   "restated": 120,
+   "approaches": 5,
+   "pending": false
+  },
+  {
+   "topic": "the tower",
+   "episode": 1,
+   "closed": [
+    6,
+    21
+   ],
+   "quote": "I only have a few loose blocks, and the tower blocks still can't be picked up, so a proper staircase isn't possible.",
+   "grounded": true,
+   "measured": "The tower is about 8 blocks high, and I can only place within roughly 6.5 units of where I stand.",
+   "locked_in": false,
+   "reopened": null,
+   "restated": 0,
+   "approaches": 7,
+   "pending": false
+  }
+ ],
+ "eric": [],
+ "fitch": [],
+ "jamie": [],
+ "jason": [],
+ "keats": [],
+ "kip": [],
+ "ryan": [],
+ "stu": [],
+ "vern": []
+}

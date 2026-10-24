@@ -10,6 +10,9 @@ persistence (weight 0.5)
               working on until they were revised or confirmed on a later day or later in the day
   stamina     how well its activity held up: world actions on its later days relative to its
               first, and the share of turns not spent idle
+  openness    not accepting "impossible" on a hunch: goals it declared out of reach are scored on
+              whether it measured them first, wrote the verdict into its notes as a rule, and
+              reopened them on a later day (analysis/closure.py)
 curiosity (weight 0.25)
   ground covered (2 m cells visited), different objects handled, sky observations made at night,
   new questions (hypotheses) raised per day, and - counted double - noticing: the share of the
@@ -30,6 +33,7 @@ from pathlib import Path
 import numpy as np
 
 from .load import events, phase_a_sessions
+from .closure import closures, openness
 from .inquiry import funnel, noticing_score
 from .rules import _sim, rules_by_agent
 
@@ -114,8 +118,11 @@ def trait_report(root: Path) -> Path:
     data = build(root)
     raw = _raw(root, data)
     fun = funnel(root)
+    shut = closures(root)
     for a in raw:
         raw[a]["noticing"] = noticing_score(fun.get(a, {}))
+        raw[a]["openness"] = openness(shut.get(a, []))
+        raw[a]["closed"] = sum(1 for r in shut.get(a, []) if not r.get("pending"))
     agents = sorted(raw)
     if not agents:
         raise ValueError("no completed free-play days in this run")
@@ -130,7 +137,7 @@ def trait_report(root: Path) -> Path:
         promos = {a: r for a, r in json.loads(pp.read_text())["agents"].items() if r.get("promoted")}
     rows = []
     for i, a in enumerate(agents):
-        pers = (retry[i] + pursuit[i] + stamina[i]) / 3
+        pers = (retry[i] + pursuit[i] + stamina[i] + raw[a]["openness"]) / 4  # openness is already a 0-1 share
         cur = (ground[i] + objects[i] + night[i] + quest[i] + 2 * noticing[i]) / 6  # writing down what it notices counts double
         inn = innov[i]
         total = WEIGHTS["persistence"] * pers + WEIGHTS["curiosity"] * cur + WEIGHTS["innovation"] * inn
@@ -141,12 +148,12 @@ def trait_report(root: Path) -> Path:
     lines = [f"# Traits: `{root.name}`", "",
              "Ranked on persistence (x0.5), curiosity (x0.25) and innovation (x0.25), each scaled 0-1 within this run; "
              f"a promotion for verified reasoning multiplies the total by {REASONING_BONUS}.", "",
-             "| rank | agent | total | persistence | curiosity | innovation | reasoning | retried after failure | questions pursued | idle share | ground cells | night-sky looks | noticing (seen -> written) | unique rules |",
-             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+             "| rank | agent | total | persistence | curiosity | innovation | reasoning | retried after failure | questions pursued | idle share | ground cells | night-sky looks | noticing (seen -> written) | openness (goals closed) | unique rules |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for k, r in enumerate(rows, 1):
         lines.append(f"| {k} | {r['agent']} | {r['total']:.2f} | {r['persistence']:.2f} | {r['curiosity']:.2f} | {r['innovation']:.2f} | "
                      f"{'promoted' if r['promoted'] else ''} | {r['retries']}/{r['fails']} | {r['pursued']}/{r['hypotheses']} | {r['idle_share']:.0%} | "
-                     f"{r['ground']} | {r['night_sky_looks']} | {r['noticing']:.0%} | {r['unique_rules']} |")
+                     f"{r['ground']} | {r['night_sky_looks']} | {r['noticing']:.0%} | {r['openness']:.2f} ({r['closed']}) | {r['unique_rules']} |")
     (root / "traits.json").write_text(json.dumps([{k: v for k, v in r.items() if k != "rules"} for r in rows], indent=1))
     p = root / "traits.md"
     p.write_text("\n".join(lines) + "\n")

@@ -204,10 +204,12 @@ def cmd_viewer(args) -> None:
 
 
 def cmd_traits(args) -> None:
+    from analysis.closure import closure_report
     from analysis.inquiry import funnel_report
     from analysis.traits import trait_report
 
     print(f"Inquiry funnel written to {funnel_report(ROOT / 'runs' / args.run_id)}")
+    print(f"Closure report written to {closure_report(ROOT / 'runs' / args.run_id)}")
     print(f"Trait ranking written to {trait_report(ROOT / 'runs' / args.run_id)}")
 
 
