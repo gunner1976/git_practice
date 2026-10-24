@@ -12,6 +12,7 @@
   python run.py ladder-estimate --run-id <pilot-id>  # upper-bound cost of the ladder from a pilot
   python run.py challenge --run-id <id>              # score the observer's question and show how each agent reached its answer
   python run.py promote --run-id <id> --max-usd 1     # promote agents that reasoned their way to a round world (Haiku judge)
+  python run.py traits --run-id <id>                 # rank agents: persistence first, then curiosity and innovation; reasoning as the gate
   python run.py price-watch                          # is 1000 agents x 10 days under $100 yet, per model (--price adds models)
   python run.py ladder   --run-id L1 --max-usd 300   # staged egg-hunt tournament over souls + memories
 
@@ -202,6 +203,12 @@ def cmd_viewer(args) -> None:
         print(f"  {sid}: replay diverged from the log at step {d['step']}")
 
 
+def cmd_traits(args) -> None:
+    from analysis.traits import trait_report
+
+    print(f"Trait ranking written to {trait_report(ROOT / 'runs' / args.run_id)}")
+
+
 def cmd_promote(args) -> None:
     from analysis.promotion import promote
 
@@ -288,11 +295,11 @@ def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name, fn in [("pilot", cmd_pilot), ("freeplay", cmd_freeplay), ("eval", cmd_eval), ("all", cmd_all), ("analyze", cmd_analyze), ("viewer", cmd_viewer), ("evolve", cmd_evolve), ("estimate", cmd_estimate),
-                     ("ladder", cmd_ladder), ("ladder-estimate", cmd_ladder_estimate), ("price-watch", cmd_price_watch), ("challenge", cmd_challenge), ("promote", cmd_promote)]:
+                     ("ladder", cmd_ladder), ("ladder-estimate", cmd_ladder_estimate), ("price-watch", cmd_price_watch), ("challenge", cmd_challenge), ("promote", cmd_promote), ("traits", cmd_traits)]:
         p = sub.add_parser(name)
         p.set_defaults(fn=fn)
         p.add_argument("--config", default=str(ROOT / "config.yaml"))
-        p.add_argument("--run-id", required=name in ("freeplay", "eval", "all", "analyze", "viewer", "evolve", "challenge", "promote", "estimate", "ladder", "ladder-estimate"))
+        p.add_argument("--run-id", required=name in ("freeplay", "eval", "all", "analyze", "viewer", "evolve", "challenge", "promote", "traits", "estimate", "ladder", "ladder-estimate"))
         p.add_argument("--max-usd", type=float, help="hard spend cap for this run (USD)")
         p.add_argument("--model", help="e.g. claude-sonnet-5-5 or claude-opus-5-5")
         p.add_argument("--effort", choices=["low", "medium", "high", "xhigh", "max"])

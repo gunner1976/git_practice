@@ -341,3 +341,16 @@ def test_planet_eko_physics_and_sky():
     assert e.session_tau(3, 0.0, 1200) == pytest.approx(2.25 * D)
     w.sky_tau = 3 * D
     assert json.loads(w.observe_json())["sky"]["moon"]["eclipse"]["darkened_fraction"] > 0.99
+
+
+def test_trait_ranking_puts_persistence_first(tmp_path):
+    from analysis.traits import WEIGHTS, trait_report
+
+    assert WEIGHTS["persistence"] > WEIGHTS["curiosity"] and WEIGHTS["persistence"] > WEIGHTS["innovation"]
+    cfg = run.read_cfg(ROOT / "configs/eko.yaml")
+    cfg["agent"]["clock"].update(session_seconds=300, warn_before_seconds=60)
+    Run(tmp_path / "r", cfg, (ROOT / "paper/system_prompt.md").read_text(), max_usd=50, mock=True).phase_a(3, 2, 150, 3)
+    text = trait_report(tmp_path / "r").read_text()
+    assert "| 1 | agent_" in text and "| 3 | agent_" in text
+    ranked = json.loads((tmp_path / "r/traits.json").read_text())
+    assert ranked[0]["total"] >= ranked[-1]["total"] and all(0 <= r["persistence"] <= 1 for r in ranked)
