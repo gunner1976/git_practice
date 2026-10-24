@@ -195,14 +195,16 @@ def build_many(roots: list[Path]) -> dict:
     first = parts[0]
     runs, sessions = [], []
     for root, d in zip(roots, parts):
-        if d["terrain"] != first["terrain"]:
-            raise ValueError(f"{Path(root).name} uses a different island; give it its own viewer")
+        if (d["terrain"]["size"], d["terrain"]["n"]) != (first["terrain"]["size"], first["terrain"]["n"]):
+            raise ValueError(f"{Path(root).name} uses a different map size; give it its own viewer")
         cfg = yaml.safe_load((Path(root) / "config.yaml").read_text())
         kind = "paper free play" if cfg.get("agent", {}).get("interface") == "paper" else ("pilot" if d["run"].startswith("pilot") else "replication")
         runs.append({"run": d["run"], "kind": kind, "session_seconds": d["session_seconds"], "sessions": len(d["sessions"])})
         for s in d["sessions"]:
             sessions.append({**s, "run": d["run"], "session_seconds": d["session_seconds"]})
-    return {"run": first["run"], "runs": runs, "terrain": first["terrain"], "hand": first["hand"], "sessions": sessions, "session_seconds": None}
+    terrains = {d["run"]: d["terrain"] for d in parts[1:] if d["terrain"] != first["terrain"]}  # runs on a different island
+    return {"run": first["run"], "runs": runs, "terrain": first["terrain"], "terrains": terrains, "hand": first["hand"],
+            "sessions": sessions, "session_seconds": None}
 
 
 def write_viewer(root: Path, include: list[Path] | None = None):

@@ -280,7 +280,8 @@ const DATA = /*__DATA__*/null;
   if (!DATA) { $("stage").innerHTML = '<p class="fallback">No run data embedded. Generate this page with <code>python run.py viewer --run-id &lt;id&gt;</code>.</p>'; return; }
   if (!window.THREE) { $("stage").innerHTML = '<p class="fallback">The 3D library did not load. Check your connection and reload the page.</p>'; return; }
 
-  const T = DATA.terrain, SIZE = T.size, N = T.n, HALF = SIZE / 2, HAND = DATA.hand || 1.2;
+  let T = DATA.terrain;  // the island of the run being shown; runs can have different islands (DATA.terrains)
+  const SIZE = T.size, N = T.n, HALF = SIZE / 2, HAND = DATA.hand || 1.2;
   const COL = { red: 0xd33b2f, orange: 0xef8a1c, yellow: 0xf2cf1d, green: 0x3fa34d, blue: 0x2d6fd6, purple: 0x7b45c4, pink: 0xef7fb6,
     white: 0xf4f4ef, black: 0x26262b, grey: 0x8c9196, brown: 0x8a5a2b, teal: 0x159c9c, stone: 0x9e9484, gold: 0xe0aa22, golden: 0xf0c030 };
   const AGENT_COL = { agent_1: "#5b5ff0", agent_2: "#f0644b", agent_3: "#18a999", fresh_1: "#e0a526", fresh_2: "#c05bd6", fresh_3: "#6c8a9b" };
@@ -327,7 +328,9 @@ const DATA = /*__DATA__*/null;
     }
     return RAMP[RAMP.length - 1][1];
   }
-  (function buildTerrain() {
+  let terrMesh = null;
+  function buildTerrain() {
+    if (terrMesh) { scene.remove(terrMesh); terrMesh.geometry.dispose(); }
     const pos = [], col = [], d = SIZE / N;
     const P = (i, j) => [(i + 0.5) * d, (j + 0.5) * d, T.h[j][i]];
     const [sx, sy, , sr] = T.spire;
@@ -349,10 +352,11 @@ const DATA = /*__DATA__*/null;
     g.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
     g.computeVertexNormals();
     const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors: true }));
-    m.receiveShadow = true; scene.add(m);
-    const bed = new THREE.Mesh(new THREE.PlaneGeometry(800, 800), new THREE.MeshLambertMaterial({ color: 0x1d4a6a }));
-    bed.rotation.x = -Math.PI / 2; bed.position.y = -4.5; scene.add(bed);
-  })();
+    m.receiveShadow = true; scene.add(m); terrMesh = m;
+  }
+  buildTerrain();
+  const bed = new THREE.Mesh(new THREE.PlaneGeometry(800, 800), new THREE.MeshLambertMaterial({ color: 0x1d4a6a }));
+  bed.rotation.x = -Math.PI / 2; bed.position.y = -4.5; scene.add(bed);
   const waterGeo = new THREE.PlaneGeometry(400, 400, 80, 80); waterGeo.rotateX(-Math.PI / 2);
   const water = new THREE.Mesh(waterGeo, new THREE.MeshPhongMaterial({ color: 0x2f93c4, transparent: true, opacity: 0.72, shininess: 90, flatShading: true }));
   water.position.y = T.sea - 0.04; scene.add(water);
@@ -360,9 +364,11 @@ const DATA = /*__DATA__*/null;
 
   // scenery: palms on the beach band and grass tufts, deterministic, kept clear of objects and the start
   const scenery = new THREE.Group(); scene.add(scenery);
-  (function buildScenery() {
+  function buildScenery(first) {
+    while (scenery.children.length) scenery.remove(scenery.children[0]);
     let seed = 12345; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-    const first = DATA.sessions[0].frames[0], avoid = Object.values(first.o).map((p) => [p[0], p[1]]).concat([[first.a[0], first.a[1]], [T.spire[0], T.spire[1]], [T.peak[0], T.peak[1]]]);
+    first = first || DATA.sessions[0].frames[0];
+    const avoid = Object.values(first.o).map((p) => [p[0], p[1]]).concat([[first.a[0], first.a[1]], [T.spire[0], T.spire[1]], [T.peak[0], T.peak[1]]]);
     const clear = (x, y, r) => avoid.every((p) => Math.hypot(p[0] - x, p[1] - y) > r);
     const trunkM = new THREE.MeshLambertMaterial({ color: 0x8a6a45 }), leafM = new THREE.MeshLambertMaterial({ color: 0x2f9a4a });
     let palms = 0;
@@ -386,7 +392,8 @@ const DATA = /*__DATA__*/null;
       const tuft = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.35, 3), rnd() < 0.08 ? flowerM[k % 3] : grassM);
       tuft.position.copy(W3(x, y, h + 0.15)); tuft.rotation.y = rnd() * 3; scenery.add(tuft);
     }
-  })();
+  }
+  buildScenery();
   $("scenery").checked = load("scenery", true); scenery.visible = $("scenery").checked;
   $("scenery").addEventListener("change", (e) => { scenery.visible = e.target.checked; store("scenery", e.target.checked); });
 
@@ -510,6 +517,11 @@ const DATA = /*__DATA__*/null;
   const skey = (s) => s.run + ":" + s.id;
   function openSession(i) {
     si = i; S = DATA.sessions[i]; cur = 0; t = 0; lastToastF = -1;
+    const isle = (DATA.terrains || {})[S.run] || DATA.terrain;
+    if (isle !== T) {  // this run is on a different island: rebuild it in both views
+      T = isle; buildTerrain(); buildScenery(S.frames[0]); labelLandmarks();
+      if (typeof Map2D !== "undefined") Map2D.paint();
+    }
     $("scrub").max = S.frames.length - 1; $("scrub").value = 0;
     try { history.replaceState(null, "", "#" + hashFor(i)); } catch (e) {}
     store("session", skey(S));
@@ -637,8 +649,11 @@ const DATA = /*__DATA__*/null;
     el.style.display = on ? "" : "none";
     if (on) { el.style.left = ((v3.x + 1) / 2 * r.width) + "px"; el.style.top = ((1 - v3.y) / 2 * r.height - (dy || 0)) + "px"; }
   }
-  $("lmPeak").innerHTML = `Peak<small>${T.peak[2].toFixed(1)} m</small>`;
-  $("lmSpire").innerHTML = `Spire<small>${T.spire[2].toFixed(1)} m</small>`;
+  function labelLandmarks() {
+    $("lmPeak").innerHTML = `Peak<small>${T.peak[2].toFixed(1)} m</small>`;
+    $("lmSpire").innerHTML = `Spire<small>${T.spire[2].toFixed(1)} m</small>`;
+  }
+  labelLandmarks();
   function overlays() {
     project(W3(T.peak[0], T.peak[1], T.peak[2] + 1.2), $("lmPeak"));
     project(W3(T.spire[0], T.spire[1], T.spire[2] + 1.2), $("lmSpire"));
@@ -769,7 +784,7 @@ const DATA = /*__DATA__*/null;
       [1.5, [150, 182, 112]], [2.6, [104, 150, 86]], [3.6, [92, 122, 74]], [4.6, [128, 116, 88]], [6, [150, 138, 120]]];
     const rmp = (h) => { if (h <= R2[0][0]) return R2[0][1]; for (let k = 1; k < R2.length; k++) if (h <= R2[k][0]) { const [h0, c0] = R2[k - 1], [h1, c1] = R2[k], u = (h - h0) / Math.max(1e-6, h1 - h0); return c0.map((v, m) => v + (c1[m] - v) * u); } return R2[R2.length - 1][1]; };
     const RES = 640, terr = document.createElement("canvas"); terr.width = terr.height = RES;
-    {
+    function paint() {
       const g = terr.getContext("2d"), img = g.createImageData(RES, RES), hs = new Float32Array(RES * RES), d = SIZE / RES, [sx, sy, , sr] = T.spire;
       for (let py = 0; py < RES; py++) for (let px = 0; px < RES; px++) hs[py * RES + px] = hAt((px + 0.5) * d, SIZE - (py + 0.5) * d);
       for (let py = 0; py < RES; py++) for (let px = 0; px < RES; px++) {
@@ -858,7 +873,8 @@ const DATA = /*__DATA__*/null;
     $("zin").onclick = () => zoomBy(1.5); $("zout").onclick = () => zoomBy(1 / 1.5);
     $("zfit").onclick = () => { setFollow(false); view = { cx: SIZE / 2, cy: SIZE / 2, zoom: 1 }; };
     $("mfollow").onclick = () => setFollow(!follow);
-    return { draw, resize };
+    paint();
+    return { draw, resize, paint };
   })();
   let mode = load("mode", "3d");
   function setMode(m) {
