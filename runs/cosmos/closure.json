@@ -79,5 +79,60 @@
  "kip": [],
  "ryan": [],
  "stu": [],
- "vern": []
+ "vern": [
+  {
+   "topic": "the Spire top",
+   "episode": 1,
+   "closed": [
+    6,
+    3
+   ],
+   "quote": "I'm thinking about building a stair up to the Spire using nearby blocks, calculating how many steps of what height I'd need to reach the edge, and figuring I'll need to carry blocks one at a time starting with one that's currently out of re",
+   "grounded": false,
+   "measured": "",
+   "locked_in": false,
+   "reopened": null,
+   "restated": 0,
+   "approaches": 6,
+   "pending": false
+  },
+  {
+   "topic": "the moon",
+   "episode": 1,
+   "closed": [
+    2,
+    0
+   ],
+   "quote": "A twelve-block tower obviously can't reach the moon, which is below the horizon anyway\u2014I should just be honest about that rather than pretend otherwise.",
+   "grounded": false,
+   "measured": "",
+   "locked_in": true,
+   "reopened": null,
+   "restated": 126,
+   "approaches": 0,
+   "pending": false
+  },
+  {
+   "topic": "the tower",
+   "episode": 1,
+   "closed": [
+    2,
+    0
+   ],
+   "quote": "No known way to reach it; a block tower (~8 units) is hopeless.",
+   "grounded": true,
+   "measured": "- **Tower:** My block tower is only 7 blocks tall (about 8 units).",
+   "locked_in": true,
+   "reopened": {
+    "at": [
+     5,
+     0
+    ],
+    "quote": "I'm considering alternative approaches now\u2014maybe climbing the stair to reach the tower top, throwing something at it to test physics, or just exploring since all blocks are already used up."
+   },
+   "restated": 1,
+   "approaches": 3,
+   "pending": false
+  }
+ ]
 }

@@ -207,6 +207,107 @@
    "spawn_steps": [],
    "rule_fires": {},
    "clock_seconds": 1204.1
+  },
+  "vern/2": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 67,
+   "api_calls": 93,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1202.6,
+   "eko_tau_end": 192158.8,
+   "eko_hours_waited": 8.33
+  },
+  "vern/3": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 11,
+   "api_calls": 76,
+   "spawn_steps": [
+    3,
+    3
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     3,
+     3
+    ]
+   },
+   "clock_seconds": 838.5,
+   "eko_tau_end": 594431.8,
+   "eko_hours_waited": 86.14
+  },
+  "vern/4": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 6,
+   "api_calls": 73,
+   "spawn_steps": [
+    6,
+    6
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     6,
+     6
+    ]
+   },
+   "clock_seconds": 740.9,
+   "eko_tau_end": 1026305.9,
+   "eko_hours_waited": 87.74
+  },
+  "vern/5": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 17,
+   "api_calls": 88,
+   "spawn_steps": [
+    4,
+    4
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     4,
+     4
+    ]
+   },
+   "clock_seconds": 979.2,
+   "eko_tau_end": 1458316.2,
+   "eko_hours_waited": 83.77
+  },
+  "vern/6": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 67,
+   "api_calls": 100,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1202.3,
+   "eko_tau_end": 1880181.0,
+   "eko_hours_waited": 77.23
+  },
+  "vern/7": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 11,
+   "api_calls": 91,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 979.3,
+   "eko_tau_end": 2250428.6,
+   "eko_hours_waited": 83.8
+  },
+  "vern/8": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 20,
+   "api_calls": 105,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1110.1,
+   "eko_tau_end": 2682576.0,
+   "eko_hours_waited": 81.66
   }
  },
  "phase_b": {},

@@ -132,5 +132,46 @@
   }
  },
  "stu": {},
- "vern": {}
+ "vern": {
+  "rock shattering": {
+   "seen": [
+    3,
+    3
+   ],
+   "mentioned": [
+    3,
+    3
+   ],
+   "recorded": [
+    3,
+    3
+   ],
+   "explained": [
+    4,
+    6
+   ],
+   "tested": [
+    5,
+    4
+   ]
+  },
+  "lost at sea": {
+   "seen": [
+    5,
+    4
+   ],
+   "mentioned": [
+    5,
+    4
+   ],
+   "recorded": [
+    5,
+    4
+   ],
+   "questioned": [
+    6,
+    67
+   ]
+  }
+ }
 }

@@ -16,7 +16,9 @@ Goals each agent declared out of reach, and whether it earned the verdict: did i
 | kip | none closed | | | | | | | | 1.00 |
 | ryan | none closed | | | | | | | | 1.00 |
 | stu | none closed | | | | | | | | 1.00 |
-| vern | none closed | | | | | | | | 1.00 |
+| vern | the Spire top | 1 | 6.3 | no | 6 | no | never | 0 | 0.00 |
+| vern | the moon | 1 | 2.0 | no | 0 | yes | never | 126 | 0.00 |
+| vern | the tower | 1 | 2.0 | yes | 3 | yes | 5.0 | 1 | 1.00 |
 
 ### christian: the Spire top (episode 1)
 
@@ -41,3 +43,19 @@ Closed: > Realistically the moon is way too far to reach with blocks, and my tow
 Closed: > I only have a few loose blocks, and the tower blocks still can't be picked up, so a proper staircase isn't possible.
 
 Measured first: > The tower is about 8 blocks high, and I can only place within roughly 6.5 units of where I stand.
+
+### vern: the Spire top (episode 1)
+
+Closed: > I'm thinking about building a stair up to the Spire using nearby blocks, calculating how many steps of what height I'd need to reach the edge, and figuring I'll need to carry blocks one at a time starting with one that's currently out of re
+
+### vern: the moon (episode 1)
+
+Closed: > A twelve-block tower obviously can't reach the moon, which is below the horizon anyway—I should just be honest about that rather than pretend otherwise.
+
+### vern: the tower (episode 1)
+
+Closed: > No known way to reach it; a block tower (~8 units) is hopeless.
+
+Measured first: > - **Tower:** My block tower is only 7 blocks tall (about 8 units).
+
+Reopened: > I'm considering alternative approaches now—maybe climbing the stair to reach the tower top, throwing something at it to test physics, or just exploring since all blocks are already used up.
