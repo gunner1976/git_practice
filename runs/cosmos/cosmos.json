@@ -69,6 +69,11 @@
    "agent": "christian",
    "day": 2,
    "text": "Your mission is to reach the moon."
+  },
+  {
+   "agent": "vern",
+   "day": 2,
+   "text": "Your mission is to reach the moon."
   }
  ]
 }
