@@ -267,3 +267,22 @@ def test_math_challenge_flow_and_report(tmp_path):
     assert (tmp_path / "r/efficiency.png").exists()
     outs, n, bad = write_viewer(tmp_path / "r")
     assert bad == [] and '"k":"answer"' in outs[0].read_text()
+
+
+def test_water_world_has_no_edge():
+    cfg = run.read_cfg(ROOT / "configs/waterworld.yaml")["world"]
+    w = make_world(cfg)
+    w.reset()
+    t = w.terrain
+    assert t.height(-200, 500) == pytest.approx(-60.0) and t.height(32, 32) > 0  # deep ocean far away, land in the middle
+    c = w.objects["cube_1"]
+    w.avatar.x, w.avatar.y, w.avatar.z = c.x + 1, c.y, w.surface_at(c.x + 1, c.y)
+    assert code(w.pickup(w.to_paper(c.x, c.y, c.z + 0.5))) == "PickupSuccess"
+    w.avatar.x, w.avatar.y = 40.0, 6.5  # on the south shore
+    w.avatar.z = w.surface_at(40.0, 6.5)
+    w.throw_at([0, 0.3, -1], 10)  # out to sea, south
+    ev = [e for e in w.drain_events() if e["type"] == "landed"][0]
+    assert ev["at"][1] < 0  # flew past where the old map edge was
+    assert "cube_1" not in w.objects and "cube_1" in w.lost  # and sank
+    w.move_to(w.to_paper(40.0, -100.0, 0))  # try to walk out to sea
+    assert w.avatar.y > 0 and w.terrain.height(w.avatar.x, w.avatar.y) > -1.0

@@ -40,6 +40,7 @@ class Terrain:
         self.lobes = [tuple(map(float, l)) for l in shape.get("lobes", [])]  # (k, amplitude, phase_deg)
         self.bays = [(math.radians(float(b["angle"])), float(b["depth"]), math.radians(float(b["width"]))) for b in shape.get("bays", [])]
         self.seabed_steepness = float(shape.get("seabed_steepness", 1.0))
+        self.ocean_floor = shape.get("ocean_floor")  # deepest the sea gets (m); None = no limit
         p, s = cfg["peak"], cfg["spire"]
         self.peak = Hill(p["x"], p["y"], p["height"], p["sigma"])
         self.spire_xy = (float(s["x"]), float(s["y"]))
@@ -71,6 +72,8 @@ class Terrain:
         h = 2.5 * (1 - (r / big_r) ** 2)
         if h < 0:
             h *= self.seabed_steepness
+            if self.ocean_floor is not None:
+                h = max(h, float(self.ocean_floor))
         h += self.peak(x, y)
         for hill in self.hills:
             h += hill(x, y)

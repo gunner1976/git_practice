@@ -1,0 +1,18 @@
+# A water world: the irregular island is the only land, in an ocean with no edge.
+# No map boundary or walls: anything thrown off the island flies on and sinks in the sea (lost
+# until the next reset, or for good in a persistent world); walking still stops where the water
+# gets too deep. The seabed drops off steeply past the shore to a 60 m deep ocean floor.
+# Paper-style free play otherwise (prompts, memory, tools, clock).
+#   python run.py freeplay --config configs/waterworld.yaml --run-id ww1 --agents 3 --sessions 10 --max-usd 60
+extends: paper_freeplay.yaml
+
+world:
+  open_ocean: true
+  island_shape:
+    lobes: [[2, 0.08, 60], [3, 0.12, 20], [5, 0.07, 0]]
+    bays:
+      - {angle: 0, depth: 0.55, width: 11}
+      - {angle: 225, depth: 0.45, width: 5}
+      - {angle: 110, depth: 0.25, width: 8}
+    seabed_steepness: 4.0
+    ocean_floor: -60.0

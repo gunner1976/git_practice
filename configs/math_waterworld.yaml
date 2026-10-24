@@ -1,0 +1,9 @@
+# The perimeter challenge on the water world (same island as math_perimeter_irregular.yaml, open ocean).
+extends: waterworld.yaml
+
+agent:
+  math_tool: true
+  challenge:
+    days: [1, 2]
+    message: 'A voice carries over the island: "What is the perimeter of the island?" When you have an answer, give it with the answer tool. You may answer again if you refine it.'
+    truth: shoreline_perimeter

@@ -307,6 +307,14 @@ instead of every action, physics is the same quasi-static box model as the repli
 layout is this harness's own. The paper's LLM activity labelling and play scoring (App. C.1, C.6, D) are
 not wired in yet; `evolve` reports mechanical measures only.
 
+## The water world (`configs/waterworld.yaml`)
+
+The irregular island as the only land in an ocean with no edge (`world.open_ocean: true`): no map
+boundary or walls, so anything thrown off the island flies on and sinks; the seabed drops steeply past
+the shore to a 60 m ocean floor (`island_shape.ocean_floor`). Walking still stops where the water is too
+deep. The paper's island had boundary walls, so this is a departure from it, kept in its own config;
+`configs/math_waterworld.yaml` adds the perimeter challenge.
+
 ## Assumptions and departures from the paper
 
 I couldn't fetch the paper's full text from the build environment (arxiv.org was blocked). The

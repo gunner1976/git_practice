@@ -86,6 +86,9 @@ class World:
             lo, hi = self.rule.get("randomize_range", [6.0, 16.0])
             self.rock_threshold = round(float(np.random.default_rng(self.seed + 7919).uniform(lo, hi)), 1)
         self.size = float(cfg["size"])
+        # open_ocean: no map edge. The island sits in a sea that goes on in every direction;
+        # anything that leaves the island patch is out over open water.
+        self.open_ocean = bool(cfg.get("open_ocean"))
         self.terrain = Terrain(cfg, self.rng)
         self.objects: dict[str, Obj] = {}
         self.time = 0
@@ -249,7 +252,11 @@ class World:
         self.events = out
 
     def _clamp(self, v: float) -> float:
-        return min(max(v, 0.0), self.size)
+        return v if self.open_ocean else min(max(v, 0.0), self.size)
+
+    def _inside(self, x: float, y: float) -> bool:
+        """Is (x, y) inside the world? Always, on an open ocean."""
+        return self.open_ocean or (0 <= x <= self.size and 0 <= y <= self.size)
 
     def _fly(self, o: Obj, vel: tuple[float, float, float]) -> tuple[float, float, float]:
         """Integrate a ballistic arc. Returns the impact point (x, y, z)."""
@@ -259,8 +266,12 @@ class World:
             px, py, pz = o.x, o.y, o.z
             vz -= g * dt
             o.x, o.y, o.z = o.x + vx * dt, o.y + vy * dt, o.z + vz * dt
-            if not (0 <= o.x <= self.size and 0 <= o.y <= self.size):
+            if not self._inside(o.x, o.y):
                 o.x, o.y = self._clamp(o.x), self._clamp(o.y)
+                break
+            sea = float(self.cfg["sea_level"])
+            if self.open_ocean and o.z <= sea and self.terrain.height(o.x, o.y) < sea:
+                o.z = self.terrain.height(o.x, o.y)  # splashed down in open water: it sinks
                 break
             if o.z <= self.terrain.height(o.x, o.y):
                 if self.terrain.height(o.x, o.y) > pz + 0.3:  # struck a cliff face: drop back
@@ -321,7 +332,7 @@ class World:
         travelled = 0.0
         for _ in range(n):
             nx, ny = a.x + dx / n, a.y + dy / n
-            if not (0 <= nx <= self.size and 0 <= ny <= self.size):
+            if not self._inside(nx, ny):
                 msg = "You reach the edge of the world."
                 break
             if self.terrain.height(nx, ny) < wade:
@@ -383,7 +394,7 @@ class World:
             raise ActionError(f"You are not holding {oid}.")
         if math.hypot(x - a.x, y - a.y) > float(self.av_cfg["reach"]):
             raise ActionError("That spot is out of reach.")
-        if not (0 <= x <= self.size and 0 <= y <= self.size):
+        if not self._inside(x, y):
             raise ActionError("That spot is outside the world.")
         if z > a.z + float(self.av_cfg["reach_up"]):
             raise ActionError("You can't reach that high.")

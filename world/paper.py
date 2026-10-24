@@ -141,7 +141,7 @@ class PaperWorld(World):
         for _ in range(n):
             st = dist / n
             nx, ny = a.x + ux * st, a.y + uy * st
-            if not (0 <= nx <= self.size and 0 <= ny <= self.size) or self.terrain.height(nx, ny) < wade:
+            if not self._inside(nx, ny) or self.terrain.height(nx, ny) < wade:
                 break
             h = self.surface_at(nx, ny)
             if h - a.z > climb:
@@ -178,7 +178,7 @@ class PaperWorld(World):
         n = max(1, math.ceil(dist / 0.1))
         for _ in range(n):
             nx, ny = a.x + dx / d * dist / n, a.y + dy / d * dist / n
-            if not (0 <= nx <= self.size and 0 <= ny <= self.size) or self.surface_at(nx, ny) > ceiling:
+            if not self._inside(nx, ny) or self.surface_at(nx, ny) > ceiling:
                 break
             a.x, a.y = nx, ny
 
@@ -234,7 +234,7 @@ class PaperWorld(World):
             return self._fail("PlaceFailed:InvalidRotation")
         x, y, up = self.from_paper(position)
         o = self.objects[a.holding]
-        if math.dist((x, y, up), (a.x, a.y, a.z)) > float(self.pcfg["place_range"]) or not (0 <= x <= self.size and 0 <= y <= self.size):
+        if math.dist((x, y, up), (a.x, a.y, a.z)) > float(self.pcfg["place_range"]) or not self._inside(x, y):
             return self._fail("PlaceFailed:OutOfRange")
         bottom = up - o.sz / 2
         ox, oy, oz = o.x, o.y, o.z
