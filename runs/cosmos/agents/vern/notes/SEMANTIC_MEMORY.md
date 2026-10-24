@@ -31,3 +31,25 @@ One section per topic. Within each topic, tag bullets by type when useful:
 - *hypothesis* — unverified. Note evidence (weak / moderate / strong) and what would confirm or refute. Promote once verified; delete if disproven.
 
 <!-- DO NOT EDIT ABOVE THIS LINE -->
+
+## Basics
+- *verified* move_to near a block (within ~1-2 units) then pickup with its exact position works (PickupSuccess).
+- *fact* World: small island with hills, 12 loose Blocks (1x1x1), a Ring, a Rock. Start around (0,0.7,-22).
+- *mistake* place at low y (1.0-1.5) fails "Occupied" (ground/terrain overlap). Place at y~3 worked (block drops).
+- *verified* throw direction [1,0.5,0] speed 10 sent a block ~14 units along +x (x from -9 to 5.5). Direction is world-space, +x = east.
+- *mistake* move_to can silently stall against a block (position unchanged, still "Ready"). Fix: jump, or route via an intermediate waypoint around it.
+- *verified* Rock is pickup-able too.
+- *verified* throw [0,0.3,1] speed 20 with the light Rock went only ~12 units along +z (landed on a hill, which may cut it short). Range isn't simply proportional to speed; terrain matters. +z = south/forward.
+- *verified* Ring (far SW corner, ~(-19,1,18)) is pickup-able; it has no "use" button (press -> NothingInReach). Long move_to across the island works in 2 waypoints.
+- *verified* Placing drops the item from the given position; placing a block above another item stacks it on top (Block on Ring ended at y~1.76 over ring y 1.18). Stacking works for building.
+- *verified* Tower building: stand ~1.5 units from the column, place at the same x,z with y a few units above the top; blocks land flush (1.0 spacing) and stay stable. 3 blocks + Ring stable so far.
+- *verified* A 5-block tower (+Ring base) stays stable; place still works from the ground at y up to 7.5 (no reach limit seen for place). Island nightfall happens ~every 8 sim-hours of ticks; time jumps between observations.
+- *fact* The Spire mesa at (-14,8) blocks movement in a straight line (move_to stalls at its edge). Route around it via e.g. (-8,12) -> (-4,0) -> north. Straight lines between SW corner and north area hit it.
+
+## Current project / state (may be stale)
+- Tower at (-18.5, y, 16) in SW corner: Ring base + 5 blocks (Block_3,5,6,4,9). Was carrying Block_11 (brown) toward it. Remaining loose blocks: 1,2,7,8,10,12 + Rock.
+- Workflow loop: observe -> move_to (waypoints) -> pickup exact pos -> move to (-17,1.2,16) -> place at (-18.5, top+1.5, 16).
+- Tools never verified: press on other objects (only tried Ring: nothing). Idea: test throw range at multiple speeds on flat ground.
+- *verified* Place has a reach limit: from ground (y~1.2, 1.5 units from target) placing at y=8.5 -> PlaceFailed:OutOfRange, y=7.0 OK (roughly <=6-7 units above me). To build taller, I'd need to climb (e.g. stand on the tower/blocks) or jump.
+- Tower is now Ring + 6 blocks (added Block_11 brown).
+- *verified* Place reach from ground: y=7.8 OK, y=8.5 fails. Limit ~8 above ground / ~7 above my feet. Tower now Ring + 7 blocks (Block_1 red added).

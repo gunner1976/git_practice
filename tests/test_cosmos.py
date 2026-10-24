@@ -42,6 +42,8 @@ def test_cosmos_agents_persist_and_hear_shared_discoveries(tmp_path):
     assert "from Christian on another world" in opening("vern", 2) and "my world is round" in opening("kip", 1)
     assert "another world" not in opening("christian", 2)
     # the world persisted: day 2 started from day 1's end state
+    first = json.loads((tmp_path / "cosmos/phase_a/keats/session_02.jsonl").read_text().splitlines()[0])
+    assert "Your name is Keats." in first["soul"] and "Eko." not in first["soul"].split("\n")[1]
     assert "start_state" in json.loads((tmp_path / "cosmos/phase_a/vern/session_02.jsonl").read_text().splitlines()[0])
     # Vern now reaches the same conclusion on day 2, after hearing it: promoted but assisted, not re-shared
     (tmp_path / "cosmos/promotions.json").write_text(json.dumps({"agents": {

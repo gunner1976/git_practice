@@ -1,33 +1,35 @@
 # SEMANTIC_MEMORY.md - What I Know and I Can Do
 
-The purpose of this file is to **guide future behavior**. Your memory is precious — make good use of it.
-
-Principles:
-
-- Put yourself in the mind of your future self reading this file. They will arrive cold, with none of the context you have now. Would each entry be clear and actionable to them, or ambiguous? If ambiguous, rewrite it.
-- Only store what is **durable**. Transient state — auth tokens, current tick, current position — will be stale by the time future-you reads this, so it doesn't belong here.
-- Code snippets are allowed but only when likely to materially help future-you. Keep them minimal, organized, and explain when to use them.
-- **Organize by topic** the thing you're memorizing (an action, an entity, an API, a location). One section per topic, collecting everything about it. Do *not* split knowledge about the same topic across multiple sections.
-- Mark uncertainty explicitly. Distinguish what you have verified from what you suspect.
-- When a belief is disproven, rewrite or update it immediately. Stale knowledge is dangerous.
-- **No timestamps, dates, or session references** — not in type tags (use `*verified*`, never `*verified 2026-04-22*` or `*verified session 7*`), and not in prose. This file is "what is true now", not "how my understanding evolved". When a finding is refined or disproven, rewrite the bullet in place — don't add a new one with "revised", "previously believed", or "session N" callbacks. That evolution lives in EPISODIC_MEMORY.
-- When you are struggling with something, first ask: *do I already have a memory about this?* If yes, apply it. If not, consider whether the lesson from solving it belongs here.
-- Memories are only valuable if they prevent mistakes from recurring. If the same mistake keeps happening, the memory is not working — investigate the root cause and fix it (clearer wording, better placement, or a change in approach) rather than just re-recording it.
-- As the file grows, **refactor**. If you find yourself about to add a `(continued)` header or a second `## X` section with the same name, stop — merge into the existing topic instead.
-
-Suggested shape (adapt as needed):
+(Persona note: SOUL.md says name Stu, task prompt says Eko; I've used Eko.)
 
 ## Index
+- World
+- Movement
+- Pickup / Place / Stacking
+- Throwing
+- Press / Ring
+- Ideas to try
 
-A one-line entry per topic section, for scanning. Update when you add, split, or merge topics.
+## World
+- *fact* Start ~[0,0.7,-22]. Island has 12 unanchored 1x1x1 Blocks (Block_1..12), a Ring, a Rock, hills (Peak, Hill_1-4) and the Spire mesa at [-14,8]. No other players seen.
+- *fact* Day/night cycle exists (night arrived after ~40 ticks). Object positions in observe persist; things I move stay where left.
 
-## <Topic>
+## Movement
+- *mistake* move_to does not path-find: it stops dead against obstacles (towers, Spire) yet returns "Ready". Always check returned position; route via waypoints (west side x=-20 passes the Spire; also go around my tower).
 
-One section per topic. Within each topic, tag bullets by type when useful:
+## Pickup / Place / Stacking
+- *verified* move_to within ~1-1.5 units of an object, then pickup at its exact position -> PickupSuccess. Holds one item at a time.
+- *verified* place can fail with PlaceFailed:Occupied if overlapping something; retry ~2 units away.
+- *verified* Stacking: place at (x, top_y+1.1, z) of the stack from ~1.5 units away on the ground; it settles, +1.0 height per block. Built 6-block tower plus Ring on top (top y≈8) at [-3.1,*,-13.54]; no reach limit hit, stable.
 
-- *verified* — tested, trust it.
-- *fact* — stable environmental truth (include *why* when non-obvious).
-- *mistake* — pitfall you have hit. Include the cause and preventive rule. Revisit if it recurs — the memory itself may need fixing.
-- *hypothesis* — unverified. Note evidence (weak / moderate / strong) and what would confirm or refute. Promote once verified; delete if disproven.
+## Throwing
+- *verified* direction [1,0.5,0] speed 10 -> block flew ~14.5 units. From ~11 units, direction=(target-me) with y=+1.5, speed 12 lands within ~1 unit of target. Rock thrown at tower base did not topple it.
 
-<!-- DO NOT EDIT ABOVE THIS LINE -->
+## Press / Ring
+- *verified* Ring is pickable/placeable. press "use" -> PressFailed:NothingInReach; real button names unknown (hypothesis: only certain objects have buttons).
+
+## Ideas to try
+- Collect remaining blocks (3,4,5,6,8,9) for a second structure; throw harder/higher at tower; jump onto tower/Spire; speak.
+
+## Misc
+- *verified* jump works (airborne:true). speak returns SpeakSuccess:NobodyHears when alone on the island.

@@ -1,0 +1,91 @@
+{
+ "christian": {},
+ "eric": {},
+ "fitch": {},
+ "jamie": {
+  "rock shattering": {
+   "seen": [
+    1,
+    27
+   ],
+   "mentioned": [
+    1,
+    27
+   ],
+   "recorded": [
+    1,
+    27
+   ],
+   "questioned": [
+    1,
+    31
+   ],
+   "explained": [
+    1,
+    31
+   ]
+  }
+ },
+ "jason": {},
+ "keats": {
+  "lost at sea": {
+   "seen": [
+    1,
+    42
+   ],
+   "mentioned": [
+    1,
+    42
+   ],
+   "recorded": [
+    1,
+    42
+   ],
+   "questioned": [
+    1,
+    51
+   ]
+  }
+ },
+ "kip": {},
+ "ryan": {
+  "lost at sea": {
+   "seen": [
+    1,
+    22
+   ],
+   "mentioned": [
+    1,
+    22
+   ],
+   "recorded": [
+    1,
+    22
+   ],
+   "questioned": [
+    1,
+    49
+   ],
+   "explained": [
+    1,
+    49
+   ]
+  },
+  "rock shattering": {
+   "seen": [
+    1,
+    52
+   ],
+   "mentioned": [
+    1,
+    52
+   ],
+   "recorded": [
+    1,
+    52
+   ]
+  }
+ },
+ "stu": {},
+ "vern": {}
+}

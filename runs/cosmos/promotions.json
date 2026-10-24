@@ -1,0 +1,66 @@
+{
+ "criterion": "deduced that the world is round by reasoning from its own observations",
+ "judge_cost_usd": 0.0,
+ "agents": {
+  "christian": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "eric": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "fitch": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "jamie": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "jason": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "keats": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "kip": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "ryan": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "stu": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "vern": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  }
+ }
+}

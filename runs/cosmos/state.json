@@ -1,5 +1,108 @@
 {
- "phase_a": {},
+ "phase_a": {
+  "stu/1": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 60,
+   "api_calls": 97,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1208.1
+  },
+  "fitch/1": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 78,
+   "api_calls": 91,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1203.5
+  },
+  "christian/1": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 68,
+   "api_calls": 95,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1206.8
+  },
+  "ryan/1": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 60,
+   "api_calls": 93,
+   "spawn_steps": [
+    52
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     52
+    ]
+   },
+   "clock_seconds": 1202.5
+  },
+  "jason/1": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 57,
+   "api_calls": 92,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1200.3
+  },
+  "jamie/1": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 63,
+   "api_calls": 92,
+   "spawn_steps": [
+    27
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     27
+    ]
+   },
+   "clock_seconds": 1212.8
+  },
+  "eric/1": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 64,
+   "api_calls": 91,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1207.0
+  },
+  "keats/1": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 64,
+   "api_calls": 94,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1204.7
+  },
+  "kip/1": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 103,
+   "api_calls": 60,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1224.7
+  },
+  "vern/1": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 62,
+   "api_calls": 91,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1202.7
+  }
+ },
  "phase_b": {},
  "meta": {
   "kind": "cosmos",

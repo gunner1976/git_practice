@@ -47,6 +47,8 @@ class Cosmos:
         self.state = json.loads(self.path.read_text()) if self.path.exists() else {"agents": [], "discoveries": [], "heard": {}}
         self.lock = threading.RLock()  # agents' days start in parallel threads
         self.run.dawn = self._dawn
+        # the paper's system prompt names every agent Eko; here each one has its own name
+        self.run.soul_for = lambda aid: self.run.soul.replace("Your name is Eko.", f"Your name is {self.name(aid)}.")
         self.run.set_meta(kind="cosmos", mock=self.run.mock)
 
     def _save(self) -> None:

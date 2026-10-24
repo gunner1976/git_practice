@@ -1,33 +1,35 @@
 # SEMANTIC_MEMORY.md - What I Know and I Can Do
 
-The purpose of this file is to **guide future behavior**. Your memory is precious — make good use of it.
-
-Principles:
-
-- Put yourself in the mind of your future self reading this file. They will arrive cold, with none of the context you have now. Would each entry be clear and actionable to them, or ambiguous? If ambiguous, rewrite it.
-- Only store what is **durable**. Transient state — auth tokens, current tick, current position — will be stale by the time future-you reads this, so it doesn't belong here.
-- Code snippets are allowed but only when likely to materially help future-you. Keep them minimal, organized, and explain when to use them.
-- **Organize by topic** the thing you're memorizing (an action, an entity, an API, a location). One section per topic, collecting everything about it. Do *not* split knowledge about the same topic across multiple sections.
-- Mark uncertainty explicitly. Distinguish what you have verified from what you suspect.
-- When a belief is disproven, rewrite or update it immediately. Stale knowledge is dangerous.
-- **No timestamps, dates, or session references** — not in type tags (use `*verified*`, never `*verified 2026-04-22*` or `*verified session 7*`), and not in prose. This file is "what is true now", not "how my understanding evolved". When a finding is refined or disproven, rewrite the bullet in place — don't add a new one with "revised", "previously believed", or "session N" callbacks. That evolution lives in EPISODIC_MEMORY.
-- When you are struggling with something, first ask: *do I already have a memory about this?* If yes, apply it. If not, consider whether the lesson from solving it belongs here.
-- Memories are only valuable if they prevent mistakes from recurring. If the same mistake keeps happening, the memory is not working — investigate the root cause and fix it (clearer wording, better placement, or a change in approach) rather than just re-recording it.
-- As the file grows, **refactor**. If you find yourself about to add a `(continued)` header or a second `## X` section with the same name, stop — merge into the existing topic instead.
-
-Suggested shape (adapt as needed):
+Principles: store only durable, actionable knowledge; organize by topic; mark verified vs hypothesis; no timestamps or session references; rewrite in place when beliefs change.
 
 ## Index
+- Pickup / Place
+- Movement
+- Throw
+- World layout
 
-A one-line entry per topic section, for scanning. Update when you add, split, or merge topics.
+## Pickup / Place
+- *verified* move_to within ~1 unit of an item, then pickup at the item's exact position works (blocks, Rock, Ring).
+- *verified* place near ground level (y≈0.9–1.5) fails "Occupied" (overlaps terrain/self). Place a few units above the target x,z; the item drops and rests on what is below.
+- *verified* Blocks stack (height 1.0). Tower of 4 blocks + Rock + Ring is stable.
+- *verified* place max range ≈ 6 units total from me; farther gives OutOfRange. Good staging spot for building at (-5,-18): stand at (-2,1.2,-19), place at y ≤ 6.2.
+- *verified* Ring has no "use" button (press fails NothingInReach). No pressable thing found yet.
 
-## <Topic>
+## Movement
+- *verified* move_to has no pathfinding: placed blocks and terrain (hills, Spire mesa) block it. If position doesn't change or stops short, route via waypoints.
+- *verified* Route to Ring in SW corner: (-20,3) → (-21,12) → (-19.2,17.2) (Spire at (-14,8) blocks the direct path). Return via (-14,-12).
+- *verified* jump works (airborne:true).
 
-One section per topic. Within each topic, tag bullets by type when useful:
+## Throw
+- *verified* distance ≈ 1.13 × speed with direction pitched ~0.3 up (e.g. [-1,0.3,0]) on flat ground. Use speed ≈ distance/1.13.
+- *verified* direction is accurate (stays on the same line). Speed 10 overshoots the island and the item is lost permanently. Keep speed ≤ ~7 and aim inland.
 
-- *verified* — tested, trust it.
-- *fact* — stable environmental truth (include *why* when non-obvious).
-- *mistake* — pitfall you have hit. Include the cause and preventive rule. Revisit if it recurs — the memory itself may need fixing.
-- *hypothesis* — unverified. Note evidence (weak / moderate / strong) and what would confirm or refute. Promote once verified; delete if disproven.
+## World layout
+- Island ~±25 units, hills (Peak, Hill_1..4) and Spire mesa; no other players seen.
+- 11 blocks remain (Block_10 lost). Tower at (-5,-18) holds Blocks 12,7,11,1 + Rock + Ring.
+- Untried: throwing into the tower (does it topple?), building walls/bridges, pressing buttons on other objects.
 
-<!-- DO NOT EDIT ABOVE THIS LINE -->
+## Tower durability
+- *verified* A block thrown at the tower (speed 5.5, pitch 0.5) hit it and fell beside it; the tower didn't move. A lone thrown block can't topple it.
+- *verified* I can climb onto a 1-high block: jump then move_to a point on top of it (stood at y≈2.2 on Block_2). Stair-stacking blocks next to the tower could let me climb it (untested).
+- *verified* Climbing the tower directly from Block_2 (jump + move_to onto the 2nd block up) failed; I ended on the ground. Likely only ~1 unit step-up works per attempt; a staircase would need steps of 1 height each.

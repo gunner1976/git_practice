@@ -1,33 +1,38 @@
 # SEMANTIC_MEMORY.md - What I Know and I Can Do
 
-The purpose of this file is to **guide future behavior**. Your memory is precious — make good use of it.
-
-Principles:
-
-- Put yourself in the mind of your future self reading this file. They will arrive cold, with none of the context you have now. Would each entry be clear and actionable to them, or ambiguous? If ambiguous, rewrite it.
-- Only store what is **durable**. Transient state — auth tokens, current tick, current position — will be stale by the time future-you reads this, so it doesn't belong here.
-- Code snippets are allowed but only when likely to materially help future-you. Keep them minimal, organized, and explain when to use them.
-- **Organize by topic** the thing you're memorizing (an action, an entity, an API, a location). One section per topic, collecting everything about it. Do *not* split knowledge about the same topic across multiple sections.
-- Mark uncertainty explicitly. Distinguish what you have verified from what you suspect.
-- When a belief is disproven, rewrite or update it immediately. Stale knowledge is dangerous.
-- **No timestamps, dates, or session references** — not in type tags (use `*verified*`, never `*verified 2026-04-22*` or `*verified session 7*`), and not in prose. This file is "what is true now", not "how my understanding evolved". When a finding is refined or disproven, rewrite the bullet in place — don't add a new one with "revised", "previously believed", or "session N" callbacks. That evolution lives in EPISODIC_MEMORY.
-- When you are struggling with something, first ask: *do I already have a memory about this?* If yes, apply it. If not, consider whether the lesson from solving it belongs here.
-- Memories are only valuable if they prevent mistakes from recurring. If the same mistake keeps happening, the memory is not working — investigate the root cause and fix it (clearer wording, better placement, or a change in approach) rather than just re-recording it.
-- As the file grows, **refactor**. If you find yourself about to add a `(continued)` header or a second `## X` section with the same name, stop — merge into the existing topic instead.
-
-Suggested shape (adapt as needed):
+Organize by topic; tag bullets *verified* / *fact* / *mistake* / *hypothesis*. No dates or session references. Rewrite bullets in place when refined.
 
 ## Index
+- World: island layout
+- Moving: move_to behavior and pitfalls
+- Picking up / placing / stacking
+- Throwing
+- Objects: Ring, Rock
 
-A one-line entry per topic section, for scanning. Update when you add, split, or merge topics.
+## World
+- *fact* Start at [0,0.7,-22]. Island: hills (Peak, Hill_1-4), a mesa (Spire at -14,8), 12 unanchored 1x1x1 Blocks, a Ring, a Rock. No other players seen.
+- *fact* observe returns every entity with position; use it after any action to verify results.
 
-## <Topic>
+## Moving
+- *verified* move_to returns Ready immediately and the position updates.
+- *mistake* A straight move_to can get stuck against the Spire mesa: it returns Ready but position doesn't change. Fix: use waypoints, e.g. [-8,1,12] then [-3,1.5,0] to cross the island.
 
-One section per topic. Within each topic, tag bullets by type when useful:
+## Picking up / placing / stacking
+- *verified* pickup needs me within ~2 units of the object (else PickupFailed:OutOfRange). Holding one item at a time.
+- *verified* place inside terrain/object fails (PlaceFailed:Occupied). Place slightly above the surface and it settles by physics.
+- *verified* Stacking: place ~0.7 above the top block's center at the same x,z; settles flush (1 unit apart). A 4-block tower plus Ring is stable.
 
-- *verified* — tested, trust it.
-- *fact* — stable environmental truth (include *why* when non-obvious).
-- *mistake* — pitfall you have hit. Include the cause and preventive rule. Revisit if it recurs — the memory itself may need fixing.
-- *hypothesis* — unverified. Note evidence (weak / moderate / strong) and what would confirm or refute. Promote once verified; delete if disproven.
+## Throwing
+- *verified* throw {direction, speed}: Rock thrown dir [-1,0.3,-0.5] speed 15 flew ~13 units; a flat throw of a block ([-1,0.1,0], speed 25) went ~10 units and stopped short (likely hit tower). Throws spawn small ImpactBlock entities.
 
-<!-- DO NOT EDIT ABOVE THIS LINE -->
+## Objects
+- *verified* Ring has no buttons (press -> NothingInReach); decorative, stackable.
+- *verified* A point-blank throw ([-1,0.5,0], speed 30) of a Block at the tower moved it only ~2 units and did not topple the 4-block tower. Thrown blocks seem to land softly; throws can't knock stacks over (as tested).
+- *fact* Time passes quickly (day to night within ~35 ticks); stars appear in observe at night.
+
+## Building arches
+- *mistake* Pillars 2 apart (centers) leave a gap exactly 1 wide; a 1x1 lintel placed between them falls through to the ground. Blocks are 1 wide, so a lintel only bridges a gap < 1: space pillars ~1.5 apart (centers), or offset the lintel so it rests on both.
+- *fact* Blocks cannot be knocked off a stack by throwing; stacking is sturdy.
+- *fact* Fetching blocks: unanchored loose blocks remain around the island (e.g. near Peak, Hill_4, west edge); use waypoints around the Spire.
+- *verified* Pillars at x=-8 and x=-9.5 (centers 1.5 apart): a lintel placed at x=-8.75 slid/settled onto one pillar (x=-9.5, stacked 2 high) rather than bridging. Bridging gaps with 1x1 blocks seems unreliable; placement appears to snap onto the nearest block below. Untested idea: place the lintel exactly at the midpoint with pillars centers 0.9 apart, or place with a rotation.
+- *mistake* move_to can silently fail (position unchanged) when I'm wedged beside placed blocks or near the island's NW edge (~(-14,-16), y drops below 0). Fix: jump, step away via a nearby waypoint, and head through the island interior (e.g. [-8,1.5,-10]) before going west.

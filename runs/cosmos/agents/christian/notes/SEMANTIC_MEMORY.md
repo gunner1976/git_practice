@@ -31,3 +31,21 @@ One section per topic. Within each topic, tag bullets by type when useful:
 - *hypothesis* — unverified. Note evidence (weak / moderate / strong) and what would confirm or refute. Promote once verified; delete if disproven.
 
 <!-- DO NOT EDIT ABOVE THIS LINE -->
+
+## Actions
+- *verified* move_to next to a block (within ~1 unit), then pickup at the block's position works.
+- *fact* World: island with hills, 12 blocks, a Ring, a Rock. Start at (0,0.7,-22).
+- *verified* place at y≈1.2 fails with "Occupied" (inside terrain); y=2.0 succeeded. Place a little above the ground and let it drop/settle.
+- *verified* Placed blocks fall under gravity and stack (blocks are 1x1x1, unanchored). Ground near (-3,-20) is at y≈0.9. Stacking by placing above the stack works.
+- *verified* place has a max reach (~6.5 units from me): y=8.0 from a standing height of 1.15 gave OutOfRange; y=7.6 worked. For taller towers, build a second stack/ramp to stand on, or place beside.
+- *mistake* move_to straight through the Spire mesa (-14,8) stops short silently (result still "Ready"). Route around via waypoints, e.g. (-19,1.5,6), then the target. Always check returned position.
+- *verified* Ring at far SW corner (-19,18) can be picked up.
+- *verified* Peak summit (12,12) is at y≈3.98, walkable; nothing special there. Day/night cycle exists (night with moon and stars); the 7-block tower stays stable.
+- *verified* throw direction [0,0.5,-1] speed 10 from (5.4,3.4,8.2): block landed ~16 units away at (5.4,2.9,-7.7). Direction is world-space; -z is "forward" toward the tower side.
+
+## Index (added)
+Actions (place/pickup/move_to/throw), building, world layout — all in "Actions" bullets above.
+- *verified* Throw [0,0.55,-1] speed 12 from (-3,1.9,-12) landed at only (-3,1.6,-18.8) (~7 units, probably hit terrain/slope). Throw range depends on terrain; it did not topple the 7-block tower (tower blocks are stable).
+- *fact* Persona note: my name is Eko (the SOUL file's "Christian" line conflicts; Eko is the in-world name).
+- *hypothesis* To build taller than ~7 blocks, stand on a stack of blocks/hill and place above; untested.
+- *verified* Jump then move_to onto a 1-high block lets me climb on top of it (stood at y≈2.07 on a block resting on ground y≈0.9). Stairs of 1-block steps are climbable; this should extend place reach upward.

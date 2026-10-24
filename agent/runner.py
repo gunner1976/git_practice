@@ -62,6 +62,7 @@ class Run:
         self.stopped_reason: str | None = None
         self.board = None   # the phone switchboard (world/phone.py), when the mission reward is a phone
         self.dawn = None    # optional (agent, session) -> text added to that day's opening (agent/cosmos.py)
+        self.soul_for = None  # optional agent -> its own system prompt (agent/cosmos.py: its name)
 
     # -------------------------------------------------------------- state io
     def _save(self) -> None:
@@ -149,7 +150,7 @@ class Run:
                 board.start(agent)
             try:
                 res = run_session(
-                    cfg=self.cfg, client=client, budget=self.budget, world=world, notes=notes, soul=self.soul,
+                    cfg=self.cfg, client=client, budget=self.budget, world=world, notes=notes, soul=self.soul_for(agent) if self.soul_for else self.soul,
                     log=log, steps=steps, opening=opening, meta={"phase": "A", "agent": agent, "session": k},
                     start_state=start_state,
                 )

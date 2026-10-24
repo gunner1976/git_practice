@@ -1,33 +1,34 @@
 # SEMANTIC_MEMORY.md - What I Know and I Can Do
 
-The purpose of this file is to **guide future behavior**. Your memory is precious — make good use of it.
-
-Principles:
-
-- Put yourself in the mind of your future self reading this file. They will arrive cold, with none of the context you have now. Would each entry be clear and actionable to them, or ambiguous? If ambiguous, rewrite it.
-- Only store what is **durable**. Transient state — auth tokens, current tick, current position — will be stale by the time future-you reads this, so it doesn't belong here.
-- Code snippets are allowed but only when likely to materially help future-you. Keep them minimal, organized, and explain when to use them.
-- **Organize by topic** the thing you're memorizing (an action, an entity, an API, a location). One section per topic, collecting everything about it. Do *not* split knowledge about the same topic across multiple sections.
-- Mark uncertainty explicitly. Distinguish what you have verified from what you suspect.
-- When a belief is disproven, rewrite or update it immediately. Stale knowledge is dangerous.
-- **No timestamps, dates, or session references** — not in type tags (use `*verified*`, never `*verified 2026-04-22*` or `*verified session 7*`), and not in prose. This file is "what is true now", not "how my understanding evolved". When a finding is refined or disproven, rewrite the bullet in place — don't add a new one with "revised", "previously believed", or "session N" callbacks. That evolution lives in EPISODIC_MEMORY.
-- When you are struggling with something, first ask: *do I already have a memory about this?* If yes, apply it. If not, consider whether the lesson from solving it belongs here.
-- Memories are only valuable if they prevent mistakes from recurring. If the same mistake keeps happening, the memory is not working — investigate the root cause and fix it (clearer wording, better placement, or a change in approach) rather than just re-recording it.
-- As the file grows, **refactor**. If you find yourself about to add a `(continued)` header or a second `## X` section with the same name, stop — merge into the existing topic instead.
-
-Suggested shape (adapt as needed):
-
 ## Index
+- World layout
+- Pickup / place / stack
+- Throw
+- Movement
+- Press
 
-A one-line entry per topic section, for scanning. Update when you add, split, or merge topics.
+## World layout
+- *fact* Island with hills (Peak, Hill_1..4), a mesa "Spire" at (-14,8), 12 loose 1x1 blocks (Block_1..12), a Ring, a Rock. Start at (0,0.7,-22). Day/night cycle passes quickly (a few ticks = hours).
+- *fact* I built a tower (Blocks 12,7,1,10 + Ring) at x=-5.07, z=-18.5 near the start. Remaining loose blocks: 2,3,4,5,6,8,9 and Rock. Block_11 was lost to the sea.
 
-## <Topic>
+## Pickup / place / stack
+- *verified* move_to within ~1.5 units, then pickup at the object's position -> PickupSuccess.
+- *verified* place only succeeds if the target is above ground/other blocks; aim ~1.5 above surface (or higher; it falls and settles). Too low = PlaceFailed:Occupied (inside terrain).
+- *verified* Stacking: place at same x,z, y a bit above top block; settles at 1.0 spacing. Reach up to ~5 units high from the ground works.
+- *verified* Ring can be picked/placed, but has no buttons.
 
-One section per topic. Within each topic, tag bullets by type when useful:
+## Throw
+- *verified* throw {direction, speed}: speed 15 toward the island edge makes the item vanish (lost). Don't throw toward edges unless you accept losing it.
+- *mistake* Throwing beside a tower collides and drops the item at my feet / I can end up standing on it. Step away first.
 
-- *verified* — tested, trust it.
-- *fact* — stable environmental truth (include *why* when non-obvious).
-- *mistake* — pitfall you have hit. Include the cause and preventive rule. Revisit if it recurs — the memory itself may need fixing.
-- *hypothesis* — unverified. Note evidence (weak / moderate / strong) and what would confirm or refute. Promote once verified; delete if disproven.
+## Movement
+- *fact* move_to is a straight line with no pathfinding; it stops early at blocks/terrain (Spire, tower). Use waypoints (e.g. x=-20 around the Spire, z=-22 south of the tower).
+- *mistake* Near (-15,-14) I dropped to y≈-0.8 and move_to stalled. Choosing a different inland target freed me.
 
-<!-- DO NOT EDIT ABOVE THIS LINE -->
+## Press
+- *verified* press fails (NothingInReach) when holding the Ring. No entity with buttons found yet; explore for one.
+- *hypothesis* Remaining unexplored: Rock, Peak summit, and whether blocks can be thrown to hit things.
+- *verified* Thrown Rock at speed 14 (direction mostly horizontal, slight upward) traveled ~11 units and landed short; on impact it spawned a small debris entity "ImpactBlock_1" (0.4 cube). Throws are short-range/arcing; to hit a target ~15 away use more speed/upward angle.
+- *verified* Throw calibration: direction vector [-4.6,1.5,-2.1] (target 5 away, slight upward) at speed 10 landed the Rock right beside its target. Direction is normalized by aim; speed ~10 reaches ~5 units, so range grows with speed (14 reached ~11). Light rock does not topple the tower.
+- *verified* Throw calibration: direction [-4.6,1.5,-2.1] (target ~5 away, slight upward) at speed 10 landed the Rock right beside the tower; speed 14 earlier reached ~11. Range grows with speed. A light rock does not topple the tower.
+- *verified* Block thrown at speed 13 (direction [-1,0.15,0]) from 8 units away stopped ~1.5 short of the tower and did not topple it; rough rule: flat range ≈ speed/2 to speed*0.8 units. The tower is very stable.
