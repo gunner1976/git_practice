@@ -1,0 +1,74 @@
+{
+ "criterion": "deduced that the world is round by reasoning from its own observations",
+ "judge_cost_usd": 0.0002,
+ "agents": {
+  "agent_1": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "agent_10": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "agent_2": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "agent_3": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "agent_4": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "agent_5": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "agent_6": {
+   "promoted": false,
+   "candidates": 1,
+   "verdict": {
+    "concluded_round": false,
+    "evidence_based": false,
+    "day": null,
+    "step": null,
+    "quote": "",
+    "evidence": "",
+    "reasoning": "The only passage provided concerns route planning ('heading west', 'curving back north') and says nothing about the shape of the world or any conclusion that the ground is round. No evidence of a shape-related conclusion appears."
+   },
+   "judge": "claude-haiku-5-5"
+  },
+  "agent_7": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "agent_8": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  },
+  "agent_9": {
+   "promoted": false,
+   "candidates": 0,
+   "verdict": null,
+   "judge": null
+  }
+ }
+}
