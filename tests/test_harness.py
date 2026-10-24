@@ -145,8 +145,9 @@ def test_replay_viewer_matches_logs(tmp_path):
     run = Run(tmp_path / "r", small_cfg(20), SOUL, max_usd=50, mock=True)
     run.phase_a(2, 2, 20, 2)
     run.phase_b(parallel=4)
-    out, n, bad = write_viewer(tmp_path / "r")
+    outs, n, bad = write_viewer(tmp_path / "r")
     assert n == 2 * 2 + 4 * 4
     assert bad == []
-    html = out.read_text()
-    assert "/*__DATA__*/null" not in html and '"sessions":' in html
+    for out in outs:
+        html = out.read_text()
+        assert "/*__DATA__*/null" not in html and '"sessions":' in html

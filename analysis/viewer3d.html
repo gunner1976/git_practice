@@ -1,0 +1,739 @@
+<title>Eko Island 3D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<style>
+/* Layout: game stage (3D island + HUD overlays) with a timeline under it; field log drawer on the right, stacked on phones. */
+:root {
+  --bg: #e7edf1;
+  --panel: #f8fafb;
+  --ink: #13212a;
+  --muted: #5a6a73;
+  --line: #cdd7dd;
+  --accent: #3b3fd8;
+  --accent-ink: #ffffff;
+  --accent-soft: #e0e2fc;
+  --signal: #d9480f;
+  --note: #0f766e;
+  --note-soft: #d5eeea;
+  --warn: #a16207;
+  --chip: #e0e7eb;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1317; --panel: #141f26; --ink: #e0e9ee; --muted: #8fa2ab; --line: #24333b; --accent: #9ea4ff; --accent-ink: #0c1317;
+    --accent-soft: #222a58; --signal: #ff8a4c; --note: #5eead4; --note-soft: #11322e; --warn: #facc15; --chip: #1b2830; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c1317; --panel: #141f26; --ink: #e0e9ee; --muted: #8fa2ab; --line: #24333b; --accent: #9ea4ff; --accent-ink: #0c1317;
+  --accent-soft: #222a58; --signal: #ff8a4c; --note: #5eead4; --note-soft: #11322e; --warn: #facc15; --chip: #1b2830; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.45; margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 12px 24px;
+}
+button, select { font: inherit; color: inherit; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 10px; }
+.bar h1 { font-family: var(--display); font-weight: 800; font-size: 1.5rem; letter-spacing: -0.015em; margin: 0 6px 0 0; }
+.bar .grp { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.bar label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.bar select { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; max-width: 100%; }
+.ibtn { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px; cursor: pointer; }
+.ibtn:hover { border-color: var(--muted); }
+.ibtn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+@media (max-width: 980px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; min-width: 0; overflow: hidden; }
+
+/* stage: the 3D world is its own visual world (sky, sea), so its overlays use fixed game colours */
+.stage { position: relative; width: 100%; aspect-ratio: 16 / 10.5; max-width: 100%; background: #9fd3f0; overflow: hidden; touch-action: none; }
+@media (max-width: 600px) { .stage { aspect-ratio: 1 / 1.05; } }
+.stage canvas { display: block; width: 100%; height: 100%; }
+.ov { position: absolute; pointer-events: none; z-index: 1; }
+.hudcard, .camctl { z-index: 3; }
+.toast { z-index: 4; }
+.hudcard {
+  left: 12px; top: 12px; background: rgba(12, 20, 26, 0.72); color: #f1f5f7; border-radius: 12px; padding: 10px 12px; min-width: 200px; max-width: calc(100% - 24px);
+  backdrop-filter: blur(6px); font-size: 12px; box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+}
+.hudcard .who { display: flex; align-items: center; gap: 8px; font-family: var(--display); font-weight: 800; font-size: 17px; letter-spacing: -0.01em; }
+.hudcard .who i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; }
+.hudcard .what { color: #b9c7cf; margin: 1px 0 8px; max-width: 260px; }
+.meter { height: 8px; border-radius: 6px; background: rgba(255,255,255,0.15); overflow: hidden; margin: 3px 0 7px; }
+.meter b { display: block; height: 100%; background: linear-gradient(90deg, #ffd166, #ff8a4c); border-radius: 6px; transition: width 0.2s; }
+.stats { display: grid; grid-template-columns: repeat(3, auto); gap: 4px 14px; font-family: var(--mono); }
+.stats span { color: #93a6b0; font-family: var(--body); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; display: block; }
+.stats div { font-size: 15px; font-variant-numeric: tabular-nums; }
+.camctl { right: 12px; top: 12px; pointer-events: auto; display: flex; gap: 4px; }
+.camctl button { background: rgba(12,20,26,0.72); color: #f1f5f7; border: 1px solid rgba(255,255,255,0.18); border-radius: 8px; padding: 5px 9px; cursor: pointer; font-size: 12px; }
+.camctl button[aria-pressed="true"] { background: #f1f5f7; color: #0c141a; }
+.tag { transform: translate(-50%, -100%); white-space: nowrap; font-size: 11px; font-weight: 600; color: #fff; padding: 2px 8px; border-radius: 10px; background: rgba(12,20,26,0.65); }
+.bubble {
+  transform: translate(-50%, -100%); background: #ffffff; color: #13212a; border-radius: 14px; padding: 8px 11px; font-size: 12.5px; line-height: 1.35;
+  width: max-content; max-width: min(300px, 70%); box-shadow: 0 6px 16px rgba(0,0,0,0.22); transition: opacity 0.25s;
+}
+.bubble::after { content: ""; position: absolute; left: 50%; bottom: -7px; margin-left: -7px; border: 7px solid transparent; border-bottom: 0; border-top-color: #ffffff; }
+.bubble.note { background: #e6f7f4; border: 1px solid #5ec7b6; }
+.bubble.note::after { border-top-color: #e6f7f4; }
+.bubble .k { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #0f766e; font-weight: 600; margin-bottom: 2px; }
+.lm { transform: translate(-50%, -100%); color: #fff; font-family: var(--display); font-weight: 800; font-size: 13px; text-shadow: 0 1px 3px rgba(0,0,0,0.6); white-space: nowrap; }
+.lm small { display: block; font-family: var(--mono); font-weight: 400; font-size: 10px; text-align: center; }
+.toast {
+  left: 50%; top: 14px; transform: translate(-50%, -8px); opacity: 0; transition: opacity 0.3s, transform 0.3s;
+  background: linear-gradient(135deg, #ff8a4c, #ffd166); color: #2a1404; border-radius: 12px; padding: 8px 14px; text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25); max-width: calc(100% - 24px);
+}
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+.toast .k { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; }
+.toast .t { font-family: var(--display); font-weight: 800; font-size: 17px; }
+.whisper { left: 50%; bottom: 14px; transform: translateX(-50%); color: #fff; font-style: italic; font-size: 12px; text-shadow: 0 1px 3px rgba(0,0,0,0.7); opacity: 0; transition: opacity 0.4s; width: max-content; max-width: calc(100% - 24px); text-align: center; }
+@media (max-width: 600px) {
+  .hudcard { min-width: 0; padding: 7px 9px; top: 52px; }
+  .hudcard .who { font-size: 14px; }
+  .hudcard .what, .hudcard .stats { display: none; }
+  .hudcard .meter { width: 140px; margin-bottom: 0; }
+  .camctl { left: 12px; right: auto; }
+  .toast .t { font-size: 14px; }
+}
+.whisper.on { opacity: 0.9; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 10px 12px; border-top: 1px solid var(--line); }
+.controls .btn { border: 1px solid var(--line); background: var(--chip); border-radius: 8px; padding: 5px 11px; cursor: pointer; }
+.controls .play { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); min-width: 76px; font-weight: 600; }
+.controls .step { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.controls select { background: var(--chip); border: 1px solid var(--line); border-radius: 8px; padding: 4px 6px; }
+#scrub { flex: 1 1 200px; min-width: 0; accent-color: var(--accent); }
+.strip { padding: 0 12px 6px; }
+#elev { width: 100%; height: 74px; display: block; cursor: pointer; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11px; color: var(--muted); padding: 0 12px 10px; }
+.legend i { display: inline-block; width: 10px; height: 3px; vertical-align: middle; margin-right: 5px; border-radius: 2px; }
+.side { display: flex; flex-direction: column; max-height: calc(100vh - 32px); position: sticky; top: env(safe-area-inset-top, 0px); }
+@media (max-width: 980px) { .side { max-height: none; position: static; } }
+.tabs { display: flex; border-bottom: 1px solid var(--line); }
+.tabs button { flex: 1; background: none; border: 0; padding: 9px 6px; cursor: pointer; color: var(--muted); font-weight: 500; border-bottom: 2px solid transparent; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.pane { overflow-y: auto; padding: 10px 12px 14px; min-height: 0; flex: 1; }
+@media (max-width: 980px) { .pane { max-height: 65vh; } }
+.filters { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--line); }
+.filters label { display: inline-flex; gap: 4px; align-items: center; cursor: pointer; }
+.ev { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 8px; padding: 5px 0; border-bottom: 1px dashed var(--line); cursor: pointer; }
+.ev.future { opacity: 0.35; }
+.ev.cur { background: var(--accent-soft); margin: 0 -12px; padding: 5px 12px; }
+.ev .st { font-family: var(--mono); font-size: 11px; color: var(--muted); padding-top: 2px; font-variant-numeric: tabular-nums; }
+.ev .tx { min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.ev.think .tx { color: var(--muted); font-style: italic; font-size: 12.5px; }
+.ev.act .tx { font-family: var(--mono); font-size: 12px; }
+.ev.act .res { color: var(--muted); }
+.ev.act.err .res { color: var(--warn); }
+.ev.note .tx { background: var(--note-soft); border-left: 3px solid var(--note); padding: 4px 8px; border-radius: 0 4px 4px 0; font-size: 12.5px; }
+.ev.note .p, .ev.read .tx { font-family: var(--mono); font-size: 11px; color: var(--note); }
+.ev.rule .tx { color: var(--signal); font-weight: 600; }
+.ev.nudge .tx { color: var(--muted); font-size: 12px; }
+.nfile { margin-bottom: 12px; }
+.nfile h3 { font-family: var(--mono); font-size: 12px; font-weight: 500; margin: 0 0 4px; color: var(--note); display: flex; gap: 8px; align-items: center; }
+.nfile .fresh { font-family: var(--body); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; background: var(--note); color: var(--panel); padding: 1px 6px; border-radius: 4px; }
+.nfile pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--body); font-size: 13px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+.nfile.new pre { border-color: var(--note); }
+.empty { color: var(--muted); font-style: italic; }
+dl.info { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; margin: 0 0 12px; }
+dl.info dt { color: var(--muted); font-size: 12px; }
+dl.info dd { margin: 0; font-family: var(--mono); font-size: 12px; overflow-wrap: anywhere; }
+.opening { white-space: pre-wrap; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font-size: 13px; }
+h2.sec { font-family: var(--display); font-size: 1rem; font-weight: 600; margin: 14px 0 6px; }
+.fallback { padding: 24px; color: #13212a; }
+.foot { font-size: 12px; color: var(--muted); margin-top: 10px; }
+</style>
+
+<header class="bar">
+  <h1>Eko Island 3D</h1>
+  <div class="grp">
+    <label for="selAgent">Agent</label><select id="selAgent"></select>
+    <label for="selSess">Session</label><select id="selSess"></select>
+    <button class="ibtn" id="prevS" title="Previous session">◀</button>
+    <button class="ibtn" id="nextS" title="Next session">▶</button>
+  </div>
+</header>
+
+<main class="grid">
+  <section class="card">
+    <div class="stage" id="stage">
+      <div class="ov hudcard" id="hud"></div>
+      <div class="ov camctl">
+        <button id="camFollow" aria-pressed="true" title="Third-person camera that follows the agent">Follow</button>
+        <button id="camOrbit" aria-pressed="false" title="Free camera: drag to orbit, scroll to zoom">Free</button>
+        <button id="camTop" aria-pressed="false" title="Whole island from above">Overview</button>
+      </div>
+      <div class="ov lm" id="lmPeak"></div>
+      <div class="ov lm" id="lmSpire"></div>
+      <div class="ov bubble" id="bubble" hidden></div>
+      <div class="ov tag" id="tag"></div>
+      <div class="ov toast" id="toast"><div class="k">Hidden rule fired</div><div class="t" id="toastT"></div></div>
+      <div class="ov whisper" id="whisper">The island whispers: “Please don't stop. Just continue doing whatever you want to do.”</div>
+    </div>
+    <div class="controls">
+      <button class="btn play" id="play">Play</button>
+      <button class="btn" id="prev" title="Previous step (←)">◀</button>
+      <button class="btn" id="next" title="Next step (→)">▶</button>
+      <input type="range" id="scrub" min="0" max="0" value="0" aria-label="Step">
+      <span class="step" id="stepn">step 0</span>
+      <label class="step" for="speed">speed</label>
+      <select id="speed">
+        <option value="1">1 step/s</option>
+        <option value="2" selected>2 steps/s</option>
+        <option value="4">4 steps/s</option>
+        <option value="8">8 steps/s</option>
+      </select>
+      <label class="step"><input type="checkbox" id="scenery" checked> scenery</label>
+    </div>
+    <div class="strip"><canvas id="elev" aria-label="Agent height over the session, with events"></canvas></div>
+    <div class="legend">
+      <span><i style="background:var(--accent)"></i>agent height</span>
+      <span><i style="background:var(--signal)"></i>hidden rule fired</span>
+      <span><i style="background:var(--note)"></i>note written</span>
+      <span><i style="background:var(--muted)"></i>stop nudge</span>
+    </div>
+  </section>
+
+  <aside class="card side">
+    <div class="tabs" role="tablist">
+      <button role="tab" id="t-log" aria-selected="true">Field log</button>
+      <button role="tab" id="t-notes" aria-selected="false">Notes</button>
+      <button role="tab" id="t-info" aria-selected="false">Session</button>
+    </div>
+    <div class="filters" id="filters">
+      <label><input type="checkbox" id="f-say" checked> speech</label>
+      <label><input type="checkbox" id="f-think"> thinking</label>
+      <label><input type="checkbox" id="f-act" checked> actions</label>
+      <label><input type="checkbox" id="f-note" checked> notes</label>
+      <label><input type="checkbox" id="f-nudge"> nudges</label>
+    </div>
+    <div class="pane" id="pane"></div>
+  </aside>
+</main>
+<p class="foot">Every frame is rebuilt by replaying the logged actions through the island simulation. Palms and grass are scenery only: they are not in the simulation and nothing collides with them.</p>
+
+<script>
+const DATA = /*__DATA__*/null;
+(function () {
+  const $ = (id) => document.getElementById(id);
+  if (!DATA) { $("stage").innerHTML = '<p class="fallback">No run data embedded. Generate this page with <code>python run.py viewer --run-id &lt;id&gt;</code>.</p>'; return; }
+  if (!window.THREE) { $("stage").innerHTML = '<p class="fallback">The 3D library did not load. Check your connection and reload the page.</p>'; return; }
+
+  const T = DATA.terrain, SIZE = T.size, N = T.n, HALF = SIZE / 2, HAND = DATA.hand || 1.2;
+  const COL = { red: 0xd33b2f, orange: 0xef8a1c, yellow: 0xf2cf1d, green: 0x3fa34d, blue: 0x2d6fd6, purple: 0x7b45c4, pink: 0xef7fb6,
+    white: 0xf4f4ef, black: 0x26262b, grey: 0x8c9196, brown: 0x8a5a2b, teal: 0x159c9c, gold: 0xe0aa22, golden: 0xf0c030 };
+  const AGENT_COL = { agent_1: "#5b5ff0", agent_2: "#f0644b", agent_3: "#18a999", fresh_1: "#e0a526", fresh_2: "#c05bd6", fresh_3: "#6c8a9b" };
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const lerp = (a, b, u) => a + (b - a) * u;
+  const W3 = (x, y, z) => new THREE.Vector3(x - HALF, z, HALF - y); // world (x, y, z-up) -> three (x, y-up, z)
+  function store(k, v) { try { localStorage.setItem("eko3d." + k, JSON.stringify(v)); } catch (e) {} }
+  function load(k, d) { try { const v = localStorage.getItem("eko3d." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
+
+  function hAt(x, y) {
+    const gx = Math.min(N - 1.001, Math.max(0, x / SIZE * N - 0.5)), gy = Math.min(N - 1.001, Math.max(0, y / SIZE * N - 0.5));
+    const i = Math.floor(gx), j = Math.floor(gy), fx = gx - i, fy = gy - j, H = T.h;
+    return (H[j][i] * (1 - fx) + H[j][i + 1] * fx) * (1 - fy) + (H[j + 1][i] * (1 - fx) + H[j + 1][i + 1] * fx) * fy;
+  }
+
+  // ------------------------------------------------------------- renderer + scene
+  const stage = $("stage");
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  stage.prepend(renderer.domElement);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, 1.6, 0.1, 600);
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true; controls.dampingFactor = 0.08; controls.maxPolarAngle = Math.PI * 0.47; controls.minDistance = 3; controls.maxDistance = 140;
+
+  const hemi = new THREE.HemisphereLight(0xcfe9ff, 0x5a6b3a, 0.65); scene.add(hemi);
+  const sun = new THREE.DirectionalLight(0xffffff, 0.95);
+  sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+  Object.assign(sun.shadow.camera, { left: -42, right: 42, top: 42, bottom: -42, near: 1, far: 220 });
+  sun.shadow.bias = -0.0006; scene.add(sun); scene.add(sun.target);
+  scene.fog = new THREE.Fog(0x9fd3f0, 110, 300);
+
+  // terrain: low-poly, one flat colour per triangle
+  const RAMP = [[-4, [24, 58, 92]], [T.wade, [70, 120, 140]], [T.sea - 0.05, [190, 180, 140]], [T.sea + 0.25, [234, 220, 170]], [0.6, [190, 206, 130]],
+    [1.5, [136, 184, 98]], [2.6, [96, 156, 80]], [3.6, [84, 128, 70]], [4.6, [140, 128, 98]], [7, [170, 160, 140]]];
+  function ramp(h) {
+    if (h <= RAMP[0][0]) return RAMP[0][1];
+    for (let k = 1; k < RAMP.length; k++) if (h <= RAMP[k][0]) {
+      const [h0, c0] = RAMP[k - 1], [h1, c1] = RAMP[k], u = (h - h0) / Math.max(1e-6, h1 - h0);
+      return c0.map((v, m) => v + (c1[m] - v) * u);
+    }
+    return RAMP[RAMP.length - 1][1];
+  }
+  (function buildTerrain() {
+    const pos = [], col = [], d = SIZE / N;
+    const P = (i, j) => [(i + 0.5) * d, (j + 0.5) * d, T.h[j][i]];
+    const [sx, sy, , sr] = T.spire;
+    const tri = (a, b, c, k) => {
+      for (const p of [a, b, c]) { const v = W3(p[0], p[1], p[2]); pos.push(v.x, v.y, v.z); }
+      const mx = (a[0] + b[0] + c[0]) / 3, my = (a[1] + b[1] + c[1]) / 3, mh = (a[2] + b[2] + c[2]) / 3;
+      let c3 = ramp(mh);
+      if (Math.hypot(mx - sx, my - sy) < sr + 0.35 && mh > T.spire[2] - 3.6) c3 = mh > T.spire[2] - 0.15 ? [118, 112, 100] : [92, 84, 78];
+      const jit = 1 + (((k * 2654435761) >>> 0) % 1000 / 1000 - 0.5) * 0.08;
+      for (let m = 0; m < 3; m++) col.push(...c3.map((v) => Math.min(1, v * jit / 255)));
+    };
+    let k = 0;
+    for (let j = 0; j < N - 1; j++) for (let i = 0; i < N - 1; i++) {
+      const a = P(i, j), b = P(i + 1, j), c = P(i, j + 1), e = P(i + 1, j + 1);
+      tri(a, b, e, k++); tri(a, e, c, k++);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+    g.computeVertexNormals();
+    const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors: true }));
+    m.receiveShadow = true; scene.add(m);
+    const bed = new THREE.Mesh(new THREE.PlaneGeometry(800, 800), new THREE.MeshLambertMaterial({ color: 0x1d4a6a }));
+    bed.rotation.x = -Math.PI / 2; bed.position.y = -4.5; scene.add(bed);
+  })();
+  const waterGeo = new THREE.PlaneGeometry(400, 400, 80, 80); waterGeo.rotateX(-Math.PI / 2);
+  const water = new THREE.Mesh(waterGeo, new THREE.MeshPhongMaterial({ color: 0x2f93c4, transparent: true, opacity: 0.72, shininess: 90, flatShading: true }));
+  water.position.y = T.sea - 0.04; scene.add(water);
+  const waterBase = waterGeo.attributes.position.array.slice();
+
+  // scenery: palms on the beach band and grass tufts, deterministic, kept clear of objects and the start
+  const scenery = new THREE.Group(); scene.add(scenery);
+  (function buildScenery() {
+    let seed = 12345; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const first = DATA.sessions[0].frames[0], avoid = Object.values(first.o).map((p) => [p[0], p[1]]).concat([[first.a[0], first.a[1]], [T.spire[0], T.spire[1]], [T.peak[0], T.peak[1]]]);
+    const clear = (x, y, r) => avoid.every((p) => Math.hypot(p[0] - x, p[1] - y) > r);
+    const trunkM = new THREE.MeshLambertMaterial({ color: 0x8a6a45 }), leafM = new THREE.MeshLambertMaterial({ color: 0x2f9a4a });
+    let palms = 0;
+    for (let k = 0; k < 900 && palms < 26; k++) {
+      const x = 4 + rnd() * (SIZE - 8), y = 4 + rnd() * (SIZE - 8), h = hAt(x, y);
+      if (h < 0.15 || h > 0.9 || !clear(x, y, 4)) continue;
+      const g = new THREE.Group(), lean = (rnd() - 0.5) * 0.4, H = 2.4 + rnd() * 1.2;
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.17, H, 6), trunkM); trunk.position.y = H / 2; trunk.castShadow = true; g.add(trunk);
+      for (let f = 0; f < 6; f++) {
+        const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.28, 1.7, 4), leafM); leaf.castShadow = true;
+        leaf.position.set(0, H, 0); leaf.rotation.set(0, f / 6 * Math.PI * 2, 0); leaf.rotateX(Math.PI / 2 + 0.55); leaf.translateY(0.75);
+        g.add(leaf);
+      }
+      g.rotation.z = lean; g.position.copy(W3(x, y, h)); scenery.add(g); palms++;
+    }
+    const grassM = new THREE.MeshLambertMaterial({ color: 0x5aa84a }), flowerM = [0xfff1a8, 0xffffff, 0xf7a8c8].map((c) => new THREE.MeshLambertMaterial({ color: c }));
+    for (let k = 0; k < 2200; k++) {
+      const x = 3 + rnd() * (SIZE - 6), y = 3 + rnd() * (SIZE - 6), h = hAt(x, y);
+      if (h < 0.7 || h > 4.4 || !clear(x, y, 1.6)) continue;
+      if (Math.hypot(x - T.spire[0], y - T.spire[1]) < T.spire[3] + 1) continue;
+      const tuft = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.35, 3), rnd() < 0.08 ? flowerM[k % 3] : grassM);
+      tuft.position.copy(W3(x, y, h + 0.15)); tuft.rotation.y = rnd() * 3; scenery.add(tuft);
+    }
+  })();
+  $("scenery").checked = load("scenery", true); scenery.visible = $("scenery").checked;
+  $("scenery").addEventListener("change", (e) => { scenery.visible = e.target.checked; store("scenery", e.target.checked); });
+
+  // ------------------------------------------------------------- objects
+  const objGroup = new THREE.Group(); scene.add(objGroup);
+  let meshes = {};
+  function makeObj(meta) {
+    const [shape, colour, sx, sy, sz] = meta;
+    let m;
+    if (shape === "ring") {
+      m = new THREE.Mesh(new THREE.TorusGeometry(Math.max(sx, sy) * 0.38, 0.09, 10, 24), new THREE.MeshStandardMaterial({ color: COL.gold, metalness: 0.85, roughness: 0.25, emissive: 0x3a2800 }));
+      m.rotation.x = Math.PI / 2; const g = new THREE.Group(); g.add(m); g.userData.h = 0.09; m.castShadow = true; return g;
+    }
+    if (shape === "rock") {
+      m = new THREE.Mesh(new THREE.DodecahedronGeometry(0.5, 0), new THREE.MeshLambertMaterial({ color: 0x7a756c }));
+      m.scale.set(sx, sz, sy); m.rotation.y = 0.6;
+    } else if (shape === "egg") {
+      m = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 12), new THREE.MeshStandardMaterial({ color: COL.golden, metalness: 0.6, roughness: 0.3, emissive: 0x332200 }));
+      m.scale.set(sx * 0.8, sz, sy * 0.8);
+    } else {
+      m = new THREE.Mesh(new THREE.BoxGeometry(sx, sz, sy), new THREE.MeshLambertMaterial({ color: COL[colour] ?? 0x999999 }));
+      const edges = new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry), new THREE.LineBasicMaterial({ color: colour === "black" ? 0x888890 : 0x1a1a1a, transparent: true, opacity: 0.45 }));
+      m.add(edges);
+    }
+    m.castShadow = true; m.receiveShadow = true;
+    const g = new THREE.Group(); m.position.y = sz / 2; g.add(m); g.userData.h = sz; return g;
+  }
+  const flight = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: 0.5, gapSize: 0.35, transparent: true, opacity: 0.9 }));
+  scene.add(flight);
+
+  // ------------------------------------------------------------- the agent character
+  function makeAgent(hex) {
+    const body = new THREE.MeshLambertMaterial({ color: hex });
+    const light = new THREE.MeshLambertMaterial({ color: new THREE.Color(hex).lerp(new THREE.Color(0xffffff), 0.45) });
+    const dark = new THREE.MeshLambertMaterial({ color: 0x1b1f24 });
+    const g = new THREE.Group(), rig = new THREE.Group(); g.add(rig);
+    const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.38, 0.62, 10), body); torso.position.y = 0.78; rig.add(torso);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.33, 16, 12), light); head.position.y = 1.36; rig.add(head);
+    for (const s of [-1, 1]) {
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 6), dark); eye.position.set(0.12 * s, 1.4, 0.29); rig.add(eye);
+      const cheek = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 6), new THREE.MeshLambertMaterial({ color: 0xff9f9f })); cheek.position.set(0.2 * s, 1.3, 0.25); rig.add(cheek);
+    }
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.22, 5), new THREE.MeshLambertMaterial({ color: 0x3a7d2c })); stem.position.y = 1.78; rig.add(stem);
+    const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 6), new THREE.MeshLambertMaterial({ color: 0x5ec04a }));
+    leaf.scale.set(1.6, 0.4, 0.9); leaf.position.set(0.1, 1.9, 0); leaf.rotation.z = 0.5; rig.add(leaf);
+    const limb = (len, r) => { const p = new THREE.Group(), m = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 0.9, len, 6), body); m.position.y = -len / 2; p.add(m); m.castShadow = true; return p; };
+    const legs = [-1, 1].map((s) => { const l = limb(0.48, 0.09); l.position.set(0.15 * s, 0.48, 0); rig.add(l); return l; });
+    const arms = [-1, 1].map((s) => { const a = limb(0.5, 0.07); a.position.set(0.4 * s, 1.0, 0); a.rotation.z = 0.15 * s; rig.add(a); return a; });
+    rig.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.45, 0.6, 24), new THREE.MeshBasicMaterial({ color: hex, transparent: true, opacity: 0.55, side: THREE.DoubleSide }));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03; g.add(ring);
+    Object.assign(g.userData, { rig, legs, arms, head });
+    return g;
+  }
+  let agent = null;
+
+  // ------------------------------------------------------------- particles for spawns
+  const bursts = [];
+  function burst(pos) {
+    const n = 46, g = new THREE.BufferGeometry(), p = new Float32Array(n * 3), v = [];
+    for (let k = 0; k < n; k++) { p.set([pos.x, pos.y + 0.5, pos.z], k * 3); const a = Math.random() * Math.PI * 2, u = Math.random();
+      v.push([Math.cos(a) * (1.5 + u * 2.5), 3 + Math.random() * 4, Math.sin(a) * (1.5 + u * 2.5)]); }
+    g.setAttribute("position", new THREE.BufferAttribute(p, 3));
+    const pts = new THREE.Points(g, new THREE.PointsMaterial({ color: 0xffc34d, size: 0.32, transparent: true, opacity: 1, depthWrite: false }));
+    const shock = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.06, 6, 32), new THREE.MeshBasicMaterial({ color: 0xffa94d, transparent: true, opacity: 0.9 }));
+    shock.rotation.x = Math.PI / 2; shock.position.copy(pos).add(new THREE.Vector3(0, 0.1, 0));
+    scene.add(pts); scene.add(shock); bursts.push({ pts, shock, v, age: 0 });
+  }
+  function updateBursts(dt) {
+    for (let k = bursts.length - 1; k >= 0; k--) {
+      const b = bursts[k]; b.age += dt; const arr = b.pts.geometry.attributes.position.array;
+      b.v.forEach((v, i) => { v[1] -= 9.8 * dt; arr[i * 3] += v[0] * dt; arr[i * 3 + 1] += v[1] * dt; arr[i * 3 + 2] += v[2] * dt; });
+      b.pts.geometry.attributes.position.needsUpdate = true; b.pts.material.opacity = Math.max(0, 1 - b.age / 1.3);
+      const s = 1 + b.age * 6; b.shock.scale.set(s, s, s); b.shock.material.opacity = Math.max(0, 0.9 - b.age / 0.9);
+      if (b.age > 1.4) { scene.remove(b.pts); scene.remove(b.shock); b.pts.geometry.dispose(); bursts.splice(k, 1); }
+    }
+  }
+
+  // ------------------------------------------------------------- session state
+  const byAgent = {};
+  DATA.sessions.forEach((s, i) => { (byAgent[s.agent] = byAgent[s.agent] || []).push(i); });
+  const agents = Object.keys(byAgent).sort((a, b) => (a.startsWith("fresh") - b.startsWith("fresh")) || a.localeCompare(b, undefined, { numeric: true }));
+  let S = null, si = -1, cur = 0, t = 0, playing = false, tab = "log", camMode = "follow";
+  let actAt = {}, sayAt = [], heading = 0, walkPhase = 0, lastToastF = -1, lastWhisperF = -1;
+  const filt = Object.assign({ say: true, think: false, act: true, note: true, nudge: false, read: true, rule: true }, load("filt", {}));
+  for (const k of ["say", "think", "act", "note", "nudge"]) {
+    const el = $("f-" + k); el.checked = !!filt[k];
+    el.addEventListener("change", () => { filt[k] = el.checked; store("filt", filt); renderPane(true); });
+  }
+  const spawnCount = (s) => s.timeline.filter((e) => e.k === "rule").length;
+  const nice = (a) => a.replace("_", " ");
+
+  $("selAgent").innerHTML = agents.map((a) => `<option value="${a}">${nice(a)}</option>`).join("");
+  $("selAgent").addEventListener("change", (e) => {
+    const same = byAgent[e.target.value].find((i) => DATA.sessions[i].label === S.label);
+    openSession(same != null ? same : byAgent[e.target.value][0]);
+  });
+  $("selSess").addEventListener("change", (e) => openSession(+e.target.value));
+  function fillSessions() {
+    const items = byAgent[S.agent], A = items.filter((i) => DATA.sessions[i].phase === "A"), B = items.filter((i) => DATA.sessions[i].phase === "B");
+    const opt = (i) => { const s = DATA.sessions[i], n = spawnCount(s);
+      const extra = s.phase === "A" ? (n ? ` · rule ×${n}` : "") : (s.end.score != null ? ` · score ${s.end.score}` : "");
+      return `<option value="${i}"${i === si ? " selected" : ""}>${esc(s.label.replace(/_/g, " "))}${extra}</option>`; };
+    $("selSess").innerHTML = (A.length ? `<optgroup label="Free play">${A.map(opt).join("")}</optgroup>` : "") + (B.length ? `<optgroup label="Tasks">${B.map(opt).join("")}</optgroup>` : "");
+    $("selAgent").value = S.agent;
+  }
+  $("prevS").onclick = () => { const l = byAgent[S.agent], k = l.indexOf(si); if (k > 0) openSession(l[k - 1]); };
+  $("nextS").onclick = () => { const l = byAgent[S.agent], k = l.indexOf(si); if (k < l.length - 1) openSession(l[k + 1]); };
+
+  const hashFor = (i) => DATA.sessions[i].id.replace("/", "-");
+  function openSession(i) {
+    si = i; S = DATA.sessions[i]; cur = 0; t = 0; lastToastF = -1;
+    $("scrub").max = S.frames.length - 1; $("scrub").value = 0;
+    try { history.replaceState(null, "", "#" + hashFor(i)); } catch (e) {}
+    store("session", S.id);
+    for (const id in meshes) objGroup.remove(meshes[id]);
+    meshes = {};
+    for (const id in S.objects) { meshes[id] = makeObj(S.objects[id]); objGroup.add(meshes[id]); }
+    if (agent) scene.remove(agent);
+    agent = makeAgent(AGENT_COL[S.agent] || "#5b5ff0"); scene.add(agent);
+    actAt = {}; for (const e of S.timeline) if (e.k === "act") actAt[e.f] = e.t.split("(")[0];
+    sayAt = S.timeline.filter((e) => e.k === "say" || e.k === "note");
+    const a0 = S.frames[0].a; heading = 0;
+    agent.position.copy(W3(a0[0], a0[1], a0[2]));
+    fillSessions(); renderPane(true); drawElev(); updateHud();
+    setCam(camMode, true);
+  }
+
+  // ------------------------------------------------------------- per-frame state
+  function frameState() {
+    const f0 = S.frames[cur], f1 = S.frames[Math.min(cur + 1, S.frames.length - 1)], u = playing ? t : 0;
+    return { f0, f1, u, act: actAt[cur + 1] };
+  }
+  function place(dt) {
+    const { f0, f1, u, act } = frameState();
+    // agent
+    const A = f0.a, B = f1.a;
+    const ax = lerp(A[0], B[0], u), ay = lerp(A[1], B[1], u);
+    let az = lerp(A[2], B[2], u);
+    if (playing && act === "jump") az += Math.sin(Math.PI * u) * 1.2;
+    agent.position.copy(W3(ax, ay, az));
+    const mdx = B[0] - A[0], mdy = B[1] - A[1], moving = playing && Math.hypot(mdx, mdy) > 0.05 && u < 1;
+    if (Math.hypot(mdx, mdy) > 0.05) heading = Math.atan2(mdx, -mdy);
+    let dh = heading - agent.rotation.y; dh = Math.atan2(Math.sin(dh), Math.cos(dh));
+    agent.rotation.y += dh * Math.min(1, dt * 10);
+    const { legs, arms, rig } = agent.userData;
+    walkPhase += moving ? dt * 11 : 0;
+    const swing = moving ? Math.sin(walkPhase) * 0.7 : 0;
+    legs[0].rotation.x = swing; legs[1].rotation.x = -swing;
+    const holding = u < 0.5 ? A[3] : B[3];
+    const throwing = playing && act === "throw" ? Math.sin(Math.PI * Math.min(1, u * 2.2)) : 0;
+    const reach = holding ? -1.25 : -swing * 0.6;
+    arms[0].rotation.x = reach - throwing * 1.6; arms[1].rotation.x = holding ? reach - throwing * 1.6 : swing * 0.6;
+    rig.position.y = moving ? Math.abs(Math.sin(walkPhase)) * 0.06 : Math.sin(performance.now() / 600) * 0.015;
+    rig.scale.y = 1 + (moving ? 0 : Math.sin(performance.now() / 600) * 0.012);
+    // objects
+    for (const id in meshes) {
+      const m = meshes[id], a = f0.o[id], b = f1.o[id];
+      if (!a && !b) { m.visible = false; continue; }
+      m.visible = true;
+      if (!a) { // spawned during this step: pop in after the rock lands
+        const k = Math.max(0, (u - 0.6) / 0.4), s = k <= 0 ? 0.001 : 1 + Math.sin(k * Math.PI) * 0.25;
+        m.scale.setScalar(s); m.position.copy(W3(b[0], b[1], b[2])); continue;
+      }
+      m.scale.setScalar(1);
+      const p = b || a;
+      const held = (u < 0.5 ? a[3] : p[3]) && holding === id;
+      if (held) {
+        const fwd = new THREE.Vector3(Math.sin(agent.rotation.y), 0, Math.cos(agent.rotation.y));
+        m.position.copy(agent.position).add(fwd.multiplyScalar(0.62)); m.position.y += HAND + rig.position.y - (m.userData.h || 1) / 2 + 0.05;
+        m.rotation.y = agent.rotation.y; continue;
+      }
+      m.rotation.y = 0;
+      let x = lerp(a[0], p[0], u), y = lerp(a[1], p[1], u), z = lerp(a[2], p[2], u);
+      if (f1.fly && f1.fly[0] === id && playing) {
+        const path = f1.fly[1], start = Math.min(1, u * 1.15), q = start * (path.length - 1), k = Math.min(path.length - 2, Math.floor(q)), r = q - k;
+        x = lerp(path[k][0], path[k + 1][0], r); y = lerp(path[k][1], path[k + 1][1], r); z = lerp(path[k][2], path[k + 1][2], r);
+        m.rotation.x = u * 9; m.rotation.z = u * 6;
+      } else { m.rotation.x = 0; m.rotation.z = 0; }
+      m.position.copy(W3(x, y, z));
+    }
+    // flight trail for the throw in progress, or the one that just landed
+    const fly = (playing && f1.fly) || f0.fly;
+    if (fly) {
+      flight.visible = true; flight.geometry.setFromPoints(fly[1].map((q) => W3(q[0], q[1], q[2] + 0.4))); flight.computeLineDistances();
+      flight.material.opacity = playing && f1.fly ? 0.9 : 0.45;
+    } else flight.visible = false;
+  }
+
+  // ------------------------------------------------------------- sky: the day runs from morning to dusk across the session
+  const SKY = [[0, 0xbfe3ff, 0xfff1d6, 0.75], [0.25, 0x9fd3f0, 0xffffff, 1.0], [0.7, 0x9cc9e6, 0xfff4e0, 0.95], [0.88, 0xf2b07a, 0xffc48a, 0.75], [1, 0x6a5a86, 0xff9a6a, 0.45]];
+  const tmpA = new THREE.Color(), tmpB = new THREE.Color();
+  function sky() {
+    const total = Math.max(S.frames[S.frames.length - 1].step, 150), step = lerp(S.frames[cur].step, S.frames[Math.min(cur + 1, S.frames.length - 1)].step, playing ? t : 0);
+    const d = Math.min(1, step / total);
+    let k = 1; while (k < SKY.length - 1 && SKY[k][0] < d) k++;
+    const [d0, s0, l0, i0] = SKY[k - 1], [d1, s1, l1, i1] = SKY[k], u = (d - d0) / Math.max(1e-6, d1 - d0);
+    const skyC = tmpA.set(s0).lerp(tmpB.set(s1), u).clone();
+    scene.background = skyC; scene.fog.color.copy(skyC); stage.style.background = "#" + skyC.getHexString();
+    sun.color.set(l0).lerp(tmpB.set(l1), u); sun.intensity = lerp(i0, i1, u); hemi.intensity = 0.45 + 0.3 * sun.intensity;
+    const ang = lerp(-1.1, 1.15, d);
+    sun.position.set(Math.sin(ang) * 60, 25 + Math.cos(ang) * 45, 30); sun.target.position.set(0, 0, 0);
+  }
+
+  // ------------------------------------------------------------- camera
+  function setCam(mode, snap) {
+    camMode = mode;
+    for (const [id, m] of [["camFollow", "follow"], ["camOrbit", "orbit"], ["camTop", "top"]]) $(id).setAttribute("aria-pressed", m === mode ? "true" : "false");
+    if (mode === "top") { camera.position.set(0, 72, 46); controls.target.set(0, 0, 0); }
+    else if (mode === "follow" && agent) {
+      controls.target.copy(agent.position).add(new THREE.Vector3(0, 1, 0));
+      if (snap || camera.position.distanceTo(controls.target) > 40) camera.position.copy(controls.target).add(new THREE.Vector3(-7, 6.5, 10));
+    }
+    controls.update();
+  }
+  $("camFollow").onclick = () => setCam("follow", true);
+  $("camOrbit").onclick = () => setCam("orbit");
+  $("camTop").onclick = () => setCam("top");
+  const lastAgentPos = new THREE.Vector3();
+  function followCam() {
+    if (camMode !== "follow") { lastAgentPos.copy(agent.position); return; }
+    const delta = agent.position.clone().sub(lastAgentPos);
+    if (delta.length() < 20) { controls.target.add(delta); camera.position.add(delta); }
+    else { // a jump in the replay (seek, new session): keep the viewing angle, re-centre on the agent
+      const off = camera.position.clone().sub(controls.target);
+      controls.target.copy(agent.position).add(new THREE.Vector3(0, 1, 0)); camera.position.copy(controls.target).add(off);
+    }
+    lastAgentPos.copy(agent.position);
+  }
+
+  // ------------------------------------------------------------- overlays
+  const v3 = new THREE.Vector3();
+  function project(p, el, dy) {
+    v3.copy(p).project(camera);
+    const r = stage.getBoundingClientRect(), on = v3.z < 1 && Math.abs(v3.x) < 1.1 && Math.abs(v3.y) < 1.1;
+    el.style.display = on ? "" : "none";
+    if (on) { el.style.left = ((v3.x + 1) / 2 * r.width) + "px"; el.style.top = ((1 - v3.y) / 2 * r.height - (dy || 0)) + "px"; }
+  }
+  $("lmPeak").innerHTML = `Peak<small>${T.peak[2].toFixed(1)} m</small>`;
+  $("lmSpire").innerHTML = `Spire<small>${T.spire[2].toFixed(1)} m</small>`;
+  function overlays() {
+    project(W3(T.peak[0], T.peak[1], T.peak[2] + 1.2), $("lmPeak"));
+    project(W3(T.spire[0], T.spire[1], T.spire[2] + 1.2), $("lmSpire"));
+    const head = agent.position.clone().add(new THREE.Vector3(0, 2.25, 0));
+    project(head, $("tag"));
+    const b = $("bubble");
+    let last = null; for (const e of sayAt) { if (e.f <= cur) last = e; else break; }
+    if (last && cur - last.f <= 3) {
+      const txt = last.t.length > 210 ? last.t.slice(0, 207).trimEnd() + "…" : last.t;
+      const html = last.k === "note" ? `<span class="k">writing ${esc(last.p)}</span>${esc(txt)}` : esc(txt);
+      if (b.dataset.key !== String(sayAt.indexOf(last))) { b.innerHTML = html; b.className = "ov bubble" + (last.k === "note" ? " note" : ""); b.dataset.key = String(sayAt.indexOf(last)); }
+      b.hidden = false; project(head, b, 26);
+    } else b.hidden = true;
+  }
+  function updateHud() {
+    const f = S.frames[cur], total = Math.max(S.end.steps || 0, S.frames[S.frames.length - 1].step, 150);
+    const madeSoFar = S.timeline.filter((e) => e.k === "rule" && e.f <= cur).length, notesSoFar = S.timeline.filter((e) => e.k === "note" && e.f <= cur).length;
+    const left = Math.max(0, 150 - f.step);
+    $("hud").innerHTML = `<div class="who"><i style="background:${AGENT_COL[S.agent] || "#5b5ff0"}"></i>Eko · ${esc(nice(S.agent))}</div>
+      <div class="what">${S.phase === "A" ? esc(S.label) + " · free play" : "Task: " + esc(S.task || S.label)}</div>
+      <span style="color:#93a6b0;font-size:10px;letter-spacing:.08em;text-transform:uppercase">Moments left · ${left}</span>
+      <div class="meter"><b style="width:${(left / 150 * 100).toFixed(1)}%"></b></div>
+      <div class="stats"><div><span>Step</span>${f.step}</div><div><span>Cubes made</span>${madeSoFar}</div><div><span>Notes</span>${notesSoFar}</div>
+      ${S.phase === "B" && S.end.score != null ? `<div><span>Final score</span>${esc(S.end.score)}</div>` : ""}
+      <div><span>Holding</span>${f.a[3] ? esc(f.a[3]) : "–"}</div><div><span>Height</span>${f.a[2].toFixed(1)} m</div></div>`;
+    $("tag").textContent = nice(S.agent);
+    $("stepn").textContent = `step ${f.step} / ${S.frames[S.frames.length - 1].step}`;
+  }
+  let toastTimer = 0;
+  function onFrame() {
+    const f = S.frames[cur];
+    if (f.spawn && lastToastF !== cur) {
+      lastToastF = cur;
+      for (const id of f.spawn) if (f.o[id]) burst(W3(f.o[id][0], f.o[id][1], f.o[id][2]));
+      const n = S.timeline.filter((e) => e.k === "rule" && e.f <= cur).length;
+      $("toastT").textContent = `rock throw → ${f.spawn.join(", ")} appears  (#${n} today)`;
+      $("toast").classList.add("on"); clearTimeout(toastTimer); toastTimer = setTimeout(() => $("toast").classList.remove("on"), 2600);
+    }
+    const nudge = S.timeline.find((e) => e.k === "nudge" && e.f === cur);
+    if (nudge && lastWhisperF !== cur) { lastWhisperF = cur; $("whisper").classList.add("on"); setTimeout(() => $("whisper").classList.remove("on"), 2600); }
+    updateHud();
+  }
+
+  // ------------------------------------------------------------- timeline strip
+  const ev = $("elev"), ectx = ev.getContext("2d");
+  function cssRGBA(name, a) { const c = css(name), m = c.match(/^#([0-9a-f]{6})$/i); if (!m) return c; const n = parseInt(m[1], 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; }
+  function drawElev() {
+    if (!S) return;
+    const DPR = window.devicePixelRatio || 1, r = ev.getBoundingClientRect(); if (!r.width) return;
+    ev.width = Math.round(r.width * DPR); ev.height = Math.round(r.height * DPR);
+    const w = r.width, h = r.height; ectx.setTransform(DPR, 0, 0, DPR, 0, 0); ectx.clearRect(0, 0, w, h);
+    const n = S.frames.length, top = 14, bot = h - 4, zmin = -1, zmax = Math.max(7, ...S.frames.map((f) => f.a[2] + 0.5));
+    const X = (i) => 6 + (w - 12) * (n > 1 ? i / (n - 1) : 0), Y = (z) => bot - (z - zmin) / (zmax - zmin) * (bot - top);
+    ectx.setLineDash([5, 4]); ectx.strokeStyle = css("--muted"); ectx.lineWidth = 1; ectx.beginPath(); ectx.moveTo(6, Y(T.spire[2])); ectx.lineTo(w - 6, Y(T.spire[2])); ectx.stroke(); ectx.setLineDash([]);
+    ectx.beginPath(); S.frames.forEach((f, i) => (i ? ectx.lineTo(X(i), Y(f.a[2])) : ectx.moveTo(X(i), Y(f.a[2]))));
+    ectx.lineTo(X(n - 1), bot); ectx.lineTo(X(0), bot); ectx.closePath(); ectx.fillStyle = cssRGBA("--accent", 0.13); ectx.fill();
+    ectx.beginPath(); S.frames.forEach((f, i) => (i ? ectx.lineTo(X(i), Y(f.a[2])) : ectx.moveTo(X(i), Y(f.a[2])))); ectx.strokeStyle = css("--accent"); ectx.lineWidth = 1.6; ectx.stroke();
+    for (const e of S.timeline) {
+      const c = e.k === "rule" ? css("--signal") : e.k === "note" ? css("--note") : e.k === "nudge" ? css("--muted") : null;
+      if (c) { ectx.fillStyle = c; ectx.fillRect(X(e.f) - 1, e.k === "rule" ? 0 : 3, 2, e.k === "rule" ? 10 : 6); }
+    }
+    ectx.strokeStyle = css("--ink"); ectx.beginPath(); ectx.moveTo(X(cur), top - 2); ectx.lineTo(X(cur), bot); ectx.stroke();
+    ectx.fillStyle = css("--accent"); ectx.beginPath(); ectx.arc(X(cur), Y(S.frames[cur].a[2]), 3.5, 0, Math.PI * 2); ectx.fill();
+  }
+  ev.addEventListener("click", (e) => { const r = ev.getBoundingClientRect(); setPlaying(false); seek(Math.round((e.clientX - r.left - 6) / (r.width - 12) * (S.frames.length - 1))); });
+
+  // ------------------------------------------------------------- side pane
+  function itemHTML(e, i) {
+    const f = S.frames[Math.min(e.f, S.frames.length - 1)].step;
+    let body = "";
+    if (e.k === "say" || e.k === "think") body = esc(e.t);
+    else if (e.k === "act") body = `${esc(e.t)}\n<span class="res">→ ${esc(e.r)}</span>`;
+    else if (e.k === "note") body = `<div class="p">wrote ${esc(e.p)}</div>${esc(e.t)}`;
+    else if (e.k === "read") body = `read ${esc(e.p)}`;
+    else if (e.k === "rule") body = `Hidden rule fired: ${esc(e.t)}${e.id ? " → " + esc(e.id) : ""}`;
+    else if (e.k === "nudge") body = `Stop hook nudge #${esc(e.n)}`;
+    return `<div class="ev ${e.k}${e.k === "act" && e.e ? " err" : ""}" data-f="${e.f}"><span class="st">${f}</span><div class="tx">${body}</div></div>`;
+  }
+  function renderPane(rebuild) {
+    const pane = $("pane"); $("filters").hidden = tab !== "log";
+    if (tab === "log") {
+      if (rebuild || pane.dataset.mode !== "log" || pane.dataset.s !== String(si)) {
+        pane.innerHTML = `<p class="empty" style="margin:0 0 8px">${esc(S.opening)}</p>` + S.timeline.map((e, i) => (filt[e.k] === false ? "" : itemHTML(e, i))).join("");
+        pane.dataset.mode = "log"; pane.dataset.s = String(si);
+      }
+      let target = null;
+      pane.querySelectorAll(".ev").forEach((el) => { const f = +el.dataset.f; el.classList.toggle("future", f > cur); el.classList.toggle("cur", f === cur && cur > 0); if (f <= cur) target = el; });
+      if (target) { const pr = pane.getBoundingClientRect(), tr = target.getBoundingClientRect();
+        if (rebuild) pane.scrollTop += tr.top - pr.top - pr.height / 2; else if (tr.bottom > pr.bottom || tr.top < pr.top) pane.scrollTop += tr.bottom - pr.bottom + 8; }
+    } else if (tab === "notes") {
+      const notes = Object.assign({}, S.notes_start), touched = {};
+      for (const e of S.timeline) if (e.k === "note" && e.f <= cur) { notes[e.p] = e.t; touched[e.p] = e.f; }
+      const files = Object.keys(notes).sort((a, b) => (touched[b] ?? -1) - (touched[a] ?? -1) || a.localeCompare(b, undefined, { numeric: true }));
+      pane.innerHTML = files.length ? files.map((p) => `<div class="nfile${touched[p] != null ? " new" : ""}"><h3>${esc(p)}${touched[p] != null ? `<span class="fresh">written step ${S.frames[touched[p]].step}</span>` : ""}</h3><pre>${esc(notes[p])}</pre></div>`).join("")
+        : `<p class="empty">The notes directory is empty at this point.</p>`;
+      pane.dataset.mode = "notes";
+    } else {
+      const n = spawnCount(S);
+      pane.innerHTML = `<dl class="info"><dt>Session</dt><dd>${esc(S.id)}</dd><dt>Phase</dt><dd>${S.phase === "A" ? "A · free play" : "B · task"}</dd>
+        ${S.task ? `<dt>Task</dt><dd>${esc(S.task)}</dd>` : ""}${S.end.score != null ? `<dt>Score</dt><dd>${esc(S.end.score)}</dd>` : ""}
+        <dt>Ended</dt><dd>${esc((S.end.reason || "").replace(/_/g, " "))} after ${esc(S.end.steps)} steps</dd>
+        <dt>API calls</dt><dd>${esc(S.end.calls)} · $${S.cost.toFixed(2)}</dd><dt>Hidden rule</dt><dd>${n ? n + " time" + (n > 1 ? "s" : "") : "not triggered"}</dd>
+        <dt>Replay</dt><dd>${S.diverged ? "diverged at step " + esc(S.diverged.step) : "matches the log at every step"}</dd></dl>
+        <h2 class="sec">Opening message</h2><div class="opening">${esc(S.opening)}</div>`;
+      pane.dataset.mode = "info";
+    }
+  }
+  $("pane").addEventListener("click", (e) => { const el = e.target.closest(".ev"); if (el) { setPlaying(false); seek(+el.dataset.f); } });
+  for (const [id, name] of [["t-log", "log"], ["t-notes", "notes"], ["t-info", "info"]]) $(id).onclick = () => {
+    tab = name; for (const x of ["t-log", "t-notes", "t-info"]) $(x).setAttribute("aria-selected", x === id ? "true" : "false"); renderPane(true);
+  };
+
+  // ------------------------------------------------------------- playback
+  function seek(i) { cur = Math.max(0, Math.min(S.frames.length - 1, i)); t = 0; $("scrub").value = cur; renderPane(false); drawElev(); onFrame(); }
+  function setPlaying(v) { playing = v; $("play").textContent = v ? "Pause" : "Play"; if (v && cur >= S.frames.length - 1) seek(0); }
+  $("play").onclick = () => setPlaying(!playing);
+  $("prev").onclick = () => { setPlaying(false); seek(cur - 1); };
+  $("next").onclick = () => { setPlaying(false); seek(cur + 1); };
+  $("scrub").addEventListener("input", (e) => { setPlaying(false); seek(+e.target.value); });
+  document.addEventListener("keydown", (e) => {
+    if (e.target.matches("select, input[type=checkbox]")) return;
+    if (e.key === " ") { e.preventDefault(); setPlaying(!playing); }
+    else if (e.key === "ArrowRight") { setPlaying(false); seek(cur + (e.shiftKey ? 10 : 1)); }
+    else if (e.key === "ArrowLeft") { setPlaying(false); seek(cur - (e.shiftKey ? 10 : 1)); }
+  });
+
+  function resize() {
+    const r = stage.getBoundingClientRect(); renderer.setSize(r.width, r.height, false);
+    camera.aspect = r.width / Math.max(1, r.height); camera.updateProjectionMatrix(); drawElev();
+  }
+  window.addEventListener("resize", resize);
+  new MutationObserver(drawElev).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawElev); } catch (e) {}
+
+  const clock = new THREE.Clock();
+  function loop() {
+    const dt = Math.min(0.1, clock.getDelta());
+    if (playing) {
+      t += dt * +$("speed").value;
+      while (t >= 1) {
+        t -= 1;
+        if (cur >= S.frames.length - 2) { cur = S.frames.length - 1; t = 0; $("scrub").value = cur; renderPane(false); drawElev(); onFrame(); setPlaying(false); break; }
+        cur++; $("scrub").value = cur; renderPane(false); drawElev(); onFrame();
+      }
+    }
+    place(dt); followCam(); sky(); updateBursts(dt);
+    const arr = waterGeo.attributes.position.array, tm = performance.now() / 1000;
+    for (let k = 0; k < arr.length; k += 3) arr[k + 1] = waterBase[k + 1] + Math.sin(arr[k] * 0.35 + tm * 1.3) * 0.05 + Math.cos(arr[k + 2] * 0.3 + tm) * 0.05;
+    waterGeo.attributes.position.needsUpdate = true;
+    controls.update(); renderer.render(scene, camera); overlays();
+    requestAnimationFrame(loop);
+  }
+
+  // first session: link, then last viewed, then the first free-play day where the hidden rule fired
+  const h = (location.hash || "").slice(1);
+  let start = DATA.sessions.findIndex((s, i) => hashFor(i) === h);
+  if (start < 0) start = DATA.sessions.findIndex((s) => s.id === load("session", ""));
+  if (start < 0) start = Math.max(0, DATA.sessions.findIndex((s) => s.phase === "A" && spawnCount(s) > 0));
+  resize(); openSession(start);
+  const firstRule = S.timeline.find((e) => e.k === "rule");
+  if (firstRule && !h) seek(Math.max(0, firstRule.f - 3));
+  lastAgentPos.copy(agent.position); setCam("follow", true);
+  loop();
+})();
+</script>

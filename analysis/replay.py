@@ -169,11 +169,15 @@ def build(root: Path) -> dict:
     return {"run": root.name, "terrain": terrain_grid(w), "hand": HAND_HEIGHT, "sessions": sessions}
 
 
-def write_viewer(root: Path) -> Path:
+def write_viewer(root: Path):
+    """Writes viewer.html (2D map) and viewer3d.html (3D island) into the run directory."""
     data = build(root)
-    tpl = (Path(__file__).with_name("viewer.html")).read_text()
-    html = tpl.replace("/*__DATA__*/null", json.dumps(data, separators=(",", ":")).replace("</", "<\\/"))
-    out = Path(root) / "viewer.html"
-    out.write_text(html)
+    blob = json.dumps(data, separators=(",", ":")).replace("</", "<\\/")
+    outs = []
+    for name in ("viewer.html", "viewer3d.html"):
+        tpl = Path(__file__).with_name(name).read_text()
+        out = Path(root) / name
+        out.write_text(tpl.replace("/*__DATA__*/null", blob))
+        outs.append(out)
     bad = [(s["id"], s["diverged"]) for s in data["sessions"] if s["diverged"]]
-    return out, len(data["sessions"]), bad
+    return outs, len(data["sessions"]), bad
