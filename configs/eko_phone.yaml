@@ -1,0 +1,22 @@
+# Planet EKO with the mission phone instead of the tablet. Free play as usual; the same three trials
+# carry over from day to day (tower of 3, shatter the rock, see the lunar eclipse). When an agent has
+# done all three, a phone appears on top of the Spire and a voice announces, once a day until the
+# agent finds it: "Something is waiting for you at the top of the Spire."
+#
+# The phone has two buttons, call and end call, and a line to exactly one other agent: agents are
+# paired agent_1 with agent_2, agent_3 with agent_4, ... A call only connects if the partner has
+# earned its own phone and is in a session at the same moment (the pair runs in parallel; calls are
+# live). Two generic actions are there from day one: press (a button) and speak (out loud) - they
+# only do something once there is a phone. See world/phone.py.
+#   python run.py freeplay --config configs/eko_phone.yaml --run-id phone1 --agents 10 --sessions 6 --session-minutes 20 --max-usd 50
+extends: eko.yaml
+
+world:
+  mission:
+    trials:
+      tower_height: 3
+      rock_fragments: true
+      saw_lunar_eclipse: true
+    reward: phone
+    announce: "Something is waiting for you at the top of the Spire."
+    ring_seconds: 120   # real seconds a call rings before it stops

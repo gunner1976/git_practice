@@ -14,6 +14,7 @@ from pathlib import Path
 import yaml
 
 from agent.tools import run_world_tool
+from world.phone import LoggedLine
 from world import World, make_world
 from world.island import HAND_HEIGHT
 
@@ -107,6 +108,11 @@ def replay_session(path: Path, wcfg: dict, notes_start: dict[str, str]) -> dict:
                 elif c.get("type") == "thinking" and c.get("thinking", "").strip():
                     timeline.append({"f": fi, "k": "think", "t": c["thinking"].strip()})
         elif k == "action":
+            if r["name"] in ("press", "speak"):  # the other end of the line isn't in the replay
+                try:
+                    w.line = LoggedLine(json.loads(r["result"])["lastActionResult"])
+                except (ValueError, KeyError, TypeError):
+                    w.line = LoggedLine("PressFailed:NothingInReach")
             msg, err = run_world_tool(w, r["name"], r["input"])
             w.drain_events()
             if diverged is None and msg != r["result"]:
@@ -157,6 +163,9 @@ def replay_session(path: Path, wcfg: dict, notes_start: dict[str, str]) -> dict:
                     if oid in w.objects:
                         meta[oid] = _objects_meta(w)[oid]
             w.drain_events()
+        elif k == "heard":  # an announcement, the phone ringing, a voice on the line
+            for t in r.get("texts", []):
+                timeline.append({"f": fi, "k": "rule", "t": "heard: " + t})
         elif k == "achievement":
             timeline.append({"f": fi, "k": "rule", "t": "trial completed: " + r["name"].replace("_", " ")})
         elif k == "stop_hook":

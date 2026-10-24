@@ -16,7 +16,10 @@ from world.paper import PaperWorld  # noqa: E402
 CFG = run.read_cfg(ROOT / "configs/paper_freeplay.yaml")
 CODES = {"Ready", "ResetAfterFall", "PickupFailed:AlreadyHolding", "PickupFailed:MissingPosition", "PickupFailed:OutOfRange", "PickupFailed:NoBlock",
          "PickupSuccess", "PlaceFailed:EmptyHands", "PlaceFailed:MissingPosition", "PlaceFailed:OutOfRange", "PlaceFailed:InvalidRotation",
-         "PlaceFailed:Occupied", "PlaceSuccess", "ThrowFailed:EmptyHands", "ThrowFailed:MissingDirection", "ThrowFailed:InvalidDirection", "ThrowSuccess"}
+         "PlaceFailed:Occupied", "PlaceSuccess", "ThrowFailed:EmptyHands", "ThrowFailed:MissingDirection", "ThrowFailed:InvalidDirection", "ThrowSuccess",
+         # the mission phone's (not in the paper)
+         "PressFailed:NothingInReach", "PressFailed:NoSuchButton", "PressSuccess:Ringing", "PressSuccess:NoAnswer", "PressSuccess:Connected",
+         "PressSuccess:AlreadyConnected", "PressSuccess:CallEnded", "PressSuccess:NoCall", "SpeakSuccess:IntoPhone", "SpeakSuccess:NobodyHears"}
 
 
 def pw() -> PaperWorld:
@@ -385,3 +388,56 @@ def test_mission_tablet_appears_after_the_trials_and_reads_only_up_close(tmp_pat
     assert (tmp_path / "r/agents/agent_1/achievements.json").exists()
     outs, n, bad = write_viewer(tmp_path / "r")
     assert n == 4 and bad == []
+
+
+def test_phone_live_call_between_two_agents_who_earned_it(tmp_path):
+    from analysis.replay import write_viewer
+    from world.phone import Switchboard
+
+    cfg = run.read_cfg(ROOT / "configs/eko_phone.yaml")
+    t = [0.0]
+    board = Switchboard(["agent_1", "agent_2"], ring_seconds=60, now=lambda: t[0])
+    w1, w2 = make_world(cfg["world"]), make_world(cfg["world"])
+    for a, w in (("agent_1", w1), ("agent_2", w2)):
+        board.attach(a, w)
+        board.start(a)
+        w.achievements = {"tower": True, "rock_fragments": True}
+        w.reset()
+    assert not w1.has_phone() and code(w1.press("call")) == "PressFailed:NothingInReach"
+    # agent_1 completes the trials: the phone appears on the Spire and a voice announces it
+    w1.achievements["saw_lunar_eclipse"] = True
+    w1.reset()
+    assert w1.has_phone() and w1.notices() == ["Something is waiting for you at the top of the Spire."]
+    ph = w1.objects["phone_1"]
+    w1.avatar.x, w1.avatar.y, w1.avatar.z = ph.x + 1.0, ph.y, ph.z
+    phone = next(e for e in json.loads(w1.observe_json())["world"]["entities"] if e["name"] == "Phone")
+    assert phone["attributes"]["buttons"] == ["call", "end call"] and w1.achievements.get("found_phone")
+    assert code(w1.press("call")) == "PressSuccess:NoAnswer"           # the partner hasn't earned a phone
+    assert code(w1.speak("hello?")) == "SpeakSuccess:NobodyHears"
+    # agent_2 earns its phone too, but is far from it: the ringing is out of earshot
+    w2.achievements["saw_lunar_eclipse"] = True
+    w2.reset()
+    w2.notices()
+    assert code(w1.press("call")) == "PressSuccess:Ringing"
+    assert w2.notices() == []
+    q = w2.objects["phone_1"]
+    w2.avatar.x, w2.avatar.y, w2.avatar.z = q.x + 1.0, q.y, q.z           # climbs up: hears it ring, once
+    assert w2.notices() == ["You hear a phone ringing nearby."] and w2.notices() == []
+    assert code(w2.press("call")) == "PressSuccess:Connected"
+    assert w1.notices() == ["The ringing stops. The line is open."]
+    assert code(w1.speak("Is someone there?")) == "SpeakSuccess:IntoPhone"
+    assert w2.notices() == ['A voice comes from the phone: "Is someone there?"']
+    assert code(w2.press("end call")) == "PressSuccess:CallEnded" and w1.notices() == ["The line goes quiet."]
+    # an unanswered call stops ringing after ring_seconds
+    w1.press("call")
+    t[0] += 61
+    assert w1.notices() == ["The phone stops ringing. Nobody answered."]
+    # a partner out of session can't be reached
+    board.stop("agent_2")
+    assert code(w1.press("call")) == "PressSuccess:NoAnswer"
+    # a mock run: the pair runs in parallel with the switchboard, and replays stay exact
+    cfg["agent"]["clock"].update(session_seconds=300, warn_before_seconds=60)
+    r = Run(tmp_path / "r", cfg, (ROOT / "paper/system_prompt.md").read_text(), max_usd=50, mock=True)
+    r.phase_a(2, 1, 150, 1)
+    outs, n, bad = write_viewer(tmp_path / "r")
+    assert n == 2 and bad == []

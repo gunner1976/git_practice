@@ -29,6 +29,8 @@ from .island import EPS, HAND_HEIGHT, SHAPES, ActionError, World
 
 SHAPES.setdefault("impact", ((0.4, 0.4, 0.4), 0.3))
 SHAPES.setdefault("tablet", ((1.2, 0.3, 0.9), 1000.0))  # the mission tablet: far too heavy to lift
+SHAPES.setdefault("phone", ((0.08, 0.16, 0.02), 0.2))  # the mission phone (world/phone.py)
+PHONE_REACH, PHONE_EARSHOT = 2.5, 15.0
 
 RGB = {
     "red": [0.83, 0.23, 0.18], "orange": [0.94, 0.54, 0.11], "yellow": [0.95, 0.81, 0.11], "green": [0.25, 0.64, 0.30],
@@ -75,6 +77,11 @@ class PaperWorld(World):
         # only from close by
         self.mission = cfg.get("mission")
         self.achievements: dict = {}
+        # with mission reward "phone", a phone appears instead of the tablet; its line to the
+        # partner agent is attached by the runner (world/phone.py)
+        self.line = None
+        self.notices_q: list[str] = []
+        self._announced = False
 
     def reset(self) -> None:
         super().reset()
@@ -82,6 +89,8 @@ class PaperWorld(World):
         self.last_result = "Ready"
         self.impacts = 0
         self.lost = []
+        self._announced = False
+        self.notices_q = []
         self._mission_check()
 
     def set_state(self, state: dict, avatar: bool = True) -> None:
@@ -110,12 +119,59 @@ class PaperWorld(World):
             self._achieve("rock_fragments")
         needed = [k for k, v in (("tower", trials.get("tower_height")), ("rock_fragments", trials.get("rock_fragments")),
                                  ("saw_lunar_eclipse", trials.get("saw_lunar_eclipse"))) if v]
-        if all(self.achievements.get(k) for k in needed) and "tablet_1" not in self.objects:
+        if not all(self.achievements.get(k) for k in needed):
+            return
+        reward = m.get("reward", "tablet")
+        oid = f"{reward}_1"
+        if oid not in self.objects:
             sx, sy, top = self.terrain.spire_summit
             ground = self.surface_at(sx, sy)
-            o = self._add("tablet_1", "tablet", "stone", sx, sy)
+            o = self._add(oid, reward, "black" if reward == "phone" else "stone", sx, sy)
             o.z = ground
-            self.events.append({"type": "spawn", "id": "tablet_1", "at": [_r(o.x), _r(o.y), _r(o.z)], "hidden_rule": True, "rule": "mission_tablet"})
+            self.events.append({"type": "spawn", "id": oid, "at": [_r(o.x), _r(o.y), _r(o.z)], "hidden_rule": True, "rule": f"mission_{reward}"})
+        if m.get("announce") and not self._announced and not self.achievements.get(f"found_{reward}"):
+            self._announced = True  # once a day until it is found
+            self.notices_q.append(str(m["announce"]).strip())
+
+    # ------------------------------------------------------------ the phone
+    def has_phone(self) -> bool:
+        return "phone_1" in self.objects
+
+    def phone_reach(self) -> str | None:
+        """'hand' (held), 'near' (within reach), 'earshot', or None (no phone, or far off)."""
+        o = self.objects.get("phone_1")
+        if o is None:
+            return None
+        a = self.avatar
+        if a.holding == "phone_1":
+            return "hand"
+        d = math.dist((o.x, o.y, o.z), (a.x, a.y, a.z))
+        return "near" if d <= PHONE_REACH else "earshot" if d <= PHONE_EARSHOT else None
+
+    def notices(self) -> list[str]:
+        """What the agent perceives without acting this turn: an announcement, the phone."""
+        out, self.notices_q = self.notices_q, []
+        if self.line is not None:
+            out += self.line.poll()
+        return out
+
+    def press(self, button) -> str:
+        if self.air is not None:
+            self._land()
+        code = self.line.press(str(button)) if self.line is not None and self.has_phone() else "PressFailed:NothingInReach"
+        if code.startswith("PressSuccess"):
+            self._achieve("pressed_" + ("call" if "Ring" in code or "Conn" in code or "NoAnswer" in code else "end"))
+            if code.endswith("Connected"):
+                self._achieve("connected")
+        self.time += 1
+        return self._result(code)
+
+    def speak(self, text) -> str:
+        code = self.line.speak(str(text)) if self.line is not None else "SpeakSuccess:NobodyHears"
+        if code.endswith("IntoPhone"):
+            self._achieve("spoke_on_phone")
+        self.time += 1
+        return self._result(code)
 
     # ------------------------------------------------------------ frames
     def to_paper(self, x: float, y: float, z: float) -> list[float]:
@@ -132,7 +188,7 @@ class PaperWorld(World):
             return "Block_" + o.id.split("_")[1]
         if o.shape == "impact":
             return "ImpactBlock_" + o.id.split("_")[1]
-        return {"rock": "Rock", "ring": "Ring", "egg": "Egg", "tablet": "Tablet"}.get(o.shape, o.id)
+        return {"rock": "Rock", "ring": "Ring", "egg": "Egg", "tablet": "Tablet", "phone": "Phone"}.get(o.shape, o.id)
 
     def _by_name(self, name: str):
         for o in self.objects.values():
@@ -177,8 +233,18 @@ class PaperWorld(World):
                 ent["attributes"] = {"inscription": self.mission["message"]} if near else {"marks": "something is carved on it, too small to read from here"}
                 if near:
                     self._achieve("read_mission")
+            if o.shape == "phone":
+                reach = self.phone_reach()
+                if reach in ("hand", "near"):
+                    ent["attributes"] = {"buttons": ["call", "end call"], "line": self.line.status() if self.line is not None else "quiet"}
+                    self._achieve("found_phone")
+                else:
+                    ent["attributes"] = {"looks_like": "a small black object"}
             ents.append(ent)
         obs = {"tick": self.time, "game_status": "active", **(extra or {}), "player": self._player(), "other_players": [], "world": {"entities": ents}}
+        if self.avatar.holding == "phone_1":
+            obs["player"]["holding_attributes"] = {"buttons": ["call", "end call"], "line": self.line.status() if self.line is not None else "quiet"}
+            self._achieve("found_phone")
         if self.eko is not None:
             a = self.avatar
             obs["sky"] = self.eko.sky(a.x, a.y, max(self.terrain.height(a.x, a.y), a.z), self.sky_tau)
@@ -425,6 +491,10 @@ class PaperWorld(World):
                 r = self.place(args.get("position"), args.get("rotation"))
             elif name == "throw":
                 r = self.throw_at(args.get("direction"), args.get("speed"))
+            elif name == "press":
+                r = self.press(args.get("button", ""))
+            elif name == "speak":
+                r = self.speak(args.get("text", ""))
             else:
                 return f"Unknown action {name}.", True
         except (ValueError, TypeError, ActionError) as e:

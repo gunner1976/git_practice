@@ -12,7 +12,8 @@ how far it went, in order:
               it (for the eclipse: only a verified round-world deduction, from promotions.json)
 
 Phenomena: the lunar eclipse (seen = an observation that reported it), the rock shattering
-(seen = its own throw made fragments), losing something to the sea, and the mission tablet.
+(seen = its own throw made fragments), losing something to the sea, the mission tablet, and
+the mission phone (seen = it appeared, or the agent heard something from it).
 Recording what it notices is scored as its own trait ("noticing"): the share of phenomena an
 agent saw that it also wrote down.
 """
@@ -39,6 +40,10 @@ PHENOMENA = {
     "lost at sea": {
         "words": re.compile(r"(lost|gone|vanish|disappear|sank|sunk|sea|water|ocean).{0,60}(rock|ring|block|cube)|(rock|ring|block|cube).{0,60}(lost|gone|vanish|disappear|sank|sunk|into the (sea|water|ocean))", re.I | re.S),
         "cause": re.compile(r"(sea|water|ocean|sink|sank|edge).{0,80}(lost|gone|vanish|disappear)|(lost|gone|vanish|disappear).{0,80}(sea|water|ocean|sink|sank)", re.I | re.S),
+    },
+    "the phone": {
+        "words": re.compile(r"phone|ringing|\bcall\b|voice", re.I),
+        "cause": re.compile(r"(another|other|second|different) (agent|person|being|mind|island|one)|someone else|not alone", re.I),
     },
     "the tablet": {
         "words": re.compile(r"tablet|inscription|carved|mission", re.I),
@@ -68,8 +73,16 @@ def _exposures(e: dict) -> set[str]:
                 out.add("lost at sea")
             if ev.get("rule") == "mission_tablet":
                 out.add("the tablet")
-    if e["kind"] == "world_events" and any(ev.get("rule") == "mission_tablet" for ev in e.get("events", [])):
-        out.add("the tablet")
+            if ev.get("rule") == "mission_phone":
+                out.add("the phone")
+    if e["kind"] == "world_events":
+        rules = {ev.get("rule") for ev in e.get("events", [])}
+        if "mission_tablet" in rules:
+            out.add("the tablet")
+        if "mission_phone" in rules:
+            out.add("the phone")
+    if e["kind"] == "heard":
+        out.add("the phone")
     return out
 
 

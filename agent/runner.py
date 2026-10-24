@@ -87,6 +87,13 @@ class Run:
     def phase_a(self, n_agents: int, n_sessions: int, steps: int, parallel: int) -> None:
         self.set_meta(phase_a={"n_agents": n_agents, "n_sessions": n_sessions, "steps": steps})
         agents = [f"agent_{i + 1}" for i in range(n_agents)]
+        self.board = None
+        if (self.cfg["world"].get("mission") or {}).get("reward") == "phone":
+            from world.phone import Switchboard
+
+            # calls are live, so both ends of every pair must be running at the same time
+            self.board = Switchboard(agents, ring_seconds=float(self.cfg["world"]["mission"].get("ring_seconds", 120)))
+            parallel = n_agents
         with ThreadPoolExecutor(max_workers=max(1, min(parallel, n_agents))) as ex:
             list(ex.map(lambda ag: self._agent_free_play(ag, n_sessions, steps), agents))
 
@@ -102,6 +109,9 @@ class Run:
                     notes.write(f.name, f.read_text())
         client = self._client(seed=zlib.crc32(agent.encode()))
         world = self._world()
+        board = getattr(self, "board", None)
+        if board is not None:
+            board.attach(agent, world)
         for k in range(1, n_sessions + 1):
             key = f"{agent}/{k}"
             if self.state["phase_a"].get(key, {}).get("done"):
@@ -125,6 +135,8 @@ class Run:
             ach_path = self.root / "agents" / agent / "achievements.json"
             if hasattr(world, "achievements"):  # mission trials carry over between days
                 world.achievements = json.loads(ach_path.read_text()) if ach_path.exists() else {}
+            if board is not None:
+                board.start(agent)
             try:
                 res = run_session(
                     cfg=self.cfg, client=client, budget=self.budget, world=world, notes=notes, soul=self.soul,
@@ -147,6 +159,8 @@ class Run:
                 self.stopped_reason = f"{agent} session {k}: {e!r}"
                 raise
             finally:
+                if board is not None:
+                    board.stop(agent)
                 log.close()
 
     def _opening(self, world: World, steps: int, task: str | None = None, session: int | None = None) -> str:

@@ -200,6 +200,10 @@ def run_session(
             if clk:  # time spent idle between the agent stopping and the nudge (0 = just the turn's latency)
                 clock += float(clk.get("idle_seconds", 0.0))
             hook = a["stop_hook_message"] if not a.get("stop_hook_observation", True) else f"{a['stop_hook_message']}\n\n{world.observe()}{status(used)}"
+            heard = world.notices() if hasattr(world, "notices") else []
+            if heard:
+                log("heard", step=used, texts=heard, **({"clock": round(clock, 1)} if clk else {}))
+                hook = f"{hook}\n\n" + "\n".join(heard)
             hook_content: list | str = hook
             if clk and not warned and clock >= float(clk["session_seconds"]) - float(clk["warn_before_seconds"]):
                 warned = True
@@ -288,6 +292,10 @@ def run_session(
             r = results[last_world_idx]
             r["content"] = f"{r['content']}\n\n{obs}{status(used)}"
         user_content: list = list(results)
+        heard = world.notices() if hasattr(world, "notices") else []
+        if heard:  # what reaches the agent unbidden: an announcement, a ringing phone, a voice
+            log("heard", step=used, texts=heard, **({"clock": round(clock, 1)} if clk else {}))
+            user_content.append({"type": "text", "text": "\n".join(heard)})
         if clk and not warned and clock >= float(clk["session_seconds"]) - float(clk["warn_before_seconds"]):
             warned = True
             log("reset_warning", step=used, clock=round(clock, 1))

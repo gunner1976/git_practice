@@ -100,6 +100,14 @@ PAPER_WORLD_TOOLS = [
     {"name": "throw", "description": "Throw. Data: {\"direction\": [x, y, z], \"speed\": n}.",
      "input_schema": {"type": "object", "properties": {"direction": _vec3, "speed": _num}, "required": ["direction", "speed"], "additionalProperties": False}},
 ]
+# with the mission phone (world/phone.py): two generic actions, there from day one, that only
+# do something once there is a phone
+PHONE_TOOLS = [
+    {"name": "press", "description": "Press a button on something you are holding or standing next to. Data: {\"button\": name}.",
+     "input_schema": {"type": "object", "properties": {"button": {"type": "string"}}, "required": ["button"], "additionalProperties": False}},
+    {"name": "speak", "description": "Say something out loud. Data: {\"text\": words}.",
+     "input_schema": {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"], "additionalProperties": False}},
+]
 PAPER_QUERY_TOOLS = [
     {"name": "observe", "description": "Get Observation: the full world state as JSON (your player and every entity on the island).",
      "input_schema": {"type": "object", "properties": {}, "additionalProperties": False}},
@@ -177,7 +185,8 @@ def tool_set(cfg: dict) -> tuple[list[dict], set[str], set[str], set[str]]:
     """(tools, world action names, notes names, query names) for this config."""
     if cfg["agent"].get("interface") == "paper":
         notes = [dict(t, description=t["description"].replace("notes directory", "workspace")) for t in NOTES_TOOLS] + [APPEND_TOOL]
-        return (PAPER_WORLD_TOOLS + PAPER_QUERY_TOOLS + notes, {t["name"] for t in PAPER_WORLD_TOOLS},
+        world_tools = PAPER_WORLD_TOOLS + (PHONE_TOOLS if (cfg["world"].get("mission") or {}).get("reward") == "phone" else [])
+        return (world_tools + PAPER_QUERY_TOOLS + notes, {t["name"] for t in world_tools},
                 {t["name"] for t in notes}, {t["name"] for t in PAPER_QUERY_TOOLS})
     return ALL_TOOLS, WORLD_NAMES, NOTES_NAMES, set()
 
