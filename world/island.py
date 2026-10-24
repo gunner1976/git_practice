@@ -473,6 +473,22 @@ class World:
         ev, self.events = self.events, []
         return ev
 
+    def set_state(self, state: dict, avatar: bool = True) -> None:
+        """Put the world in a saved `state()` (used when the world persists between days).
+        With avatar=False the avatar starts from its usual spot instead."""
+        self.objects = {d["id"]: Obj(**d) for d in state["objects"]}
+        if avatar:
+            self.avatar = Avatar(**state["avatar"])
+        else:
+            self.avatar = copy.deepcopy(self._initial[1])
+            for o in self.objects.values():  # anything it was holding is put down where it stood
+                if o.held:
+                    o.held = False
+            self.settle()
+        self.spawned = int(state.get("spawned", 0))
+        self.eggs = int(state.get("eggs", 0))
+        self.avatar.z = self.surface_at(self.avatar.x, self.avatar.y)
+
     def state(self) -> dict:
         return {
             "time": self.time,

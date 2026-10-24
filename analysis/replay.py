@@ -83,6 +83,8 @@ def replay_session(path: Path, wcfg: dict, notes_start: dict[str, str]) -> dict:
     base = type(make_world(wcfg, seed=start.get("world_seed")))
     w = type("Tracing" + base.__name__, (_Tracing, base), {})(wcfg, seed=start.get("world_seed"))
     w.reset()
+    if start.get("start_state"):  # a persistent world: start from how the previous day ended
+        w.set_state(start["start_state"])
     meta = _objects_meta(w)
     frames = [{"step": 0, **_snapshot(w)}]
     timeline: list[dict] = []

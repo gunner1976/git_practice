@@ -193,3 +193,36 @@ def test_paper_session_flow_and_extension(tmp_path):
     assert n == 2 and bad == []
     p = build_evolution(tmp_path / "r")
     assert "Diary" in p.read_text() and (p.parent / "evolution.png").exists()
+
+
+def test_persistent_world_carries_over_between_days(tmp_path):
+    from analysis.replay import write_viewer
+
+    cfg = run.read_cfg(ROOT / "configs/paper_persistent.yaml")
+    assert cfg["world"]["persist"] is True and cfg["agent"]["interface"] == "paper"
+    cfg["agent"]["clock"].update(session_seconds=300, warn_before_seconds=60)
+    soul = (ROOT / "paper/system_prompt.md").read_text()
+    r = Run(tmp_path / "r", cfg, soul, max_usd=50, mock=True)
+    r.phase_a(1, 2, 150, 1)
+    end1 = json.loads((tmp_path / "r/agents/agent_1/world/session_01_end.json").read_text())
+    log2 = [json.loads(l) for l in (tmp_path / "r/phase_a/agent_1/session_02.jsonl").read_text().splitlines()]
+    start2 = log2[0]["start_state"]
+    assert {o["id"]: (o["x"], o["y"], o["z"]) for o in start2["objects"]} == {o["id"]: (o["x"], o["y"], o["z"]) for o in end1["objects"]}
+    assert (start2["avatar"]["x"], start2["avatar"]["y"]) == (end1["avatar"]["x"], end1["avatar"]["y"])
+    outs, n, bad = write_viewer(tmp_path / "r")
+    assert n == 2 and bad == []
+
+
+def test_set_state_without_avatar_puts_held_object_down():
+    w = flat(pw())
+    c = w.objects["cube_1"]
+    c.x, c.y = 31.0, 30.0
+    w.settle()
+    w.pickup(w.to_paper(c.x, c.y, c.z + 0.5))
+    st = w.state()
+    w2 = flat(pw())
+    w2.set_state(st, avatar=False)
+    assert w2.avatar.holding is None and not w2.objects["cube_1"].held
+    w3 = pw()
+    w3.set_state(st)
+    assert w3.avatar.holding == "cube_1"

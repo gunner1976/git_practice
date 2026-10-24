@@ -1,0 +1,9 @@
+# Paper-style free play, except the island is NOT reset between days: each day starts
+# from the world exactly as the agent left it (objects, debris, losses to the sea), and the
+# agent wakes where it was. Prompts are unchanged, so the agent has to discover this itself.
+#   python run.py freeplay --config configs/paper_persistent.yaml --run-id persist1 --agents 1 --sessions 10 --session-minutes 20 --max-usd 15
+extends: paper_freeplay.yaml
+
+world:
+  persist: true          # carry the world state over from the end of one day to the start of the next
+  persist_avatar: true   # wake where you fell asleep (false: wake at the usual start spot)

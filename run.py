@@ -62,6 +62,10 @@ def load_cfg(args) -> dict:
         cfg["agent"]["steps_per_session"] = args.steps
     if getattr(args, "parallel", None):
         cfg["phase_a"]["parallel_agents"] = args.parallel
+    if getattr(args, "session_minutes", None) and cfg["agent"].get("clock"):
+        c = cfg["agent"]["clock"]
+        c["warn_before_seconds"] = float(c["warn_before_seconds"]) * args.session_minutes * 60 / float(c["session_seconds"])
+        c["session_seconds"] = args.session_minutes * 60
     if not 1 <= cfg["phase_a"]["n_agents"] <= 13:
         sys.exit("n_agents must be between 1 and 13")
     if not 1 <= cfg["phase_a"]["n_sessions"] <= 500:
@@ -263,6 +267,7 @@ def main(argv=None) -> None:
         p.add_argument("--sessions", type=int)
         p.add_argument("--steps", type=int)
         p.add_argument("--parallel", type=int)
+        p.add_argument("--session-minutes", type=float, help="length of a simulated day (clock-based configs)")
         p.add_argument("--mock", action="store_true", help="use the scripted mock model (no API calls)")
         p.add_argument("--skip-pilot-check", action="store_true")
         if name == "viewer":

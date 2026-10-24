@@ -58,6 +58,11 @@ class PaperWorld(World):
         self.impacts = 0
         self.lost = []
 
+    def set_state(self, state: dict, avatar: bool = True) -> None:
+        super().set_state(state, avatar)
+        self.air = None
+        self.last_result = "Ready"
+
     # ------------------------------------------------------------ frames
     def to_paper(self, x: float, y: float, z: float) -> list[float]:
         return [_r(x - self.half), _r(z), _r(y - self.half)]
@@ -294,11 +299,14 @@ class PaperWorld(World):
 
     def _shatter(self, x: float, y: float, z: float, k: int) -> None:
         self.impacts += 1
-        start = sum(1 for o in self.objects.values() if o.shape == "impact")
+        n = 0
         for i in range(k):
             ang = 2 * math.pi * i / k + 0.37 * self.impacts
             r = 0.75 + 0.25 * (i % 2)
-            oid = f"impact_{start + i + 1}"
+            n += 1
+            while f"impact_{n}" in self.objects or f"impact_{n}" in self.lost:
+                n += 1
+            oid = f"impact_{n}"
             o = self._add(oid, "impact", "stone", self._clamp(x + math.cos(ang) * r), self._clamp(y + math.sin(ang) * r))
             o.z = max(z, self.terrain.height(o.x, o.y))
             self.spawned += 1

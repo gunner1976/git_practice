@@ -83,9 +83,12 @@ def run_session(
     steps: int,
     opening: str,
     meta: dict,
+    start_state: dict | None = None,
 ) -> dict:
     a = cfg["agent"]
     world.reset()
+    if start_state:  # the world persists: the island is as the agent left it
+        world.set_state(start_state, avatar=bool(cfg["world"].get("persist_avatar", True)))
     show_left = bool(a["show_steps_remaining"])
     tools, world_names, notes_names, query_names = tool_set(cfg)
     clk = a.get("clock")  # paper mode: the session is an hour of simulated wall-clock time
@@ -111,7 +114,8 @@ def run_session(
     first_obs = world.observe()
     first = f"{opening}\n\n{first_obs}{status(0)}" if a.get("initial_observation", True) else opening
     messages: list = [{"role": "user", "content": first}]
-    log("session_start", **meta, steps=steps, soul=soul, opening=opening, world_seed=world.seed, hidden_rules=ground_truth(world))
+    log("session_start", **meta, steps=steps, soul=soul, opening=opening, world_seed=world.seed, hidden_rules=ground_truth(world),
+        **({"start_state": world.state()} if start_state else {}))
     if a.get("initial_observation", True):
         log("observation", step=0, text=first_obs)
 
