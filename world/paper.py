@@ -57,6 +57,18 @@ class PaperWorld(World):
 
             self.planet = Planet(cfg["planet"], (self.terrain.cx, self.terrain.cy))
         self.day_fraction = 0.5  # set by the session loop from its clock
+        # EKO, the full planet (world/eko.py): its gravity drives the island's physics and its sky
+        # (star, moon, stars) is what the agent sees; sky_tau is EKO time, set by the session loop
+        self.eko = None
+        self.sky_tau = 0.0
+        if cfg.get("eko"):
+            from .eko import Eko
+
+            self.eko = Eko(cfg["eko"], (self.terrain.cx, self.terrain.cy))
+            earth_g = float(self.phys["gravity"])
+            self.phys = {**self.phys, "gravity": self.eko.g}
+            # same legs, different gravity: a jump reaches higher in proportion to 1/g
+            self.av_cfg = {**self.av_cfg, "jump_height": float(self.av_cfg["jump_height"]) * earth_g / self.eko.g}
 
     def reset(self) -> None:
         super().reset()
@@ -124,7 +136,10 @@ class PaperWorld(World):
             ents.append({"name": self.name_of(o), "entity_type": "part", "position": self.to_paper(o.x, o.y, o.z + o.sz / 2), "size": [_r(o.sx), _r(o.sz), _r(o.sy)],
                          "shape": "block" if o.shape in ("cube", "impact") else o.shape, "color": RGB.get(o.colour, [0.5, 0.5, 0.5]), "anchored": False})
         obs = {"tick": self.time, "game_status": "active", **(extra or {}), "player": self._player(), "other_players": [], "world": {"entities": ents}}
-        if self.planet is not None:
+        if self.eko is not None:
+            a = self.avatar
+            obs["sky"] = self.eko.sky(a.x, a.y, max(self.terrain.height(a.x, a.y), a.z), self.sky_tau)
+        elif self.planet is not None:
             a = self.avatar
             az, el = self.planet.sun(a.x, a.y, self.day_fraction)
             ground = self.terrain.height(a.x, a.y) if a.z <= self.terrain.height(a.x, a.y) + 1e-6 else a.z

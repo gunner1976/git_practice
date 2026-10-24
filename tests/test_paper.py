@@ -313,3 +313,31 @@ def test_round_world_sky_and_promotion_flow(tmp_path):
     res = json.loads((tmp_path / "r/promotions.json").read_text())["agents"]["agent_1"]
     assert res["promoted"] and res["verdict"]["step"] == 7 and "unverified" in res["judge"]
     assert "**yes**" in out.read_text()
+
+
+def test_planet_eko_physics_and_sky():
+    cfg = run.read_cfg(ROOT / "configs/eko.yaml")
+    w = make_world(cfg["world"])
+    w.reset()
+    e = w.eko
+    assert e.g == pytest.approx(8.60, abs=0.01) and w.phys["gravity"] == e.g          # gravity from mass and radius
+    assert w.av_cfg["jump_height"] == pytest.approx(1.3 * 9.8 / e.g)                   # same legs, lower gravity
+    assert e.month / e.day == pytest.approx(10.12, abs=0.01)                           # Kepler's third law
+    D = e.day
+    noon = e.sky(32, 32, 1.0, D / 2)["sun"]
+    assert noon["elevation_deg"] == pytest.approx(90 - 23, abs=0.5) and noon["azimuth_deg"] == pytest.approx(180, abs=1)
+    night = e.sky(32, 32, 1.0, 3 * D)                                                 # session 3, total eclipse
+    assert night["daylight"] == "night" and night["moon"]["eclipse"]["darkened_fraction"] > 0.99
+    assert len(night["brightest_stars"]) > 0
+    partial = e.sky(32, 32, 1.0, 3 * D - 0.05 * D)["moon"]["eclipse"]
+    assert 0 < partial["darkened_fraction"] < 1 and partial["shadow_edge"] == "a curved arc"
+    # the stars turn about a pole that stands at the island's latitude
+    import numpy as np
+    pole = np.array([0.0, 0.0, 1.0])
+    _, up, east, north = e._observer(32, 32, 3 * D)
+    az, el = e._altaz(pole, up, east, north)
+    assert el == pytest.approx(23, abs=0.01) and (az < 1 or az > 359)
+    # the session clock maps onto EKO days, and observations carry the sky
+    assert e.session_tau(3, 0.0, 1200) == pytest.approx(2.25 * D)
+    w.sky_tau = 3 * D
+    assert json.loads(w.observe_json())["sky"]["moon"]["eclipse"]["darkened_fraction"] > 0.99

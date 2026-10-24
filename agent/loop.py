@@ -108,7 +108,15 @@ def run_session(
         steps = 10**9
         start_utc = dt.datetime.fromisoformat(clk["start_utc"].replace("Z", "+00:00")) + dt.timedelta(hours=int(meta.get("session") or 1) - 1)
 
+    eko = getattr(world, "eko", None)
+
+    def eko_tau() -> float:
+        return eko.session_tau(int(meta.get("session") or 1), clock, float(clk["session_seconds"]))
+
     def now_iso() -> str:
+        if eko is not None and clk:  # EKO's own clock: its days and hours
+            base = dt.datetime.fromisoformat(clk["start_utc"].replace("Z", "+00:00"))
+            return (base + dt.timedelta(seconds=eko_tau())).strftime("%Y-%m-%dT%H:%M:%SZ")
         return (start_utc + dt.timedelta(seconds=clock)).strftime("%Y-%m-%dT%H:%M:%SZ") if clk else ""
 
     def status(used: int) -> str:
@@ -243,10 +251,12 @@ def run_session(
             elif name in query_names:
                 if clk and hasattr(world, "day_fraction"):
                     world.day_fraction = min(1.0, clock / float(clk["session_seconds"]))
+                if clk and eko is not None:
+                    world.sky_tau = eko_tau()
                 msg, err = world.observe_json({"time": now_iso()}), False
                 if clk:
                     clock += float(clk["query_seconds"])
-                log("tool_call", step=used, name=name, input=args, result=msg[:4000], error=err)
+                log("tool_call", step=used, name=name, input=args, result=msg[:20000], error=err)  # keep what the agent saw (the night sky is long)
             elif name in notes_names:
                 if clk:
                     clock += float(clk["query_seconds"])

@@ -201,7 +201,7 @@ def build_many(roots: list[Path]) -> dict:
         kind = "paper free play" if cfg.get("agent", {}).get("interface") == "paper" else ("pilot" if d["run"].startswith("pilot") else "replication")
         runs.append({"run": d["run"], "kind": kind, "session_seconds": d["session_seconds"], "sessions": len(d["sessions"])})
         for s in d["sessions"]:
-            sessions.append({**s, "run": d["run"], "session_seconds": d["session_seconds"]})
+            sessions.append({**s, "run": d["run"], "session_seconds": d["session_seconds"], "full_day": bool(cfg.get("world", {}).get("eko"))})
         pp = Path(root) / "promotions.json"
         if pp.exists():
             for agent, r in json.loads(pp.read_text())["agents"].items():

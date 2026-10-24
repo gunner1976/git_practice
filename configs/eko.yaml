@@ -1,0 +1,27 @@
+# Planet EKO: the water world as a full planet. We know its specifics (planets/EKO.md); the agents
+# don't. Its gravity drives the island's physics; its sky - the star, the moon with phases and
+# eclipses, the night stars - is what the agents see when they observe. Each session is one EKO day,
+# dawn to dawn (20 EKO hours compressed into the session clock); consecutive sessions are consecutive
+# days. A total lunar eclipse falls at midnight of day 3. Nothing in the prompts mentions any of this.
+#   python run.py freeplay --config configs/eko.yaml --run-id eko1 --agents 10 --sessions 4 --session-minutes 20 --parallel 10 --max-usd 40
+extends: waterworld.yaml
+
+world:
+  eko:
+    radius_km: 5400                    # Earth: 6371
+    mass_kg: 3.757e+24                 # -> surface gravity 8.60 m/s^2
+    solar_day_hours: 20                # noon to noon
+    year_days: 320                     # EKO days
+    axial_tilt_deg: 18
+    star_apparent_diameter_deg: 0.54   # EKO's sun as seen from EKO
+    star_longitude_at_epoch_deg: 0     # epoch at EKO's spring equinox
+    island_latitude_deg: 23
+    island_longitude_deg: 0
+    eye_height_m: 1.6
+    star_seed: 23
+    n_stars: 60
+    moon:
+      distance_km: 150000              # -> 10.1 EKO-day orbit by Kepler's third law
+      radius_km: 1300                  # -> 1.0 degree across in the sky
+      inclination_deg: 0.8             # to EKO's orbit: eclipses near the nodes
+      first_full_moon_day: 3           # full moon (on a node: total lunar eclipse) at that day's midnight
