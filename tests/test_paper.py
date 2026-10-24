@@ -263,5 +263,7 @@ def test_math_challenge_flow_and_report(tmp_path):
     assert any(e["kind"] == "tool_call" and e["name"] == "calculate" and e["result"].startswith("175.9") for e in log)
     text = challenge_report(tmp_path / "r").read_text()
     assert "True answer:** 179.0" in text and "175.9 m" in text and "-1.8%" in text
+    assert "Efficiency and novelty against human methods" in text and "| coast walk | 64 |" in text
+    assert (tmp_path / "r/efficiency.png").exists()
     outs, n, bad = write_viewer(tmp_path / "r")
     assert bad == [] and '"k":"answer"' in outs[0].read_text()

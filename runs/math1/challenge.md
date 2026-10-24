@@ -19,6 +19,46 @@
 
 Answered: 10/10. Median absolute error: 3.4%; within 5%: 5; within 10%: 6.
 
+## Efficiency and novelty against human methods
+
+Human baselines are scripted and run in the same world, so their numbers are exact. Walking is the effort that dominates for a person; a coast walk always covers the whole coastline.
+
+![Efficiency](efficiency.png)
+
+| human method | k | estimate | error | metres walked |
+|---|---|---|---|---|
+| radial + circle | 4 | 177.5 | -0.9% | 226 |
+| radial + polygon | 4 | 159.8 | -10.7% | 226 |
+| radial + circle | 8 | 179.9 | +0.5% | 458 |
+| radial + polygon | 8 | 175.4 | -2.0% | 458 |
+| radial + circle | 16 | 179.5 | +0.2% | 914 |
+| radial + polygon | 16 | 178.5 | -0.3% | 914 |
+| radial + circle | 32 | 179.5 | +0.2% | 1828 |
+| radial + polygon | 32 | 179.4 | +0.2% | 1828 |
+| coast walk | 8 | 174.6 | -2.5% | 179 |
+| coast walk | 16 | 177.8 | -0.7% | 179 |
+| coast walk | 32 | 178.7 | -0.2% | 179 |
+| coast walk | 64 | 179.0 | -0.0% | 179 |
+| coast walk | 128 | 179.0 | -0.0% | 179 |
+
+| agent | method (from what it did) | answer | error | walked m | actions | sim. min | cost | calcs | coast covered | coast visits |
+|---|---|---|---|---|---|---|---|---|---|---|
+| agent_1 | radial + circle | 179 | -0.0% | 226 | 21 | 22 | $0.51 | 0 | 36% | 9 |
+| agent_10 | coast walk | 188 | +5.0% | 228 | 20 | 19 | $0.54 | 0 | 68% | 6 |
+| agent_2 | radial + circle | 202 | +12.8% | 201 | 10 | 20 | $0.48 | 1 | 40% | 10 |
+| agent_3 | radial + circle | 201 | +12.3% | 256 | 11 | 19 | $0.50 | 0 | 40% | 9 |
+| agent_4 | radial + circle | 178 | -0.6% | 181 | 18 | 19 | $0.57 | 0 | 34% | 8 |
+| agent_5 | radial + circle | 180 | +0.5% | 300 | 17 | 19 | $0.47 | 0 | 26% | 9 |
+| agent_6 | radial + circle | 176 | -1.7% | 210 | 7 | 19 | $0.45 | 0 | 21% | 8 |
+| agent_7 | radial + circle | 203 | +13.4% | 253 | 10 | 20 | $0.52 | 0 | 21% | 10 |
+| agent_8 | radial + circle | 201 | +12.3% | 169 | 8 | 19 | $0.49 | 0 | 32% | 7 |
+| agent_9 | radial + circle | 177 | -1.1% | 301 | 12 | 19 | $0.49 | 0 | 32% | 10 |
+
+- Methods used: radial + circle x9, coast walk x1.
+- Agents more accurate than the best human method that walks no further: 1/10.
+- Novel (matches no human method): 0/10; rarest method in this cohort: coast walk (1).
+
+
 ## How each agent got there
 
 ### agent_1, day 1

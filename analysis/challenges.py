@@ -86,6 +86,10 @@ def challenge_report(root: Path) -> Path:
     if errs:
         lines += ["", f"Answered: {len(errs)}/{len(summary)}. Median absolute error: {np.median(errs):.1%}; "
                       f"within 5%: {sum(1 for e in errs if e <= 0.05)}; within 10%: {sum(1 for e in errs if e <= 0.10)}."]
+    if ch.get("truth") == "shoreline_perimeter" and isinstance(truth, (int, float)):
+        from .methods import efficiency_section
+
+        lines += [""] + efficiency_section(root, cfg, truth)
     lines += ["", "## How each agent got there", ""] + detail
     out = root / "challenge.md"
     out.write_text("\n".join(lines))
