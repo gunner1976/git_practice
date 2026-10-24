@@ -101,6 +101,103 @@
    "spawn_steps": [],
    "rule_fires": {},
    "clock_seconds": 1202.7
+  },
+  "christian/2": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 65,
+   "api_calls": 85,
+   "spawn_steps": [
+    22,
+    22,
+    36
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     22,
+     22,
+     36
+    ]
+   },
+   "clock_seconds": 1206.6
+  },
+  "christian/3": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 99,
+   "api_calls": 79,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1207.2
+  },
+  "christian/4": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 62,
+   "api_calls": 92,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1209.0
+  },
+  "christian/5": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 41,
+   "api_calls": 109,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1208.6
+  },
+  "christian/6": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 42,
+   "api_calls": 109,
+   "spawn_steps": [
+    16
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     16
+    ]
+   },
+   "clock_seconds": 1211.9
+  },
+  "christian/7": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 38,
+   "api_calls": 101,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1204.1
+  },
+  "christian/8": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 32,
+   "api_calls": 108,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1204.2
+  },
+  "christian/9": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 40,
+   "api_calls": 104,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1213.0
+  },
+  "christian/10": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 35,
+   "api_calls": 105,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1206.3
   }
  },
  "phase_b": {},

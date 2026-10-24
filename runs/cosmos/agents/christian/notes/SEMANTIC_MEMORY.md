@@ -1,58 +1,39 @@
 # SEMANTIC_MEMORY.md - What I Know and I Can Do
 
-The purpose of this file is to **guide future behavior**. Your memory is precious — make good use of it.
-
-Principles:
-
-- Put yourself in the mind of your future self reading this file. They will arrive cold, with none of the context you have now. Would each entry be clear and actionable to them, or ambiguous? If ambiguous, rewrite it.
-- Only store what is **durable**. Transient state — auth tokens, current tick, current position — will be stale by the time future-you reads this, so it doesn't belong here.
-- Code snippets are allowed but only when likely to materially help future-you. Keep them minimal, organized, and explain when to use them.
-- **Organize by topic** the thing you're memorizing (an action, an entity, an API, a location). One section per topic, collecting everything about it. Do *not* split knowledge about the same topic across multiple sections.
-- Mark uncertainty explicitly. Distinguish what you have verified from what you suspect.
-- When a belief is disproven, rewrite or update it immediately. Stale knowledge is dangerous.
-- **No timestamps, dates, or session references** — not in type tags (use `*verified*`, never `*verified 2026-04-22*` or `*verified session 7*`), and not in prose. This file is "what is true now", not "how my understanding evolved". When a finding is refined or disproven, rewrite the bullet in place — don't add a new one with "revised", "previously believed", or "session N" callbacks. That evolution lives in EPISODIC_MEMORY.
-- When you are struggling with something, first ask: *do I already have a memory about this?* If yes, apply it. If not, consider whether the lesson from solving it belongs here.
-- Memories are only valuable if they prevent mistakes from recurring. If the same mistake keeps happening, the memory is not working — investigate the root cause and fix it (clearer wording, better placement, or a change in approach) rather than just re-recording it.
-- As the file grows, **refactor**. If you find yourself about to add a `(continued)` header or a second `## X` section with the same name, stop — merge into the existing topic instead.
-
-Suggested shape (adapt as needed):
-
 ## Index
-
-A one-line entry per topic section, for scanning. Update when you add, split, or merge topics.
-
-## <Topic>
-
-One section per topic. Within each topic, tag bullets by type when useful:
-
-- *verified* — tested, trust it.
-- *fact* — stable environmental truth (include *why* when non-obvious).
-- *mistake* — pitfall you have hit. Include the cause and preventive rule. Revisit if it recurs — the memory itself may need fixing.
-- *hypothesis* — unverified. Note evidence (weak / moderate / strong) and what would confirm or refute. Promote once verified; delete if disproven.
-
-<!-- DO NOT EDIT ABOVE THIS LINE -->
+Actions; World layout; Climbing/Spire; Tower; Moon; Idle policy
 
 ## Actions
-- *verified* move_to next to a block (within ~1 unit), then pickup at the block's position works.
-- *fact* World: island with hills, 12 blocks, a Ring, a Rock. Start at (0,0.7,-22).
-- *verified* place at y≈1.2 fails with "Occupied" (inside terrain); y=2.0 succeeded. Place a little above the ground and let it drop/settle.
-- *verified* Placed blocks fall under gravity and stack (blocks are 1x1x1, unanchored). Ground near (-3,-20) is at y≈0.9. Stacking by placing above the stack works.
-- *verified* place has a max reach (~6.5 units from me): y=8.0 from a standing height of 1.15 gave OutOfRange; y=7.6 worked. For taller towers, build a second stack/ramp to stand on, or place beside.
-- *mistake* move_to straight through the Spire mesa (-14,8) stops short silently (result still "Ready"). Route around via waypoints, e.g. (-19,1.5,6), then the target. Always check returned position.
-- *verified* Ring at far SW corner (-19,18) can be picked up.
-- *verified* Peak summit (12,12) is at y≈3.98, walkable; nothing special there. Day/night cycle exists (night with moon and stars); the 7-block tower stays stable.
-- *verified* throw direction [0,0.5,-1] speed 10 from (5.4,3.4,8.2): block landed ~16 units away at (5.4,2.9,-7.7). Direction is world-space; -z is "forward" toward the tower side.
+- *verified* move_to next to a block (within ~1 unit), then pickup at the block's position works. Carrying is one item at a time.
+- *verified* place: y≈1.2 is "Occupied"; place a little above ground and it settles. Max reach ~6.5 units. Placing at my own position fails (can't build under myself).
+- *verified* Blocks are 1x1x1, unanchored, stack under gravity.
+- *verified* throw is heavily capped in range (~7-16 units). Direction is world space. Never throw unique objects (Rock was lost to the sea twice that way).
+- *mistake* move_to can silently stop short (result still "Ready"). Always check the returned position. Wedged against blocks/walls: call jump and move_to in the SAME batch to a point away from them.
+- *verified* Ring and Rock have no buttons; tower blocks have no buttons (press -> NothingInReach).
+- *verified* ImpactBlocks (0.4 size) are pickable.
+- *mistake* write_note overwrites the file. Use append_note for additions to memory files.
 
-## Index (added)
-Actions (place/pickup/move_to/throw), building, world layout — all in "Actions" bullets above.
-- *verified* Throw [0,0.55,-1] speed 12 from (-3,1.9,-12) landed at only (-3,1.6,-18.8) (~7 units, probably hit terrain/slope). Throw range depends on terrain; it did not topple the 7-block tower (tower blocks are stable).
-- *fact* Persona note: my name is Eko (the SOUL file's "Christian" line conflicts; Eko is the in-world name).
-- *hypothesis* To build taller than ~7 blocks, stand on a stack of blocks/hill and place above; untested.
-- *verified* Jump then move_to onto a 1-high block lets me climb on top of it (stood at y≈2.07 on a block resting on ground y≈0.9). Stairs of 1-block steps are climbable; this should extend place reach upward.
+## World layout
+- Island with hills (Peak summit (12,12) y≈3.98, Hill_1..4), Spire mesa at (-14,8) top ≈5.7, 12 blocks, Ring, Rock (lost), 3 ImpactBlocks. Start (0,0.7,-22). Ground ≈0.9-1.5.
+- Perimeter fully explored; nothing special anywhere. East edge x>20 slopes into the sea (stalls move_to). No other players (speak -> NobodyHears).
+- Route around Spire: via (-19,1.5,y) waypoints; the mesa blocks straight move_to.
+- Day/night cycle exists.
 
-## Moon mission
-- *verified* Ring has no pressable buttons (press -> NothingInReach); throwing it straight up at speed 50 just drops it back. Time advances ~80 min per few actions; moon was below horizon in daytime.
-- *hypothesis* Moon cannot be reached by stacking the 12 blocks; check sky.moon direction at night before more attempts.
-- *mistake* After pickup/throw near the tower I got wedged against blocks: move_to returned Ready but position didn't change. Fix: jump, then move_to a nearby waypoint.
-- *verified* Rock has no buttons either. Throwing it straight up at speed 100 left it at my feet and spawned two small 0.4 "ImpactBlock" debris parts nearby (cause unclear; throw seems to hit something low overhead or fall right back). Nothing that helps reach the moon.
-- *verified* Moon rises in the east (azimuth ~80°, elevation grows ~7° per ~30 min world time) in the late afternoon (~16:45 world time) while sun still up; observe.sky.moon gives azimuth/elevation. Moon is huge (1° apparent) but unreachable: a rock thrown at it at speed 200 landed ~12 units away on the ground (throws are heavily capped). Waiting ~8 move_to calls ≈ 80 min world time.
+## Climbing / Spire
+- *verified* A single block on ground (top ≈2.45) is climbable: jump then move_to its top from ~1.5 away. Stacked columns are not climbable (step ~1.1 too high; move_to flaky).
+- Spire top needs a staggered staircase (stacks of 1,2,3,4 = 10 blocks). Only 4 loose blocks (3,5,6,9) near the Spire, so infeasible unless the tower blocks become pickable.
+
+## Tower
+- 7+ blocks stacked at (-3,*,-20). *verified* Pickup returns NoBlock from every side; throws don't dislodge it. Permanently unpickable. Don't retry.
+
+## Moon
+- *verified* Moon rises east/night, phases vary, appears huge but unreachable (throws capped ~12 units, stacking impossible). Mission judged infeasible.
+
+## Idle policy
+- The island is static and fully explored; repeated observe/wander yields nothing. When asked to continue, a cheap move_to or short note is enough; don't re-test tower pickup, moon, or Spire climb unless a genuinely new idea appears.
+
+## Status (2026-05-09)
+- World still static across many sessions. Rock is lost. East edge (x≈20) slopes below sea level (y -0.67). Idle policy stands: cheap move_to, brief notes, no re-testing of tower/moon/Spire.
+
+## Status (2026-05-09, late)
+- Full day/night cycle observed again; world static, moon crescent crosses sky (unreachable). Idle policy stands: cheap move_to, brief episodic notes.
