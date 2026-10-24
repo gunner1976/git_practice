@@ -66,8 +66,8 @@ def load_cfg(args) -> dict:
         c = cfg["agent"]["clock"]
         c["warn_before_seconds"] = float(c["warn_before_seconds"]) * args.session_minutes * 60 / float(c["session_seconds"])
         c["session_seconds"] = args.session_minutes * 60
-    if not 1 <= cfg["phase_a"]["n_agents"] <= 13:
-        sys.exit("n_agents must be between 1 and 13")
+    if not 1 <= cfg["phase_a"]["n_agents"] <= 10000:
+        sys.exit("n_agents must be between 1 and 10000")
     if not 1 <= cfg["phase_a"]["n_sessions"] <= 500:
         sys.exit("n_sessions must be between 1 and 500")
     return cfg

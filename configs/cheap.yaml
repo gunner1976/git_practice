@@ -1,0 +1,16 @@
+# Low-cost paper-style free play for running many replicate agents (~100x cheaper per
+# agent-day than paper_freeplay.yaml on Sonnet). Same prompts, memory and world; what changes:
+#   - Claude Haiku 5.5 at low effort (about 20x cheaper per token);
+#   - older tool results are cleared sooner, so each turn re-reads less conversation;
+#   - when the agent stops, 2 simulated minutes pass before the nudge, so idling uses up
+#     the day in fewer (paid) turns.
+#   python run.py freeplay --config configs/cheap.yaml --run-id cohort1 --agents 10 --sessions 10 --session-minutes 20 --parallel 10 --max-usd 2
+extends: paper_freeplay.yaml
+
+agent:
+  model: claude-haiku-5-5
+  effort: low
+  refusal_fallback: false        # Haiku has no server-side fallback
+  context_prune_chars: 60000     # ~15k tokens (paper_freeplay: ~60k)
+  clock:
+    idle_seconds: 120

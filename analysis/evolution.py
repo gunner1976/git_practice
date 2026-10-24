@@ -14,6 +14,7 @@ from collections import Counter
 from pathlib import Path
 
 import matplotlib
+import numpy as np
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -90,6 +91,38 @@ def session_metrics(s: dict, terrain: dict, log: list[dict], notes_before: dict,
     }
 
 
+def cohort_summary(table: dict[str, list[dict]], rules: dict, run: str) -> list[str]:
+    """Across all agents, day by day: medians and the share of agents that have done X by then."""
+    n = len(table)
+    if n < 2:
+        return []
+    days = sorted({r["day"] for rows in table.values() for r in rows})
+    first = lambda rows, key: next((r["day"] for r in rows if r[key]), None)  # noqa: E731
+    imp = {a: first(rows, "impacts") for a, rows in table.items()}
+    spi = {a: first(rows, "on_spire") for a, rows in table.items()}
+    held_by_day = {}
+    for a in table:
+        rl = rules.get(f"{run}|{a}", [])
+        held_by_day[a] = {d: sum(1 for r in rl if r["versions"][0]["s"] <= d - 1 and not (r["dropped"] and r["dropped"]["s"] <= d - 1)) for d in days}
+    med = lambda xs: float(np.median(xs)) if xs else 0.0  # noqa: E731
+    out = ["## Across all agents", "",
+           f"{n} agents. Medians per day; \"so far\" columns are the share of agents that had done it on that day or earlier.", "",
+           "| day | agents | turns | idle share | actions | objects handled | throws | episodic total | rules held | made debris so far | on Spire so far |",
+           "|---|---|---|---|---|---|---|---|---|---|---|"]
+    for d in days:
+        rows = [r for rs in table.values() for r in rs if r["day"] == d]
+        ag = [a for a, rs in table.items() if any(r["day"] == d for r in rs)]
+        idle = med([r["idle"] / max(1, r["turns"]) for r in rows])
+        out.append(f"| {d} | {len(rows)} | {med([r['turns'] for r in rows]):.0f} | {idle:.0%} | {med([r['actions'] for r in rows]):.0f} | "
+                   f"{med([r['picked'] for r in rows]):.0f} | {med([r['throws'] for r in rows]):.0f} | {med([r['episodic'] for r in rows]):.0f} | "
+                   f"{med([held_by_day[a][d] for a in ag]):.0f} | {sum(1 for a in ag if imp[a] and imp[a] <= d) / max(1, len(ag)):.0%} | "
+                   f"{sum(1 for a in ag if spi[a] and spi[a] <= d) / max(1, len(ag)):.0%} |")
+    games = sum(1 for a in table for r in rules.get(f"{run}|{a}", []) if r["kind"] == "game")
+    out += ["", f"- Agents that ever made rock debris: {sum(1 for v in imp.values() if v)}/{n}; reached the Spire top: {sum(1 for v in spi.values() if v)}/{n}.",
+            f"- Rules classed as the agent's own games, across all agents: {games}.", ""]
+    return out
+
+
 def build_evolution(root: Path) -> Path:
     root = Path(root)
     data = build(root)
@@ -113,9 +146,18 @@ def build_evolution(root: Path) -> Path:
     n = len(METRICS)
     cols = 4
     fig, axes = plt.subplots(math.ceil(n / cols), cols, figsize=(4 * cols, 2.6 * math.ceil(n / cols)), squeeze=False)
+    many = len(table) > 6
     for ax, (key, _, title) in zip(axes.flat, METRICS):
-        for agent, rows in table.items():
-            ax.plot([r["day"] for r in rows], [r[key] for r in rows], marker="o", ms=3, lw=1.4, label=agent)
+        if many:  # a cohort: median with the middle half of agents shaded, individual agents faint
+            days = sorted({r["day"] for rows in table.values() for r in rows})
+            for rows in table.values():
+                ax.plot([r["day"] for r in rows], [r[key] for r in rows], lw=0.6, alpha=0.25, color="#5b5ff0")
+            q = [np.percentile([r[key] for rows in table.values() for r in rows if r["day"] == d], [25, 50, 75]) for d in days]
+            ax.fill_between(days, [x[0] for x in q], [x[2] for x in q], alpha=0.25, color="#5b5ff0", label="middle 50%")
+            ax.plot(days, [x[1] for x in q], marker="o", ms=3, lw=1.8, color="#2f3bb0", label="median")
+        else:
+            for agent, rows in table.items():
+                ax.plot([r["day"] for r in rows], [r[key] for r in rows], marker="o", ms=3, lw=1.4, label=agent)
         ax.set_title(title, fontsize=9)
         ax.tick_params(labelsize=7)
         ax.grid(alpha=0.25)
@@ -131,6 +173,7 @@ def build_evolution(root: Path) -> Path:
              f"{sum(len(r) for r in table.values())} free-play days across {len(table)} agents. "
              "Every number comes from replaying the logged actions; memory figures are the agent's own files at the end of each day.", "",
              "![Evolution](evolution.png)", ""]
+    lines += cohort_summary(table, rules, data["run"])
     for agent, rows in table.items():
         first_impact = next((r["day"] for r in rows if r["impacts"]), None)
         first_spire = next((r["day"] for r in rows if r["on_spire"]), None)

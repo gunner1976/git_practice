@@ -178,6 +178,8 @@ def run_session(
                 end_reason = "agent_stopped"
                 break
             log("stop_hook", n=nudges)
+            if clk:  # time spent idle between the agent stopping and the nudge (0 = just the turn's latency)
+                clock += float(clk.get("idle_seconds", 0.0))
             hook = a["stop_hook_message"] if not a.get("stop_hook_observation", True) else f"{a['stop_hook_message']}\n\n{world.observe()}{status(used)}"
             hook_content: list | str = hook
             if clk and not warned and clock >= float(clk["session_seconds"]) - float(clk["warn_before_seconds"]):

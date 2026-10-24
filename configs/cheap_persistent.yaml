@@ -1,0 +1,6 @@
+# configs/cheap.yaml with a world that persists between days (see paper_persistent.yaml).
+extends: cheap.yaml
+
+world:
+  persist: true
+  persist_avatar: true
