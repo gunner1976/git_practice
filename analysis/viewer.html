@@ -67,6 +67,14 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .hudcard .who i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; }
 .hudcard .promo { font-family: var(--body); font-size: 11px; font-weight: 600; background: linear-gradient(135deg, #ffd166, #ff8a4c); color: #2a1404; padding: 1px 8px; border-radius: 999px; }
 .hudcard .what { color: #b9c7cf; margin: 1px 0 8px; max-width: 260px; }
+/* compact by default: name and time left in one small strip at the bottom-left, out of the scene's way */
+.hudcard { top: auto; bottom: 12px; }
+.hudcard.mini { min-width: 0; padding: 6px 10px; display: flex; align-items: center; gap: 10px; }
+.hudcard.mini .who { font-size: 14px; }
+.hudcard.mini .what, .hudcard.mini .stats, .hudcard.mini .lbl { display: none; }
+.hudcard.mini .meter { width: 90px; margin: 0; }
+.hudcard.mini .tl { font-family: var(--mono); font-size: 11px; color: #c9d5dc; white-space: nowrap; }
+.hudcard:not(.mini) .tl { display: none; }
 .meter { height: 8px; border-radius: 6px; background: rgba(255,255,255,0.15); overflow: hidden; margin: 3px 0 7px; }
 .meter b { display: block; height: 100%; background: linear-gradient(90deg, #ffd166, #ff8a4c); border-radius: 6px; transition: width 0.2s; }
 .stats { display: grid; grid-template-columns: repeat(3, auto); gap: 4px 14px; font-family: var(--mono); }
@@ -121,9 +129,9 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
 .toast .k { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; }
 .toast .t { font-family: var(--display); font-weight: 800; font-size: 17px; }
-.whisper { left: 50%; bottom: 14px; transform: translateX(-50%); color: #fff; font-style: italic; font-size: 12px; text-shadow: 0 1px 3px rgba(0,0,0,0.7); opacity: 0; transition: opacity 0.4s; width: max-content; max-width: calc(100% - 24px); text-align: center; }
+.whisper { left: 50%; bottom: 52px; transform: translateX(-50%); color: #fff; font-style: italic; font-size: 12px; text-shadow: 0 1px 3px rgba(0,0,0,0.7); opacity: 0; transition: opacity 0.4s; width: max-content; max-width: calc(100% - 24px); text-align: center; }
 @media (max-width: 600px) {
-  .hudcard { min-width: 0; padding: 7px 9px; top: 52px; }
+  .hudcard { min-width: 0; padding: 7px 9px; }
   .hudcard .who { font-size: 14px; }
   .hudcard .what, .hudcard .stats { display: none; }
   .hudcard .meter { width: 140px; margin-bottom: 0; }
@@ -255,6 +263,7 @@ h2.sec { font-family: var(--display); font-size: 1rem; font-weight: 600; margin:
       <canvas id="map2d" hidden aria-label="Top-down map of the island with the agent and objects"></canvas>
       <div class="tip" id="tip" hidden></div>
       <div class="ov camctl">
+        <button id="hudToggle" aria-pressed="false" title="Show or hide the agent's details (time left, step, notes, what it holds)">Details</button>
         <span class="seg" role="group" aria-label="View">
           <button id="mode3d" aria-pressed="true" title="3D world">3D</button>
           <button id="mode2d" aria-pressed="false" title="Top-down map">2D map</button>
@@ -589,6 +598,9 @@ const DATA = /*__DATA__*/null;
   }
   buildScenery();
   $("scenery").checked = load("scenery", true); scenery.visible = $("scenery").checked;
+  const setHud = (on) => { $("hud").classList.toggle("mini", !on); $("hudToggle").setAttribute("aria-pressed", on ? "true" : "false"); store("hudDetails", on); };
+  setHud(load("hudDetails", false));
+  $("hudToggle").addEventListener("click", () => setHud($("hud").classList.contains("mini")));
   $("scenery").addEventListener("change", (e) => { scenery.visible = e.target.checked; store("scenery", e.target.checked); });
 
   // ------------------------------------------------------------- objects
@@ -672,7 +684,9 @@ const DATA = /*__DATA__*/null;
   const akey = (s) => s.run + "|" + s.agent, agentName = (k) => k.split("|")[1];
   const byAgent = {};
   DATA.sessions.forEach((s, i) => { (byAgent[akey(s)] = byAgent[akey(s)] || []).push(i); });
-  const agents = Object.keys(byAgent).sort((a, b) => (agentName(a).startsWith("fresh") - agentName(b).startsWith("fresh")) || a.localeCompare(b, undefined, { numeric: true }));
+  const FOUNDED = ((DATA.cosmos || {}).agents || []).map((a) => a.id);  // the cosmos lists founders in the order they joined
+  const rank = (k) => { const i = FOUNDED.indexOf(agentName(k)); return i < 0 ? 1e6 : i; };
+  const agents = Object.keys(byAgent).sort((a, b) => (agentName(a).startsWith("fresh") - agentName(b).startsWith("fresh")) || rank(a) - rank(b) || a.localeCompare(b, undefined, { numeric: true }));
   $("selRun").innerHTML = RUNS.map((r) => `<option value="${esc(r.run)}">${esc(r.run)}${r.kind ? " · " + esc(r.kind) : ""}</option>`).join("");
   $("selRun").hidden = $("runLbl").hidden = RUNS.length < 2;
   $("selRun").addEventListener("change", (e) => {
@@ -881,8 +895,8 @@ const DATA = /*__DATA__*/null;
     const promoted = pr && S.phase === "A" && (dayNo > pr.day || (dayNo === pr.day && f.step >= pr.step));
     $("hud").innerHTML = `<div class="who"><i style="background:${AGENT_COL[S.agent] || "#5b5ff0"}"></i>${NAMES[S.agent] ? "" : "Eko · "}${esc(nice(S.agent))}${promoted ? ' <span class="promo" title="' + esc(pr.evidence) + '">★ promoted</span>' : ""}</div>
       <div class="what">${S.phase === "A" ? esc(S.label) + " · free play" : "Task: " + esc(S.task || S.label)}</div>
-      <span style="color:#93a6b0;font-size:10px;letter-spacing:.08em;text-transform:uppercase">${leftLbl}</span>
-      <div class="meter"><b style="width:${(left / full * 100).toFixed(1)}%"></b></div>
+      <span class="lbl" style="color:#93a6b0;font-size:10px;letter-spacing:.08em;text-transform:uppercase">${leftLbl}</span>
+      <div class="meter" title="${esc(leftLbl)}"><b style="width:${(left / full * 100).toFixed(1)}%"></b></div><span class="tl">${esc(leftLbl.replace(/^.*· /, ""))}</span>
       <div class="stats"><div><span>Step</span>${f.step}</div><div><span>Cubes made</span>${madeSoFar}</div><div><span>Notes</span>${notesSoFar}</div>
       ${S.phase === "B" && S.end.score != null ? `<div><span>Final score</span>${esc(S.end.score)}</div>` : ""}
       <div><span>Holding</span>${f.a[3] ? esc(f.a[3]) : "–"}</div><div><span>Height</span>${f.a[2].toFixed(1)} m</div></div>`;
