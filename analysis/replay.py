@@ -239,11 +239,38 @@ def build_many(roots: list[Path]) -> dict:
             "sessions": sessions, "session_seconds": None, "promotions": promos}
 
 
+def _cosmos_status(root: Path) -> dict | None:
+    """The founders' status for the viewer's project section (runs made with agent/cosmos.py)."""
+    p = root / "cosmos.json"
+    if not p.exists():
+        return None
+    st = json.loads(p.read_text())
+    done = json.loads((root / "state.json").read_text())["phase_a"] if (root / "state.json").exists() else {}
+    ids = [a["id"] for a in st["agents"]]
+    names = {a["id"]: a["name"] for a in st["agents"]}
+    partner = {}
+    for i in range(0, len(ids) - 1, 2):
+        partner[ids[i]], partner[ids[i + 1]] = ids[i + 1], ids[i]
+    agents = []
+    for a in ids:
+        k = 0
+        while done.get(f"{a}/{k + 1}", {}).get("done"):
+            k += 1
+        ach = root / "agents" / a / "achievements.json"
+        agents.append({"id": a, "name": names[a], "days": k, "partner": names.get(partner.get(a), ""),
+                       "achievements": json.loads(ach.read_text()) if ach.exists() else {}})
+    spent = sum(json.loads(l)["cost_usd"] for l in (root / "ledger.jsonl").read_text().splitlines() if l.strip()) if (root / "ledger.jsonl").exists() else 0.0
+    return {"agents": agents, "discoveries": st.get("discoveries", []), "spent": round(spent, 2)}
+
+
 def write_viewer(root: Path, include: list[Path] | None = None):
     """Writes viewer.html (3D island with a 2D map toggle, field log, rules and notes)
     into the run directory; `include` adds other runs of the same island."""
     data = build_many([Path(root), *[Path(p) for p in (include or [])]])
     data["rules"] = rules_by_agent(data)
+    cos = _cosmos_status(Path(root))
+    if cos:
+        data["cosmos"] = cos
     blob = json.dumps(data, separators=(",", ":")).replace("</", "<\\/")
     tpl = Path(__file__).with_name("viewer.html").read_text()
     out = Path(root) / "viewer.html"

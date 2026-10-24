@@ -3,106 +3,52 @@
   {
    "id": "christian",
    "name": "Christian",
-   "joined_after_days": {}
+   "joined_on_day": 1
   },
   {
    "id": "vern",
    "name": "Vern",
-   "joined_after_days": {
-    "christian": 0
-   }
+   "joined_on_day": 1
   },
   {
    "id": "keats",
    "name": "Keats",
-   "joined_after_days": {
-    "christian": 0,
-    "vern": 0
-   }
+   "joined_on_day": 1
   },
   {
    "id": "jamie",
    "name": "Jamie",
-   "joined_after_days": {
-    "christian": 0,
-    "vern": 0,
-    "keats": 0
-   }
+   "joined_on_day": 1
   },
   {
    "id": "ryan",
    "name": "Ryan",
-   "joined_after_days": {
-    "christian": 0,
-    "vern": 0,
-    "keats": 0,
-    "jamie": 0
-   }
+   "joined_on_day": 1
   },
   {
    "id": "fitch",
    "name": "Fitch",
-   "joined_after_days": {
-    "christian": 0,
-    "vern": 0,
-    "keats": 0,
-    "jamie": 0,
-    "ryan": 0
-   }
+   "joined_on_day": 1
   },
   {
    "id": "jason",
    "name": "Jason",
-   "joined_after_days": {
-    "christian": 0,
-    "vern": 0,
-    "keats": 0,
-    "jamie": 0,
-    "ryan": 0,
-    "fitch": 0
-   }
+   "joined_on_day": 1
   },
   {
    "id": "stu",
    "name": "Stu",
-   "joined_after_days": {
-    "christian": 0,
-    "vern": 0,
-    "keats": 0,
-    "jamie": 0,
-    "ryan": 0,
-    "fitch": 0,
-    "jason": 0
-   }
+   "joined_on_day": 1
   },
   {
    "id": "eric",
    "name": "Eric",
-   "joined_after_days": {
-    "christian": 0,
-    "vern": 0,
-    "keats": 0,
-    "jamie": 0,
-    "ryan": 0,
-    "fitch": 0,
-    "jason": 0,
-    "stu": 0
-   }
+   "joined_on_day": 1
   },
   {
    "id": "kip",
    "name": "Kip",
-   "joined_after_days": {
-    "christian": 0,
-    "vern": 0,
-    "keats": 0,
-    "jamie": 0,
-    "ryan": 0,
-    "fitch": 0,
-    "jason": 0,
-    "stu": 0,
-    "eric": 0
-   }
+   "joined_on_day": 1
   }
  ],
  "discoveries": [],

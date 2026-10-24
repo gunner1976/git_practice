@@ -180,6 +180,60 @@ dl.info dd { margin: 0; font-family: var(--mono); font-size: 12px; overflow-wrap
 h2.sec { font-family: var(--display); font-size: 1rem; font-weight: 600; margin: 14px 0 6px; }
 .fallback { padding: 24px; color: #13212a; }
 .foot { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+/* Project section: the mission, the architecture and the journey, below the replay */
+.projlink { margin-left: auto; text-decoration: none; color: var(--accent); font-weight: 600; font-size: 13px; }
+.project { margin-top: 28px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.project > * { min-width: 0; }
+.project h2 { font-family: var(--display); font-weight: 800; font-size: 1.35rem; letter-spacing: -0.01em; margin: 0 0 8px; text-wrap: balance; }
+.project h3 { font-family: var(--display); font-weight: 600; font-size: 1.05rem; margin: 0 0 6px; text-wrap: balance; }
+.project p { margin: 0 0 8px; max-width: 70ch; }
+.project .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; }
+.mission { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; }
+@media (max-width: 760px) { .mission { grid-template-columns: minmax(0, 1fr); } }
+.mission .thesis { font-family: var(--display); font-weight: 800; font-size: clamp(1.5rem, 3.4vw, 2.2rem); line-height: 1.08; letter-spacing: -0.02em; margin: 0 0 10px; text-wrap: balance; }
+.mission .thesis em { font-style: normal; color: var(--accent); }
+.weights { display: grid; gap: 7px; align-content: start; }
+.weights .w { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) 4.2em; gap: 8px; align-items: center; font-size: 13px; }
+.weights .w b { display: block; height: 10px; border-radius: 5px; background: var(--accent); }
+.weights .w span:last-child { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; color: var(--muted); white-space: nowrap; }
+.weights .w.reason b { background: var(--signal); }
+.weights small { color: var(--muted); font-size: 12px; }
+.goals { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 10px 22px; margin: 0; padding: 0; list-style: none; }
+.goals li { border-top: 2px solid var(--line); padding-top: 8px; font-size: 13px; color: var(--muted); }
+.goals li strong { display: block; color: var(--ink); font-size: 14px; margin-bottom: 2px; }
+.arch { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+.arch svg { display: block; min-width: 720px; width: 100%; height: auto; }
+.arch .box { fill: var(--bg); stroke: var(--line); stroke-width: 1.5; }
+.arch .box.hot { stroke: var(--accent); }
+.arch .box.sig { stroke: var(--signal); }
+.arch .t { fill: var(--ink); font-family: var(--body); font-size: 13px; font-weight: 600; }
+.arch .s { fill: var(--muted); font-family: var(--body); font-size: 11px; }
+.arch .m { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; }
+.arch .ln { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+.arch .ln.call { stroke: var(--signal); stroke-dasharray: 5 4; }
+.arch .head { fill: var(--muted); }
+.arch .head.call { fill: var(--signal); }
+.journey { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.journey li { padding-right: 4px; display: grid; grid-template-columns: 5.5em 14px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.journey .d { font-family: var(--mono); color: var(--muted); font-size: 12px; padding-top: 1px; }
+.journey .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); margin-top: 4px; }
+.journey li.key .dot { background: var(--accent); }
+.journey li.now .dot { background: var(--signal); box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 25%, transparent); }
+.journey .what strong { display: block; }
+.journey .what span { color: var(--muted); }
+.journey .usd { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); font-size: 12px; white-space: nowrap; }
+.tbl { overflow-x: auto; }
+.tbl table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 560px; }
+.tbl th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--line); padding: 6px 8px; }
+.tbl td { border-bottom: 1px solid var(--line); padding: 6px 8px; vertical-align: top; }
+.tbl td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.chip { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 999px; background: var(--chip); margin: 0 4px 3px 0; white-space: nowrap; }
+.chip.done { background: var(--accent-soft); color: var(--accent); }
+.chip.todo { background: transparent; border: 1px dashed var(--line); color: var(--muted); }
+.next { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 10px 22px; list-style: none; margin: 0; padding: 0; }
+.next li { font-size: 13px; color: var(--muted); padding-left: 12px; border-left: 2px solid var(--line); }
+.next li strong { color: var(--ink); display: block; }
 </style>
 
 <header class="bar">
@@ -191,6 +245,7 @@ h2.sec { font-family: var(--display); font-size: 1rem; font-weight: 600; margin:
     <button class="ibtn" id="prevS" title="Previous session">◀</button>
     <button class="ibtn" id="nextS" title="Next session">▶</button>
   </div>
+  <a class="projlink" href="#project">Mission and architecture ↓</a>
 </header>
 
 <main class="grid">
@@ -272,6 +327,142 @@ h2.sec { font-family: var(--display); font-size: 1rem; font-weight: 600; margin:
     <div class="pane" id="pane"></div>
   </aside>
 </main>
+
+<section class="project" id="project" aria-label="The project">
+  <div class="mission">
+    <div>
+      <div class="eyebrow">The mission</div>
+      <p class="thesis">An EKOnian reaches <em>EKO's moon</em>, driven by its own reasoned curiosity, innovation and persistence.</p>
+      <p>Agents live on planet EKO, a world we designed down to its orbit and gravity but never describe to them. Nobody tells them what to do. We watch what they notice, what they write down, what they work out, and how far they push. The agents that reason best are promoted, and what they discover is passed on. Over time this should produce agents whose abilities carry over to harder problems, eventually real ones.</p>
+      <p>This replicates and extends Cloos et al. 2026, <i>Is this machine playing?</i> (arXiv:2610.07130).</p>
+    </div>
+    <div class="weights" aria-label="How agents are ranked">
+      <div class="eyebrow">How a good agent is ranked</div>
+      <div class="w"><span>Persistence</span><b style="width:100%"></b><span>× 0.50</span></div>
+      <div class="w"><span>Curiosity</span><b style="width:50%"></b><span>× 0.25</span></div>
+      <div class="w"><span>Innovation</span><b style="width:50%"></b><span>× 0.25</span></div>
+      <div class="w reason"><span>Reasoning</span><b style="width:75%"></b><span>× 1.5</span></div>
+      <small>Each trait is scaled 0–1 within a run. A verified reasoning promotion multiplies the total. Curiosity counts noticing double: writing down what it saw, unprompted.</small>
+    </div>
+  </div>
+
+  <div>
+    <h2>What we are after</h2>
+    <ul class="goals">
+      <li><strong>Find the next Aristotle</strong>The first agent to deduce, from its own observations, that EKO is round. The curved shadow on the moon during an eclipse is the classic clue.</li>
+      <li><strong>Select for persistence first</strong>Retrying after failure, pursuing its own open questions, keeping going on later days. Then curiosity, then innovation.</li>
+      <li><strong>Fewer stimuli, not more</strong>A rare, repeated event like the eclipse tells us more than many cues. The bottleneck we measure is from writing it down to questioning it.</li>
+      <li><strong>Never start over</strong>The founders live on persistent worlds and keep their memory. New agents only ever join; nothing is reset.</li>
+      <li><strong>From pairs to a mesh</strong>A phone joins two agents today. Later, swarms of agents work the same problem together, nudged in a direction we choose.</li>
+      <li><strong>Beyond our own physics</strong>Hand-built worlds cap what agents can learn at what we put in. In time the lab itself has to become emergent or real.</li>
+    </ul>
+  </div>
+
+  <div>
+    <h2>Architecture</h2>
+    <p>One agent's day, and how the worlds connect. Each founder has its own twin of EKO; the phone line and the dawn messages are the only links between them.</p>
+    <div class="arch">
+      <svg viewBox="0 0 980 430" role="img" aria-label="Architecture: each founder (a Claude model with its memory files) lives one EKO day at a time through the session loop on its own persistent twin of EKO; trials on EKO unlock a phone linked through the switchboard to a partner on another twin; a promotion judge reads the logs and shares verified discoveries at the next dawn; the analysis tools build this replay, the rules, the inquiry funnel and the trait ranking.">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker>
+          <marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head call" d="M0,0 L10,5 L0,10 z"/></marker>
+        </defs>
+        <!-- founder -->
+        <rect class="box hot" x="20" y="30" width="230" height="120" rx="10"/>
+        <text class="t" x="36" y="56">Founder (e.g. Christian)</text>
+        <text class="s" x="36" y="76">a Claude model, its own name</text>
+        <text class="m" x="36" y="98">SOUL.md</text>
+        <text class="m" x="36" y="114">EPISODIC_MEMORY.jsonl</text>
+        <text class="m" x="36" y="130">SEMANTIC_MEMORY.md</text>
+        <!-- loop -->
+        <rect class="box" x="330" y="30" width="270" height="120" rx="10"/>
+        <text class="t" x="346" y="56">Session loop: one EKO day</text>
+        <text class="s" x="346" y="76">20-minute simulated clock, dawn to dawn</text>
+        <text class="m" x="346" y="98">move_to · jump · pickup · place · throw</text>
+        <text class="m" x="346" y="114">observe · press · speak · notes</text>
+        <text class="m" x="346" y="130">5-minute warning before sleep</text>
+        <!-- eko -->
+        <rect class="box hot" x="680" y="30" width="280" height="150" rx="10"/>
+        <text class="t" x="696" y="56">Twin EKO (persistent)</text>
+        <text class="s" x="696" y="76">the island, as the agent left it</text>
+        <text class="m" x="696" y="98">g = 8.60 m/s² · radius 5,400 km</text>
+        <text class="m" x="696" y="114">20 h day · 320-day year · tilt 18°</text>
+        <text class="m" x="696" y="130">moon: 10.5-day month, eclipses</text>
+        <text class="m" x="696" y="146">stars turning about the pole</text>
+        <text class="m" x="696" y="162">rock shatters · objects lost at sea</text>
+        <!-- arrows founder<->loop<->eko -->
+        <path class="ln" d="M250 80 H326" marker-end="url(#ah)"/>
+        <path class="ln" d="M330 104 H254" marker-end="url(#ah)"/>
+        <text class="s" x="258" y="72">acts, writes</text>
+        <text class="s" x="258" y="120">sees, hears</text>
+        <path class="ln" d="M600 80 H676" marker-end="url(#ah)"/>
+        <path class="ln" d="M680 104 H604" marker-end="url(#ah)"/>
+        <!-- trials -> phone -->
+        <rect class="box sig" x="680" y="220" width="280" height="86" rx="10"/>
+        <text class="t" x="696" y="246">Trials → the phone on the Spire</text>
+        <text class="m" x="696" y="266">tower of 3 · shatter the rock · eclipse</text>
+        <text class="s" x="696" y="286">“Something is waiting for you at the top”</text>
+        <path class="ln" d="M820 180 V216" marker-end="url(#ah)"/>
+        <!-- switchboard -->
+        <rect class="box sig" x="330" y="220" width="270" height="86" rx="10"/>
+        <text class="t" x="346" y="246">Switchboard: a live line</text>
+        <text class="s" x="346" y="266">to one partner on another twin EKO</text>
+        <text class="m" x="346" y="286">call · end call · speak</text>
+        <path class="ln call" d="M680 263 H604" marker-end="url(#ahc)"/>
+        <path class="ln call" d="M330 263 H260" marker-end="url(#ahc)"/>
+        <rect class="box" x="20" y="220" width="230" height="86" rx="10" style="stroke-dasharray:4 4"/>
+        <text class="t" x="36" y="246">Partner (e.g. Vern)</text>
+        <text class="s" x="36" y="266">its own twin EKO, awake</text>
+        <text class="s" x="36" y="282">at the same time</text>
+        <!-- judge + analysis -->
+        <rect class="box" x="20" y="340" width="400" height="74" rx="10"/>
+        <text class="t" x="36" y="364">Promotion judge → shared discoveries</text>
+        <text class="s" x="36" y="384">verifies a reasoned deduction from the logs;</text>
+        <text class="s" x="36" y="400">the first is passed on at every other agent's next dawn</text>
+        <rect class="box" x="450" y="340" width="510" height="74" rx="10"/>
+        <text class="t" x="466" y="364">Analysis of every log</text>
+        <text class="s" x="466" y="384">this replay · rules over time · inquiry funnel (seen → written → questioned</text>
+        <text class="s" x="466" y="400">→ tested → explained) · trait ranking · cost ledger · monthly price check</text>
+        <path class="ln" d="M20 377 H8 V90 H16" marker-end="url(#ah)"/>
+      </svg>
+    </div>
+  </div>
+
+  <div>
+    <h2>Where we have got to</h2>
+    <ol class="journey">
+      <li class="key"><span class="d">Oct 23</span><i class="dot"></i><span class="what"><strong>Replication harness and the paper's study</strong><span>Island world, tool loop, cost caps and resumable runs; the full replication run "main".</span></span><span class="usd">$28.17</span></li>
+      <li><span class="d">Oct 24</span><i class="dot"></i><span class="what"><strong>Replay viewer</strong><span>3D and 2D in one page, field log, Rules and Notes tabs, several runs and islands.</span></span><span class="usd"></span></li>
+      <li class="key"><span class="d">Oct 24</span><i class="dot"></i><span class="what"><strong>Free play as in the paper</strong><span>Its prompts, memory files and simulated clock; one agent over 10 days, then a world that persists between days.</span></span><span class="usd">$14.27</span></li>
+      <li><span class="d">Oct 24</span><i class="dot"></i><span class="what"><strong>Cutting cost toward thousands of agents</strong><span>Cache-friendly context trimming, Haiku profiles near $0.02 a day, and a monthly check on when 1,000 agents × 10 days fits under $100.</span></span><span class="usd">$5.02</span></li>
+      <li><span class="d">Oct 24</span><i class="dot"></i><span class="what"><strong>First discipline: math</strong><span>The perimeter challenge with a calculator, on a round and then an irregular shoreline, compared with human methods.</span></span><span class="usd">$18.36</span></li>
+      <li class="key"><span class="d">Oct 24</span><i class="dot"></i><span class="what"><strong>Planet EKO</strong><span>A water world with one island, then a full planet with its own gravity, moon, eclipses and stars.</span></span><span class="usd"></span></li>
+      <li class="key"><span class="d">Oct 24</span><i class="dot"></i><span class="what"><strong>Measuring reasoning: run eko1</strong><span>10 agents × 4 days. Six saw the eclipse and wrote it down; one questioned it; none promoted yet. Trait ranking and the inquiry funnel added.</span></span><span class="usd">$24.40</span></li>
+      <li><span class="d">Oct 24</span><i class="dot"></i><span class="what"><strong>The mission tablet, then the phone</strong><span>Trials unlock a reward on the Spire; the phone opens a live line to one partner agent.</span></span><span class="usd"></span></li>
+      <li class="now"><span class="d">Oct 24</span><i class="dot"></i><span class="what"><strong>The cosmos begins</strong><span>Ten named founders on persistent twin EKOs, paired by phone, sharing verified discoveries. Day 1 lived.</span></span><span class="usd">$6.33</span></li>
+    </ol>
+    <p class="foot">Spend is the agents' API cost from each run's ledger. Total so far: $96.55.</p>
+  </div>
+
+  <div>
+    <h2>The cosmos now</h2>
+    <p id="cosmosSum">The founders' status appears here when this page is built from the cosmos run.</p>
+    <div class="tbl"><table id="cosmosTbl" hidden>
+      <thead><tr><th>Founder</th><th>Days lived</th><th>Phone partner</th><th>Mission trials</th><th>Found since</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+
+  <div>
+    <h2>Waiting on a decision</h2>
+    <ul class="next">
+      <li><strong>Recurring night eclipses</strong>Tune EKO's moon so an eclipse falls at night about every 10 days, giving agents repeat chances to question and test it.</li>
+      <li><strong>A raw eclipse report</strong>Drop the "curved arc" label from what agents observe, so the shape has to be worked out.</li>
+      <li><strong>Credit for independence</strong>Score promotions by how much help the agent had: none, a shared discovery, or a phone call.</li>
+      <li><strong>Inheritance between generations</strong>Pass the best agents' memory on to newcomers, with promotions as the selection pressure.</li>
+    </ul>
+  </div>
+</section>
 <p class="foot">The Rules tab lists what the agent wrote down as rules: beliefs about the world, hypotheses, mistakes to avoid, and games or rules it set itself, each with when it first appeared, how often it was revised, and whether it later left its notes. It is extracted from the notes automatically, so read it alongside the Notes tab. Every frame is rebuilt by replaying the logged actions through the island simulation. Palms and grass are scenery only: they are not in the simulation and nothing collides with them.</p>
 
 <script>
@@ -980,7 +1171,30 @@ const DATA = /*__DATA__*/null;
   const firstRule = S.timeline.find((e) => e.k === "rule");
   if (firstRule && !h) seek(Math.max(0, firstRule.f - 3));
   lastAgentPos.copy(agent.position); setCam("follow", true);
+
   setMode(mode === "2d" ? "2d" : "3d");
   loop();
 })();
+</script>
+<script>
+/* the project section works even when the 3D library does not load */
+  // ------------------------------------------------------------- the cosmos table (project section)
+  (function () {
+    const $ = (id) => document.getElementById(id);
+    const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const C = DATA && DATA.cosmos;
+    if (!C) return;
+    const TRIALS = [["tower", "tower"], ["rock_fragments", "rock shattered"], ["saw_lunar_eclipse", "eclipse seen"]];
+    const EXTRA = [["found_phone", "found the phone"], ["connected", "connected"], ["spoke_on_phone", "spoke on the line"]];
+    const rows = C.agents.map((a) => {
+      const done = a.achievements || {};
+      const trials = TRIALS.map(([k, l]) => `<span class="chip ${done[k] ? "done" : "todo"}">${l}</span>`).join("");
+      const extra = EXTRA.filter(([k]) => done[k]).map(([, l]) => `<span class="chip done">${l}</span>`).join("");
+      const disc = (C.discoveries || []).filter((d) => d.agent === a.id).map((d) => `<span class="chip done">${esc(d.kind.replace("_", " "))}${d.assisted_by && d.assisted_by.length ? " (assisted)" : ""}</span>`).join("");
+      return `<tr><td>${esc(a.name)}</td><td class="n">${a.days}</td><td>${esc(a.partner || "")}</td><td>${trials}</td><td>${extra}${disc}</td></tr>`;
+    });
+    const tbl = $("cosmosTbl"); tbl.querySelector("tbody").innerHTML = rows.join(""); tbl.hidden = false;
+    const lived = Math.max(0, ...C.agents.map((a) => a.days));
+    $("cosmosSum").textContent = `${C.agents.length} founders, up to day ${lived}, $${C.spent.toFixed(2)} spent in the cosmos. ${(C.discoveries || []).length ? (C.discoveries.length + " discoveries so far.") : "No promoted discoveries yet."}`;
+  })();
 </script>

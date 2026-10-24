@@ -80,7 +80,7 @@ class Cosmos:
                     notes.write(f.name, f.read_text())
             soul = notes.read("SOUL.md") if "SOUL.md" in notes.list() else ""
             notes.write("SOUL.md", soul.rstrip() + f"\n\n## Name\n\nYour name is {name}.\n")
-            self.state["agents"].append({"id": aid, "name": name, "joined_after_days": self.days_lived()})
+            self.state["agents"].append({"id": aid, "name": name, "joined_on_day": max(self.days_lived().values(), default=0) + 1})
             added.append(aid)
         self._save()
         return added
