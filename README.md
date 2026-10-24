@@ -275,7 +275,7 @@ python run.py pilot    --config configs/paper_freeplay.yaml --max-usd 3
 python run.py freeplay --config configs/paper_freeplay.yaml --run-id paper1 --max-usd 60
 python run.py freeplay --config configs/paper_freeplay.yaml --run-id paper1 --sessions 20 --max-usd 120  # more days, same agents
 python run.py evolve   --run-id paper1     # day-by-day metrics, chart and diary: runs/paper1/evolution/
-python run.py viewer   --run-id paper1     # 2D and 3D replays
+python run.py viewer   --run-id paper1     # replay viewer: 3D world / 2D map, field log, rules over time, notes
 ```
 
 What it takes from the paper:

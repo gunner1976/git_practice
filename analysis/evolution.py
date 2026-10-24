@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 from .load import events, phase_a_sessions  # noqa: E402
 from .replay import build  # noqa: E402
+from .rules import rules_by_agent  # noqa: E402
 
 METRICS = [  # key, column label, chart title
     ("minutes", "min", "Simulated minutes"),
@@ -93,6 +94,7 @@ def build_evolution(root: Path) -> Path:
     root = Path(root)
     data = build(root)
     by_id = {s["id"]: s for s in data["sessions"]}
+    rules = rules_by_agent(data)
     out_dir = root / "evolution"
     out_dir.mkdir(exist_ok=True)
     table: dict[str, list[dict]] = {}
@@ -147,6 +149,26 @@ def build_evolution(root: Path) -> Path:
                 lines.append("")
         if not any(r["new_summaries"] for r in rows):
             lines += ["(no episodic entries)", ""]
+        rl = rules.get(f"{data['run']}|{agent}", [])
+        kinds = {"belief": "belief", "hypothesis": "hypothesis", "mistake": "mistake", "game": "own game"}
+        lines += ["### Rules written down, by day", "",
+                  "Extracted automatically from the notes: each rule-like line, when it first appeared, revisions, and whether it later left the notes.", "",
+                  "| day | new | revised | left notes | held at end of day |", "|---|---|---|---|---|"]
+        for d in sorted({v["s"] for r in rl for v in r["versions"]} | {r["dropped"]["s"] for r in rl if r["dropped"]}):
+            new = sum(1 for r in rl if r["versions"][0]["s"] == d)
+            rev = sum(1 for r in rl for v in r["versions"][1:] if v["s"] == d)
+            gone = sum(1 for r in rl if r["dropped"] and r["dropped"]["s"] == d)
+            held = sum(1 for r in rl if r["versions"][0]["s"] <= d and not (r["dropped"] and r["dropped"]["s"] <= d))
+            lines.append(f"| {d + 1} | {new} | {rev} | {gone} | {held} |")
+        lines.append("")
+        for d in sorted({r["versions"][0]["s"] for r in rl}):
+            lines.append(f"**Day {d + 1}: new rules**")
+            for r in rl:
+                if r["versions"][0]["s"] == d:
+                    last = r["versions"][-1]
+                    tail = f" *(revised {len(r['versions']) - 1}x" + (f"; left notes on day {r['dropped']['s'] + 1})*" if r["dropped"] else ")*") if len(r["versions"]) > 1 else (f" *(left notes on day {r['dropped']['s'] + 1})*" if r["dropped"] else "")
+                    lines.append(f"- [{kinds.get(r['kind'], r['kind'])}] {last['text']}{tail}")
+            lines.append("")
     p = out_dir / "evolution.md"
     p.write_text("\n".join(lines))
     (out_dir / "evolution.json").write_text(json.dumps(table, indent=1))

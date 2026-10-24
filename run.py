@@ -7,7 +7,7 @@
   python run.py all      --run-id main --max-usd 120 # Phase A then Phase B
   python run.py analyze  --run-id main               # stats, discovery, play markers, report.md + charts
   python run.py evolve   --run-id main               # day-by-day change in each agent's free play: runs/<id>/evolution/
-  python run.py viewer   --run-id main               # replay viewers: runs/<id>/viewer.html (2D) and viewer3d.html (3D)
+  python run.py viewer   --run-id main               # replay viewer (3D world / 2D map toggle, rules over time): runs/<id>/viewer.html
   python run.py estimate --run-id <pilot-id>         # re-print the full-run estimate from a pilot
   python run.py ladder-estimate --run-id <pilot-id>  # upper-bound cost of the ladder from a pilot
   python run.py ladder   --run-id L1 --max-usd 300   # staged egg-hunt tournament over souls + memories
@@ -146,7 +146,8 @@ def cmd_freeplay(args) -> None:
     _require_pilot(args)
     cfg = load_cfg(args)
     run = open_run(args, cfg)
-    run.set_meta(kind="full", mock=run.mock)
+    if "kind" not in run.state.get("meta", {}):  # extending a pilot keeps it a pilot
+        run.set_meta(kind="full", mock=run.mock)
     if args.sessions and args.sessions > run.cfg["phase_a"]["n_sessions"]:
         # more days for the same agents: they pick up from the memory they wrote
         run.cfg["phase_a"]["n_sessions"] = args.sessions
@@ -189,7 +190,7 @@ def cmd_viewer(args) -> None:
     from analysis.replay import write_viewer
 
     outs, n, bad = write_viewer(ROOT / "runs" / args.run_id, [ROOT / "runs" / r for r in (args.include or [])])
-    print(f"Replay viewers for {n} sessions written to " + " and ".join(str(o) for o in outs))
+    print(f"Replay viewer for {n} sessions written to {outs[0]}")
     for sid, d in bad:
         print(f"  {sid}: replay diverged from the log at step {d['step']}")
 

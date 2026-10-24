@@ -18,6 +18,7 @@ from world import World, make_world
 from world.island import HAND_HEIGHT
 
 from .load import events, phase_a_sessions, phase_b_logs
+from .rules import rules_by_agent
 
 GRID = 128  # heightmap samples per side
 
@@ -198,17 +199,14 @@ def build_many(roots: list[Path]) -> dict:
 
 
 def write_viewer(root: Path, include: list[Path] | None = None):
-    """Writes viewer.html (2D map) and viewer3d.html (3D island) into the run directory;
-    `include` adds other runs of the same island to the same pages."""
+    """Writes viewer.html (3D island with a 2D map toggle, field log, rules and notes)
+    into the run directory; `include` adds other runs of the same island."""
     data = build_many([Path(root), *[Path(p) for p in (include or [])]])
-    links = Path(root) / "viewer_links.json"  # {"2d": url, "3d": url} of the published pages, if any
-    data["links"] = json.loads(links.read_text()) if links.exists() else {}
+    data["rules"] = rules_by_agent(data)
     blob = json.dumps(data, separators=(",", ":")).replace("</", "<\\/")
-    outs = []
-    for name in ("viewer.html", "viewer3d.html"):
-        tpl = Path(__file__).with_name(name).read_text()
-        out = Path(root) / name
-        out.write_text(tpl.replace("/*__DATA__*/null", blob))
-        outs.append(out)
+    tpl = Path(__file__).with_name("viewer.html").read_text()
+    out = Path(root) / "viewer.html"
+    out.write_text(tpl.replace("/*__DATA__*/null", blob))
+    outs = [out]
     bad = [(s["id"], s["diverged"]) for s in data["sessions"] if s["diverged"]]
     return outs, len(data["sessions"]), bad
