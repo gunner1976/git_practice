@@ -170,6 +170,30 @@ class Cosmos:
             found += self.judge(judge_model)
         return found
 
+    def sync_to(self, day: int, judge_model: str | None = None, only: list[str] | None = None, max_rounds: int = 400) -> list[dict]:
+        """Bring every agent (or those named) to the end of EKO day `day`: agents behind live more
+        sessions, none running past that day's end, until all have lived exactly `day` days.
+        Agents run together each round, so those already there wait for the rest."""
+        world = self.run._world()
+        if getattr(world, "eko", None) is None:
+            raise ValueError("sync_to needs planet EKO")
+        D = world.eko.day
+        self.run.eko_until = day * D + D / 4  # the dawn that begins day + 1
+        found = []
+        try:
+            for _ in range(max_rounds):
+                behind = [a for a in self.agents if (not only or a in only) and self.eko_day(a) < day]
+                if not behind or self.run.budget.stopped:
+                    break
+                nxt = {a: self.days(a) + 1 for a in behind}
+                self.run.free_play(behind, nxt, self.run.cfg["agent"]["steps_per_session"], len(behind), pair_order=self.agents)
+                if self.run.stopped_reason:
+                    break
+                found += self.judge(judge_model)
+        finally:
+            self.run.eko_until = None
+        return found
+
     def status(self) -> str:
         lived = self.days_lived()
         lines = [f"Cosmos `{self.root.name}`: {len(self.agents)} agents, ${self.run.budget.spent:.2f} spent so far.", ""]

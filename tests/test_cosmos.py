@@ -84,7 +84,28 @@ def test_wait_and_multi_day_sessions_carry_eko_time(tmp_path):
         assert e["eko_tau_end"] - e["eko_tau_start"] <= 3 * day + 1
     assert max(e["eko_tau_end"] - e["eko_tau_start"] for e in ends) > day
     assert ends[1]["eko_tau_start"] >= ends[0]["eko_tau_end"]            # time carries on: next dawn
-    assert (ends[1]["eko_tau_start"] - day / 4) % day == 0
-    assert json.loads((tmp_path / "c/agents/ada/eko_clock.json").read_text())["eko_day"] > 2
+    eko = c.run._world().eko
+    assert ends[1]["eko_tau_start"] == eko.wake_after(ends[0]["eko_tau_end"])  # the next dawn, or on if it just passed one
+    assert json.loads((tmp_path / "c/agents/ada/eko_clock.json").read_text())["eko_day"] >= 2
     outs, n, bad = write_viewer(tmp_path / "c")
     assert n == 2 and bad == []
+
+
+def test_sync_brings_everyone_to_the_same_eko_day(tmp_path):
+    cfg = run.read_cfg(ROOT / "configs/cosmos.yaml")
+    cfg["agent"]["clock"].update(session_seconds=300, warn_before_seconds=60, wait_tool=True, days_per_session=3)
+    c = Cosmos(tmp_path / "c", cfg, (ROOT / "paper/system_prompt.md").read_text(), max_usd=50, mock=True)
+    c.add(["Ada", "Bo", "Cy"])
+    c.advance(1, only=["ada"])
+    c.advance(1, only=["ada"])
+    assert c.eko_day("ada") > c.eko_day("bo") == 0
+    c.sync_to(4)
+    assert {a: c.eko_day(a) for a in c.agents} == {"ada": 4, "bo": 4, "cy": 4}
+    D = c.run._world().eko.day
+    for a in c.agents:  # nobody ran past the end of day 4 (beyond the last turn's few minutes)
+        for p in sorted((tmp_path / f"c/phase_a/{a}").glob("session_*.jsonl")):
+            end = next(json.loads(l) for l in p.read_text().splitlines() if '"session_end"' in l)
+            assert end["eko_tau_end"] < 4 * D + D / 4 + 0.05 * D
+    # one more shared day for everyone: they all wake at the same dawn
+    c.sync_to(5)
+    assert set(c.eko_day(a) for a in c.agents) == {5}

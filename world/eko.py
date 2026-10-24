@@ -141,6 +141,16 @@ class Eko:
         """The first dawn (a quarter day after local midnight) at or after EKO time tau."""
         return math.ceil((tau - self.day / 4) / self.day - 1e-9) * self.day + self.day / 4
 
+    def wake_after(self, tau: float) -> float:
+        """When an agent that fell asleep at EKO time tau wakes: the next dawn, or right away if it
+        fell asleep just after a dawn (so a session that ran a little past dawn doesn't skip a day)."""
+        prev = self.next_dawn(tau) - self.day if self.next_dawn(tau) > tau else tau
+        return tau if tau - prev < 0.1 * self.day else self.next_dawn(tau)
+
+    def days_lived(self, wake: float) -> int:
+        """Whole EKO days behind an agent that next wakes at `wake` (day 1 began at the first dawn)."""
+        return int((wake - self.day / 4) // self.day + 1e-9)
+
     def sky(self, x: float, y: float, ground: float, tau: float) -> dict:
         """What an observer standing at island point (x, y), on ground `ground` m above sea level,
         sees at EKO time tau."""

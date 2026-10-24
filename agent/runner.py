@@ -63,6 +63,7 @@ class Run:
         self.board = None   # the phone switchboard (world/phone.py), when the mission reward is a phone
         self.dawn = None    # optional (agent, session) -> text added to that day's opening (agent/cosmos.py)
         self.soul_for = None  # optional agent -> its own system prompt (agent/cosmos.py: its name)
+        self.eko_until = None  # optional EKO time no session may run past (agent/cosmos.py: sync)
 
     # -------------------------------------------------------------- state io
     def _save(self) -> None:
@@ -150,7 +151,10 @@ class Run:
             eko_path = self.root / "agents" / agent / "eko_clock.json"
             if getattr(world, "eko", None) is not None and eko_path.exists():
                 # EKO time carries on: wake at the first dawn after the last session ended
-                meta["eko_start_tau"] = world.eko.next_dawn(json.loads(eko_path.read_text())["tau"])
+                clk_ = json.loads(eko_path.read_text())
+                meta["eko_start_tau"] = clk_.get("wake", world.eko.wake_after(clk_["tau"]))
+            if self.eko_until is not None:
+                meta["eko_end_tau"] = self.eko_until
             if board is not None:
                 board.start(agent)
             try:
@@ -163,7 +167,8 @@ class Run:
                     ach_path.write_text(json.dumps(world.achievements))
                 if "eko_tau_end" in res:
                     e = world.eko
-                    eko_path.write_text(json.dumps({"tau": res["eko_tau_end"], "eko_day": int((res["eko_tau_end"] - e.day / 4) // e.day) + 1}))
+                    wake = e.wake_after(res["eko_tau_end"])
+                    eko_path.write_text(json.dumps({"tau": res["eko_tau_end"], "wake": wake, "eko_day": e.days_lived(wake)}))
                 if self.cfg["world"].get("persist"):
                     wdir.mkdir(parents=True, exist_ok=True)
                     (wdir / f"session_{k:02d}_end.json").write_text(json.dumps(world.state()))

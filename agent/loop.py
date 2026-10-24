@@ -118,6 +118,8 @@ def run_session(
         ss = float(clk["session_seconds"])
         start_tau = float(meta["eko_start_tau"]) if meta.get("eko_start_tau") is not None else eko.session_tau(int(meta.get("session") or 1), 0.0, ss)
         span_end = start_tau + float(clk.get("days_per_session", 1)) * eko.day
+        if meta.get("eko_end_tau") is not None:  # the cosmos is bringing everyone to the same EKO day
+            span_end = min(span_end, float(meta["eko_end_tau"]))
         warn_tau = eko.day * float(clk["warn_before_seconds"]) / ss
 
     def eko_tau() -> float:
