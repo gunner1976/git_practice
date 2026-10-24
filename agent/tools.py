@@ -135,11 +135,19 @@ ANSWER_TOOL = {
 }
 
 
+WAIT_TOOL = {
+    "name": "wait",
+    "description": "Wait. Data: {\"hours\": n}. Time passes while you rest; you may wake earlier if something changes.",
+    "input_schema": {"type": "object", "properties": {"hours": _num}, "required": ["hours"], "additionalProperties": False},
+}
+
+
 def extra_tools(cfg: dict) -> list[dict]:
-    """Tools beyond the world and the workspace: the calculator, and an answer tool when the
-    observer poses a challenge."""
+    """Tools beyond the world and the workspace: the calculator, an answer tool when the observer
+    poses a challenge, and wait (letting EKO time pass at no cost) when the clock allows it."""
     a = cfg["agent"]
-    return ([CALC_TOOL] if a.get("math_tool") else []) + ([ANSWER_TOOL] if a.get("challenge") else [])
+    return ([CALC_TOOL] if a.get("math_tool") else []) + ([ANSWER_TOOL] if a.get("challenge") else []) + \
+        ([WAIT_TOOL] if (a.get("clock") or {}).get("wait_tool") else [])
 
 
 def calculate(expression: str) -> str:

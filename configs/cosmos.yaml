@@ -10,4 +10,6 @@ world:
 
 agent:
   clock:
-    session_seconds: 1200   # a 20-minute day, as in eko1
+    session_seconds: 1200   # 20 minutes of activity per session (the awake budget), as in eko1
+    wait_tool: true         # agents can let EKO time pass at no cost, waking when the sky changes
+    days_per_session: 5     # so a session can cover up to 5 EKO days; without waiting it covers one

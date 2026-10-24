@@ -64,3 +64,27 @@ def test_cosmos_agents_persist_and_hear_shared_discoveries(tmp_path):
     assert _cosmos(tmp_path / "cosmos").agents == ["christian", "vern", "keats", "kip"]
     outs, n, bad = write_viewer(tmp_path / "cosmos")
     assert n == 8 and bad == []
+
+
+def test_wait_and_multi_day_sessions_carry_eko_time(tmp_path):
+    from analysis.replay import write_viewer
+
+    cfg = run.read_cfg(ROOT / "configs/cosmos.yaml")
+    cfg["agent"]["clock"].update(session_seconds=300, warn_before_seconds=60, wait_tool=True, days_per_session=3)
+    c = Cosmos(tmp_path / "c", cfg, (ROOT / "paper/system_prompt.md").read_text(), max_usd=50, mock=True)
+    c.add(["Ada"])
+    c.advance(2)
+    logs = [[json.loads(l) for l in (tmp_path / f"c/phase_a/ada/session_{k:02d}.jsonl").read_text().splitlines()] for k in (1, 2)]
+    ends = [next(e for e in L if e["kind"] == "session_end") for L in logs]
+    waits = [e for L in logs for e in L if e["kind"] == "wait"]
+    assert waits and all(w["hours"] <= w["hours_asked"] + 1e-9 for w in waits)
+    assert any(w["woke"] != "time passed" for w in waits)               # something in the sky woke it
+    day = c.run._world().eko.day
+    for e in ends:  # waiting lets a session cover more than one EKO day, never more than three
+        assert e["eko_tau_end"] - e["eko_tau_start"] <= 3 * day + 1
+    assert max(e["eko_tau_end"] - e["eko_tau_start"] for e in ends) > day
+    assert ends[1]["eko_tau_start"] >= ends[0]["eko_tau_end"]            # time carries on: next dawn
+    assert (ends[1]["eko_tau_start"] - day / 4) % day == 0
+    assert json.loads((tmp_path / "c/agents/ada/eko_clock.json").read_text())["eko_day"] > 2
+    outs, n, bad = write_viewer(tmp_path / "c")
+    assert n == 2 and bad == []

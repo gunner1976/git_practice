@@ -109,9 +109,50 @@ def run_session(
         start_utc = dt.datetime.fromisoformat(clk["start_utc"].replace("Z", "+00:00")) + dt.timedelta(hours=int(meta.get("session") or 1) - 1)
 
     eko = getattr(world, "eko", None)
+    # EKO time: the session starts at a dawn (carried over from the last session by the runner, or
+    # the session's own day) and runs at one EKO day per session_seconds of activity, plus any time
+    # the agent spends waiting. A session may span several EKO days (clock.days_per_session): the
+    # awake budget stays the same, so only waiting can cover the extra days.
+    slept = 0.0
+    if eko is not None and clk:
+        ss = float(clk["session_seconds"])
+        start_tau = float(meta["eko_start_tau"]) if meta.get("eko_start_tau") is not None else eko.session_tau(int(meta.get("session") or 1), 0.0, ss)
+        span_end = start_tau + float(clk.get("days_per_session", 1)) * eko.day
+        warn_tau = eko.day * float(clk["warn_before_seconds"]) / ss
 
     def eko_tau() -> float:
-        return eko.session_tau(int(meta.get("session") or 1), clock, float(clk["session_seconds"]))
+        return start_tau + eko.day * clock / ss + slept
+
+    def near_end() -> bool:
+        """Inside the end-of-day warning window: of the awake budget, or of the session's EKO span."""
+        return clock >= float(clk["session_seconds"]) - float(clk["warn_before_seconds"]) or (eko is not None and eko_tau() >= span_end - warn_tau)
+
+    def day_frac() -> dict:
+        """Fraction of the EKO day since dawn, for the replay's daylight."""
+        return {"df": round(((eko_tau() - eko.day / 4) / eko.day) % 1.0, 4)} if eko is not None and clk else {}
+
+    def wait(hours) -> tuple[str, bool, dict]:
+        nonlocal slept
+        try:
+            h = max(0.0, min(float(hours), 200.0))
+        except (TypeError, ValueError):
+            return "Wait needs a number of hours.", True, {}
+        t0 = eko_tau()
+        limit = max(t0, span_end - warn_tau)  # waiting stops where the end-of-day warning begins
+        target, t, reason = min(t0 + h * 3600.0, limit), t0, "time passed"
+        a_ = world.avatar
+        before = eko.senses(a_.x, a_.y, t0)
+        names = (("the sun rose", "the sun set"), ("the moon rose", "the moon set"), ("the moon's light changed", "the moon's light changed"))
+        while t < target:
+            t = min(target, t + 600.0)  # look up every 10 EKO minutes
+            now = eko.senses(a_.x, a_.y, t)
+            changed = [names[i][0 if now[i] else 1] for i in range(3) if now[i] != before[i]]
+            if changed:
+                reason = changed[0]
+                break
+        slept += t - t0
+        return json.dumps({"lastActionResult": "WaitSuccess", "waited_hours": round((t - t0) / 3600.0, 2), "woke": reason, "time": now_iso()}), False, \
+            {"hours_asked": h, "hours": round((t - t0) / 3600.0, 3), "woke": reason}
 
     def now_iso() -> str:
         if eko is not None and clk:  # EKO's own clock: its days and hours
@@ -154,6 +195,9 @@ def run_session(
             break
         if clk and clock >= float(clk["session_seconds"]):
             end_reason = "session_time_up"
+            break
+        if eko is not None and clk and eko_tau() >= span_end:
+            end_reason = "session_span_over"
             break
         budget.check(last_cost * 1.25)  # raises BudgetExceeded
         if a.get("context_prune_chars"):
@@ -205,7 +249,7 @@ def run_session(
                 log("heard", step=used, texts=heard, **({"clock": round(clock, 1)} if clk else {}))
                 hook = f"{hook}\n\n" + "\n".join(heard)
             hook_content: list | str = hook
-            if clk and not warned and clock >= float(clk["session_seconds"]) - float(clk["warn_before_seconds"]):
+            if clk and not warned and near_end():
                 warned = True
                 log("reset_warning", step=used, clock=round(clock, 1))
                 hook_content = f"{hook}\n\n{clk['warn_message']}"
@@ -234,7 +278,7 @@ def run_session(
                             if e.get("type") == "spawn":
                                 spawn_steps.append(used)
                             log("hidden_rule_fired", step=used, event=e)
-                    log("action", step=used, name=name, input=args, result=msg, error=err, events=events, **({"clock": round(clock, 1)} if clk else {}))
+                    log("action", step=used, name=name, input=args, result=msg, error=err, events=events, **({"clock": round(clock, 1)} if clk else {}), **day_frac())
                     for e in events:
                         if e.get("type") == "achievement":
                             log("achievement", step=used, name=e["name"])
@@ -242,7 +286,10 @@ def run_session(
             elif name in extra_names:
                 if clk:
                     clock += float(clk["query_seconds"])
-                if name == "calculate":
+                if name == "wait":
+                    msg, err, info = wait(args.get("hours")) if eko is not None and clk else ("Nothing happens.", True, {})
+                    log("wait", step=used, **info, **({"clock": round(clock, 1)} if clk else {}), **day_frac())
+                elif name == "calculate":
                     try:
                         msg, err = calculate(str(args.get("expression", ""))), False
                     except Exception as e:  # noqa: BLE001 - any bad expression goes back to the agent
@@ -296,7 +343,7 @@ def run_session(
         if heard:  # what reaches the agent unbidden: an announcement, a ringing phone, a voice
             log("heard", step=used, texts=heard, **({"clock": round(clock, 1)} if clk else {}))
             user_content.append({"type": "text", "text": "\n".join(heard)})
-        if clk and not warned and clock >= float(clk["session_seconds"]) - float(clk["warn_before_seconds"]):
+        if clk and not warned and near_end():
             warned = True
             log("reset_warning", step=used, clock=round(clock, 1))
             user_content.append({"type": "text", "text": clk["warn_message"]})
@@ -308,6 +355,8 @@ def run_session(
 
     state = world.state()
     log("session_end", reason=end_reason, steps_used=used, api_calls=calls, notes_ops=notes_ops, nudges=nudges, world=state, spawn_steps=spawn_steps,
-        rule_fires=rule_fires, **({"clock_seconds": round(clock, 1)} if clk else {}))
+        rule_fires=rule_fires, **({"clock_seconds": round(clock, 1)} if clk else {}),
+        **({"eko_tau_start": round(start_tau, 1), "eko_tau_end": round(eko_tau(), 1), "eko_hours_waited": round(slept / 3600.0, 2)} if eko is not None and clk else {}))
     return {"end_reason": end_reason, "steps_used": used, "api_calls": calls, "spawn_steps": spawn_steps, "rule_fires": rule_fires,
-            **({"clock_seconds": round(clock, 1)} if clk else {})}
+            **({"clock_seconds": round(clock, 1)} if clk else {}),
+            **({"eko_tau_end": round(eko_tau(), 1), "eko_hours_waited": round(slept / 3600.0, 2)} if eko is not None and clk else {})}

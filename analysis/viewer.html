@@ -448,7 +448,7 @@ h2.sec { font-family: var(--display); font-size: 1rem; font-weight: 600; margin:
     <h2>The cosmos now</h2>
     <p id="cosmosSum">The founders' status appears here when this page is built from the cosmos run.</p>
     <div class="tbl"><table id="cosmosTbl" hidden>
-      <thead><tr><th>Founder</th><th>Days lived</th><th>Phone partner</th><th>Mission trials</th><th>Found since</th></tr></thead>
+      <thead><tr><th>Founder</th><th>Sessions · EKO day</th><th>Phone partner</th><th>Mission trials</th><th>Found since</th></tr></thead>
       <tbody></tbody>
     </table></div>
   </div>
@@ -800,7 +800,9 @@ const DATA = /*__DATA__*/null;
   const tmpA = new THREE.Color(), tmpB = new THREE.Color();
   function sky() {
     const F0 = S.frames[cur], F1 = S.frames[Math.min(cur + 1, S.frames.length - 1)];
-    const d = S.session_seconds ? Math.min(1, lerp(F0.c || 0, F1.c || F0.c || 0, playing ? t : 0) / S.session_seconds)
+    // the logged time of day when there is one (sessions spanning several EKO days, waits); else the session clock
+    const d = F0.df !== undefined ? (F1.df !== undefined && F1.df >= F0.df ? lerp(F0.df, F1.df, playing ? t : 0) : F0.df)
+      : S.session_seconds ? Math.min(1, lerp(F0.c || 0, F1.c || F0.c || 0, playing ? t : 0) / S.session_seconds)
       : Math.min(1, lerp(F0.step, F1.step, playing ? t : 0) / Math.max(S.frames[S.frames.length - 1].step, 150));
     // planet EKO: a session is a whole day, dawn to dawn - daytime in the first half, night in the second
     const NIGHT = [[0, 0xf2b07a, 0xffc48a, 0.45], [0.12, 0x1d2240, 0x8090c0, 0.18], [0.88, 0x0b1022, 0x6070a0, 0.15], [1, 0xf2b07a, 0xffd6a0, 0.45]];
@@ -935,6 +937,7 @@ const DATA = /*__DATA__*/null;
     else if (e.k === "read") body = `read ${esc(e.p)}`;
     else if (e.k === "rule") body = `Hidden rule fired: ${esc(e.t)}${e.id ? " → " + esc(e.id) : ""}`;
     else if (e.k === "nudge") body = `Stop hook nudge #${esc(e.n)}`;
+    else if (e.k === "wait") body = `<span class="res">${esc(e.t)}</span>`;
     else if (e.k === "calc") body = `calculate ${esc(e.t)}\n<span class="res">= ${esc(e.r)}</span>`;
     else if (e.k === "answer") body = `<div class="p">answered the voice</div><b>${esc(e.t)}</b>\n${esc(e.r)}`;
     return `<div class="ev ${e.k}${e.k === "act" && e.e ? " err" : ""}" data-f="${e.f}"><span class="st">${f}</span><div class="tx">${body}</div></div>`;
@@ -1195,10 +1198,10 @@ const DATA = /*__DATA__*/null;
       const trials = TRIALS.map(([k, l]) => `<span class="chip ${done[k] ? "done" : "todo"}">${l}</span>`).join("");
       const extra = EXTRA.filter(([k]) => done[k]).map(([, l]) => `<span class="chip done">${l}</span>`).join("");
       const disc = (C.discoveries || []).filter((d) => d.agent === a.id).map((d) => `<span class="chip done">${esc(d.kind.replace("_", " "))}${d.assisted_by && d.assisted_by.length ? " (assisted)" : ""}</span>`).join("");
-      return `<tr><td>${esc(a.name)}</td><td class="n">${a.days}</td><td>${esc(a.partner || "")}</td><td>${trials}</td><td>${extra}${disc}</td></tr>`;
+      return `<tr><td>${esc(a.name)}</td><td class="n">${a.days} · ${a.eko_day ?? a.days}</td><td>${esc(a.partner || "")}</td><td>${trials}</td><td>${extra}${disc}</td></tr>`;
     });
     const tbl = $("cosmosTbl"); tbl.querySelector("tbody").innerHTML = rows.join(""); tbl.hidden = false;
-    const lived = Math.max(0, ...C.agents.map((a) => a.days));
-    $("cosmosSum").textContent = `${C.agents.length} founders, up to day ${lived}, $${C.spent.toFixed(2)} spent in the cosmos. ${(C.discoveries || []).length ? (C.discoveries.length + " discoveries so far.") : "No promoted discoveries yet."}`;
+    const lived = Math.max(0, ...C.agents.map((a) => a.eko_day ?? a.days));
+    $("cosmosSum").textContent = `${C.agents.length} founders, up to EKO day ${lived}, $${C.spent.toFixed(2)} spent in the cosmos. ${(C.discoveries || []).length ? (C.discoveries.length + " discoveries so far.") : "No promoted discoveries yet."}`;
   })();
 </script>

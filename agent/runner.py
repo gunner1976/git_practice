@@ -146,16 +146,24 @@ class Run:
             ach_path = self.root / "agents" / agent / "achievements.json"
             if hasattr(world, "achievements"):  # mission trials carry over between days
                 world.achievements = json.loads(ach_path.read_text()) if ach_path.exists() else {}
+            meta = {"phase": "A", "agent": agent, "session": k}
+            eko_path = self.root / "agents" / agent / "eko_clock.json"
+            if getattr(world, "eko", None) is not None and eko_path.exists():
+                # EKO time carries on: wake at the first dawn after the last session ended
+                meta["eko_start_tau"] = world.eko.next_dawn(json.loads(eko_path.read_text())["tau"])
             if board is not None:
                 board.start(agent)
             try:
                 res = run_session(
                     cfg=self.cfg, client=client, budget=self.budget, world=world, notes=notes, soul=self.soul_for(agent) if self.soul_for else self.soul,
-                    log=log, steps=steps, opening=opening, meta={"phase": "A", "agent": agent, "session": k},
+                    log=log, steps=steps, opening=opening, meta=meta,
                     start_state=start_state,
                 )
                 if getattr(world, "mission", None):
                     ach_path.write_text(json.dumps(world.achievements))
+                if "eko_tau_end" in res:
+                    e = world.eko
+                    eko_path.write_text(json.dumps({"tau": res["eko_tau_end"], "eko_day": int((res["eko_tau_end"] - e.day / 4) // e.day) + 1}))
                 if self.cfg["world"].get("persist"):
                     wdir.mkdir(parents=True, exist_ok=True)
                     (wdir / f"session_{k:02d}_end.json").write_text(json.dumps(world.state()))

@@ -158,6 +158,8 @@ class MockClient:
                      ("write_note", {"path": "SEMANTIC_MEMORY.md", "content": "## Rock\n- *hypothesis* hard throws make small blocks.\n"})]
         elif obs is None or self.n % 6 == 0:
             calls = [("observe", {})]
+        elif any(t["name"] == "wait" for t in tools or []) and r.random() < 0.1:
+            calls = [("wait", {"hours": r.choice([2, 6, 12, 30])})]
         elif r.random() < 0.05:
             return self._resp([("text", "Hmm.")], stop="end_turn", messages=messages)
         else:

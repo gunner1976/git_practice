@@ -130,6 +130,17 @@ class Eko:
         moon = self.Rm / self.a
         return _overlap(moon, umbra, sep) / (math.pi * moon * moon), umbra / moon
 
+    def senses(self, x: float, y: float, tau: float) -> tuple[bool, bool, bool]:
+        """What a resting observer would notice changing: (sun up, moon up, moon darkened)."""
+        pos, up, east, north = self._observer(x, y, tau)
+        s_el = self._altaz(self._sun_dir(tau), up, east, north)[1]
+        m_el = self._altaz(self._moon_vec(tau) - pos, up, east, north)[1]
+        return s_el > 0, m_el > 0, m_el > 0 and self.lunar_eclipse(tau)[0] > 0.05
+
+    def next_dawn(self, tau: float) -> float:
+        """The first dawn (a quarter day after local midnight) at or after EKO time tau."""
+        return math.ceil((tau - self.day / 4) / self.day - 1e-9) * self.day + self.day / 4
+
     def sky(self, x: float, y: float, ground: float, tau: float) -> dict:
         """What an observer standing at island point (x, y), on ground `ground` m above sea level,
         sees at EKO time tau."""

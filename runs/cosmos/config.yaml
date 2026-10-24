@@ -187,6 +187,8 @@ agent:
     warn_message: You will be reset in 5 minutes. Update your workspace memory files
       now.
     start_utc: '2026-05-01T08:00:00Z'
+    wait_tool: true
+    days_per_session: 5
 phase_a:
   n_agents: 3
   n_sessions: 10

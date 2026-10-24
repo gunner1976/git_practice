@@ -120,6 +120,8 @@ def replay_session(path: Path, wcfg: dict, notes_start: dict[str, str]) -> dict:
             fr = {"step": r["step"], **_snapshot(w)}
             if "clock" in r:
                 fr["c"] = r["clock"]
+            if "df" in r:  # fraction of the EKO day since dawn (sessions that span several days, or waits)
+                fr["df"] = r["df"]
             if r["name"] == "throw" and not err and getattr(w, "last_flight", None):
                 thrown = r["input"].get("id") or next((e["id"] for e in r.get("events", []) if e.get("type") == "landed"), None)
                 fr["fly"] = [thrown, w.last_flight]
@@ -166,6 +168,8 @@ def replay_session(path: Path, wcfg: dict, notes_start: dict[str, str]) -> dict:
         elif k == "heard":  # an announcement, the phone ringing, a voice on the line
             for t in r.get("texts", []):
                 timeline.append({"f": fi, "k": "rule", "t": "heard: " + t})
+        elif k == "wait":
+            timeline.append({"f": fi, "k": "wait", "t": f"waited {r.get('hours', 0)} h (asked {r.get('hours_asked', 0)} h); woke: {r.get('woke', '')}"})
         elif k == "achievement":
             timeline.append({"f": fi, "k": "rule", "t": "trial completed: " + r["name"].replace("_", " ")})
         elif k == "stop_hook":
@@ -257,7 +261,8 @@ def _cosmos_status(root: Path) -> dict | None:
         while done.get(f"{a}/{k + 1}", {}).get("done"):
             k += 1
         ach = root / "agents" / a / "achievements.json"
-        agents.append({"id": a, "name": names[a], "days": k, "partner": names.get(partner.get(a), ""),
+        ec = root / "agents" / a / "eko_clock.json"
+        agents.append({"id": a, "name": names[a], "days": k, "eko_day": json.loads(ec.read_text())["eko_day"] if ec.exists() else k, "partner": names.get(partner.get(a), ""),
                        "achievements": json.loads(ach.read_text()) if ach.exists() else {}})
     spent = sum(json.loads(l)["cost_usd"] for l in (root / "ledger.jsonl").read_text().splitlines() if l.strip()) if (root / "ledger.jsonl").exists() else 0.0
     return {"agents": agents, "discoveries": st.get("discoveries", []), "spent": round(spent, 2)}

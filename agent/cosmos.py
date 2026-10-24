@@ -93,6 +93,11 @@ class Cosmos:
             k += 1
         return k
 
+    def eko_day(self, aid: str) -> int:
+        """The EKO day the agent has reached (sessions can span several days once it can wait)."""
+        p = self.root / "agents" / aid / "eko_clock.json"
+        return json.loads(p.read_text())["eko_day"] if p.exists() else self.days(aid)
+
     def days_lived(self) -> dict[str, int]:
         return {a: self.days(a) for a in self.agents}
 
@@ -176,7 +181,7 @@ class Cosmos:
         for a in self.agents:
             ach = self.root / "agents" / a / "achievements.json"
             got = sorted(k for k, v in (json.loads(ach.read_text()) if ach.exists() else {}).items() if v)
-            lines.append(f"- {self.name(a)}: {lived[a]} days" + (f", phone partner {self.name(partner[a])}" if a in partner else "") + (f"; {', '.join(got)}" if got else ""))
+            lines.append(f"- {self.name(a)}: {lived[a]} sessions, EKO day {self.eko_day(a)}" + (f", phone partner {self.name(partner[a])}" if a in partner else "") + (f"; {', '.join(got)}" if got else ""))
         for d in self.state["discoveries"]:
             lines.append(f"- discovery: {d['name']} (day {d['day']}) {d['kind']}" + (" - shared" if d["shared"] else "") + (" - assisted" if d["assisted_by"] else ""))
         return "\n".join(lines)
