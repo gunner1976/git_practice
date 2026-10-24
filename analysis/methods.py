@@ -143,7 +143,8 @@ def agent_methods(root: Path, data: dict, wcfg: dict, truth: float) -> list[dict
         else:
             coverage, spokes = 0.0, 0
         text = fa["explanation"].lower()
-        circle = any(w in text for w in ("2π", "2pi", "2*pi", "2 pi", "2·pi", "circle", "circular", "πr", "pi*r"))
+        circle = any(w in text for w in ("2π", "2pi", "2*pi", "2 pi", "2·pi", "circle", "circular", "πr", "pi*r", "mean radius",
+                                         "average radius", "shore radius", "mean shore", "radius of about", "radius ≈", "radius ~"))
         polygon = any(w in text for w in ("polygon", "segment", "sum of", "summed", "added up", "chord", "walked around", "traced", "traverse", "along the coast", "around the coast"))
         if coverage >= 0.6:
             method = "coast walk"
