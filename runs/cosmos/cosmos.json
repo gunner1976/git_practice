@@ -63,5 +63,12 @@
   "eric": {},
   "keats": {},
   "vern": {}
- }
+ },
+ "told": [
+  {
+   "agent": "christian",
+   "day": 2,
+   "text": "Your mission is to reach the moon."
+  }
+ ]
 }
