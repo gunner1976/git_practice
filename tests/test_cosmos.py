@@ -55,7 +55,12 @@ def test_cosmos_agents_persist_and_hear_shared_discoveries(tmp_path):
     finally:
         pr.promote = keep
     assert [d["name"] for d in new] == ["Vern"] and new[0]["assisted_by"] == ["round_world:christian"] and not new[0]["shared"]
+    # the observer tells one agent something once; only that agent lives the next day
+    assert c.tell("keats", "Your mission is to reach the moon.") == 3
+    c.advance(1, only=["keats"])
+    assert c.days_lived() == {"christian": 2, "vern": 2, "keats": 3, "kip": 1}
+    assert opening("keats", 3).count("Your mission is to reach the moon.") == 1
     # state survives reopening, and every day replays exactly
     assert _cosmos(tmp_path / "cosmos").agents == ["christian", "vern", "keats", "kip"]
     outs, n, bad = write_viewer(tmp_path / "cosmos")
-    assert n == 7 and bad == []
+    assert n == 8 and bad == []

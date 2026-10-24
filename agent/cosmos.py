@@ -19,6 +19,7 @@ the days each has lived, every discovery, and which agent heard which discovery 
     python run.py cosmos --max-usd 10            # one more day for every agent
     python run.py cosmos --days 3 --max-usd 30
     python run.py cosmos --add Ada,Bo --max-usd 0  # new agents join (they start on their own day 1)
+    python run.py cosmos --only Christian --tell "Your mission is to reach the moon." --days 10 --max-usd 10
 """
 
 from __future__ import annotations
@@ -101,7 +102,8 @@ class Cosmos:
         by someone else that it has not heard on an earlier day."""
         with self.lock:
             heard = self.state["heard"].setdefault(aid, {})
-            lines = []
+            # what the observer tells this agent, on the day it was meant for
+            lines = [t["text"] for t in self.state.get("told", []) if t["agent"] == aid and t["day"] == session]
             for d in self.state["discoveries"]:
                 if not d.get("shared") or d["agent"] == aid:
                     continue
@@ -112,6 +114,14 @@ class Cosmos:
                     lines.append(f'Words reach you at dawn, from {d["name"]} on another world like yours: "{d["quote"]}"')
             self._save()
         return "\n\n".join(lines) or None
+
+    def tell(self, aid: str, text: str) -> int:
+        """The observer speaks to one agent once, as it wakes on its next day. Returns that day."""
+        day = self.days(aid) + 1
+        with self.lock:
+            self.state.setdefault("told", []).append({"agent": aid, "day": day, "text": text.strip()})
+            self._save()
+        return day
 
     def judge(self, judge_model: str | None, max_usd: float = 1.0) -> list[dict]:
         """Run the promotion judge over everything so far and record new discoveries."""
@@ -138,17 +148,18 @@ class Cosmos:
         return new
 
     # ------------------------------------------------------------ time
-    def advance(self, days: int = 1, judge_model: str | None = None) -> list[dict]:
-        """Every agent lives `days` more days, one day at a time (all agents in parallel, so phone
-        partners are awake together); the judge runs after each day."""
+    def advance(self, days: int = 1, judge_model: str | None = None, only: list[str] | None = None) -> list[dict]:
+        """Every agent (or only those named) lives `days` more days, one day at a time (all in
+        parallel, so phone partners are awake together); the judge runs after each day."""
         cfg = self.run.cfg
         found = []
         for _ in range(days):
             if self.run.budget.stopped:
                 break
             # each agent lives its own next day (newcomers start at their day 1); everyone at once
-            nxt = {a: k + 1 for a, k in self.days_lived().items()}
-            self.run.free_play(self.agents, nxt, cfg["agent"]["steps_per_session"], len(self.agents))
+            who = [a for a in self.agents if not only or a in only]
+            nxt = {a: self.days(a) + 1 for a in who}
+            self.run.free_play(who, nxt, cfg["agent"]["steps_per_session"], len(who), pair_order=self.agents)
             if self.run.stopped_reason:
                 break
             found += self.judge(judge_model)

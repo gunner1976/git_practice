@@ -92,14 +92,14 @@ class Run:
         agents = [f"agent_{i + 1}" for i in range(n_agents)]
         self.free_play(agents, n_sessions, steps, parallel)
 
-    def free_play(self, agents: list[str], n_sessions: int | dict, steps: int, parallel: int) -> None:
+    def free_play(self, agents: list[str], n_sessions: int | dict, steps: int, parallel: int, pair_order: list[str] | None = None) -> None:
         """Each named agent plays up to day `n_sessions` (or its own entry, if a dict); days already
-        done are skipped. Phone partners are paired in the order of `agents`."""
+        done are skipped. Phone partners are paired in the order of `pair_order` (default `agents`)."""
         if (self.cfg["world"].get("mission") or {}).get("reward") == "phone":
             from world.phone import Switchboard
 
             # calls are live, so both ends of every pair must be running at the same time
-            self.board = Switchboard(agents, ring_seconds=float(self.cfg["world"]["mission"].get("ring_seconds", 120)))
+            self.board = Switchboard(pair_order or agents, ring_seconds=float(self.cfg["world"]["mission"].get("ring_seconds", 120)))
             parallel = len(agents)
         upto = n_sessions if isinstance(n_sessions, dict) else {a: n_sessions for a in agents}
         with ThreadPoolExecutor(max_workers=max(1, min(parallel, len(agents)))) as ex:

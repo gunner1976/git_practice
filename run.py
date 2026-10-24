@@ -221,7 +221,7 @@ def cmd_promote(args) -> None:
 
 def cmd_cosmos(args) -> None:
     """The persistent universe: create it (founders), add agents, or live more days."""
-    from agent.cosmos import FOUNDERS, Cosmos
+    from agent.cosmos import FOUNDERS, Cosmos, agent_id
 
     if args.config == str(ROOT / "config.yaml"):
         args.config = str(ROOT / "configs/cosmos.yaml")
@@ -233,8 +233,14 @@ def cmd_cosmos(args) -> None:
         print("Founders join: " + ", ".join(c.name(a) for a in c.add(FOUNDERS)))
     if args.add:
         print("Joined: " + ", ".join(c.name(a) for a in c.add([n for n in args.add.split(",") if n.strip()])))
+    only = [agent_id(n) for n in args.only.split(",") if n.strip()] if args.only else None
+    if only and any(a not in c.agents for a in only):
+        sys.exit(f"Unknown agent in --only: {args.only}")
+    if args.tell:
+        for a in only or c.agents:
+            print(f"{c.name(a)} will hear at dawn of day {c.tell(a, args.tell)}: {args.tell}")
     if args.days:
-        found = c.advance(args.days, judge_model=None if c.run.mock else (args.judge_model or "claude-haiku-5-5"))
+        found = c.advance(args.days, judge_model=None if c.run.mock else (args.judge_model or "claude-haiku-5-5"), only=only)
         for d in found:
             print(f"Discovery: {d['name']} on day {d['day']}" + (" (shared at the next dawn)" if d["shared"] else "") + (" (assisted)" if d["assisted_by"] else ""))
         report_stop(c.run)
@@ -341,6 +347,8 @@ def main(argv=None) -> None:
             p.add_argument("--days", type=int, default=0, help="days every agent lives in this call (0: just create / add / show status)")
             p.add_argument("--add", help="comma-separated names of new agents to add")
             p.add_argument("--judge-model", help="promotion judge (default claude-haiku-5-5)")
+            p.add_argument("--only", help="comma-separated names: only these agents live the days")
+            p.add_argument("--tell", help="words the agents (or --only ones) hear once, as they wake on their next day")
         if name == "viewer":
             p.add_argument("--include", action="append", metavar="RUN_ID", help="also show this run (same island); repeatable")
     args = ap.parse_args(argv)

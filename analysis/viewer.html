@@ -477,6 +477,8 @@ const DATA = /*__DATA__*/null;
   const COL = { red: 0xd33b2f, orange: 0xef8a1c, yellow: 0xf2cf1d, green: 0x3fa34d, blue: 0x2d6fd6, purple: 0x7b45c4, pink: 0xef7fb6,
     white: 0xf4f4ef, black: 0x26262b, grey: 0x8c9196, brown: 0x8a5a2b, teal: 0x159c9c, stone: 0x9e9484, gold: 0xe0aa22, golden: 0xf0c030 };
   const AGENT_COL = { agent_1: "#5b5ff0", agent_2: "#f0644b", agent_3: "#18a999", fresh_1: "#e0a526", fresh_2: "#c05bd6", fresh_3: "#6c8a9b" };
+  const PALETTE = ["#5b5ff0", "#f0644b", "#18a999", "#e0a526", "#c05bd6", "#2f8fd8", "#d9487e", "#6aa83a", "#8a63d2", "#d97a1e"];
+  ((DATA.cosmos || {}).agents || []).forEach((a, i) => { AGENT_COL[a.id] = PALETTE[i % PALETTE.length]; });
   const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const lerp = (a, b, u) => a + (b - a) * u;
@@ -685,7 +687,9 @@ const DATA = /*__DATA__*/null;
     el.addEventListener("change", () => { filt[k] = el.checked; store("filt", filt); renderPane(true); });
   }
   const spawnCount = (s) => s.timeline.filter((e) => e.k === "rule").length;
-  const nice = (a) => a.replace("_", " ");
+  // the cosmos founders have names; other runs' agents read "Agent 1", "Fresh 2"
+  const NAMES = Object.fromEntries(((DATA.cosmos || {}).agents || []).map((a) => [a.id, a.name]));
+  const nice = (a) => NAMES[a] || (a.charAt(0).toUpperCase() + a.slice(1)).replace("_", " ");
 
   $("selAgent").addEventListener("change", (e) => {
     const same = byAgent[e.target.value].find((i) => DATA.sessions[i].label === S.label);
@@ -873,7 +877,7 @@ const DATA = /*__DATA__*/null;
     const pr = (DATA.promotions || {})[akey(S)];
     const dayNo = parseInt((S.label.match(/\d+/) || ["0"])[0], 10);
     const promoted = pr && S.phase === "A" && (dayNo > pr.day || (dayNo === pr.day && f.step >= pr.step));
-    $("hud").innerHTML = `<div class="who"><i style="background:${AGENT_COL[S.agent] || "#5b5ff0"}"></i>Eko · ${esc(nice(S.agent))}${promoted ? ' <span class="promo" title="' + esc(pr.evidence) + '">★ promoted</span>' : ""}</div>
+    $("hud").innerHTML = `<div class="who"><i style="background:${AGENT_COL[S.agent] || "#5b5ff0"}"></i>${NAMES[S.agent] ? "" : "Eko · "}${esc(nice(S.agent))}${promoted ? ' <span class="promo" title="' + esc(pr.evidence) + '">★ promoted</span>' : ""}</div>
       <div class="what">${S.phase === "A" ? esc(S.label) + " · free play" : "Task: " + esc(S.task || S.label)}</div>
       <span style="color:#93a6b0;font-size:10px;letter-spacing:.08em;text-transform:uppercase">${leftLbl}</span>
       <div class="meter"><b style="width:${(left / full * 100).toFixed(1)}%"></b></div>
