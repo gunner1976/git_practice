@@ -188,7 +188,7 @@ def cmd_evolve(args) -> None:
 def cmd_viewer(args) -> None:
     from analysis.replay import write_viewer
 
-    outs, n, bad = write_viewer(ROOT / "runs" / args.run_id)
+    outs, n, bad = write_viewer(ROOT / "runs" / args.run_id, [ROOT / "runs" / r for r in (args.include or [])])
     print(f"Replay viewers for {n} sessions written to " + " and ".join(str(o) for o in outs))
     for sid, d in bad:
         print(f"  {sid}: replay diverged from the log at step {d['step']}")
@@ -264,6 +264,8 @@ def main(argv=None) -> None:
         p.add_argument("--parallel", type=int)
         p.add_argument("--mock", action="store_true", help="use the scripted mock model (no API calls)")
         p.add_argument("--skip-pilot-check", action="store_true")
+        if name == "viewer":
+            p.add_argument("--include", action="append", metavar="RUN_ID", help="also show this run (same island); repeatable")
     args = ap.parse_args(argv)
     args.fn(args)
 

@@ -181,9 +181,28 @@ def build(root: Path) -> dict:
             "session_seconds": float(clk["session_seconds"]) if clk else None}
 
 
-def write_viewer(root: Path):
-    """Writes viewer.html (2D map) and viewer3d.html (3D island) into the run directory."""
-    data = build(root)
+def build_many(roots: list[Path]) -> dict:
+    """Several runs of the same island in one viewer, with a run picker."""
+    parts = [build(r) for r in roots]
+    first = parts[0]
+    runs, sessions = [], []
+    for root, d in zip(roots, parts):
+        if d["terrain"] != first["terrain"]:
+            raise ValueError(f"{Path(root).name} uses a different island; give it its own viewer")
+        cfg = yaml.safe_load((Path(root) / "config.yaml").read_text())
+        kind = "paper free play" if cfg.get("agent", {}).get("interface") == "paper" else ("pilot" if d["run"].startswith("pilot") else "replication")
+        runs.append({"run": d["run"], "kind": kind, "session_seconds": d["session_seconds"], "sessions": len(d["sessions"])})
+        for s in d["sessions"]:
+            sessions.append({**s, "run": d["run"], "session_seconds": d["session_seconds"]})
+    return {"run": first["run"], "runs": runs, "terrain": first["terrain"], "hand": first["hand"], "sessions": sessions, "session_seconds": None}
+
+
+def write_viewer(root: Path, include: list[Path] | None = None):
+    """Writes viewer.html (2D map) and viewer3d.html (3D island) into the run directory;
+    `include` adds other runs of the same island to the same pages."""
+    data = build_many([Path(root), *[Path(p) for p in (include or [])]])
+    links = Path(root) / "viewer_links.json"  # {"2d": url, "3d": url} of the published pages, if any
+    data["links"] = json.loads(links.read_text()) if links.exists() else {}
     blob = json.dumps(data, separators=(",", ":")).replace("</", "<\\/")
     outs = []
     for name in ("viewer.html", "viewer3d.html"):

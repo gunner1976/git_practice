@@ -45,6 +45,7 @@ button:focus-visible, select:focus-visible, input:focus-visible, [tabindex]:focu
 .top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; margin-bottom: 12px; }
 .top h1 { font-family: var(--display); font-weight: 700; font-size: 1.55rem; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
 .top .run { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.golink { text-decoration: none; color: var(--ink); margin-left: auto; }
 .picker { display: grid; gap: 8px; margin-bottom: 12px; }
 .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .row .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); width: 64px; flex: none; }
@@ -122,9 +123,11 @@ h2.sec { font-family: var(--display); font-size: 1rem; font-weight: 500; margin:
 <header class="top">
   <h1>Eko Island Replay</h1>
   <span class="run" id="runlbl"></span>
+  <a class="chip golink" id="other" hidden target="_blank" rel="noopener">Open the 3D view ↗</a>
 </header>
 
 <section class="picker" aria-label="Choose a session">
+  <div class="row" id="runs"><span class="lbl">Run</span></div>
   <div class="row" id="agents"><span class="lbl">Agent</span></div>
   <div class="row" id="days"><span class="lbl">Free play</span></div>
   <div class="row" id="tasks"><span class="lbl">Tasks</span></div>
@@ -196,7 +199,10 @@ const DATA = /*__DATA__*/null;
     pink: "#ef7fb6", white: "#f4f4ef", black: "#202024", grey: "#8c9196", brown: "#8a5a2b", teal: "#159c9c", stone: "#9e9484", gold: "#d9a520", golden: "#e8b923" };
   const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  $("runlbl").textContent = `run ${DATA.run} · ${DATA.sessions.length} sessions · replayed from logs`;
+  if (DATA.links && DATA.links["3d"]) { $("other").href = DATA.links["3d"]; $("other").hidden = false; }
+  const RUNS = DATA.runs || [{ run: DATA.run, kind: "", session_seconds: DATA.session_seconds }];
+  DATA.sessions.forEach((s) => { s.run = s.run || DATA.run; if (s.session_seconds === undefined) s.session_seconds = DATA.session_seconds; });
+  $("runlbl").textContent = `${RUNS.length > 1 ? RUNS.length + " runs" : "run " + RUNS[0].run} · ${DATA.sessions.length} sessions · replayed from logs`;
 
   // ------------------------------------------------------------- terrain
   function hAt(x, y) {
@@ -240,9 +246,11 @@ const DATA = /*__DATA__*/null;
   })();
 
   // ------------------------------------------------------------- state
+  const akey = (s) => s.run + "|" + s.agent;
   const byAgent = {};
-  DATA.sessions.forEach((s, i) => { (byAgent[s.agent] = byAgent[s.agent] || []).push(i); });
-  const agents = Object.keys(byAgent).sort((a, b) => (a.startsWith("fresh") - b.startsWith("fresh")) || a.localeCompare(b, undefined, { numeric: true }));
+  DATA.sessions.forEach((s, i) => { (byAgent[akey(s)] = byAgent[akey(s)] || []).push(i); });
+  const agentName = (k) => k.split("|")[1];
+  const agents = Object.keys(byAgent).sort((a, b) => (agentName(a).startsWith("fresh") - agentName(b).startsWith("fresh")) || a.localeCompare(b, undefined, { numeric: true }));
   let S = null, si = -1, cur = 0, t = 0, playing = false, last = 0;
   let view = { cx: SIZE / 2, cy: SIZE / 2, zoom: 1 }, follow = false, tab = "log";
   const filt = { say: true, think: false, act: true, note: true, nudge: false, read: true, rule: true };
@@ -258,13 +266,18 @@ const DATA = /*__DATA__*/null;
   // ------------------------------------------------------------- picker
   function spawnCount(s) { return s.timeline.filter((e) => e.k === "rule").length; }
   function renderPicker() {
-    const ag = S.agent;
+    const ag = akey(S);
     const mk = (parent, label, pressed, onclick, extra) => {
       const b = document.createElement("button"); b.className = "chip"; b.setAttribute("aria-pressed", pressed ? "true" : "false");
       b.innerHTML = esc(label) + (extra || ""); b.onclick = onclick; parent.appendChild(b); return b;
     };
-    for (const id of ["agents", "days", "tasks"]) { const r = $(id); while (r.children.length > 1) r.lastChild.remove(); }
-    agents.forEach((a) => mk($("agents"), a.replace("_", " "), a === ag, () => {
+    for (const id of ["runs", "agents", "days", "tasks"]) { const r = $(id); while (r.children.length > 1) r.lastChild.remove(); }
+    $("runs").hidden = RUNS.length < 2;
+    RUNS.forEach((r) => mk($("runs"), r.run, r.run === S.run, () => {
+      const same = DATA.sessions.findIndex((x) => x.run === r.run && x.agent === S.agent);
+      openSession(same >= 0 ? same : DATA.sessions.findIndex((x) => x.run === r.run));
+    }, r.kind ? `<span class="sc">${esc(r.kind)}</span>` : ""));
+    agents.filter((a) => a.split("|")[0] === S.run).forEach((a) => mk($("agents"), agentName(a).replace("_", " "), a === ag, () => {
       const same = byAgent[a].find((i) => DATA.sessions[i].label === S.label);
       openSession(same != null ? same : byAgent[a][0]);
     }));
@@ -276,12 +289,13 @@ const DATA = /*__DATA__*/null;
       mk($("tasks"), s.label.replace(/_/g, " "), i === si, () => openSession(i), s.end.score != null ? `<span class="sc">${esc(s.end.score)}</span>` : ""); });
   }
 
-  function hashFor(i) { return DATA.sessions[i].id.replace("/", "-"); }
+  function hashFor(i) { const s = DATA.sessions[i]; return ((RUNS.length > 1 ? s.run + "." : "") + s.id).replace(/[^A-Za-z0-9._~-]/g, "-"); }
+  const skey = (s) => s.run + ":" + s.id;
   function openSession(i, keepStep) {
     si = i; S = DATA.sessions[i]; cur = keepStep ? Math.min(cur, S.frames.length - 1) : 0; t = 0;
     $("scrub").max = S.frames.length - 1; $("scrub").value = cur;
     try { history.replaceState(null, "", "#" + hashFor(i)); } catch (e) {}
-    store("session", S.id);
+    store("session", skey(S));
     renderPicker(); renderPane(true); drawElev(); draw();
   }
 
@@ -413,7 +427,8 @@ const DATA = /*__DATA__*/null;
   function hud(st) {
     const f = S.frames[cur], a = f.a;
     $("hud").innerHTML = `<b>(${a[0].toFixed(1)}, ${a[1].toFixed(1)})</b> z ${a[2].toFixed(1)} m · ${a[3] ? "holding " + esc(a[3]) : "empty-handed"}`;
-    $("stepn").textContent = `step ${f.step} / ${S.frames[S.frames.length - 1].step}`;
+    const mmss = (x) => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`;
+    $("stepn").textContent = `step ${f.step} / ${S.frames[S.frames.length - 1].step}` + (S.session_seconds && f.c != null ? ` · ${mmss(f.c)} of ${mmss(S.session_seconds)}` : "");
   }
 
   // hover + pan + zoom
@@ -523,7 +538,9 @@ const DATA = /*__DATA__*/null;
     } else {
       const s = S, n = spawnCount(s), writes = s.timeline.filter((e) => e.k === "note").length;
       pane.innerHTML = `<dl class="info">
+        <dt>Run</dt><dd>${esc(s.run)}${(RUNS.find((r) => r.run === s.run) || {}).kind ? " · " + esc(RUNS.find((r) => r.run === s.run).kind) : ""}</dd>
         <dt>Session</dt><dd>${esc(s.id)}</dd>
+        ${s.end.clock ? `<dt>Simulated time</dt><dd>${(s.end.clock / 60).toFixed(1)} minutes</dd>` : ""}
         <dt>Phase</dt><dd>${s.phase === "A" ? "A · free play" : "B · task"}</dd>
         ${s.task ? `<dt>Task</dt><dd>${esc(s.task)}</dd>` : ""}
         ${s.end.score != null ? `<dt>Score</dt><dd>${esc(s.end.score)}</dd>` : ""}
@@ -580,7 +597,7 @@ const DATA = /*__DATA__*/null;
   // initial session: hash, then last viewed, then the first session with a hidden-rule event
   const h = (location.hash || "").slice(1);
   let start = DATA.sessions.findIndex((s) => hashFor(DATA.sessions.indexOf(s)) === h);
-  if (start < 0) start = DATA.sessions.findIndex((s) => s.id === load("session", ""));
+  if (start < 0) start = DATA.sessions.findIndex((s) => skey(s) === load("session", ""));
   if (start < 0) start = Math.max(0, DATA.sessions.findIndex((s) => s.phase === "A" && spawnCount(s) > 0));
   openSession(start);
   const firstRule = S.timeline.find((e) => e.k === "rule");
