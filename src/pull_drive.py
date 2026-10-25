@@ -6,6 +6,8 @@ and appends a row per file to data/manifest.csv with id, path, size, modified
 time, Drive md5 and a locally computed SHA256.
 
 Authentication (one of):
+  GDRIVE_SA_JSON='<contents of the service-account key JSON>'
+      Same service account as below, but the key text itself in an environment secret.
   GOOGLE_APPLICATION_CREDENTIALS=/path/to/service_account.json
       Service account. It must be added as a member (Viewer) of the shared
       drive, or of the specific folders, by a drive manager.
@@ -60,13 +62,17 @@ def credentials():
     from google.oauth2 import service_account
     from google.oauth2.credentials import Credentials
 
+    sa_inline = os.environ.get("GDRIVE_SA_JSON")  # service-account key JSON text, stored as an environment secret
     sa = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
     tok = os.environ.get("GDRIVE_TOKEN_JSON")
+    if sa_inline:
+        import json
+        return service_account.Credentials.from_service_account_info(json.loads(sa_inline), scopes=SCOPES)
     if sa:
         return service_account.Credentials.from_service_account_file(sa, scopes=SCOPES)
     if tok:
         return Credentials.from_authorized_user_file(tok, SCOPES)
-    sys.exit("No credentials: set GOOGLE_APPLICATION_CREDENTIALS or GDRIVE_TOKEN_JSON "
+    sys.exit("No credentials: set GDRIVE_SA_JSON, GOOGLE_APPLICATION_CREDENTIALS or GDRIVE_TOKEN_JSON "
              "(see module docstring).")
 
 
