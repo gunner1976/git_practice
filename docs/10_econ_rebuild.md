@@ -83,3 +83,9 @@ These changes were agreed with Kevin Gunning on 24 Oct 2026. `src/econ_rebuild.p
 - The GLJ deck averages about USD 78/bbl over 2027–35, with USD 81 in the first year when the well's rate is highest. That lifts the incremental base case from +0.27 (flat 70) to +0.47.
 - Removing the area fees from the incremental view, about +0.1, roughly offsets the higher indexed capex, about −0.07.
 - The conclusion is unchanged: TEC-12 works as an add-on to a producing TEC-10 and does not stand alone at the base profile.
+
+## Update 25 Oct 2026: area charges as paid, and the bridge to GLJ YE2025
+
+- **Area charges (G-60).** The stand-alone case now carries the charges as paid in 2024–25: FMP quota MXN 29,829/month (at 18 MXN/USD) plus IEEH USD 42.8 k/yr from the Tonalli P&L, **USD 5,224/month** (2026 basis, +2 %/yr). Sensitivities: statutory exploration-phase USD 2,638/month (stand-alone base −0.45 MM) and extraction-phase USD 3,922/month (−0.51 MM). The incremental case carries none, unchanged.
+- **Results, GLJ Oct 2026, base capex, 0.81 × WTI:** incremental low / base / high −1.02 / **+0.47** / +1.44 MM NPV10 BT (base +0.11 AT, payout 27 months, IRR 29 %); stand-alone −1.64 / **−0.57** / +0.20 MM. Flat-WTI break-evens: base 65.5 incremental, 86.3 stand-alone.
+- **Bridge to GLJ (G-68; `bridge.csv`, `figures/24_glj_bridge.png`).** GLJ's YE2025 TEC-12 1P entity for Kinjal (report 25269) is NPV10 BT USD 2.08 MM at 1 Jan 2026. From the repository incremental base (+0.47): GLJ Jan-2026 deck (`data/raw/web_2026-10-25/`) −0.39; first oil Jul 2028 with NPV dated 1 Jan 2026 +0.04; capex 1.96 MM +0.07; GLJ costs (1,670 $/well-month, 5.85 $/bbl, no water charge, 75 k$ abandonment) +1.46; GLJ 1P type well (qi 200 bbl/d, Di 36.6 %/yr read as effective, b 0.5; 252 kbbl over 30 years) +0.49. Rebuilt GLJ case 2.13 MM, within 2 % of GLJ. The cost basis, chiefly water handling at 40–85 % water cut, is the largest difference; volumes and price realisation are close.
