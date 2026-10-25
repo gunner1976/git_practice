@@ -127,21 +127,21 @@ Simmons' 390–799 kbbl "8-year sales" are TEC-12 plus TEC-13 (G-40) and the 202
 
 ### 6.5 Economics — rebuilt (task 10, `data/processed/econ_rebuild/`, `figures/10_econ_rebuild.png`)
 
-**Update, 25 Oct 2026.** The primary case is now GLJ's 1 Oct 2026 price forecast. Costs are inflated at 2 %/yr, the price factor is 0.81 × WTI, the AFE is PPI-indexed to USD 2.04 MM, and the area fiscal charges (USD 2,638/month in 2026 dollars) are carried in the stand-alone case only. NPV10 before tax, USD MM, base capex:
+**Update, 25 Oct 2026.** The primary case is now GLJ's 1 Oct 2026 price forecast. Costs are inflated at 2 %/yr, the price factor is 0.81 × WTI, the AFE is PPI-indexed to USD 2.04 MM, and the area fiscal charges as paid in 2024–25 (USD 5,224/month: FMP quota plus IEEH; G-60, revised 25 Oct 2026 after the database review) are carried in the stand-alone case only. NPV10 before tax, USD MM, base capex:
 
 | GLJ Oct 2026 | Low | **Base** | High |
 |---|---|---|---|
 | Incremental to producing TEC-10 | −1.02 | **+0.47** (after tax +0.11; payout 27 months; IRR 29 %) | +1.44 |
-| Stand-alone | −1.57 | **−0.45** (after tax −0.69) | +0.33 |
+| Stand-alone | −1.64 | **−0.57** (after tax −0.78) | +0.20 |
 
 Flat real-WTI sensitivity on the same basis, base profile:
 
 | WTI | 50 | 60 | 70 | 80 | 90 | 100 |
 |---|---|---|---|---|---|---|
-| Stand-alone | −1.50 | −1.08 | −0.63 | −0.16 | +0.32 | +0.80 |
+| Stand-alone | −1.57 | −1.17 | −0.74 | −0.29 | +0.17 | +0.64 |
 | Incremental | −0.95 | −0.36 | +0.29 | +0.90 | +1.49 | +2.05 |
 
-Break-evens: about WTI 66 incremental and 83 stand-alone. The September 2026 tables below are kept for the record. They used flat WTI, the ×1.25 escalation, and the unindexed 2014 quota charged in both views.
+Break-evens: about WTI 66 incremental and 86 stand-alone. **Against GLJ:** GLJ's YE2025 TEC-12 1P entity (report 25269, for Kinjal) is +2.08 MM; a step-by-step bridge rebuilds it within 2 %, and the largest step is GLJ's lower cost basis with no water-handling charge (+1.46 MM of the +1.61 MM gap; G-68, `figures/24_glj_bridge.png`). The September 2026 tables below are kept for the record. They used flat WTI, the ×1.25 escalation, and the unindexed 2014 quota charged in both views.
 
 
 2023 IFR fiscal and cost structure (bid royalty 31.22 %, basic royalty B0 × price + 1.5 %, surface 1 %, hydrocarbon tax on 7.2 km², field price 90 % of WTI, opex 7.25 USD/bbl oil + 3.25 USD/bbl water + 2,500 USD/well/month, battery 10,000 and disposal 1,500 USD/month, 30 % tax, 25 % depreciation, 10 % discount), start January 2027, water cut following TEC-10 (40 % → 85 %), escalated base AFE, 100 % WI, no corporate G&A, no carry. NPV10 before tax, USD MM:
@@ -200,3 +200,15 @@ Thirteen slides in `docs/Tecolutla_TEC12_Handover.pptx`: the reconciled field hi
 ## 10. Sources
 
 Every file is listed with its SHA256 in `data/manifest.csv` (150 binaries plus 10 text renderings). The ten files above the connector's download limit, including the Work Program PDF and the GLJ YE2020 corporate summary detail, were read through the connector's text rendering (G-13 resolved, `docs/12_drive_large_files.md`); their figures and the two gauge-series workbooks beyond about 1 MB are still unread (G-52). Task notes: `docs/01_econ_2023.md` … `docs/09_log_panel.md`; gap register `docs/gaps.md`.
+
+
+## Addendum, 25 Oct 2026: database review
+
+A file-by-file review of the whole Tecolutla data room, all Tecolutla LAS and the seismic inventory (`docs/19_database_review.md`) changes this review in four places:
+
+1. **TEC-12 window (§6, G-47).** At TEC-10 the 2,294–2,311 mSS window is Tantoyuca on cuttings XRD (El Abra from −2,312.9 mSS), so TEC-10's water-saturated result does not test the crestal El Abra. TEC-9 is the only well with El Abra at window depth: its top 8 m (2,296–2,304 mSS) is porous (SPHI ~15 %, ILD ~8) and at parity with its producer, and the 6 m below is tight. The target is restated as the top ~8 m of El Abra at the crest. The operator's July 2019 alternative (FWL risen to ~2,316 mTVDss with a transition zone above) remains the main risk, with the 1956 crestal gas.
+2. **Structure (§6).** The Jan 2019 Top El Abra grid ties all vertical-well tops within ±2.1 m and puts the TEC-12 bottom hole at −2,289.4 mSS against the −2,296 prognosis (`figures/25_el_abra_structure.png`). A northern culmination at −2,284.4 mSS is unpenetrated; TEC-11 ran down the north-west plunge (G-75).
+3. **TEC-11 (§5).** Final state: liner 1,869–2,863 mMD, fish 2,866–2,872, open hole to 3,283; five perforations 2,643.5–2,745.5 mMD; drilled at 316–331° to cut fractures and acidised without isolation.
+4. **Economics and commercial history (§6.5).** Area charges as paid (G-60); bridge to GLJ (G-68); 2018–23 field netback about zero before G&A and capital (G-56).
+
+Well-record corrections: TEC-101 chronology (G-61), TEC-9 status (G-62), TEC-6 2007 abandonment (G-63), TEC-3 surface shoe (G-54). G-34 is closed.

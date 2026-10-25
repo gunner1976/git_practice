@@ -34,7 +34,7 @@ slide("1. What changed from version 3", [
     "OOIP 7.8 (CNH) vs 11.2 (IFR) is petrophysics, not geometry: P90/P50/P10 8.1 / 10.0 / 12.2 MMbbl.",
     "AFE is USD 1,572,724 (deleted formula explains the 5,000); PPI-indexed to Sep 2026 (x1.297): USD 2.04 MM / CAD 2.84 MM.",
     "Every IFR model since 2020 costs TEC-12 as a TEC-10 re-entry, not the S-shape AFE well.",
-    "Economics on GLJ's 1 Oct 2026 deck at 0.81 x WTI: incremental to a producing TEC-10, NPV10 +0.47 MM before tax (payout 27 months); stand-alone -0.45 MM; flat-WTI break-evens ~66 incremental, ~83 stand-alone."])
+    "Economics on GLJ's 1 Oct 2026 deck at 0.81 x WTI: incremental to a producing TEC-10, NPV10 +0.47 MM before tax (payout 27 months); stand-alone -0.57 MM; flat-WTI break-evens ~66 incremental, ~86 stand-alone; GLJ's 2.08 MM rebuilt within 2 % (cost basis is the main difference)."])
 slide("2. Production database: 1,341 tidy rows, six sources, no interpolation", [
     "CNH monthly 1966-2016 (four wells), CNH field level 1960-65, Tonalli tests, TEC-10 daily 2018-19, trucking tickets, PEMEX statements.",
     "Recorded 1.72 MMbbl to Dec 2022; 0.48 MMbbl of the March 2020 By Zone total is wellfile allocation.",
@@ -87,8 +87,8 @@ slide("9. AFE: USD 1,572,724, priced on 2018 rates", [
     "Currency USD: Tonalli cost format 'Dolares', models in US$, confirmed by the author 16 Sep 2026 (G-44 resolved).",
     "Escalated to Sep 2026 on the US drilling PPI (309.4 -> 401.3, x1.297; G-45 closed): base USD 2.04 MM = CAD 2.84 MM at 1.3915; range x1.15-1.40 = USD 1.81-2.20 MM."], "figures/08_afe.png", 8.4)
 slide("10. Economics rebuilt on the 2023 structure", [
-    "GLJ 1 Oct 2026 prices (WTI 81 / 75 / 73, then +2 %/yr), costs +2 %/yr; 2023 royalty, tax and opex terms; PPI-indexed AFE; area fiscal charges (USD 2.6 k/month) in the stand-alone case only; start Jan 2027; 100 % WI; no G&A, no carry.",
-    "Realised price 0.81 x WTI from 37 PEMEX settlements (2020-22). Stand-alone NPV10 BTAX on GLJ: base -0.45 MM, high +0.33, low -1.57; flat-WTI break-even ~83.",
+    "GLJ 1 Oct 2026 prices (WTI 81 / 75 / 73, then +2 %/yr), costs +2 %/yr; 2023 royalty, tax and opex terms; PPI-indexed AFE; area fiscal charges as paid 2024-25 (USD 5.2 k/month) in the stand-alone case only; start Jan 2027; 100 % WI; no G&A, no carry.",
+    "Realised price 0.81 x WTI from 37 PEMEX settlements (2020-22). Stand-alone NPV10 BTAX on GLJ: base -0.57 MM, high +0.20, low -1.64; flat-WTI break-even ~86.",
     "Incremental to a producing TEC-10 (battery, disposal and area fees already carried): base +0.47 MM BTAX (+0.11 ATAX), payout 27 months, IRR 29 %; high +1.44; low -1.02; flat-WTI break-even ~66. At the 2023 model's 0.90 factor the base would be +0.99.",
     "Royalties and area fees 41-44 % of revenue; fixed costs end the stand-alone base case at 54 months with 127 of 218 kbbl produced; incremental runs 175 months, 203 kbbl.",
     "WTI ~USD 100 in mid-Sep 2026 on a supply disruption; long-term decks 70-80. The 2025 reform leaves contract terms unchanged (LSH transitorio Décimo, G-49).",
