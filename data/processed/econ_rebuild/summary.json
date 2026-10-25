@@ -15,6 +15,7 @@
   "abandon": 150000.0,
   "start": "2027-01-01",
   "cuota_mxn_m": 29829.0,
+  "ieeh_usd_yr": 42800.0,
   "act_tax_mxn_km2_m": 2464.84,
   "act_tax_extraction_mxn_km2_m": 9859.56,
   "block_km2": 7.16,
@@ -22,7 +23,8 @@
   "inflation": 0.02,
   "cost_base_year": 2026,
   "price_factor": 0.81,
-  "area_fees_usd_m": 2637.625244444445,
+  "area_fees_usd_m": 5223.833333333333,
+  "area_fees_statutory_usd_m": 2637.625244444445,
   "area_fees_extraction_usd_m": 3921.9138666666663
  },
  "glj_oct26_wti": {
@@ -44,28 +46,28 @@
  },
  "glj_oct26_base_capex": {
   "low_bpd|stand-alone": {
-   "npv10_btax": -1571088,
-   "npv10_atax": -1599817,
+   "npv10_btax": -1638683,
+   "npv10_atax": -1661851,
    "payout_months": NaN,
    "irr_btax": NaN,
-   "oil_econ_bbl": 48904,
-   "econ_months": 32
+   "oil_econ_bbl": 47371,
+   "econ_months": 30
   },
   "base_bpd|stand-alone": {
-   "npv10_btax": -454048,
-   "npv10_atax": -688363,
+   "npv10_btax": -565050,
+   "npv10_atax": -782463,
    "payout_months": NaN,
    "irr_btax": NaN,
-   "oil_econ_bbl": 126609,
-   "econ_months": 54
+   "oil_econ_bbl": 121866,
+   "econ_months": 50
   },
   "high_bpd|stand-alone": {
-   "npv10_btax": 325541,
-   "npv10_atax": -104709,
-   "payout_months": 19.0,
-   "irr_btax": 0.361,
-   "oil_econ_bbl": 177096,
-   "econ_months": 64
+   "npv10_btax": 200766,
+   "npv10_atax": -209295,
+   "payout_months": 20.0,
+   "irr_btax": 0.272,
+   "oil_econ_bbl": 168889,
+   "econ_months": 58
   },
   "low_bpd|incremental": {
    "npv10_btax": -1023408,
@@ -97,11 +99,16 @@
   "base_bpd": -510413,
   "high_bpd": 261093
  },
+ "glj_oct26_standalone_statutory_fees": {
+  "low_bpd": -1571088,
+  "base_bpd": -454048,
+  "high_bpd": 325541
+ },
  "glj_oct26_price_factor_sensitivity": [
   {
    "price_factor": 0.81,
    "incremental": false,
-   "npv10_btax": -454048
+   "npv10_btax": -565050
   },
   {
    "price_factor": 0.81,
@@ -111,7 +118,7 @@
   {
    "price_factor": 0.75,
    "incremental": false,
-   "npv10_btax": -703955
+   "npv10_btax": -802346
   },
   {
    "price_factor": 0.75,
@@ -121,7 +128,7 @@
   {
    "price_factor": 0.85,
    "incremental": false,
-   "npv10_btax": -285390
+   "npv10_btax": -402307
   },
   {
    "price_factor": 0.85,
@@ -131,7 +138,7 @@
   {
    "price_factor": 0.9,
    "incremental": false,
-   "npv10_btax": -73798
+   "npv10_btax": -196928
   },
   {
    "price_factor": 0.9,
@@ -144,19 +151,19 @@
    "capex_case": "low",
    "incremental": false,
    "capex": 1844805,
-   "npv10_btax": -219169
+   "npv10_btax": -330171
   },
   {
    "capex_case": "base",
    "incremental": false,
    "capex": 2080618,
-   "npv10_btax": -454048
+   "npv10_btax": -565050
   },
   {
    "capex_case": "high",
    "incremental": false,
    "capex": 2245849,
-   "npv10_btax": -618624
+   "npv10_btax": -729626
   },
   {
    "capex_case": "low",
@@ -175,45 +182,94 @@
    "incremental": true,
    "capex": 2245849,
    "npv10_btax": 304103
-  },
-  {
-   "capex_case": "base",
-   "incremental": false,
-   "capex": 2080618,
-   "npv10_btax": -510413
   }
  ],
+ "bridge_to_glj_ye2025": [
+  {
+   "step": "Repository incremental base (Oct-2026 deck, Jan 2027 start, NPV at start)",
+   "npv10_btax": 468679,
+   "oil_econ_bbl": 203347,
+   "econ_months": 175,
+   "opex_per_bbl": 22.36,
+   "delta": 468679.0
+  },
+  {
+   "step": "Price deck to GLJ Jan 2026",
+   "npv10_btax": 79097,
+   "oil_econ_bbl": 200236,
+   "econ_months": 167,
+   "opex_per_bbl": 22.04,
+   "delta": -389582.0
+  },
+  {
+   "step": "First oil Jul 2028, NPV dated 1 Jan 2026",
+   "npv10_btax": 117137,
+   "oil_econ_bbl": 199031,
+   "econ_months": 164,
+   "opex_per_bbl": 22.57,
+   "delta": 38040.0
+  },
+  {
+   "step": "Capex 1.96 MM$ (GLJ) for the indexed AFE",
+   "npv10_btax": 182337,
+   "oil_econ_bbl": 199031,
+   "econ_months": 164,
+   "opex_per_bbl": 22.57,
+   "delta": 65200.0
+  },
+  {
+   "step": "Costs to GLJ: 1,670 $/well-month, 5.85 $/bbl, no water charge, 75 k$ abandonment",
+   "npv10_btax": 1639484,
+   "oil_econ_bbl": 217613,
+   "econ_months": 217,
+   "opex_per_bbl": 8.84,
+   "delta": 1457147.0
+  },
+  {
+   "step": "Profile to GLJ 1P type well (qi 200, Di 36.6 %, b 0.5)",
+   "npv10_btax": 2127233,
+   "oil_econ_bbl": 252407,
+   "econ_months": 360,
+   "opex_per_bbl": 10.25,
+   "delta": 487749.0
+  }
+ ],
+ "glj_ye2025_tec12_1p": {
+  "remaining_kbbl": 205,
+  "npv10_btax_usd": 2080000.0,
+  "ref": "Kinjal report 25269, 1pj5nvDi"
+ },
  "flat_wti_npv10_btax": {
   "stand-alone": {
    "50.0": {
-    "base_bpd": -1498411.0,
-    "high_bpd": -1130685.0,
-    "low_bpd": -1980684.0
+    "base_bpd": -1568851.0,
+    "high_bpd": -1209677.0,
+    "low_bpd": -2019151.0
    },
    "60.0": {
-    "base_bpd": -1079894.0,
-    "high_bpd": -555010.0,
-    "low_bpd": -1817488.0
+    "base_bpd": -1169679.0,
+    "high_bpd": -655944.0,
+    "low_bpd": -1872536.0
    },
    "70.0": {
-    "base_bpd": -630052.0,
-    "high_bpd": 65435.0,
-    "low_bpd": -1642022.0
+    "base_bpd": -739511.0,
+    "high_bpd": -60017.0,
+    "low_bpd": -1708193.0
    },
    "80.0": {
-    "base_bpd": -162235.0,
-    "high_bpd": 716897.0,
-    "low_bpd": -1460228.0
+    "base_bpd": -288580.0,
+    "high_bpd": 566586.0,
+    "low_bpd": -1533844.0
    },
    "90.0": {
-    "base_bpd": 315160.0,
-    "high_bpd": 1390722.0,
-    "low_bpd": -1274590.0
+    "base_bpd": 171723.0,
+    "high_bpd": 1213481.0,
+    "low_bpd": -1356746.0
    },
    "100.0": {
-    "base_bpd": 795412.0,
-    "high_bpd": 2077914.0,
-    "low_bpd": -1089654.0
+    "base_bpd": 635475.0,
+    "high_bpd": 1872863.0,
+    "low_bpd": -1177671.0
    }
   },
   "incremental": {
@@ -252,9 +308,9 @@
  "flat_wti_breakeven": {
   "low_bpd|stand-alone": null,
   "low_bpd|incremental": null,
-  "base_bpd|stand-alone": 83.4,
+  "base_bpd|stand-alone": 86.3,
   "base_bpd|incremental": 65.5,
-  "high_bpd|stand-alone": 68.9,
+  "high_bpd|stand-alone": 71.0,
   "high_bpd|incremental": 56.6
  },
  "base_case_incremental": {
@@ -282,7 +338,7 @@
  "notes": [
   "GLJ 1 Oct 2026 then-current WTI, costs +2 %/yr from 2026, NPV10 nominal, mid-month discounting, start Jan 2027",
   "flat-WTI grid: constant prices and costs (real), same fees/capex",
-  "area fees in stand-alone only; incremental assumes TEC-10 producing and carrying battery, disposal and area fees",
+  "area fees in stand-alone only, as paid 2024-25 (FMP quota + IEEH); incremental assumes TEC-10 producing and carrying battery, disposal and area fees",
   "no corporate G&A, no carry, 100 % WI; fiscal terms per contract (unchanged by the 2025 reform, G-49)"
  ]
 }

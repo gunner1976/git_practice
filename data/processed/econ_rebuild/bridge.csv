@@ -1,0 +1,7 @@
+step,npv10_btax,oil_econ_bbl,econ_months,opex_per_bbl,delta
+"Repository incremental base (Oct-2026 deck, Jan 2027 start, NPV at start)",468679,203347,175,22.36,468679.0
+Price deck to GLJ Jan 2026,79097,200236,167,22.04,-389582.0
+"First oil Jul 2028, NPV dated 1 Jan 2026",117137,199031,164,22.57,38040.0
+Capex 1.96 MM$ (GLJ) for the indexed AFE,182337,199031,164,22.57,65200.0
+"Costs to GLJ: 1,670 $/well-month, 5.85 $/bbl, no water charge, 75 k$ abandonment",1639484,217613,217,8.84,1457147.0
+"Profile to GLJ 1P type well (qi 200, Di 36.6 %, b 0.5)",2127233,252407,360,10.25,487749.0
