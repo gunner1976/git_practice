@@ -289,7 +289,7 @@ table("TEC-12: the remaining opportunity is the unswept top of the El Abra on th
 ], colw=[1.5, 1.4, 1.6, 1.5, 2.2], fs=10, bw=4.0, bullets=[
     "Every well that produced from near its top El Abra (TEC-2, TEC-7) did so 6-10 m lower on structure than the crest.",
     "On the crest, the top 14-27 m of the El Abra was left unperforated by PEMEX: it is the highest, least-drained part of the field.",
-    "TEC-12 targets it from the TEC-10 pad: S-shape well, target El Abra at -2,296 mSS, TD 2,360 mMD (-2,333 mSS), 7 in casing to TD, AFE USD 1.57 MM.",
+    "TEC-12 targets it from the TEC-10 pad: S-shape well, target El Abra at -2,296 mSS, TD 2,360 mMD (-2,333 mSS), 7 in casing to TD, AFE USD 2.04 MM (1.57 MM at Nov 2020 prices, PPI-indexed).",
     "Fallback: the 2,311-2,332 mSS interval that produced in every well."],
     notes=Q(("Why is TEC-12 better than re-perforating TEC-6 or TEC-9?", "TEC-6 is plugged (bridge plug at 2,297 mSS, 2006) and TEC-9's wellhead is in poor condition; neither has modern logs. A new well gives modern logs, a sample and a clean completion at the crest."),
               ("How big is the attic?", "Not separately mapped. The crest above ~2,303 mSS is thin (about 10 m) and limited in area; booked TEC-12 2P is 343 kbbl (GLJ YE2020) from the whole column at the crest. Treat the attic as upside, the produced interval as the base."),
@@ -310,16 +310,18 @@ two_figs("TEC-12: what the offset logs say, and how the well is designed to answ
 
 # ============================ 18. TEC-12 economics ============================
 slide("TEC-12: forecast and economics", [
-    ("Well: ", "S-shape from the TEC-10 pad, ~13 days drilling, AFE USD 1.57 MM (drill, complete, equip)."),
+    ("Well: ", "S-shape from the TEC-10 pad, ~13 days drilling; AFE USD 2.04 MM (drill, complete, equip; Nov 2020 estimate indexed on the US drilling PPI)."),
     ("Forecast range: ", "first-month rate 100-221 bbl/d across the studies; repository base 50 / 133 / 178 kbbl at 1 / 5 / 10 years, EUR 218 kbbl; GLJ 2P 343 kbbl."),
-    ("Price: ", "measured realisation 0.81 × WTI (PEMEX settlements 2020-22)."),
-    ("Incremental to a producing TEC-10 ", "(battery and disposal already carried): NPV10 before tax +0.27 MM at WTI 70, +0.89 MM at WTI 80; payout 23-32 months; break-even WTI ~65."),
-    ("Stand-alone: ", "break-even WTI ~80."),
-    ("Upside: ", "high profile positive from WTI 60 incremental; a successful window completion would also re-rate the crest for a follow-up well (TEC-13)."),
-    ("Basis: ", "2023 fiscal terms (31.22 % bid royalty + basic royalty, 30 % tax); 2025 reform not modelled."),
+    ("Price: ", "GLJ 1 Oct 2026 forecast, WTI 81 (2027), 75, 73, then rising 2 %/yr; costs +2 %/yr; realisation 0.81 × WTI (PEMEX settlements 2020-22)."),
+    ("Incremental to a producing TEC-10 ", "(battery, disposal and area fees already carried): NPV10 +0.47 MM before tax, +0.11 MM after tax; payout 27 months; IRR 29 %; high profile +1.44, low -1.02."),
+    ("Stand-alone: ", "-0.45 MM before tax (high +0.33). Flat-WTI break-evens ~66 incremental, ~83 stand-alone."),
+    ("Upside: ", "high profile positive from WTI ~57 incremental; a successful window completion would also re-rate the crest for a follow-up well (TEC-13)."),
+    ("Basis: ", "contract fiscal terms (31.22 % bid royalty + basic royalty, 30 % tax), unchanged by the 2025 reform (LSH transitorio Décimo); area fees USD 2.6 k/month in the stand-alone case."),
 ], fig="figures/10_econ_rebuild.png", fig_w=7.4, size=10.5,
     notes=Q(("Why is the base EUR lower than GLJ's 343 kbbl?", "The repository base uses TEC-10's own decline (b ≈ 0.5) rather than a PEMEX-style type curve (b 1.2-1.7). GLJ 2P is the booked number; ours is a conservative check (docs/06_forecast.md)."),
-              ("Downside case?", "Low profile (65 kbbl EUR) is negative at every price tested; that is the case where the window adds nothing and the produced interval underperforms."),
+              ("Downside case?", "Low profile (65 kbbl EUR) is negative at every price tested (-1.02 MM incremental on GLJ); that is the case where the window adds nothing and the produced interval underperforms."),
+              ("Why GLJ Oct 2026?", "Current independent deck, the basis Kinjal's planned reserve report is likely to use. It averages ~USD 78/bbl WTI over 2027-35. Flat-price sensitivity is on the chart."),
+              ("What about after-tax?", "Base incremental +0.11 MM after tax; the 30 % tax with 25 % declining-balance depreciation takes ~0.36 MM."),
               ("Source", "docs/10_econ_rebuild.md; data/processed/econ_rebuild/; docs/08_afe.md.")))
 
 # ============================ 19. Commercial & regulatory ============================

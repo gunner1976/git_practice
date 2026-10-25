@@ -3,15 +3,16 @@ Usage: python src/afe_rebuild.py
 Outputs: data/processed/afe/{afe_lines.csv, afe_by_day.csv, afe_categories.csv, afe_escalated.csv, summary.json}, figures/08_afe.png
 Escalation factors are explicit inputs at the top of this file, with their source in the docstring of docs/08_afe.md.
 """
-import json, re, numpy as np, pandas as pd, openpyxl
+import json, os, re, numpy as np, pandas as pd, openpyxl
 import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 OUT = "data/processed/afe/"
 A = "data/raw/ye2020_reserves/TEC-12 Drilling & Completion Cost Estimate.xlsx"           # 7 Apr 2021 copy, complete SUB column
 B = "data/raw/tec12_drill/TEC-12 Rough Drilling & Completion Cost Estimate (2).xlsx"     # 14 Sep 2021 copy, SUB cell AB12 blank
 USDCAD = 1.3915                     # 15 Sep 2026 mid-market (tradingeconomics.com, Bank of Canada series), see docs/08_afe.md
-USDCAD_GLJ = 1 / 0.79               # GLJ Jan-2022 forecast CAD/USD 0.79 for 2022-2032+ (GLJ jan22.xlsx!FX rates)
+USDCAD_GLJ = 1 / 0.73               # GLJ 1 Oct 2026 forecast CAD/USD 0.73 for 2028+ (gljpc.com Oct26.pdf Table 1)
 # escalation, Nov 2020 (AFE pricing date) -> Sep 2026, cumulative multipliers
-ESC = {"low": 1.15, "base": 1.25, "high": 1.40}   # see docs/08_afe.md section 4 for the basis of each
+PPI_NOV2020, PPI_SEP2026 = 309.400, 401.286   # FRED PCU213111213111, US drilling PPI, Dec 1985 = 100 (G-45)
+ESC = {"low": 1.15, "base": round(PPI_SEP2026 / PPI_NOV2020, 4), "high": 1.40}   # base indexed; low/high as in docs/08_afe.md section 4
 CATEGORY = {  # AFE row -> cost category for escalation and for the TEC-11 comparison
     "Surveys / Pre-Site": "site & civil", "Drilling Pad": "site & civil", "Cellar": "site & civil", "Location and Road": "site & civil",
     "Conductor Hammering": "site & civil", "Rig move": "rig & rig move", "Drilling Rig": "rig & rig move", "Camp": "rig & rig move", "Campers": "rig & rig move",
@@ -43,20 +44,25 @@ def read_afe(path):
     wb.close()
     return dict(days=days, stages=stages, dates=dates, lines=lines, daily_total=daily_tot, cumulative=cum, grand_sub=grand_sub, grand_sub_formula=grand_sub_formula)
 
-a = read_afe(A); b = read_afe(B)
-la = pd.DataFrame([{k: v for k, v in l.items() if k != "daily"} for l in a["lines"]]); lb = pd.DataFrame([{k: v for k, v in l.items() if k != "daily"} for l in b["lines"]])
-la["sub_cell_B"] = lb.sub_cell.values; la["sub_formula_B"] = lb.sub_formula.values; la["sum_of_days_B"] = lb.sum_of_days.values
-la["category"] = la.description.map(cat)
-la["usd_2020"] = la.sum_of_days
-la.to_csv(OUT + "afe_lines.csv", index=False)
-# by day
-bd = pd.DataFrame(dict(day=a["days"], stage=a["stages"], date=a["dates"], daily_total_usd=a["daily_total"], cumulative_usd=a["cumulative"]))
-bd["stage"] = bd.stage.ffill(); bd.to_csv(OUT + "afe_by_day.csv", index=False)
-total = float(la.usd_2020.sum())
-disc = dict(version_A_sub_total=float(a["grand_sub"]), version_B_sub_total=float(b["grand_sub"]), cumulative_row_end=float(a["cumulative"][-1]),
-            sum_of_all_daily_cells=total, lines_where_B_sub_blank=lb[lb.sub_cell.isna() & (lb.sum_of_days > 0)].description.tolist(),
-            B_sub_formulas_not_starting_at_H=lb[lb.sub_formula.astype(str).str.contains(r"=SUM\([IJ]", regex=True)].description.tolist(),
-            explanation="Version B (Sep 2021): the SUB formula in AB12 (Drilling Pad Maintenance, 5,000) was deleted, so the SUB column totals 1,567,724 while the daily totals and cumulative row still include the 5,000 and end at 1,572,724. Two other SUB formulas (rows 14, 15) start at column I/J instead of H but lose nothing because H is blank there. Version A (Apr 2021) is internally consistent at 1,572,724.")
+RAW = os.path.exists(A) and os.path.exists(B)
+if RAW:
+    a = read_afe(A); b = read_afe(B)
+    la = pd.DataFrame([{k: v for k, v in l.items() if k != "daily"} for l in a["lines"]]); lb = pd.DataFrame([{k: v for k, v in l.items() if k != "daily"} for l in b["lines"]])
+    la["sub_cell_B"] = lb.sub_cell.values; la["sub_formula_B"] = lb.sub_formula.values; la["sum_of_days_B"] = lb.sum_of_days.values
+    la["category"] = la.description.map(cat)
+    la["usd_2020"] = la.sum_of_days
+    la.to_csv(OUT + "afe_lines.csv", index=False)
+    # by day
+    bd = pd.DataFrame(dict(day=a["days"], stage=a["stages"], date=a["dates"], daily_total_usd=a["daily_total"], cumulative_usd=a["cumulative"]))
+    bd["stage"] = bd.stage.ffill(); bd.to_csv(OUT + "afe_by_day.csv", index=False)
+    total = float(la.usd_2020.sum())
+    disc = dict(version_A_sub_total=float(a["grand_sub"]), version_B_sub_total=float(b["grand_sub"]), cumulative_row_end=float(a["cumulative"][-1]),
+                sum_of_all_daily_cells=total, lines_where_B_sub_blank=lb[lb.sub_cell.isna() & (lb.sum_of_days > 0)].description.tolist(),
+                B_sub_formulas_not_starting_at_H=lb[lb.sub_formula.astype(str).str.contains(r"=SUM\([IJ]", regex=True)].description.tolist(),
+                explanation="Version B (Sep 2021): the SUB formula in AB12 (Drilling Pad Maintenance, 5,000) was deleted, so the SUB column totals 1,567,724 while the daily totals and cumulative row still include the 5,000 and end at 1,572,724. Two other SUB formulas (rows 14, 15) start at column I/J instead of H but lose nothing because H is blank there. Version A (Apr 2021) is internally consistent at 1,572,724.")
+else:  # raw workbooks not on disk (data/raw is not committed): rebuild escalation and figure from the processed outputs
+    la = pd.read_csv(OUT + "afe_lines.csv"); bd = pd.read_csv(OUT + "afe_by_day.csv"); prev = json.load(open(OUT + "summary.json"))
+    total = float(la.usd_2020.sum()); disc = prev["discrepancy"]; a = dict(dates=[prev["days"]["first_date"], prev["days"]["last_date"]])
 # categories and escalation
 cats = la.groupby("category").usd_2020.sum().sort_values(ascending=False).reset_index()
 cats["share"] = cats.usd_2020 / total
@@ -64,15 +70,19 @@ cats.to_csv(OUT + "afe_categories.csv", index=False)
 esc = []
 for lab, f in ESC.items():
     usd = total * f
-    esc.append(dict(case=lab, escalation_factor=f, usd=round(usd), cad_at_spot=round(usd * USDCAD), cad_at_glj_0p79=round(usd * USDCAD_GLJ)))
+    esc.append(dict(case=lab, escalation_factor=f, usd=round(usd), cad_at_spot=round(usd * USDCAD), cad_at_glj_0p73=round(usd * USDCAD_GLJ)))
 esc = pd.DataFrame(esc); esc.to_csv(OUT + "afe_escalated.csv", index=False)
 # TEC-11 actual vs budget (Tec 11 Summary of Costs, sheet Actual)
-wb = openpyxl.load_workbook("data/raw/development_plan/Tec 11 Summary of Costs (Actual and Budgeted).xlsx", read_only=True, data_only=True); ws = wb["Actual"]
-t11 = [r for r in ws.iter_rows(min_row=7, max_row=11, min_col=2, max_col=7, values_only=True)]; wb.close()
-t11 = pd.DataFrame(t11, columns=["project", "item", "date", "actual_usd", "budget_usd", "over_under"]).dropna(subset=["actual_usd"])
-t11_ratio = float(t11[t11.item == "Drilling Costs"].actual_usd.iloc[0] / t11[t11.item == "Drilling Costs"].budget_usd.iloc[0])
+T11 = "data/raw/development_plan/Tec 11 Summary of Costs (Actual and Budgeted).xlsx"
+if os.path.exists(T11):
+    wb = openpyxl.load_workbook(T11, read_only=True, data_only=True); ws = wb["Actual"]
+    t11 = [r for r in ws.iter_rows(min_row=7, max_row=11, min_col=2, max_col=7, values_only=True)]; wb.close()
+    t11 = pd.DataFrame(t11, columns=["project", "item", "date", "actual_usd", "budget_usd", "over_under"]).dropna(subset=["actual_usd"])
+    t11_ratio = float(t11[t11.item == "Drilling Costs"].actual_usd.iloc[0] / t11[t11.item == "Drilling Costs"].budget_usd.iloc[0])
+else:
+    t11 = pd.DataFrame(prev["tec11"]); t11_ratio = prev["tec11_drilling_actual_over_budget"]
 summary = dict(afe_total_usd_2020=round(total, 2), discrepancy=disc, days=dict(pre_spud=6, drilling_and_completion=14, first_date=str(a["dates"][0])[:10], last_date=str(a["dates"][-1])[:10]),
-               currency="no label in either workbook; USD by evidence (see docs)", usdcad_spot_2026_09_15=USDCAD, usdcad_glj_jan22=round(USDCAD_GLJ, 4),
+               currency="no label in either workbook; USD by evidence (see docs)", usdcad_spot_2026_09_15=USDCAD, usdcad_glj_oct26=round(USDCAD_GLJ, 4),
                afe_2020_in_cad_at_spot=round(total * USDCAD), afe_2020_in_cad_at_glj=round(total * USDCAD_GLJ),
                escalation=esc.to_dict("records"), tec11_drilling_actual_over_budget=round(t11_ratio, 3), tec11=t11.to_dict("records"),
                categories=cats.round(3).to_dict("records"), top_lines=la.sort_values("usd_2020", ascending=False).head(12)[["description", "vendor", "usd_2020"]].round(0).to_dict("records"))
@@ -86,7 +96,7 @@ ax1.set_xlabel("USD thousand (Nov 2020 pricing)"); ax1.set_title(f"TEC-12 AFE li
 bd2 = bd.copy(); bd2["x"] = range(len(bd2))
 ax2.bar(bd2.x, bd2.daily_total_usd / 1e3, color="#9ecae1", label="daily spend (USD k)")
 ax2b = ax2.twinx(); ax2b.plot(bd2.x, bd2.cumulative_usd / 1e6, color="k", lw=1.5, label="cumulative (USD MM)")
-for lab, f, col in [("base +25 %", ESC["base"], "tab:orange"), ("high +40 %", ESC["high"], "tab:red")]:
+for lab, f, col in [(f"base x{ESC['base']:.3f} (PPI-indexed)", ESC["base"], "tab:orange"), ("high x1.40", ESC["high"], "tab:red")]:
     ax2b.axhline(total * f / 1e6, color=col, ls="--", lw=1, label=f"escalated {lab}: USD {total*f/1e6:.2f} MM = CAD {total*f*USDCAD/1e6:.2f} MM")
 ax2.set_xticks(bd2.x); ax2.set_xticklabels([str(d) for d in bd2.day], fontsize=7); ax2.set_xlabel("operational day (PS = pre-spud)"); ax2.set_ylabel("USD thousand per day"); ax2b.set_ylabel("USD million")
 h1, l1 = ax2.get_legend_handles_labels(); h2, l2 = ax2b.get_legend_handles_labels(); ax2.legend(h1 + h2, l1 + l2, fontsize=8, loc="upper left")

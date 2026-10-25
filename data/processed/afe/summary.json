@@ -22,30 +22,30 @@
  },
  "currency": "no label in either workbook; USD by evidence (see docs)",
  "usdcad_spot_2026_09_15": 1.3915,
- "usdcad_glj_jan22": 1.2658,
+ "usdcad_glj_oct26": 1.3699,
  "afe_2020_in_cad_at_spot": 2188445,
- "afe_2020_in_cad_at_glj": 1990789,
+ "afe_2020_in_cad_at_glj": 2154416,
  "escalation": [
   {
    "case": "low",
    "escalation_factor": 1.15,
    "usd": 1808632,
    "cad_at_spot": 2516711,
-   "cad_at_glj_0p79": 2289408
+   "cad_at_glj_0p73": 2477578
   },
   {
    "case": "base",
-   "escalation_factor": 1.25,
-   "usd": 1965904,
-   "cad_at_spot": 2735556,
-   "cad_at_glj_0p79": 2488487
+   "escalation_factor": 1.297,
+   "usd": 2039822,
+   "cad_at_spot": 2838413,
+   "cad_at_glj_0p73": 2794277
   },
   {
    "case": "high",
    "escalation_factor": 1.4,
    "usd": 2201813,
    "cad_at_spot": 3063823,
-   "cad_at_glj_0p79": 2787105
+   "cad_at_glj_0p73": 3016182
   }
  ],
  "tec11_drilling_actual_over_budget": 1.088,
@@ -85,7 +85,7 @@
   {
    "project": "Total",
    "item": NaN,
-   "date": null,
+   "date": NaN,
    "actual_usd": 4403743.175911247,
    "budget_usd": 3934870,
    "over_under": 468873.1759112468

@@ -42,6 +42,8 @@ Conclusion: **USD**, confirmed by Kevin Gunning on 16 Sep 2026 (G-44 resolved). 
 
 ## 4. Escalation from Nov 2020 to Sep 2026
 
+> **Update, 25 Oct 2026 (G-45 closed).** The US drilling PPI (FRED PCU213111213111) reads 309.400 in Nov 2020 and 401.286 in Sep 2026, a factor of **×1.297**. The base case is now the indexed **USD 2,039,822** (CAD 2,838,413 at 1.3915 spot; CAD 2,794,277 at GLJ's Oct-2026 long-term 0.73 CAD/USD). Low ×1.15 and high ×1.40 are kept as the range. The table below is the September 2026 assumption set, kept for the record.
+
 No cost index could be pulled inside this environment (FRED, BLS, ycharts and tradingeconomics are blocked by the egress proxy; G-45). The three factors below are explicit assumptions, chosen from what could be sourced:
 
 | Case | Factor | Basis |

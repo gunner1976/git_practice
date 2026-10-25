@@ -32,9 +32,9 @@ slide("1. What changed from version 3", [
     "Type curve: the 345-400 kbbl curve embeds PEMEX recompletions; TEC-10 declines with b 0.49 to ~100 kbbl. Range 65 / 218 / 366 kbbl.",
     "Target window 2,294-2,311 mSS: water at TEC-10 on core-supported porosity (Sw >= 1.1, no open fractures); at parity with the 353-kbbl producer at TEC-9 on an uncorrected 1973 sonic. Every barrel produced came from 2,303-2,332 mSS. Log and test the window at TEC-12 before completing (G-47).",
     "OOIP 7.8 (CNH) vs 11.2 (IFR) is petrophysics, not geometry: P90/P50/P10 8.1 / 10.0 / 12.2 MMbbl.",
-    "AFE is USD 1,572,724 (deleted formula explains the 5,000); escalated base USD 1.97 MM / CAD 2.74 MM.",
+    "AFE is USD 1,572,724 (deleted formula explains the 5,000); PPI-indexed to Sep 2026 (x1.297): USD 2.04 MM / CAD 2.84 MM.",
     "Every IFR model since 2020 costs TEC-12 as a TEC-10 re-entry, not the S-shape AFE well.",
-    "Rebuilt economics at the measured 0.81 x WTI realised price: incremental to a producing TEC-10, NPV10 +0.27 MM at WTI 70, break-even ~65; stand-alone, break-even ~80."])
+    "Economics on GLJ's 1 Oct 2026 deck at 0.81 x WTI: incremental to a producing TEC-10, NPV10 +0.47 MM before tax (payout 27 months); stand-alone -0.45 MM; flat-WTI break-evens ~66 incremental, ~83 stand-alone."])
 slide("2. Production database: 1,341 tidy rows, six sources, no interpolation", [
     "CNH monthly 1966-2016 (four wells), CNH field level 1960-65, Tonalli tests, TEC-10 daily 2018-19, trucking tickets, PEMEX statements.",
     "Recorded 1.72 MMbbl to Dec 2022; 0.48 MMbbl of the March 2020 By Zone total is wellfile allocation.",
@@ -85,13 +85,13 @@ slide("9. AFE: USD 1,572,724, priced on 2018 rates", [
     "Rig and move 27 %, tubulars and wellhead 23 %, mud and disposal 18 %; day rates identical to the TEC-11 Dec-2018 tracker.",
     "No contingency, no production casing, no owner's costs. TEC-11 came in +12 % over budget.",
     "Currency USD: Tonalli cost format 'Dolares', models in US$, confirmed by the author 16 Sep 2026 (G-44 resolved).",
-    "Escalated to Sep 2026 (assumed x1.15 / 1.25 / 1.40; index blocked, G-45): USD 1.81 / 1.97 / 2.20 MM = CAD 2.52 / 2.74 / 3.06 MM at 1.3915."], "figures/08_afe.png", 8.4)
+    "Escalated to Sep 2026 on the US drilling PPI (309.4 -> 401.3, x1.297; G-45 closed): base USD 2.04 MM = CAD 2.84 MM at 1.3915; range x1.15-1.40 = USD 1.81-2.20 MM."], "figures/08_afe.png", 8.4)
 slide("10. Economics rebuilt on the 2023 structure", [
-    "Fiscal and cost terms from the 2023 workbook; base profile; escalated base AFE; water cut following TEC-10; start Jan 2027; 100 % WI; no G&A, no carry.",
-    "Realised price 0.81 x WTI from 37 PEMEX settlements (2020-22). Stand-alone NPV10 BTAX at WTI 60/70/80: base -0.92 / -0.46 / +0.02 MM; high -0.39 / +0.25 / +0.92; low never positive.",
-    "Incremental to a producing TEC-10 (battery and disposal already carried): base -0.34 / +0.27 / +0.89 MM, payout 32 months at WTI 70. The 2023 model's 0.90 factor added 0.4-0.5 MM to every case.",
-    "Royalty burden 42-44 % of revenue; fixed costs end the stand-alone base case at 61 months with 134 of 218 kbbl produced.",
-    "WTI ~USD 100 in mid-Sep 2026 on a supply disruption; long-term decks 70-80. 2025 fiscal reform not reviewed (G-49).",
+    "GLJ 1 Oct 2026 prices (WTI 81 / 75 / 73, then +2 %/yr), costs +2 %/yr; 2023 royalty, tax and opex terms; PPI-indexed AFE; area fiscal charges (USD 2.6 k/month) in the stand-alone case only; start Jan 2027; 100 % WI; no G&A, no carry.",
+    "Realised price 0.81 x WTI from 37 PEMEX settlements (2020-22). Stand-alone NPV10 BTAX on GLJ: base -0.45 MM, high +0.33, low -1.57; flat-WTI break-even ~83.",
+    "Incremental to a producing TEC-10 (battery, disposal and area fees already carried): base +0.47 MM BTAX (+0.11 ATAX), payout 27 months, IRR 29 %; high +1.44; low -1.02; flat-WTI break-even ~66. At the 2023 model's 0.90 factor the base would be +0.99.",
+    "Royalties and area fees 41-44 % of revenue; fixed costs end the stand-alone base case at 54 months with 127 of 218 kbbl produced; incremental runs 175 months, 203 kbbl.",
+    "WTI ~USD 100 in mid-Sep 2026 on a supply disruption; long-term decks 70-80. The 2025 reform leaves contract terms unchanged (LSH transitorio Décimo, G-49).",
     "v3's overhead finding stands: the well works for an operator that already carries the field, not for a single-asset company."], "figures/10_econ_rebuild.png", 8.2)
 slide("11. New sources read in the second pass: CNH polygon, CMI fractures", [
     "Ten large Drive files read through the connector's text rendering (Work Program, GLJ detail, core report, mud logs, gauge data): docs/12.",
@@ -103,7 +103,7 @@ slide("11. New sources read in the second pass: CNH polygon, CMI fractures", [
     "Sw sensitivity (72 cases, anchored to the aquifer and the producing interval): the window is water at TEC-10 on the core-supported density porosity, Sw >= 1.1 vs 0.6-1.0 in the perforations; N-D crossover flips sign at 2,311 mSS. At TEC-9 (118 m from TEC-12) the 1973 sonic puts the window at parity with the 353-kbbl producer unless 20 %+ of its porosity is shale effect. Base case on 2,311-2,332 mSS; log and test the window at TEC-12 before completing (docs/14).",
     "2025 reform: contract fiscal terms preserved per secondary sources; regulator now CNE; contract-to-assignment substitution clause to be checked by counsel (G-49)."], "figures/14_cmi_fractures.png", 6.6)
 slide("12. Decisions and the gap register", [
-    "Before sanction: (1) core-calibrated petrophysics of TEC-10's upper zone (G-47); (2) static gradient on TEC-10 after the multi-year shut-in; (3) re-index escalation when the Nov-2020 PPI is read (G-45; AFE currency USD confirmed); (4) pull the ten large-file binaries into data/raw (G-52; their text was read, docs/12).",
+    "Before sanction: (1) core-calibrated petrophysics of TEC-10's upper zone (G-47); (2) static gradient on TEC-10 after the multi-year shut-in; (3) escalation indexed on the drilling PPI (G-45 closed; AFE currency USD confirmed); (4) pull the ten large-file binaries into data/raw (G-52; their text was read, docs/12).",
     "If the window is water: move the target to 2,311-2,332 mSS (the produced interval in every well) and re-run the base case.",
     "Quote volumes as: recorded 1.72 MMbbl; OOIP 8-10-12; TEC-12 65/218/366 kbbl; AFE USD 1.57 MM (2020) / ~2.0 MM (2026).",
     "Wording fixes for any external document: CMI not FMI; 'wackestone to grainstone, compact'; 'within 2 % of initial pressure'; Simmons volumes are two wells.",

@@ -130,11 +130,12 @@ Your framing: TEC-12 at the peak of the reef, perforating the highest, under-exp
 - That turns John's hardest question into the well's stated objective.
 - The repository has not run a separate economic case for the fallback alone. Say so if asked.
 
-**Economics:** these are at the measured 0.81 × WTI price factor, before tax, 2023 fiscal terms (`docs/10_econ_rebuild.md`).
-- AFE USD 1.57 MM for an S-shape from the TEC-10 pad.
+**Economics** (updated 25 Oct 2026). GLJ's 1 Oct 2026 price deck, costs +2 %/yr, 0.81 × WTI, NPV10 before tax, contract fiscal terms (`docs/10_econ_rebuild.md`):
+- AFE USD 2.04 MM for an S-shape from the TEC-10 pad (USD 1.57 MM at Nov 2020 prices, PPI-indexed ×1.297).
 - Base profile: 50 / 133 / 178 kbbl at 1 / 5 / 10 years, EUR 218 kbbl.
-- **Incremental to a producing TEC-10:** NPV10 +0.27 MM at WTI 70, +0.89 MM at WTI 80; break-even about WTI 65.
-- **Stand-alone:** break-even about WTI 80.
+- **Incremental to a producing TEC-10:** NPV10 +0.47 MM (+0.11 after tax), payout 27 months, IRR 29 %; high profile +1.44, low −1.02.
+- **Stand-alone:** −0.45 MM; high +0.33. It carries the area fiscal charges of USD 2.6 k/month.
+- **Flat-WTI break-evens:** about 66 incremental and 83 stand-alone.
 
 ### A8. Commercial and regulatory
 - **Sales:** trucked to PEMEX at CAB Poza Rica. Realised price 0.81 × WTI (volume-weighted 2020–22), with 2.7–3.3 USD/bbl fixed tariffs.

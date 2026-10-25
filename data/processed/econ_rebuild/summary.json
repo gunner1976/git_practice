@@ -1,17 +1,9 @@
 {
  "parameters": {
-  "field_price_factor": 0.9,
   "bid_royalty": 0.3122,
   "basic_b0": 0.00125,
   "basic_add": 0.015,
-  "basic_a0": 48.0,
   "surface": 0.01,
-  "hc_tax_peso_km2_m": [
-   1150.0,
-   2750.0
-  ],
-  "block_km2": 7.2,
-  "mxn_usd": 18.0,
   "battery_fixed": 10000.0,
   "well_fixed": 2500.0,
   "disposal_fixed": 1500.0,
@@ -21,166 +13,276 @@
   "depr": 0.25,
   "disc": 0.1,
   "abandon": 150000.0,
-  "start": "2027-01-01"
+  "start": "2027-01-01",
+  "cuota_mxn_m": 29829.0,
+  "act_tax_mxn_km2_m": 2464.84,
+  "act_tax_extraction_mxn_km2_m": 9859.56,
+  "block_km2": 7.16,
+  "mxn_usd": 18.0,
+  "inflation": 0.02,
+  "cost_base_year": 2026,
+  "price_factor": 0.81,
+  "area_fees_usd_m": 2637.625244444445,
+  "area_fees_extraction_usd_m": 3921.9138666666663
  },
- "capex_usd": {
+ "glj_oct26_wti": {
+  "2026": 91.0,
+  "2027": 81.0,
+  "2028": 75.0,
+  "2029": 73.22,
+  "2030": 74.68,
+  "2031": 76.18,
+  "2032": 77.7,
+  "2033": 79.26,
+  "2034": 80.84,
+  "2035": 82.46
+ },
+ "capex_usd_2026": {
   "low": 1808632,
-  "base": 1965904,
+  "base": 2039822,
   "high": 2201813
  },
- "base_case": {
+ "glj_oct26_base_capex": {
+  "low_bpd|stand-alone": {
+   "npv10_btax": -1571088,
+   "npv10_atax": -1599817,
+   "payout_months": NaN,
+   "irr_btax": NaN,
+   "oil_econ_bbl": 48904,
+   "econ_months": 32
+  },
+  "base_bpd|stand-alone": {
+   "npv10_btax": -454048,
+   "npv10_atax": -688363,
+   "payout_months": NaN,
+   "irr_btax": NaN,
+   "oil_econ_bbl": 126609,
+   "econ_months": 54
+  },
+  "high_bpd|stand-alone": {
+   "npv10_btax": 325541,
+   "npv10_atax": -104709,
+   "payout_months": 19.0,
+   "irr_btax": 0.361,
+   "oil_econ_bbl": 177096,
+   "econ_months": 64
+  },
+  "low_bpd|incremental": {
+   "npv10_btax": -1023408,
+   "npv10_atax": -1096469,
+   "payout_months": NaN,
+   "irr_btax": NaN,
+   "oil_econ_bbl": 65489,
+   "econ_months": 67
+  },
+  "base_bpd|incremental": {
+   "npv10_btax": 468679,
+   "npv10_atax": 112278,
+   "payout_months": 27.0,
+   "irr_btax": 0.288,
+   "oil_econ_bbl": 203347,
+   "econ_months": 175
+  },
+  "high_bpd|incremental": {
+   "npv10_btax": 1441936,
+   "npv10_atax": 832656,
+   "payout_months": 15.0,
+   "irr_btax": 0.776,
+   "oil_econ_bbl": 331490,
+   "econ_months": 278
+  }
+ },
+ "glj_oct26_standalone_extraction_fees": {
+  "low_bpd": -1605470,
+  "base_bpd": -510413,
+  "high_bpd": 261093
+ },
+ "glj_oct26_price_factor_sensitivity": [
+  {
+   "price_factor": 0.81,
+   "incremental": false,
+   "npv10_btax": -454048
+  },
+  {
+   "price_factor": 0.81,
+   "incremental": true,
+   "npv10_btax": 468679
+  },
+  {
+   "price_factor": 0.75,
+   "incremental": false,
+   "npv10_btax": -703955
+  },
+  {
+   "price_factor": 0.75,
+   "incremental": true,
+   "npv10_btax": 115334
+  },
+  {
+   "price_factor": 0.85,
+   "incremental": false,
+   "npv10_btax": -285390
+  },
+  {
+   "price_factor": 0.85,
+   "incremental": true,
+   "npv10_btax": 704572
+  },
+  {
+   "price_factor": 0.9,
+   "incremental": false,
+   "npv10_btax": -73798
+  },
+  {
+   "price_factor": 0.9,
+   "incremental": true,
+   "npv10_btax": 991850
+  }
+ ],
+ "glj_oct26_capex_sensitivity": [
+  {
+   "capex_case": "low",
+   "incremental": false,
+   "capex": 1844805,
+   "npv10_btax": -219169
+  },
+  {
+   "capex_case": "base",
+   "incremental": false,
+   "capex": 2080618,
+   "npv10_btax": -454048
+  },
+  {
+   "capex_case": "high",
+   "incremental": false,
+   "capex": 2245849,
+   "npv10_btax": -618624
+  },
+  {
+   "capex_case": "low",
+   "incremental": true,
+   "capex": 1844805,
+   "npv10_btax": 703558
+  },
+  {
+   "capex_case": "base",
+   "incremental": true,
+   "capex": 2080618,
+   "npv10_btax": 468679
+  },
+  {
+   "capex_case": "high",
+   "incremental": true,
+   "capex": 2245849,
+   "npv10_btax": 304103
+  },
+  {
+   "capex_case": "base",
+   "incremental": false,
+   "capex": 2080618,
+   "npv10_btax": -510413
+  }
+ ],
+ "flat_wti_npv10_btax": {
+  "stand-alone": {
+   "50.0": {
+    "base_bpd": -1498411.0,
+    "high_bpd": -1130685.0,
+    "low_bpd": -1980684.0
+   },
+   "60.0": {
+    "base_bpd": -1079894.0,
+    "high_bpd": -555010.0,
+    "low_bpd": -1817488.0
+   },
+   "70.0": {
+    "base_bpd": -630052.0,
+    "high_bpd": 65435.0,
+    "low_bpd": -1642022.0
+   },
+   "80.0": {
+    "base_bpd": -162235.0,
+    "high_bpd": 716897.0,
+    "low_bpd": -1460228.0
+   },
+   "90.0": {
+    "base_bpd": 315160.0,
+    "high_bpd": 1390722.0,
+    "low_bpd": -1274590.0
+   },
+   "100.0": {
+    "base_bpd": 795412.0,
+    "high_bpd": 2077914.0,
+    "low_bpd": -1089654.0
+   }
+  },
+  "incremental": {
+   "50.0": {
+    "base_bpd": -946316.0,
+    "high_bpd": -533803.0,
+    "low_bpd": -1597294.0
+   },
+   "60.0": {
+    "base_bpd": -355424.0,
+    "high_bpd": 279290.0,
+    "low_bpd": -1346651.0
+   },
+   "70.0": {
+    "base_bpd": 288677.0,
+    "high_bpd": 1176186.0,
+    "low_bpd": -1104496.0
+   },
+   "80.0": {
+    "base_bpd": 899616.0,
+    "high_bpd": 2024387.0,
+    "low_bpd": -871518.0
+   },
+   "90.0": {
+    "base_bpd": 1486489.0,
+    "high_bpd": 2839174.0,
+    "low_bpd": -647718.0
+   },
+   "100.0": {
+    "base_bpd": 2049294.0,
+    "high_bpd": 3620548.0,
+    "low_bpd": -433096.0
+   }
+  }
+ },
+ "flat_wti_breakeven": {
+  "low_bpd|stand-alone": null,
+  "low_bpd|incremental": null,
+  "base_bpd|stand-alone": 83.4,
+  "base_bpd|incremental": 65.5,
+  "high_bpd|stand-alone": 68.9,
+  "high_bpd|incremental": 56.6
+ },
+ "base_case_incremental": {
   "profile": "base_bpd",
-  "wti": 70,
-  "field_price": 63.0,
-  "capex": 1965904.0,
-  "price_factor": 0.9,
-  "incremental": false,
-  "econ_months": 69,
-  "oil_econ_bbl": 142069,
-  "revenue": 8950376,
-  "royalties": 3732466,
-  "opex": 3020941,
-  "noi_btax": 81065,
-  "npv10_btax": -85206,
-  "npv10_atax": -355098,
-  "tax": -288039,
-  "payout_months": 35,
-  "irr_btax": null,
-  "royalty_share": 0.417,
-  "opex_per_bbl": 21.26
- },
- "npv10_btax_grid_base_capex": {
-  "50": {
-   "base_bpd": -1122678.0,
-   "high_bpd": -659638.0,
-   "low_bpd": -1774734.0
-  },
-  "60": {
-   "base_bpd": -615383.0,
-   "high_bpd": 33600.0,
-   "low_bpd": -1573079.0
-  },
-  "70": {
-   "base_bpd": -85206.0,
-   "high_bpd": 766982.0,
-   "low_bpd": -1361554.0
-  },
-  "80": {
-   "base_bpd": 456620.0,
-   "high_bpd": 1532389.0,
-   "low_bpd": -1147724.0
-  },
-  "90": {
-   "base_bpd": 1002104.0,
-   "high_bpd": 2315548.0,
-   "low_bpd": -935140.0
-  },
-  "100": {
-   "base_bpd": 1543005.0,
-   "high_bpd": 3097090.0,
-   "low_bpd": -725563.0
-  }
- },
- "npv10_atax_grid_base_capex": {
-  "50": {
-   "base_bpd": -1190104.0,
-   "high_bpd": -832670.0,
-   "low_bpd": -1774734.0
-  },
-  "60": {
-   "base_bpd": -773213.0,
-   "high_bpd": -282900.0,
-   "low_bpd": -1582966.0
-  },
-  "70": {
-   "base_bpd": -355098.0,
-   "high_bpd": 281334.0,
-   "low_bpd": -1395005.0
-  },
-  "80": {
-   "base_bpd": 60422.0,
-   "high_bpd": 857854.0,
-   "low_bpd": -1213285.0
-  },
-  "90": {
-   "base_bpd": 470171.0,
-   "high_bpd": 1435815.0,
-   "low_bpd": -1038269.0
-  },
-  "100": {
-   "base_bpd": 870621.0,
-   "high_bpd": 1995714.0,
-   "low_bpd": -869600.0
-  }
- },
- "npv10_btax_grid_incremental": {
-  "50": {
-   "base_bpd": -595712.0,
-   "high_bpd": -82107.0,
-   "low_bpd": -1407907.0
-  },
-  "60": {
-   "base_bpd": 64546.0,
-   "high_bpd": 851043.0,
-   "low_bpd": -1137175.0
-  },
-  "70": {
-   "base_bpd": 755738.0,
-   "high_bpd": 1812398.0,
-   "low_bpd": -875478.0
-  },
-  "80": {
-   "base_bpd": 1412858.0,
-   "high_bpd": 2723905.0,
-   "low_bpd": -625112.0
-  },
-  "90": {
-   "base_bpd": 2039683.0,
-   "high_bpd": 3594161.0,
-   "low_bpd": -386076.0
-  },
-  "100": {
-   "base_bpd": 2636795.0,
-   "high_bpd": 4423166.0,
-   "low_bpd": -158371.0
-  }
- },
- "npv10_atax_grid_incremental": {
-  "50": {
-   "base_bpd": -719837.0,
-   "high_bpd": -329996.0,
-   "low_bpd": -1415327.0
-  },
-  "60": {
-   "base_bpd": -184816.0,
-   "high_bpd": 413954.0,
-   "low_bpd": -1171381.0
-  },
-  "70": {
-   "base_bpd": 354777.0,
-   "high_bpd": 1106858.0,
-   "low_bpd": -948616.0
-  },
-  "80": {
-   "base_bpd": 820927.0,
-   "high_bpd": 1744913.0,
-   "low_bpd": -744581.0
-  },
-  "90": {
-   "base_bpd": 1259705.0,
-   "high_bpd": 2354092.0,
-   "low_bpd": -556363.0
-  },
-  "100": {
-   "base_bpd": 1677684.0,
-   "high_bpd": 2934395.0,
-   "low_bpd": -382015.0
-  }
+  "deck": "glj_oct26",
+  "wti": null,
+  "price_factor": 0.81,
+  "capex": 2080618,
+  "incremental": true,
+  "fees": "none",
+  "econ_months": 175,
+  "oil_econ_bbl": 203347,
+  "revenue": 13050642,
+  "royalties": 5410736,
+  "opex": 4547328,
+  "noi_btax": 810078,
+  "npv10_btax": 468679,
+  "npv10_atax": 112278,
+  "tax": -385210,
+  "payout_months": 27,
+  "irr_btax": 0.288,
+  "royalty_share": 0.415,
+  "opex_per_bbl": 22.36
  },
  "notes": [
-  "fiscal terms and opex from the 2023 IFR workbook; no corporate G&A, no Simmons carry, 100 % WI",
-  "water cut assumed to follow TEC-10 (0.40 -> 0.85)",
-  "flat real prices, no inflation, 10 % discount, start Jan 2027",
-  "post-2025 fiscal reform not checked (G-49)"
+  "GLJ 1 Oct 2026 then-current WTI, costs +2 %/yr from 2026, NPV10 nominal, mid-month discounting, start Jan 2027",
+  "flat-WTI grid: constant prices and costs (real), same fees/capex",
+  "area fees in stand-alone only; incremental assumes TEC-10 producing and carrying battery, disposal and area fees",
+  "no corporate G&A, no carry, 100 % WI; fiscal terms per contract (unchanged by the 2025 reform, G-49)"
  ]
 }
