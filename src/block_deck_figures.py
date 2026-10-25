@@ -45,8 +45,8 @@ rows = [
  ("TEC-2","plug",None,None,None,2322.5,2323.5,"permanent plug May 2019, shuts off wet deeper perfs","Activities performed in Tecolutla.xlsx (1PawcesN)"),
  ("TEC-2","td",None,None,None,0,2375,"TD","Tecolutla Well Header Information.csv"),
   # TEC-3 (1956, water-invaded on test, plugged 7 Mar 1956). PEMEX estado mecanico (updated 19 May 2006) in the 2017 CNH cedula.
- ("TEC-3","surface",9.625,36,"J-55",0,501.35,"cemented","PEMEX estado mecanico TEC-3 (1XtyXmV6); CNH cedula Tec-3 (1PpxStcY)"),
- ("TEC-3","open_hole",8.625,None,None,501.35,2380.5,"open hole 8 5/8 in","PEMEX estado mecanico TEC-3 (1XtyXmV6)"),
+ ("TEC-3","surface",9.625,36,"J-55",0,601.7,"cemented 15 Feb 1956 (three 1956 PEMEX records; the 2006 sketch and 2017 cedula give 501.35, TEC-5's depth)","TEC-3 informe final (1_JknB-X), expedientes (1wE8xjBe, 1K1l1fei); database review cnh"),
+ ("TEC-3","open_hole",8.625,None,None,601.7,2380.5,"open hole 8 5/8 in","PEMEX estado mecanico TEC-3 (1XtyXmV6); shoe per 1956 records"),
  ("TEC-3","plug",None,None,None,571.7,625,"cement plug","PEMEX estado mecanico TEC-3 (1XtyXmV6)"),
  ("TEC-3","plug",None,None,None,2310,2380.5,"cement plug (bottom)","PEMEX estado mecanico TEC-3 (1XtyXmV6)"),
  ("TEC-3","td",None,None,None,0,2380.5,"TD; plugged 7 Mar 1956 (water on formation test)","PEMEX estado mecanico TEC-3; header CSV gives 2,381"),
@@ -66,6 +66,9 @@ rows = [
  ("TEC-6","perf",None,None,None,2320,2321,"squeezed","Tecolutla Perforations Information.csv"),
  ("TEC-6","perf",None,None,None,2324,2327,"squeezed","Tecolutla Perforations Information.csv"),
  ("TEC-6","perf",None,None,None,2336,2338,"open hole (1956 initial interval)","Perforations CSV; TEC-6 informe final"),
+ ("TEC-6","plug",None,None,None,2235,2280,"cement plug (PEMEX abandonment Mar-Apr 2007)","BLOQUE_TECOLUTLA_6_ESTADO_MECANICO.pdf, 31 Aug 2007 (1EldJkzk)"),
+ ("TEC-6","plug",None,None,None,1947.62,1967,"cement retainer 1,947.62 m, squeeze holes 1,965-1,967 m (2007)","BLOQUE_TECOLUTLA_6_ESTADO_MECANICO.pdf (1EldJkzk)"),
+ ("TEC-6","plug",None,None,None,298.06,299,"mechanical plug (2007); 6 5/8 in casing parted at 352 m, breach 352-1,100 m, gas at surface before abandonment","BLOQUE_TECOLUTLA_6_ESTADO_MECANICO.pdf; PEMEX 2007 logs (1--MROmJ, 11Zewmh1)"),
  ("TEC-6","td",None,None,None,0,2338.9,"TD","TECOLUTLA_6_INFORME_FINAL.pdf"),
  # TEC-7 (1957)
  ("TEC-7","surface",9.625,36,"J-55",0,600.48,"cemented","Anexo 3 estado mecanico final tec-7.pdf (11Wasndd)"),
@@ -81,11 +84,13 @@ rows = [
  ("TEC-9","surface",9.625,36,"J-55",0,502,"cemented","BLOQUE_TECOLUTLA_9_ESTADO_MECANICO.PDF (1ys9wOiU)"),
  ("TEC-9","production",6.625,28,"P-110",0,2340,"cemented","BLOQUE_TECOLUTLA_9_ESTADO_MECANICO.PDF"),
  ("TEC-9","tubing",2.875,None,None,0,2318,"2 7/8 in to 2,318 m + 2 3/8 in","BLOQUE_TECOLUTLA_9_ESTADO_MECANICO.PDF"),
- ("TEC-9","perf",None,None,None,2328,2333,"squeezed (closed Jan 1999; monument)","Perforations CSV; estado mecanico"),
+ ("TEC-9","perf",None,None,None,2328,2333,"produced 1973-99 and 2003-12; squeezed Nov 2012","Perforations CSV; CNH CD tables; PEMEX 2012 logs"),
+ ("TEC-9","plug",None,None,None,2312.36,2313,"cement retainer (squeeze Nov 2012); plugged 4 Jan 2013","PEMEX 2012 intervention logs (19ro5aaF); CNH files (1a4FKOi9)"),
+ ("TEC-9","plug",None,None,None,470,736,"cement plugs across 6 5/8 in casing breach (~530-833 m); 9 5/8 in breach ~70 m repaired 2010","PEMEX 2012 logs; database review cnh/reg"),
  ("TEC-9","td",None,None,None,0,2340,"TD; deviated from 296 m, 11 deg, 112 m displacement","BLOQUE_TECOLUTLA_9_ESTADO_MECANICO.PDF"),
  # TEC-101 (1972)
  ("TEC-101","surface",9.625,40,"N-80",0,807.19,"cemented","BLOQUE_TECOLUTLA_101_ESTADO_MECANICO.pdf (1a00morB)"),
- ("TEC-101","open_hole",8.625,None,None,807.19,2804,"open hole; fish at 926 m; water-invaded, plugged 31 Mar 1972","BLOQUE_TECOLUTLA_101_ESTADO_MECANICO.pdf"),
+ ("TEC-101","open_hole",8.625,None,None,807.19,2804,"open hole; drilled 28 Jan-16 Mar 1972; El Abra top 2,342 mMD (-2,334 mSS, logs); water-invaded, plugged 31 Mar 1972","BLOQUE_TECOLUTLA_101_ESTADO_MECANICO.pdf; PEMEX well shapefile; 1972 logs"),
  ("TEC-101","perf",None,None,None,2718,2804,"open-hole interval, squeezed","Tecolutla Perforations Information.csv"),
  ("TEC-101","td",None,None,None,0,2804,"TD","BLOQUE_TECOLUTLA_101_ESTADO_MECANICO.pdf"),
  # TEC-10DES (2018)
@@ -102,11 +107,17 @@ rows = [
  ("TEC-10","perf",None,None,None,2433.5,2442.5,"active per CSV; injectivity test Jun 2018 admitted at 2,120 psi","Perforations CSV; Prueba de Admision (1XyZ35a9)"),
  ("TEC-10","td",None,None,None,0,2490,"TD (J-shape, ~20 deg at TD)","Well header CSV; QMAX mud report"),
  # TEC-11DES (2018)
- ("TEC-11","surface",9.625,None,None,0,472,"proposal depth 472/500 m; post-operative report not read","PROPUESTA VF TEC-11 TR 9 5/8 @ 472 m (1o4iHKGh)"),
+ ("TEC-11","surface",9.625,32.3,"H-40",0,500,"cemented; 13 3/8 in J-55 conductor at 40 m","Tec-11 VF.pdf, Tonalli 25 Sep 2019 (1olpp-TY)"),
  ("TEC-11","production",7.0,26,None,0,2354.44,"cemented 24-25 Nov 2018, returns to surface","TEC-11 DES TR 7 Reporte Post Operativo (1CL89Fst)"),
- ("TEC-11","liner",4.5,13.5,None,2354.44,3283,"4 1/2 in liner in the lateral (liner run design 1Fk1BJgP); tubing-less","Tecolutla 11_Corrida_V1_Liner 4.5.xlsm; Fideicomiso 2024"),
+ ("TEC-11","liner",4.5,13.5,"L-80",1869.18,2863,"tie-back at 1,869.18 mMD to 2,863 mMD; tie-back and liner cement jobs failed","Tec-11 VF.pdf (1olpp-TY)"),
+ ("TEC-11","plug",None,None,None,2866,2872,"fish 5.9 m (bit + watermelon mill, May 2019)","Tec-11 VF.pdf; operations log (1PawcesN)"),
+ ("TEC-11","open_hole",6.125,None,None,2872,3283,"open-hole lateral, not re-enterable","Tec-11 VF.pdf"),
  ("TEC-11","plug",None,None,None,2400,2401,"Boss composite plug set Aug 2019; 100 % water","Anexo 4 aviso abandono temporal (18kU9Zb7)"),
- ("TEC-11","perf",None,None,None,2624,2806,"ten proposed 2 m intervals 2,624-2,806 mMD (never produced oil)","Tecolutla Perforations Information.csv"),
+ ("TEC-11","perf",None,None,None,2643.5,2646.5,"water-invaded (Jun 2019)","Tec-11 VF.pdf (1olpp-TY)"),
+ ("TEC-11","perf",None,None,None,2673.5,2676.5,"water-invaded (Jun 2019)","Tec-11 VF.pdf; operations log"),
+ ("TEC-11","perf",None,None,None,2700.5,2703.5,"water-invaded (Jun 2019)","Tec-11 VF.pdf; operations log"),
+ ("TEC-11","perf",None,None,None,2726.5,2729.5,"water-invaded (Jun 2019)","Tec-11 VF.pdf; operations log"),
+ ("TEC-11","perf",None,None,None,2742.5,2745.5,"water-invaded (Jun 2019); 286 bbl/d water","Tec-11 VF.pdf; operations log"),
  ("TEC-11","td",None,None,None,0,3283,"TD mMD (2,331 mTVD)","Well header CSV; Fideicomiso 2024"),
 ]
 cas = pd.DataFrame(rows, columns=["well","item","od_in","weight_lbft","grade","top_mmd","base_mmd","status","source"])
