@@ -131,6 +131,16 @@ def study_text(study, top: int = 20) -> str:
     out.append(table(["entity", "wallets", "capital in", "PnL", "CAGR", "Sharpe", "luck test", "MaxDD",
                       "illiquid", "operator", "rep"], rows) if rows else "  no profitable entities")
 
+    em = sorted([r for r in study.boards.active if not r.metrics.get("significant")
+                 and r.metrics.get("days_remaining", float("inf")) < float("inf")],
+                key=lambda r: r.metrics["days_remaining"])
+    out.append("\nEMERGING (beating the luck bar's pace; days of history still needed to prove it)")
+    rows = [[short(r.address), r.group, f"{r.metrics['history_days']:.0f}d", f"{r.metrics['days_remaining']:.0f}d",
+             share(r.metrics.get("dsr", 0)), num(r.metrics["sharpe"]), f"${r.metrics.get('pnl_usd', 0):,.0f}"]
+            for r in em[:top]]
+    out.append(table(["wallet", "operator", "history", "still needed", "luck now", "Sharpe", "PnL"], rows)
+               if rows else "  none on pace yet")
+
     months = sorted(study.flows_smart)[-6:]
     sectors = sorted({s for m in months for s in study.flows_smart[m]})
     out.append("\nSMART-MONEY NET FLOWS BY SECTOR (USD bought minus sold via swaps, last 6 months)")

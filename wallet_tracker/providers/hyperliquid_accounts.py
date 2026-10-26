@@ -21,7 +21,8 @@ import math
 import re
 import statistics as st
 
-from ..metrics import compound, expected_max_sharpe, max_drawdown, moments, probabilistic_sharpe
+from ..metrics import (compound, days_to_proof, evidence_status, expected_max_sharpe, max_drawdown, moments,
+                       probabilistic_sharpe)
 from .http import Http
 
 URL = "https://api.hyperliquid.xyz/info"
@@ -199,6 +200,14 @@ def deflate(rows: list[dict]) -> float:
             if f"ir_period_vs_{name}" in r:
                 r[f"dsr_vs_{name}"] = probabilistic_sharpe(r[f"ir_period_vs_{name}"], r["effective_days"],
                                                            r[f"ir_skew_vs_{name}"], r[f"ir_kurt_vs_{name}"], star)
+        # Evidence clock on the claim that matters - beating ETH - if measured.
+        sr_x = r.get("ir_period_vs_eth", r["sharpe_period"])
+        sk, ku = r.get("ir_skew_vs_eth", r["skew"]), r.get("ir_kurt_vs_eth", r["kurtosis"])
+        need = days_to_proof(sr_x, star, sk, ku)
+        r["days_to_proof"] = need
+        r["days_remaining"] = max(0.0, need - r["effective_days"]) if need is not None else None
+        r["evidence"] = evidence_status(r.get("dsr_vs_eth", r["dsr"]) if "ir_period_vs_eth" in r else r["dsr"],
+                                        r["effective_days"], need)
     return star * math.sqrt(365)
 
 

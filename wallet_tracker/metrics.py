@@ -76,6 +76,30 @@ def probabilistic_sharpe(sr: float, n: int, skew: float, kurt: float, sr_star: f
     return norm_cdf((sr - sr_star) * math.sqrt(n - 1) / math.sqrt(denom))
 
 
+def days_to_proof(sr: float, sr_star: float, skew: float, kurt: float, confidence: float = 0.95) -> float | None:
+    """Observations needed for the probabilistic Sharpe vs the luck bar to
+    reach `confidence`, if the current per-period Sharpe holds. Inverts
+    PSR: z * sqrt(denom) / (sr - sr_star) = sqrt(n - 1). None when the
+    current pace never gets there (not beating the luck bar)."""
+    if sr <= sr_star:
+        return None
+    denom = 1.0 - skew * sr + (kurt - 1.0) / 4.0 * sr * sr
+    if denom <= 0:
+        return None
+    z = norm_ppf(confidence)
+    return 1.0 + (z * z * denom) / (sr - sr_star) ** 2
+
+
+def evidence_status(dsr: float, observed: float, needed: float | None, min_days: float = 90) -> str:
+    if dsr >= 0.95:
+        return "proven"
+    if needed is None:
+        return "behind pace"
+    if observed < min_days:
+        return "too early"
+    return "on track"
+
+
 def expected_max_sharpe(sr_variance: float, n_trials: int) -> float:
     """Sharpe the best of `n_trials` skill-less strategies would show by luck."""
     if n_trials < 2 or sr_variance <= 0:

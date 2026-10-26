@@ -116,6 +116,15 @@ class MetricsTest(unittest.TestCase):
         self.assertLess(short, long)
         self.assertGreater(long, 0.95)
 
+    def test_days_to_proof_inverts_psr(self):
+        need = metrics.days_to_proof(0.15, 0.05, 0.0, 3.0)
+        self.assertAlmostEqual(metrics.probabilistic_sharpe(0.15, int(round(need)), 0.0, 3.0, 0.05), 0.95, delta=0.01)
+        self.assertIsNone(metrics.days_to_proof(0.04, 0.05, 0.0, 3.0))       # behind the luck bar's pace
+        self.assertLess(metrics.days_to_proof(0.3, 0.05, 0, 3), metrics.days_to_proof(0.1, 0.05, 0, 3))
+        self.assertEqual(metrics.evidence_status(0.97, 40, 30), "proven")
+        self.assertEqual(metrics.evidence_status(0.5, 40, 300), "too early")
+        self.assertEqual(metrics.evidence_status(0.5, 200, 300), "on track")
+
     def test_luck_bar_rises_with_trials(self):
         self.assertLess(metrics.expected_max_sharpe(0.01, 10), metrics.expected_max_sharpe(0.01, 1000))
 

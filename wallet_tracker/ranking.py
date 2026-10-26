@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 from .analyze import WalletReport
 from .config import Config
-from .metrics import expected_max_sharpe, probabilistic_sharpe
+from .metrics import days_to_proof, expected_max_sharpe, probabilistic_sharpe
 from .models import WalletClass
 
 
@@ -78,6 +78,9 @@ def _deflate(reports: list[WalletReport], cfg: Config) -> float:
         m["dsr"] = probabilistic_sharpe(m["sharpe_daily"], int(m["history_days"]),
                                         m["skew"], m["kurtosis"], sr_star)
         m["significant"] = float(m["dsr"] >= cfg.significance_level)
+        need = days_to_proof(m["sharpe_daily"], sr_star, m["skew"], m["kurtosis"], cfg.significance_level)
+        m["days_to_proof"] = need if need is not None else float("inf")
+        m["days_remaining"] = max(0.0, need - m["history_days"]) if need is not None else float("inf")
     return sr_star * (365 ** 0.5)
 
 

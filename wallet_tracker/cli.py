@@ -480,9 +480,49 @@ def cmd_perps(args) -> None:
     # Percent vs dollars: good while small, then lost money after scaling up.
     scaled = [r for r in traders if r["total_return"] > 0 and r["pnl_usd"] < 0]
     print(f"positive % return but negative $ PnL (won small, lost big after scaling up): {len(scaled)}")
+    # Evidence clock: who is on pace to be proven, and how long until we'll know.
+    pool = [r for r in rows if "dsr" in r and r.get("annual_turnover", 0) <= args.mm_turnover
+            and r.get("annual_turnover", 0) >= 5 and r["pnl_usd"] > 0 and r["max_drawdown"] < 0.95]
+    counts = {k: sum(r.get("evidence") == k for r in pool) for k in ("proven", "on track", "too early", "behind pace")}
+    print("\nEVIDENCE CLOCK (beating ETH): " + ", ".join(f"{k} {v}" for k, v in counts.items()))
+    def clock_table(title: str, items: list[dict]) -> None:
+        print(f"\n{title}")
+        print(table(["account", "alias", "history", "days still needed", "luck vs ETH now", "IR vs ETH", "PnL",
+                     "max DD"],
+                    [[short(r["address"]), (r["alias"] or "")[:16], f"{r['effective_days']}d",
+                      "-" if r.get("days_remaining") is None else f"{r['days_remaining']:.0f}d",
+                      f"{r.get('dsr_vs_eth', r['dsr']):.0%}", num(r.get("ir_vs_eth", r["sharpe"])),
+                      f"${r['pnl_usd']:,.0f}", pct(-r["max_drawdown"])] for r in items[:args.show]])
+              if items else "  none")
+    by_status = lambda k: sorted([r for r in pool if r.get("evidence") == k],  # noqa: E731
+                                 key=lambda r: (r.get("days_remaining") or 0, -r.get("dsr_vs_eth", 0)))
+    clock_table("PROVEN: beat ETH with >= 95% luck-test confidence", by_status("proven"))
+    clock_table("ON TRACK: 90+ days of history, on pace to prove it (the next leaders, if they keep it up)",
+                by_status("on track"))
+    # Forward test: once a shortlist is chosen, new data only has to beat the
+    # best of the *shortlist* by chance, not the best of everyone screened.
+    from .metrics import days_to_proof as _dtp
+    from .metrics import expected_max_sharpe as _ems
+    shortlist = by_status("proven") + by_status("on track")
+    if shortlist:
+        star_fwd = _ems(1.0 / 365, len(shortlist))
+        print(f"\nFORWARD CLOCK: shortlist of {len(shortlist)}; from here, each must beat the best of "
+              f"{len(shortlist)} by chance (Sharpe {star_fwd * 365 ** 0.5:.2f}, vs {luck:.2f} for the full screen)")
+        rows_f = []
+        for r in shortlist:
+            sr = r.get("ir_period_vs_eth", r["sharpe_period"])
+            need = _dtp(sr, star_fwd, r.get("ir_skew_vs_eth", r["skew"]), r.get("ir_kurt_vs_eth", r["kurtosis"]))
+            rows_f.append((need, r))
+        rows_f.sort(key=lambda x: x[0] if x[0] is not None else 1e9)
+        print(table(["account", "alias", "IR vs ETH", "forward days of new data to confirm", "max DD"],
+                    [[short(r["address"]), (r["alias"] or "")[:16], num(r.get("ir_vs_eth", r["sharpe"])),
+                      "-" if need is None else f"{need:.0f}d", pct(-r["max_drawdown"])]
+                     for need, r in rows_f[:args.show * 2]]))
+    clock_table("TOO EARLY: strong starts under 90 days - watch, don't follow (hot starts rarely last)",
+                sorted(by_status("too early"), key=lambda r: -r.get("dsr_vs_eth", 0)))
     if args.kb:
         kb = KnowledgeBase(args.kb)
-        kb.record_perps(scored, luck)
+        kb.record_perps(rows, luck)
         kb.close()
         print(f"stored {len(scored)} accounts in {args.kb}", file=sys.stderr)
     if args.json:
@@ -672,6 +712,14 @@ def cmd_kb(args) -> None:
         sectors = sorted({s for m in f.values() for s in m})
         print(table(["sector"] + months, [[sec] + [f"{f[m].get(sec, 0) / 1e6:+.2f}M" for m in months]
                                           for sec in sectors]) if f else "no flows stored")
+    elif args.action == "emerging":
+        rows = []
+        for (a, alias, ev, rem, now_c, first_c, first_ts, span, pnl, dd, n) in kb.emerging(args.limit):
+            trend = "" if n < 2 or first_c is None or now_c is None else f"{(now_c - first_c) * 100:+.0f} pts"
+            rows.append([short(a), (alias or "")[:16], ev, "-" if rem is None else f"{rem:.0f}d",
+                         f"{(now_c or 0):.0%}", trend, str(n), f"{span:.0f}d", f"${pnl:,.0f}", pct(-(dd or 0))])
+        print(table(["account", "alias", "status", "days still needed", "luck vs ETH", "since first seen",
+                     "snapshots", "history", "PnL", "max DD"], rows) if rows else "no perps screens stored yet")
     elif args.action == "movers":
         mv = kb.movers()
         for k in ("new", "dropped"):
@@ -806,7 +854,7 @@ def main(argv: list[str] | None = None) -> None:
     nw.set_defaults(fn=cmd_networth)
 
     k = sub.add_parser("kb", help="query the knowledge base")
-    k.add_argument("action", choices=["runs", "top", "wallet", "flows", "movers"])
+    k.add_argument("action", choices=["runs", "top", "wallet", "flows", "movers", "emerging"])
     k.add_argument("address", nargs="?")
     k.add_argument("--kb", default=os.path.expanduser("~/.wallet_tracker/kb.sqlite"))
     k.add_argument("--limit", type=int, default=25)

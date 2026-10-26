@@ -40,7 +40,8 @@ CREATE TABLE IF NOT EXISTS regime_matrix (
 CREATE TABLE IF NOT EXISTS perp_snapshots (
   ts INTEGER, address TEXT, alias TEXT, class TEXT, account_value REAL, pnl_usd REAL, sharpe REAL, dsr REAL,
   dsr_vs_eth REAL, dsr_vs_btc REAL, excess_vs_eth REAL, pct_months_beat_eth REAL, max_drawdown REAL,
-  span_days REAL, annual_turnover REAL, luck_sharpe REAL, PRIMARY KEY (ts, address));
+  span_days REAL, annual_turnover REAL, luck_sharpe REAL, days_remaining REAL, evidence TEXT,
+  PRIMARY KEY (ts, address));
 CREATE INDEX IF NOT EXISTS ws_addr ON wallet_snapshots(address);
 CREATE INDEX IF NOT EXISTS ps_addr ON perp_snapshots(address);
 """
@@ -61,6 +62,18 @@ class KnowledgeBase:
     def __init__(self, path: str):
         self.db = sqlite3.connect(path)
         self.db.executescript(SCHEMA)
+        self._migrate()
+
+    def _migrate(self) -> None:
+        """Add columns introduced after a knowledge base was first created."""
+        added = {"perp_snapshots": {"days_remaining": "REAL", "evidence": "TEXT"},
+                 "wallet_snapshots": {"size_tier": "TEXT", "frequency_tier": "TEXT"}}
+        for table, cols in added.items():
+            have = {row[1] for row in self.db.execute(f"PRAGMA table_info({table})")}
+            for col, typ in cols.items():
+                if col not in have:
+                    self.db.execute(f"ALTER TABLE {table} ADD COLUMN {col} {typ}")
+        self.db.commit()
 
     def close(self) -> None:
         self.db.close()
@@ -116,14 +129,33 @@ class KnowledgeBase:
         account's growing track record of luck-test confidence."""
         ts = ts or int(time.time())
         for r in rows:
-            self.db.execute("INSERT OR REPLACE INTO perp_snapshots VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            self.db.execute("INSERT OR REPLACE INTO perp_snapshots (ts, address, alias, class, account_value, pnl_usd, "
+                            "sharpe, dsr, dsr_vs_eth, dsr_vs_btc, excess_vs_eth, pct_months_beat_eth, max_drawdown, "
+                            "span_days, annual_turnover, luck_sharpe, days_remaining, evidence) "
+                            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                             (ts, r["address"], r.get("alias", ""), r.get("class", ""), r.get("account_value"),
                              r.get("pnl_usd"), _clean(r.get("sharpe")), _clean(r.get("dsr")),
                              _clean(r.get("dsr_vs_eth")), _clean(r.get("dsr_vs_btc")),
                              _clean(r.get("excess_total_vs_eth")), r.get("pct_months_beat_eth"),
-                             _clean(r.get("max_drawdown")), r.get("span_days"), r.get("annual_turnover"), luck_sharpe))
+                             _clean(r.get("max_drawdown")), r.get("span_days"), r.get("annual_turnover"), luck_sharpe,
+                             r.get("days_remaining"), r.get("evidence")))
         self.db.commit()
         return ts
+
+    def emerging(self, limit: int = 25) -> list[tuple]:
+        """Accounts on the evidence clock in the latest screen, with how their
+        confidence moved since they were first seen - rising = promotion candidate."""
+        latest = self.db.execute("SELECT MAX(ts) FROM perp_snapshots").fetchone()[0]
+        if latest is None:
+            return []
+        return self.db.execute("""
+            SELECT p.address, p.alias, p.evidence, p.days_remaining, p.dsr_vs_eth, f.dsr_vs_eth, f.ts, p.span_days,
+                   p.pnl_usd, p.max_drawdown, (SELECT COUNT(*) FROM perp_snapshots c WHERE c.address = p.address)
+            FROM perp_snapshots p
+            JOIN perp_snapshots f ON f.address = p.address
+             AND f.ts = (SELECT MIN(ts) FROM perp_snapshots WHERE address = p.address)
+            WHERE p.ts = ? AND p.evidence IN ('on track', 'too early', 'proven')
+            ORDER BY (p.evidence = 'proven') DESC, p.days_remaining LIMIT ?""", (latest, limit)).fetchall()
 
     def perp_history(self, address: str) -> list[tuple]:
         return self.db.execute("SELECT ts, account_value, pnl_usd, sharpe, dsr, dsr_vs_eth, dsr_vs_btc FROM "
