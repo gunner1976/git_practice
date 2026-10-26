@@ -464,9 +464,11 @@ def cmd_perps(args) -> None:
                   f"{r['span_days']:.0f}"] for i, r in enumerate(traders[:args.show], 1)]))
     sig = sum(r["dsr"] >= 0.95 for r in traders)
     print(f"\npass the luck test (DSR >= 95%): {sig} of {len(traders)}")
-    beat = [r for r in traders if r.get("dsr_vs_eth", 0) >= 0.8 and r.get("dsr_vs_btc", 0) >= 0.8]
-    print(f"beat BOTH ETH and BTC with >= 80% luck-test confidence: {len(beat)}")
-    best = sorted(traders, key=lambda r: min(r.get("dsr_vs_eth", 0), r.get("dsr_vs_btc", 0)), reverse=True)[:args.show]
+    # Credible: real dollars made, never wiped out, enough monthly blocks to judge consistency.
+    credible = [r for r in traders if r["pnl_usd"] >= 50_000 and r["max_drawdown"] < 0.95]
+    beat = [r for r in credible if r.get("dsr_vs_eth", 0) >= 0.8 and r.get("dsr_vs_btc", 0) >= 0.8]
+    print(f"beat BOTH ETH and BTC with >= 80% luck-test confidence (>= $50k PnL, never wiped out): {len(beat)}")
+    best = sorted(credible, key=lambda r: min(r.get("dsr_vs_eth", 0), r.get("dsr_vs_btc", 0)), reverse=True)[:args.show]
     print("\nMARKET-BEATERS (ranked by the weaker of their luck tests vs ETH and vs BTC)")
     print(table(["account", "alias", "value", "PnL", "excess vs ETH", "vs BTC", "IR vs ETH", "luck vs ETH",
                  "luck vs BTC", "months > ETH", "max DD", "days"],
@@ -478,6 +480,11 @@ def cmd_perps(args) -> None:
     # Percent vs dollars: good while small, then lost money after scaling up.
     scaled = [r for r in traders if r["total_return"] > 0 and r["pnl_usd"] < 0]
     print(f"positive % return but negative $ PnL (won small, lost big after scaling up): {len(scaled)}")
+    if args.kb:
+        kb = KnowledgeBase(args.kb)
+        kb.record_perps(scored, luck)
+        kb.close()
+        print(f"stored {len(scored)} accounts in {args.kb}", file=sys.stderr)
     if args.json:
         with open(args.json, "w") as fh:
             json.dump({"luck_sharpe": luck, "traders": traders,
@@ -615,6 +622,7 @@ def main(argv: list[str] | None = None) -> None:
     pz.add_argument("--mm-turnover", type=float, default=5_000, help="annual turnover above which = MM/HFT")
     pz.add_argument("--show", type=int, default=25)
     pz.add_argument("--json")
+    pz.add_argument("--kb", help="SQLite knowledge base to append this screen to")
     pz.set_defaults(fn=cmd_perps)
 
     k = sub.add_parser("kb", help="query the knowledge base")

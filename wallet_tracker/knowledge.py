@@ -37,7 +37,12 @@ CREATE TABLE IF NOT EXISTS migrations (
 CREATE TABLE IF NOT EXISTS regime_matrix (
   run_id INTEGER, operator TEXT, regime TEXT, median_excess REAL, n INTEGER,
   PRIMARY KEY (run_id, operator, regime));
+CREATE TABLE IF NOT EXISTS perp_snapshots (
+  ts INTEGER, address TEXT, alias TEXT, class TEXT, account_value REAL, pnl_usd REAL, sharpe REAL, dsr REAL,
+  dsr_vs_eth REAL, dsr_vs_btc REAL, excess_vs_eth REAL, pct_months_beat_eth REAL, max_drawdown REAL,
+  span_days REAL, annual_turnover REAL, luck_sharpe REAL, PRIMARY KEY (ts, address));
 CREATE INDEX IF NOT EXISTS ws_addr ON wallet_snapshots(address);
+CREATE INDEX IF NOT EXISTS ps_addr ON perp_snapshots(address);
 """
 
 
@@ -105,6 +110,24 @@ class KnowledgeBase:
                                 (run, group, regime, c["median_excess"], c["n"]))
         self.db.commit()
         return run
+
+    def record_perps(self, rows: list[dict], luck_sharpe: float, ts: int | None = None) -> int:
+        """Store one Hyperliquid screen; repeated daily, these become each
+        account's growing track record of luck-test confidence."""
+        ts = ts or int(time.time())
+        for r in rows:
+            self.db.execute("INSERT OR REPLACE INTO perp_snapshots VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                            (ts, r["address"], r.get("alias", ""), r.get("class", ""), r.get("account_value"),
+                             r.get("pnl_usd"), _clean(r.get("sharpe")), _clean(r.get("dsr")),
+                             _clean(r.get("dsr_vs_eth")), _clean(r.get("dsr_vs_btc")),
+                             _clean(r.get("excess_total_vs_eth")), r.get("pct_months_beat_eth"),
+                             _clean(r.get("max_drawdown")), r.get("span_days"), r.get("annual_turnover"), luck_sharpe))
+        self.db.commit()
+        return ts
+
+    def perp_history(self, address: str) -> list[tuple]:
+        return self.db.execute("SELECT ts, account_value, pnl_usd, sharpe, dsr, dsr_vs_eth, dsr_vs_btc FROM "
+                               "perp_snapshots WHERE address = ? ORDER BY ts", (address.lower(),)).fetchall()
 
     # ------------------------------------------------------------- queries
     def runs(self) -> list[tuple]:
