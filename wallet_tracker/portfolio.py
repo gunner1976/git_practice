@@ -44,6 +44,7 @@ class PortfolioResult:
     closed_trades: list[ClosedTrade] = field(default_factory=list)
     events: list[Event] = field(default_factory=list)
     net_flows_usd: float = 0.0
+    peak_capital_usd: float = 0.0     # highest cumulative net deposits: the money actually put in
     fees_usd: float = 0.0
     swap_volume_usd: float = 0.0
     swaps_total: int = 0
@@ -160,6 +161,7 @@ def simulate(events: list[Event], book: PriceBook, end_ts: int, freeze_days: int
         })
         prev_px = {t: x for t, x in px.items() if x}
         res.net_flows_usd += flow
+        res.peak_capital_usd = max(res.peak_capital_usd, res.net_flows_usd)
         prev_v, prev_p = v, p
 
     for tok, q in lots.items():

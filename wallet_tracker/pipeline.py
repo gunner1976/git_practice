@@ -21,6 +21,20 @@ from .reputation import assess, first_funder
 from .sectors import SectorMap, exposure, flows
 
 BUY_HOLD_ROW = "buy-and-hold (reference)"
+
+# Size tiers by capital put in (peak cumulative net deposits), not by
+# balance: a minnow that compounds into a whale stays a minnow here, so
+# skill can't masquerade as size.
+SIZE_TIERS = [("minnow (<$50k)", 0), ("fish ($50k–250k)", 50_000), ("dolphin ($250k–1M)", 250_000),
+              ("shark ($1M–10M)", 1_000_000), ("whale ($10M+)", 10_000_000)]
+
+
+def size_tier(avg_equity: float) -> str:
+    name = SIZE_TIERS[0][0]
+    for label, floor in SIZE_TIERS:
+        if avg_equity >= floor:
+            name = label
+    return name
 TRADER_CLASSES = {WalletClass.ACTIVE, WalletClass.BOT, WalletClass.DORMANT}
 
 
@@ -44,6 +58,9 @@ class Study:
     # month -> sector -> net USD bought, for "smart money" and for all traders
     flows_smart: dict[str, dict[str, float]] = field(default_factory=dict)
     flows_all: dict[str, dict[str, float]] = field(default_factory=dict)
+    size_summary: dict[str, dict[str, float]] = field(default_factory=dict)
+    size_regime: dict[str, dict[str, dict[str, float]]] = field(default_factory=dict)
+    size_baskets: dict[str, tuple[list[int], list[float]]] = field(default_factory=dict)
 
 
 @dataclass
@@ -119,6 +136,7 @@ def run_study(histories: list[WalletHistory], series: dict[str, dict[int, float]
     study.migrations, study.migration_stats = migrations, universe_stats(migrations, traders)
     _matrices(study)
     _capital_map(study, sector_map or SectorMap(), PriceBook(series))
+    _size_cohorts(study)
     eth = series.get("eth", {})
     days = sorted(d for d in eth if d >= min((r.result.days[0] for r in reports if r.result.days), default=now))
     study.eth = (days, [eth[d] / eth[p] - 1 if p in eth else 0.0 for p, d in zip([days[0]] + days, days)])
@@ -214,3 +232,32 @@ def _capital_map(study: Study, smap: SectorMap, book: PriceBook) -> None:
             best.reputation.score, best.reputation.tier, stats["cagr"], stats["sharpe"],
             any(is_smart(r) for r in rs)))
     study.entities.sort(key=lambda e: (e.smart, e.reputation), reverse=True)
+
+
+def _size_cohorts(study: Study) -> None:
+    """Whales vs minnows: the same metrics, cut by how much money a wallet runs."""
+    for r in study.reports:
+        r.size_tier = size_tier(r.metrics.get("capital_in_usd", 0.0))
+    traders = [r for r in study.reports if r.wallet_class is WalletClass.ACTIVE
+               and r.metrics["history_days"] >= 60 and r.metrics.get("closed_trades", 0) >= 5]
+    for label, _ in SIZE_TIERS:
+        members = [r for r in traders if r.size_tier == label]
+        if not members:
+            continue
+        med = lambda k: st.median(r.metrics.get(k, 0.0) for r in members)  # noqa: E731
+        sig = sum(bool(r.metrics.get("significant")) for r in members)
+        study.size_summary[label] = {
+            "n": len(members), "median_cagr": med("cagr"), "median_sharpe": med("sharpe"),
+            "median_max_drawdown": med("max_drawdown"), "median_regime_robustness": med("regime_robustness"),
+            "median_copy_cagr": med("copy_cagr"), "significant": sig, "significant_rate": sig / len(members),
+            "pct_beating_eth": sum(r.metrics.get("alpha_vs_eth", 0) > 0 for r in members) / len(members),
+            "median_pnl_usd": med("pnl_usd"), "total_pnl_usd": sum(r.metrics.get("pnl_usd", 0.0) for r in members),
+            "human_share": sum(r.operator.get("human_score", 0.5) >= 0.6 for r in members) / len(members),
+        }
+        cells = {}
+        for reg in REGIMES + ["stress"]:
+            vals = [r.regimes[reg]["ann_excess"] for r in members if r.regimes.get(reg, {}).get("days", 0) >= 10]
+            if vals:
+                cells[reg] = {"median_excess": st.median(vals), "n": len(vals)}
+        study.size_regime[label] = cells
+        study.size_baskets[label] = combine(members, copy=True)

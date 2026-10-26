@@ -246,6 +246,58 @@ def capital_map(study: Study) -> str:
 """
 
 
+# ---------------------------------------------------------------- whales vs minnows
+def size_section(study: Study, eth_days, eth_rs) -> str:
+    if not study.size_summary:
+        return ""
+    tiers = list(study.size_summary)
+    slots = ["s1", "s2", "s3", "s4", "s5"]
+    start = None
+    for t in tiers:
+        d, r = study.size_baskets.get(t, ([], []))
+        g = growth(d, r)
+        if g and (start is None or g[0][0] < start):
+            start = g[0][0]
+    series = []
+    for i, t in enumerate(tiers):
+        d, r = study.size_baskets.get(t, ([], []))
+        series.append({"label": f"{t} ({study.size_summary[t]['n']})", "short": t.split(" ")[0].capitalize(),
+                       "cls": slots[i % 5], "pts": growth(d, r, start)})
+    series.append({"label": "ETH", "cls": "bench", "pts": growth(eth_days, eth_rs, start), "dashed": True})
+
+    rows = "".join(
+        f"<tr><th scope='row'>{esc(t)}</th><td>{v['n']}</td><td>{pct(v['median_cagr'])}</td>"
+        f"<td>{v['median_sharpe']:.2f}</td><td>{pct(-v['median_max_drawdown'])}</td>"
+        f"<td>{v['median_regime_robustness']:.2f}</td><td>{v['pct_beating_eth'] * 100:.0f}%</td>"
+        f"<td>{v['significant']} ({v['significant_rate'] * 100:.0f}%)</td><td>{pct(v['median_copy_cagr'])}</td>"
+        f"<td>{money(v['median_pnl_usd'])}</td><td>{money(v['total_pnl_usd'])}</td>"
+        f"<td>{v['human_share'] * 100:.0f}%</td></tr>" for t, v in study.size_summary.items())
+
+    vals = [c["median_excess"] / (365 if k == "stress" else 1) for cells in study.size_regime.values()
+            for k, c in cells.items()]
+    hrows = [(t, [(cells[c]["median_excess"] / (365 if c == "stress" else 1)) if c in cells else None for c in COLS],
+              [f"{t} · {c}: median {pct(cells[c]['median_excess'] / (365 if c == 'stress' else 1), 1)} vs ETH "
+               f"({cells[c]['n']} wallets)" if c in cells else "" for c in COLS])
+             for t, cells in study.size_regime.items()]
+    return f"""
+<section>
+  <h2>Whales vs minnows</h2>
+  <p class="sub">Active traders grouped by the capital they put in (peak net deposits), so a small account that traded its
+  way to a fortune still counts as small. Small wallets are noisier, so look at
+  how many pass the luck test, not only at the best returns. Copy baskets follow every wallet in the tier, one day late.</p>
+  {legend([(x["label"], x["cls"], bool(x.get("dashed"))) for x in series])}
+  <div class="chartbox">{line_svg("sizes", series)}</div>
+  <div class="scroll"><table class="data">
+    <thead><tr><th scope="col">Size</th><th scope="col">Wallets</th><th scope="col">CAGR</th><th scope="col">Sharpe</th>
+    <th scope="col">Max DD</th><th scope="col">RRS</th><th scope="col">Beat ETH</th><th scope="col">Pass luck test</th>
+    <th scope="col">Copy CAGR</th><th scope="col">PnL (median)</th><th scope="col">PnL (total)</th><th scope="col">Human</th></tr></thead>
+    <tbody>{rows}</tbody></table></div>
+  <h3>By market regime</h3>
+  {heat(hrows, COLS, scale_for(vals), row_head="Size")}
+</section>
+"""
+
+
 # ---------------------------------------------------------------- page
 def tier_chip(rep) -> str:
     if rep is None:
@@ -414,6 +466,8 @@ def render_html(study: Study, demo: bool = False, fragment: bool = False) -> str
   market, which is what the Regime Robustness Score (RRS) rewards.</p>
   {heat(w_rows, COLS, scale_for(wvals), row_head="Wallet")}
 </section>
+
+{size_section(study, eth_days, eth_rs)}
 
 {capital_map(study)}
 

@@ -29,7 +29,7 @@ class ClassifierConfig:
 class EligibilityConfig:
     min_history_days: int = 120
     min_closed_trades: int = 10
-    min_avg_equity_usd: float = 10_000.0
+    min_avg_equity_usd: float = 2_500.0       # low, so small but skilled wallets can rank
     min_price_coverage: float = 0.85
     max_top_trade_profit_share: float = 0.6   # one lucky trade shouldn't carry the record
     min_active_month_ratio: float = 0.5

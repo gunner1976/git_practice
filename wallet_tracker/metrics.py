@@ -219,6 +219,10 @@ def compute(res: PortfolioResult, benchmark: list[float], copy_returns: list[flo
     m["days_since_last_swap"] = (now - swaps[-1].timestamp) / DAY if swaps else float("inf")
     m["avg_equity_usd"] = avg_eq
     m["final_equity_usd"] = res.final_equity
+    # Dollars made by trading, as opposed to dollars deposited.
+    m["pnl_usd"] = res.final_equity - res.net_flows_usd
+    m["capital_in_usd"] = res.peak_capital_usd
+    m["self_funded_ratio"] = m["pnl_usd"] / res.net_flows_usd if res.net_flows_usd > 0 else 0.0
     m["swap_volume_usd"] = res.swap_volume_usd
     m["fees_usd"] = res.fees_usd
     m["price_coverage"] = res.price_coverage

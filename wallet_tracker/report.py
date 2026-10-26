@@ -127,6 +127,15 @@ def study_text(study, top: int = 20) -> str:
     rows = [[sec] + [f"{study.flows_smart[m].get(sec, 0) / 1e6:+.1f}M" for m in months] for sec in sectors]
     out.append(table(["sector"] + months, rows) if rows else "  no smart-money swaps")
 
+    out.append("\nWHALES vs MINNOWS (active traders by capital put in; medians unless noted)")
+    rows = [[t, str(v["n"]), pct(v["median_cagr"]), num(v["median_sharpe"]), pct(-v["median_max_drawdown"]),
+             num(v["median_regime_robustness"]), share(v["pct_beating_eth"]),
+             f"{v['significant']} ({v['significant_rate']:.0%})", pct(v["median_copy_cagr"]),
+             f"${v['median_pnl_usd']:,.0f}", f"${v['total_pnl_usd']:,.0f}", share(v["human_share"])]
+            for t, v in study.size_summary.items()]
+    out.append(table(["size", "n", "CAGR", "Sharpe", "MaxDD", "RRS", "beat ETH", "signif", "copy CAGR",
+                      "PnL (median)", "PnL (total)", "human"], rows) if rows else "  no active traders")
+
     ms = study.migration_stats
     out.append(f"\nWALLET MIGRATIONS: {ms.get('migrations', 0)} of {ms.get('wallets', 0)} trading wallets "
                f"({ms.get('rate', 0):.1%}) handed their book to another address; {ms.get('verified', 0)} verified")
