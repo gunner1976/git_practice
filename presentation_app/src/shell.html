@@ -104,6 +104,11 @@ select, input[type=range] { accent-color: var(--accent); }
 select { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font: 13px var(--sans); max-width: 100%; }
 #outline { max-width: 340px; }
 #voice { max-width: 220px; }
+.seg { display: inline-flex; } .seg .btn { min-width: 46px; justify-content: center; } .seg .btn:first-child { border-radius: 8px 0 0 8px; } .seg .btn:last-child { border-radius: 0 8px 8px 0; margin-left: -1px; }
+.seg .btn[aria-pressed="true"] { background: var(--accent); color: #160b04; border-color: var(--accent); }
+.pulse { animation: pulse 1.8s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes pulse { 0% { opacity: 1; transform: scale(.55); } 100% { opacity: 0; transform: scale(1.7); } }
+.wl.pad { border-left-color: #c8b58a; background: rgba(30,26,18,.82); }
 .navbar .grp { display: flex; align-items: center; gap: 8px; }
 .navbar .sp { flex: 1; }
 #slideNo { font: 500 13px var(--mono); color: var(--ink2); min-width: 64px; text-align: center; }
@@ -176,8 +181,9 @@ select { background: var(--panel); color: var(--ink); border: 1px solid var(--li
         <span class="sp"></span>
         <div class="grp">
           <button class="btn" id="mute" aria-pressed="false" title="Narration voice on or off"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/></svg><span>Voice on</span></button>
+          <span class="seg" role="group" aria-label="Narration language"><button class="btn" id="langEn" aria-pressed="true" title="English narration">EN</button><button class="btn" id="langEs" aria-pressed="false" title="Narración en español (captions too; slide text stays in English)">ES</button></span>
           <select id="voice" aria-label="Narration voice"></select>
-          <label class="grp lbl" for="rate">Speed <input type="range" id="rate" min="0.75" max="1.4" step="0.05" value="1"><output id="rateOut" class="lbl">1.00×</output></label>
+          <label class="grp lbl" for="rate">Speed <input type="range" id="rate" min="0.75" max="1.4" step="0.05" value="0.95"><output id="rateOut" class="lbl">0.95×</output></label>
           <button class="btn" id="caps" aria-pressed="true" title="Captions">CC</button>
           <button class="btn" id="full" title="Full screen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5v2H6v3zm10-5h6v5h-2V6h-4zM4 15h2v3h3v2H4zm14 3v-3h2v5h-5v-2z"/></svg></button>
         </div>

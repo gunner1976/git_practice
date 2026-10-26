@@ -43,6 +43,10 @@ So **five wells have produced oil**: TEC-2, TEC-6, TEC-7 and TEC-9 under PEMEX, 
 - **Peak year: 1972, 228,557 bbl** (about 626 bbl/d), from 3 wells.
 - **Most wells producing together: four** (TEC-2, 6, 7 and 9), first in May 1973. Four wells were on in 70 months between 1973 and 2006. The best year with four wells on was 1973, at 88,053 bbl. 1977 made 126,624 bbl from three wells.
 
+## Zero months in the presentation app (26 Oct 2026)
+
+`src/build_app_data.py` adds explicit zero rows (flag `z=1`) only for months with no record that fall inside a **non-producing** segment of the well's status timeline in `wells.json` (shut in, workover, injector; each segment carries its source). The PEMEX-era internal gaps are CNH-reported zero months: the original CNH CD tables carry 781 explicit zero rows that fill all 66 internal gap runs (G-34, `database_review/cnh_findings.md` §1). Months with no record inside a **producing** segment stay absent and are drawn as breaks or hatched bands: 1956–59 (no monthly record of any kind), TEC-2 Jun 1956–Mar 1957, TEC-7 Jan–Mar 1957, TEC-2's 2019–22 share of the commingled stream, Jan 2023. Plugged wells stop at the plugging month. For the commingled 2019–22 months (shown as TEC-10), water and the 2022 shut-in months come from the CNH filings / LOS rows in `opex_monthly.csv` (flag `f=1`); Dec 2022 oil uses the LOS 733 bbl instead of the ticket row's 0. These are display rules; `production_by_well.csv` is unchanged.
+
 ## Caveats
 
 - Gaps with no records:

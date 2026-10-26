@@ -26,7 +26,7 @@ export function scene(ctx, o = {}) {
   const f = ctx.field; f.labelsOn = o.labels !== false; f.showSurface(o.surface !== false, o.surfaceOpacity ?? 0.95);
   f.owc.visible = !!o.owc; f.setWellStates(wellStates(ctx, o.year ?? 2026.8, { captions: o.captions !== false, override: o.override || {} }));
   f.setHighlight(o.highlight || null); f.setShift(...(o.shift || [0, 0]));
-  f.setSlices(o.slices || null);
+  f.setSlices(o.slices || null); f.setPads(o.pads || null, o.traces || []);
   if (o.focus) f.focusWell(o.focus, ctx.fast ? 0 : (o.dur ?? 2400), o.focusOpts || {}); else if (o.view) f.view(o.view, ctx.fast ? 0 : (o.dur ?? 2400));
   f.orbit(!!o.orbit, o.orbitSpeed ?? 0.25);
 }
@@ -58,13 +58,13 @@ export function coreSlides(ctx) {
   P.goldenlane = {
     id: 'goldenlane', title: 'On the Golden Lane', section: 'Setting',
     build(el) {
-      const body = std(el, { eyebrow: 'Setting', title: 'Tecolutla sits at the south-eastern tip of the Golden Lane reef rim', src: 'Coastline: Natural Earth 1:10 m. Reef-rim trace is schematic, after published regional maps (Faja de Oro / Tuxpan platform); town positions approximate. Field outline: CNH polygon. Sources: CNH dictamen A24 (2018), RES PEMEX field summary, geology notes.' });
+      const body = std(el, { eyebrow: 'Setting', title: 'Tecolutla sits at the south-eastern tip of the Golden Lane reef rim', src: 'Coastline: Natural Earth 1:10 m. Reef-rim trace is schematic, after published regional maps (Faja de Oro / Tuxpan platform); town positions approximate. Field outline: CNH polygon. Sources: CNH dictamen A24 (2018), RES PEMEX field summary, geology notes. Cerro Azul No. 4: HGS Bulletin editor’s note (Sep 2015), Wikipedia “Cerro Azul, Veracruz”; rate is a blowout estimate, not metered. TM-01: CNH Ronda 2.3 results (2018), licence CNH-R02-L03-TM-01/2017; IFR “Round 2.3 TM-01 Block” deck (Feb 2018).' });
       body.innerHTML = `<div class="row" style="gap:40px;align-items:stretch">
         <div id="glmap" style="width:560px;height:640px;position:relative;flex:none"></div>
         <div class="col grow" style="gap:26px">
-          ${S(1, `<h3>The Golden Lane (Faja de Oro)</h3><p>An Albian–Cenomanian reef that ringed the Tuxpan carbonate platform: an atoll about 150 km long and 70 km wide. Its rim is a chain of separate fields, each a reef build-up sealed by Tertiary shale, from Cerro Azul and Naranjos onshore to the marine fields offshore.</p>`)}
-          ${S(2, `<h3>Where Tecolutla fits</h3><p>The field is on the onshore reef rim at its south-eastern end, about 60 km east-south-east of Poza Rica and 7 km from the coast. CNH classes it as play <b>El Abra · reef rim · onshore</b>. Erosion at the end of the Albian cut channels through the rim; those channels and the overlying shale make each block its own trap.</p>`)}
-          ${S(3, `<div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><div class="v">45</div><div class="l">El Abra fields in the CNH trend table (35 on the reef rim)</div></div><div class="kpi"><div class="v">31<small>%</small></div><div class="l">Median 3P recovery for reef-rim fields</div></div><div class="kpi hot"><div class="v">2.5<small>MMbbl/km²</small></div><div class="l">Tecolutla's oil in place per km², against a rim median of 8.3: a small, thin field</div></div></div>`)}
+          ${S(1, `<h3>The Golden Lane (Faja de Oro)</h3><p>An Albian–Cenomanian reef round the Tuxpan platform: an atoll about 150 km by 70 km. Its rim is a chain of separate fields, each a reef block sealed by Tertiary shale, from Cerro Azul onshore to the marine fields.</p>`)}
+          ${S(3, `<h3>Where Tecolutla fits</h3><p>The field is on the onshore reef rim at its south-eastern end, about 60 km east-south-east of Poza Rica and 7 km from the coast. CNH play: <b>El Abra · reef rim · onshore</b>. Tecolutla was licensed in Ronda 1.3 (2016); the adjacent <b>TM-01</b> block, went in Ronda 2.3 (2018) to Jaguar E&amp;P on a USD 26.1 MM tie-break bonus. IFR’s bid deck mapped its El Abra pools: Miguel Hidalgo, Vicente Guerrero, Gutiérrez Zamora.</p>`)}
+          ${S(4, `<div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><div class="v">45</div><div class="l">El Abra fields in the CNH trend table (35 on the reef rim)</div></div><div class="kpi"><div class="v">31<small>%</small></div><div class="l">Median 3P recovery for reef-rim fields</div></div><div class="kpi hot"><div class="v">2.5<small>MMbbl/km²</small></div><div class="l">Tecolutla's oil in place per km², against a rim median of 8.3: a small, thin field</div></div></div>`)}
         </div></div>`;
       const W = 560, Hh = 640, lon0 = -98.2, lon1 = -96.6, lat0 = 20.15, lat1 = 22.05;
       const kx = Math.cos(21.1 * Math.PI / 180), sx = d3.scaleLinear().domain([lon0, lon1]).range([0, W]), sy = d3.scaleLinear().domain([lat0, lat1]).range([Hh, 0]);
@@ -88,6 +88,13 @@ export function coreSlides(ctx) {
       towns.forEach(([n, la, lo]) => { if (lo < lon0 || la > lat1) return; svg.append('circle').attr('cx', sx(lo)).attr('cy', sy(la)).attr('r', 5).attr('fill', '#d6dde4'); svg.append('text').attr('x', sx(lo) - 10).attr('y', sy(la) + 6).attr('text-anchor', 'end').attr('fill', '#d6dde4').style('font-size', '19px').text(n); });
       svg.append('text').attr('x', sx(-96.95)).attr('y', sy(21.55)).attr('fill', '#8fb0c8').style('font-size', '20px').style('font-style', 'italic').text('Gulf of Mexico');
       svg.append('text').attr('x', sx(-97.05)).attr('y', sy(21.2)).attr('fill', '#e8a37a').style('font-size', '18px').text('marine Golden Lane');
+      const ca = svg.append('g').attr('opacity', 0), cax = sx(-97.74), cay = sy(21.19);
+      ca.append('circle').attr('cx', cax).attr('cy', cay).attr('r', 11).attr('fill', '#ffcf3a').attr('stroke', '#fff').attr('stroke-width', 2.5);
+      ca.append('circle').attr('class', 'pulse').attr('cx', cax).attr('cy', cay).attr('r', 26).attr('fill', 'none').attr('stroke', '#ffcf3a').attr('stroke-width', 2);
+      ca.append('line').attr('x1', cax).attr('y1', cay - 12).attr('x2', 150).attr('y2', 182).attr('stroke', '#ffcf3a').attr('stroke-width', 2);
+      ca.append('rect').attr('x', 14).attr('y', 22).attr('width', 330).attr('height', 160).attr('rx', 8).attr('fill', '#0b1620').attr('stroke', '#ffcf3a').attr('stroke-width', 1.5).attr('opacity', 0.94);
+      [['Cerro Azul No. 4 · Feb 1916', 600, '#ffe08a'], ['Blew out at ~260,000 bbl/d', 400, '#fff'], ['(estimate); 9 days uncontrolled', 400, '#fff'], ['57+ MMbbl in 14 years', 400, '#fff'], ['~110 km NW of Tecolutla', 400, '#9fb3c3']]
+        .forEach(([t, w, c], i) => ca.append('text').attr('x', 28).attr('y', 52 + i * 29).attr('fill', c).style('font-size', '20px').attr('font-weight', w).text(t));
       const tg = svg.append('g').attr('opacity', 0);
       tg.append('circle').attr('cx', sx(-97.009)).attr('cy', sy(20.449)).attr('r', 13).attr('fill', '#ff6a2a').attr('stroke', '#fff').attr('stroke-width', 3);
       tg.append('circle').attr('cx', sx(-97.009)).attr('cy', sy(20.449)).attr('r', 34).attr('fill', 'none').attr('stroke', '#ffb38a').attr('stroke-width', 2).attr('stroke-dasharray', '5 5');
@@ -97,7 +104,8 @@ export function coreSlides(ctx) {
       return [
         { say: 'Start with the setting. In the Cretaceous, a reef grew round the edge of the Tuxpan platform: an atoll about a hundred and fifty kilometres long. That rim is the Golden Lane, the Faja de Oro, and it has given Mexico some of its most famous wells.', run: f => rimP.transition().duration(f ? 0 : 5000).ease(d3.easeCubicInOut).attr('stroke-dashoffset', 0) },
         { say: 'Uplift and erosion at the end of the Albian cut the rim into separate blocks, each a reef build-up sealed by Tertiary shale. Every Golden Lane field is one of those blocks.' },
-        { say: 'Tecolutla is at the south-eastern tip of the onshore rim, about sixty kilometres from Poza Rica and seven from the coast.', run: f => tg.transition().duration(f ? 0 : 900).attr('opacity', 1) },
+        { say: 'The trend made its name early. Cerro Azul number four, about a hundred and ten kilometres north-west of here, blew out in February 1916 and flowed uncontrolled for nine days at an estimated two hundred and sixty thousand barrels a day, one of the largest wells ever drilled. It went on to make more than fifty seven million barrels in fourteen years. Same reef; very different scale.', run: f => ca.transition().duration(f ? 0 : 900).attr('opacity', 1) },
+        { say: 'Tecolutla is at the south-eastern tip of the onshore rim, about sixty kilometres from Poza Rica and seven from the coast. It was licensed in Round 1.3 in 2016. The adjacent TM-01 block, with its own El Abra pools, was offered in Round 2.3 in 2018 and went to Jaguar after a tie-break cash bonus of twenty six point one million dollars.', run: f => { ca.transition().duration(f ? 0 : 600).attr('opacity', 0.35); tg.transition().duration(f ? 0 : 900).attr('opacity', 1); } },
         { say: 'Against its neighbours it is small and thin: about two and a half million barrels in place per square kilometre, against a reef-rim median of eight. That sets the scale for everything that follows. This is a field where one good well matters.' }
       ];
     }
@@ -376,6 +384,49 @@ export function coreSlides(ctx) {
     }
   };
 
+  // ---------------------------------------------------------------- recovery factor against the El Abra trend
+  P.recovery = {
+    id: 'recovery', title: 'Recovery against the trend', section: 'Reserves',
+    build(el) {
+      const body = std(el, { eyebrow: 'Recovery factor', title: 'Tecolutla has recovered about what its neighbours have, on the CNH volume', src: 'CNH El Abra trend table, 45 fields, production to Apr 2015 (analogue_rf.csv, docs/07 §3): recovery = cumulative ÷ CNH original volume. Tecolutla also shown on IFR’s 11.2 MMbbl. Neighbours: Miguel Hidalgo (NW) and Ignacio Allende (SE) blocks; Vicente Guerrero and Gutiérrez Zamora, mapped in IFR’s TM-01 deck.' });
+      const AN = (D.ooip && D.ooip.analogues) || [];
+      body.innerHTML = `<div class="row" style="gap:50px;align-items:flex-start"><div id="rfSc" style="width:980px;height:640px;flex:none"></div>
+        <div class="col grow" style="gap:22px">${S(1, `<h3>Nearest El Abra pools · recovery to date</h3><div id="rfNb"></div>`)}
+        ${S(2, `<div class="kpis" style="grid-template-columns:1fr 1fr"><div class="kpi"><div class="v">30<small>%</small></div><div class="l">reef-rim median to date (3P ultimate 31 %, best 53 %)</div></div><div class="kpi hot"><div class="v">18–25<small>%</small></div><div class="l">Tecolutla, on IFR’s 11.2 and CNH’s 7.8 MMbbl</div></div></div>`)}</div></div>`;
+      const W = 980, Hh = 640, m = { l: 90, r: 30, t: 30, b: 70 };
+      const svg = d3.select('#rfSc', el).append('svg').attr('viewBox', `0 0 ${W} ${Hh}`).attr('width', W).attr('height', Hh).style('font-family', 'IBM Plex Sans, sans-serif');
+      const x = d3.scaleLog().domain([0.2, 2000]).range([m.l, W - m.r]), y = d3.scaleLinear().domain([0, 55]).range([Hh - m.b, m.t]);
+      const ax = svg.append('g').attr('transform', `translate(0,${Hh - m.b})`).call(d3.axisBottom(x).tickValues([0.3, 1, 3, 10, 30, 100, 300, 1000]).tickFormat(d3.format('~g')));
+      const ay = svg.append('g').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(6).tickFormat(d => d + ' %'));
+      [ax, ay].forEach(a => { a.selectAll('text').attr('fill', C.ink2).style('font-size', '20px'); a.selectAll('line,path').attr('stroke', C.grid); });
+      svg.append('text').attr('x', (m.l + W - m.r) / 2).attr('y', Hh - 18).attr('text-anchor', 'middle').attr('fill', C.ink2).style('font-size', '20px').text('Original oil in place, MMbbl (log scale)');
+      svg.append('text').attr('x', 22).attr('y', (m.t + Hh - m.b) / 2).attr('transform', `rotate(-90,22,${(m.t + Hh - m.b) / 2})`).attr('text-anchor', 'middle').attr('fill', C.ink2).style('font-size', '20px').text('Recovered to date, % of OOIP');
+      svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(30)).attr('y2', y(30)).attr('stroke', '#9cc7f0').attr('stroke-dasharray', '8 6').attr('stroke-width', 2);
+      svg.append('text').attr('x', x(1.15)).attr('y', y(30) - 10).attr('text-anchor', 'start').attr('fill', '#9cc7f0').style('font-size', '19px').attr('paint-order', 'stroke').attr('stroke', C.bg).attr('stroke-width', 5).text('reef-rim median 30 %');
+      const NB = ['Miguel Hidalgo', 'Ignacio Allende', 'Vicente Guerrero', 'Gutiérrez Zamora'];
+      const pts = AN.filter(a => a.field !== 'Tecolutla' && a.ooip_mmbbl > 0.1 && a.rf_current > 0);
+      svg.append('g').selectAll('circle').data(pts).join('circle').attr('cx', a => x(a.ooip_mmbbl)).attr('cy', a => y(100 * a.rf_current)).attr('r', a => NB.includes(a.field) ? 10 : 7)
+        .attr('fill', a => NB.includes(a.field) ? '#5b9bd5' : a.play === 'Reef Rim' ? '#7b8794' : '#4a525c').attr('stroke', C.bg).attr('stroke-width', 1.5);
+      const nb = svg.append('g');
+      const lab = { 'Miguel Hidalgo': [12, 22], 'Ignacio Allende': [12, -12], 'Vicente Guerrero': [12, -12], 'Gutiérrez Zamora': [12, -12] };
+      pts.filter(a => NB.includes(a.field)).forEach(a => nb.append('text').attr('x', x(a.ooip_mmbbl) + lab[a.field][0]).attr('y', y(100 * a.rf_current) + lab[a.field][1]).text(a.field).attr('fill', '#cfe3ff').style('font-size', '19px').attr('paint-order', 'stroke').attr('stroke', C.bg).attr('stroke-width', 5));
+      const tg = svg.append('g');
+      tg.append('line').attr('x1', x(7.8)).attr('y1', y(24.5)).attr('x2', x(11.2)).attr('y2', y(17.7)).attr('stroke', C.accent).attr('stroke-width', 3).attr('stroke-dasharray', '5 5');
+      [[7.8, 24.5, 'CNH 7.8'], [11.2, 17.7, 'IFR 11.2']].forEach(([o, r, t]) => { tg.append('circle').attr('cx', x(o)).attr('cy', y(r)).attr('r', 12).attr('fill', C.accent).attr('stroke', '#fff').attr('stroke-width', 2.5); tg.append('text').attr('x', x(o) + 16).attr('y', y(r) + 28).text(t).attr('fill', '#ffd0b0').style('font-size', '18px'); });
+      tg.append('text').attr('x', x(7.8) - 16).attr('y', y(24.5) - 18).attr('text-anchor', 'end').text('Tecolutla').attr('fill', '#fff').style('font-size', '24px').attr('font-weight', 700).attr('paint-order', 'stroke').attr('stroke', C.bg).attr('stroke-width', 5);
+      const lg = svg.append('g').attr('transform', `translate(${m.l + 20},${m.t + 10})`);
+      [['#7b8794', 'reef-rim field'], ['#4a525c', 'platform-interior field'], ['#5b9bd5', 'nearest pools']].forEach(([c, t], i) => { lg.append('circle').attr('cx', 8).attr('cy', i * 28).attr('r', 8).attr('fill', c); lg.append('text').attr('x', 24).attr('y', i * 28 + 6).text(t).attr('fill', C.ink2).style('font-size', '18px'); });
+      const near = [...NB.map(n => AN.find(a => a.field === n)).filter(Boolean).map(a => ({ label: a.field, value: 100 * a.rf_current, color: '#5b9bd5', text: `${(100 * a.rf_current).toFixed(0)} % · 3P ${(100 * a.rf_3p_eur).toFixed(0)} %` })),
+        { label: 'Tecolutla, CNH', value: 24.5, color: C.accent, text: '25 % · 3P 27 %' }, { label: 'Tecolutla, IFR', value: 17.7, color: C.accent, text: '18 %' }].sort((a, b) => b.value - a.value);
+      const nbB = hbars($('#rfNb', el), near, { W: 640, rowH: 50, labelW: 230, max: 45, ticks: 3, vfmt: d3.format('.0f'), m: { r: 170 } });
+      return [
+        { say: 'How does the recovery compare with other El Abra pools? This is the CNH table of forty five El Abra fields, recovery to date against the oil in place. Reef-rim fields have recovered a median of thirty percent; the best reach fifty. Tecolutla, in orange, has recovered about twenty five percent on the CNH volume, or eighteen on IFR’s larger volume.' },
+        { say: 'Its nearest neighbours bracket it. Miguel Hidalgo, next door to the north-west, has recovered twenty two percent; Ignacio Allende, to the south-east, twenty seven; Vicente Guerrero thirty seven and Gutiérrez Zamora forty.', run: f => nbB.show(f) },
+        { say: 'So on the CNH volume Tecolutla has done about what a typical small reef-rim pool does; on the IFR volume it is below the trend, with about a third of its trend recovery still ahead. Either way, the remaining oil is about nine hundred thousand barrels, and most of it sits at the crest.' }
+      ];
+    }
+  };
+
   // ---------------------------------------------------------------- operating cost with oil and water
   P.opex = {
     id: 'opex', title: 'Operations and cost', section: 'Operations',
@@ -431,14 +482,19 @@ export function coreSlides(ctx) {
     build(el) {
       el.innerHTML = `<div class="glass pe" style="position:absolute;left:90px;top:80px;width:800px">
         <div class="eyebrow">TEC-12 · the target</div><h2 style="font-size:52px;margin-top:10px">The top of El Abra at the crest</h2>
-        ${S(1, `<p style="margin-top:20px"><b>Never produced.</b> The crest wells left the top 14–27 m of El Abra unperforated; nothing has produced from −2,294 to −2,303 m anywhere.</p>`)}
-        ${S(2, `<p style="margin-top:16px"><b>Oil-bearing where seen.</b> TEC-7's 1957 E-log, before production: top 7 m at Sw 0.13, porosity 0.17. TEC-9, 118 m away: top 8 m porous (~15 %), at parity with its 353 kbbl producer, cemented by PEMEX, never perforated.</p>`)}
-        ${S(3, `<p style="margin-top:16px"><b>Highest on seismic.</b> −2,293 m on the PSTM: 3 m above TEC-9, 17 m above TEC-10.</p>`)}
-        ${S(3, `<p style="margin-top:16px;color:var(--accent2)"><b>Restated target:</b> the top ~8 m of El Abra, 14–20 m higher than at TEC-10; fallback the proven interval below.</p>`)}</div>
-        <div class="src">TEC-7 expediente p.85, TEC-9 1973 logs, PEMEX PSTM, RockWise XRD · docs/19, docs/20, G-47. Perforations shown in orange (active) and grey (squeezed).</div><div class="pg"></div>`;
-      scene(ctx, { year: 2026.8, focus: 'TEC-12', focusOpts: { dist: 2300, az: -0.9, el: 0.3, lift: 100 }, highlight: 'TEC-12', surfaceOpacity: 0.7, shift: [0.2, 0], override: { 'TEC-10': { status: 'restorable' }, 'TEC-2': { status: 'restorable' } } });
+        ${S(2, `<p style="margin-top:20px"><b>Never produced.</b> The crest wells left the top 14–27 m of El Abra unperforated; nothing has produced from −2,294 to −2,303 m anywhere.</p>`)}
+        ${S(3, `<p style="margin-top:16px"><b>Oil-bearing where seen.</b> TEC-7's 1957 E-log, before production: top 7 m at Sw 0.13, porosity 0.17. TEC-9, 118 m away: top 8 m porous (~15 %), at parity with its 353 kbbl producer, cemented by PEMEX, never perforated.</p>`)}
+        ${S(4, `<p style="margin-top:16px"><b>Highest on seismic.</b> −2,293 m on the PSTM: 3 m above TEC-9, 17 m above TEC-10.</p>`)}
+        ${S(4, `<p style="margin-top:16px;color:var(--accent2)"><b>Restated target:</b> the top ~8 m of El Abra, 14–20 m higher than at TEC-10; fallback the proven interval below.</p>`)}</div>
+        <div class="src">TEC-7 expediente p.85, TEC-9 1973 logs, PEMEX PSTM, RockWise XRD · docs/19, docs/20, G-47. Pads drawn schematically at the surface locations; TEC-12 path from the Feb 2021 programme. Perforations shown in orange (active) and grey (squeezed).</div><div class="pg"></div>`;
+      const PADS = [{ name: 'TEC-10 / TEC-12 pad', sub: 'TEC-12 kicks off here', x: 707578, y: 2262431, w: 110, h: 90, dx: -120, dy: 30 }, { name: 'TEC-6', sub: 'plugged 2007', x: 707494, y: 2262529, w: 70, h: 70, dx: -60 },
+        { name: 'TEC-2 / TEC-11 pad', x: 707596, y: 2263008, w: 100, h: 110 }, { name: 'TEC-9', sub: 'surface location', x: 707834, y: 2262336, w: 70, h: 70, dx: 40, dy: 50 }, { name: 'TEC-7', sub: 'injector', x: 707946, y: 2262706, w: 70, h: 70 }];
+      const TRACES = [{ well: 'TEC-12', color: 0xff8a3d, r: 10, label: '<b>TEC-12 bottom hole</b><i>~175 m ENE of the pad</i>', dx: -30, dy: -24 }, { well: 'TEC-9', color: 0xd6dde4, label: '<b>TEC-9 bottom hole</b>', dx: 130, dy: 10 }, { well: 'TEC-10', color: 0xd6dde4, label: '<b>TEC-10 bottom hole</b>', dy: 60 }, { well: 'TEC-11', color: 0xb9a6ff, label: '<b>TEC-11 lateral</b>' }];
+      scene(ctx, { year: 2026.8, highlight: 'TEC-12', surfaceOpacity: 0.4, shift: [0.2, 0], pads: PADS, labels: false, traces: TRACES, override: { 'TEC-10': { status: 'restorable' }, 'TEC-2': { status: 'restorable' } } });
+      F.flyTo(F.P(707640, 2262640, 0), 3200, -0.15, 1.25, ctx.fast ? 0 : 2400);
       return [
-        { say: 'So to TEC-12. The well goes from the TEC-10 pad, here, to the southern high between TEC-6, TEC-9 and TEC-10. The target is the top of El Abra at the crest.' },
+        { say: 'So to TEC-12, starting at the surface. These are the well pads. TEC-12 is drilled from the existing TEC-10 pad, beside the old TEC-6 location, so there is no new lease, road or flowline. From there it is a deviated S-shaped well: it kicks off and steps out about a hundred and seventy five metres east-north-east to the crest, finishing between TEC-6, TEC-9 and TEC-10.', run: f => F.flyTo(F.P(707660, 2262480, 0), 1900, -0.15, 1.2, f ? 0 : 3000) },
+        { say: 'Follow the well down. The target is the top of El Abra at the crest, about two thousand three hundred metres below sea level.', run: f => { F.labelsOn = true; F.focusWell('TEC-12', f ? 0 : 3200, { dist: 2300, az: -0.9, el: 0.3, lift: 100 }); } },
         { say: 'First, it has never been produced. Every crest well perforated below the top fourteen to twenty seven metres of the reef, chasing the water upward from below. Nothing anywhere has produced from minus two thousand two hundred and ninety four to minus two thousand three hundred and three.', run: f => F.focusWell('TEC-9', f ? 0 : 2400, { dist: 1300, az: -0.4, el: 0.2, lift: 0 }) },
         { say: 'Second, where that top unit has been logged it is oil-bearing. PEMEX’s 1957 electric log in TEC-7, run before any production, shows the top seven metres at thirteen percent water saturation and seventeen percent porosity. TEC-9, a hundred and eighteen metres away, shows its top eight metres porous and at the same saturation as the interval that made three hundred and fifty thousand barrels. PEMEX cemented it and never perforated it.' },
         { say: 'Third, it is the highest point on the seismic. So the target is the top eight metres or so of El Abra, reached fourteen to twenty metres higher than at TEC-10, with the proven interval below as the fallback.', run: f => F.focusWell('TEC-12', f ? 0 : 2400, { dist: 1500, az: 0.6, el: 0.25, lift: 0 }) }
@@ -541,16 +597,17 @@ export function coreSlides(ctx) {
   P.netback = {
     id: 'netback', title: 'Netback history', section: 'Economics',
     build(el) {
-      const body = std(el, { eyebrow: 'Commercial history', title: 'Two wells could not carry the field alone', src: 'Field lease operating statements; USD thousands except per barrel; *2018 is Sep–Dec · acc_findings.md. LOS reconcile to PEMEX settlements (exact 2020–21, within 0.6 % in 2022).' });
+      const body = std(el, { eyebrow: 'Commercial history', title: 'Two wells could not carry the field alone', src: 'Field lease operating statements; USD thousands except per barrel; *2018 is Sep–Dec · acc_findings.md. LOS reconcile to PEMEX settlements (exact 2020–21, within 0.6 % in 2022). Sales point: CNH Nov 2022 monthly format and DGM balances (wells_ops_reserves_notes.md).' });
       const R = [['2018*', 15209, 917, 382, 291], ['2019', 32702, 1732, 706, 839], ['2020', 19041, 682, 283, 336], ['2021', 17546, 939, 394, 349], ['2022', 2756, 178, 89, 168], ['2023', 530, 30, 17, 627]];
       body.innerHTML = `<div class="row" style="gap:50px;align-items:flex-start"><div id="nb" style="width:1100px"></div>
         <div class="col grow" style="gap:24px">${S(1, `<div class="kpi"><div class="v" style="color:var(--accent2)">≈ 0</div><div class="l">2018–23 revenue less royalties, fees and opex, before G&amp;A and about USD 7.6 MM of capital</div></div>`)}
-        ${S(2, `<p>Royalties and fees took 41–56 % of revenue. A crestal well with a low water cut changes that ratio; more water does not.</p>`)}</div></div>`;
+        ${S(2, `<p>Royalties and fees took 41–56 % of revenue. A crestal well with a low water cut changes that ratio; more water does not.</p>`)}
+        ${S(0, `<p style="font-size:23px;color:var(--ink2)"><b>Sales point:</b> trucked to PEMEX <b>CAB Poza Rica</b> (Central de Almacenamiento y Bombeo; fiscal turbine meter), delivered at the Ezequiel Ordóñez pumping station, La Guásima, Papantla. Price 0.81 × WTI (2020–22), tariffs 2.7–3.3 USD/bbl.</p>`)}</div></div>`;
       const v = vstack($('#nb', el), R.map(r => ({ label: r[0], parts: [{ key: 'roy', value: r[3], color: '#9a7fe0' }, { key: 'opex', value: r[4], color: C.accent }, { key: 'net', value: Math.max(0, r[2] - r[3] - r[4]), color: C.oil }] })), { W: 1100, H: 560, ylabel: 'USD thousands', totfmt: d3.format(',') });
       legend($('#nb', el), [['#9a7fe0', 'royalties and fees'], [C.accent, 'field opex'], [C.oil, 'left over (net)']]);
       return [
-        { say: 'Here is the field’s commercial record under Tonalli, from the lease operating statements. Each bar is a year: royalties and fees, operating cost, and what was left. Over 2018 to 2023, revenue less royalties and opex is about zero, before overheads and seven point six million dollars of capital.', run: f => v.show(f) },
-        { say: 'Royalties and fees took forty one to fifty six percent of revenue. John will compute this, so it is better said first: two watered-out wells could not carry the field.' },
+        { say: 'Here is the field’s commercial record under Tonalli, from the lease operating statements. The crude was trucked to PEMEX’s Central de Almacenamiento y Bombeo, the CAB Poza Rica, where it is measured on the fiscal meter and sold, through the Ezequiel Ordóñez pumping station at La Guásima, Papantla. Each bar is a year: royalties and fees, operating cost, and what was left. Over 2018 to 2023, revenue less royalties and opex is about zero, before overheads and seven point six million dollars of capital.', run: f => v.show(f) },
+        { say: 'Royalties and fees took forty one to fifty six percent of revenue. Put plainly: two watered-out wells could not carry the field.' },
         { say: 'What changes the ratio is a well with a low water cut at the crest. More of the same water does not.' }
       ];
     }
@@ -561,11 +618,11 @@ export function coreSlides(ctx) {
     id: 'commercial', title: 'Contract and regulatory', section: 'Commercial',
     build(el) {
       const body = std(el, { eyebrow: 'Contract and regulatory', title: 'A long licence with items to settle', src: 'Licence contract, 2017 evaluation plan, LSH (DOF 18-03-2025), Tonalli P&L, GLJ YE2025 · G-49, G-60, G-64 to G-67.' });
-      const K = [['Licence', 'CNH-R01-L03-A24/2016, 7.16 km². Term to Aug 2041 plus two 5-year extensions; guarantee USD 1.76 MM; pre-reform terms kept by the 2025 law.'], ['Fiscal and offtake', '31.22 % bid royalty plus basic royalty; 30 % tax; area charges ~USD 5.2 k/month. Crude trucked to PEMEX at Poza Rica at 0.81 × WTI.'], ['To settle before closing', 'CNH consent to the change of control (clause 23.2). Shut-in cause and date: GLJ says permit, early 2023; filings say February/July 2022.'], ['Exposures', 'Flaring justified at GOR 337 scf/bbl against 742–859 measured; ~0.96 MM of TEC-11 invoices of unknown status; abandonment reserve USD 411 k.']];
+      const K = [['Licence', 'CNH-R01-L03-A24/2016, 7.16 km². Term to Aug 2041 plus two 5-year extensions; guarantee USD 1.76 MM; pre-reform terms kept by the 2025 law.'], ['Fiscal and offtake', '31.22 % bid royalty plus basic royalty; 30 % tax; area charges ~USD 5.2 k/month. Crude trucked to PEMEX CAB Poza Rica (fiscal meter) at 0.81 × WTI.'], ['To settle before closing', 'CNH consent to the change of control (clause 23.2). Shut-in cause and date: GLJ says permit, early 2023; filings say February/July 2022.'], ['Exposures', 'Flaring justified at GOR 337 scf/bbl against 742–859 measured; ~0.96 MM of TEC-11 invoices of unknown status; abandonment reserve USD 411 k.']];
       body.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:28px">${K.map((k, i) => S(i, `<div class="card" style="height:100%"><h3>${k[0]}</h3><p style="margin-top:12px">${k[1]}</p></div>`)).join('')}</div>`;
       return [
         { say: 'On the contract: a Round one point three licence to 2041 with two five-year extensions, and the 2025 hydrocarbons law keeps its terms.' },
-        { say: 'The fiscal take is a thirty one percent bid royalty plus the basic royalty and thirty percent tax. Crude is trucked to PEMEX at Poza Rica at about eighty one percent of WTI.' },
+        { say: 'The fiscal take is a thirty one percent bid royalty plus the basic royalty and thirty percent tax. Crude is trucked to PEMEX’s CAB Poza Rica storage and pumping centre and sold at about eighty one percent of WTI.' },
         { say: 'Before closing, the change of control needs regulator consent, and the shut-in cause and date need reconciling: GLJ says a permit issue in early 2023, the filings say 2022.' },
         { say: 'And three exposures to price in: the flaring basis, about a million dollars of TEC-11 invoices of unknown status, and the abandonment reserve.' }
       ];

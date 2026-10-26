@@ -5,8 +5,8 @@ Inputs (all in the repository):
                                technical_tables.json, coast_golden_lane.json}  (compiled 26 Oct 2026 from the docs and processed tables; sources inside)
   data/processed/pressure/tecolutla_pressures.csv, data/processed/econ_rebuild/{summary.json, bridge.csv, cashflow_base.csv},
   data/processed/petrophysics/{TEC10_logs_mss.csv, TEC9_logs_mss.csv, TEC11_logs_mss.csv}, data/processed/seismic/tec11_vs_grid.csv,
-  data/processed/volumetrics/{summary.json, ooip_by_source.csv, monte_carlo.csv}, data/processed/tecolutla_production.csv.
-Nothing is interpolated: months without a record are absent. Pre-1966 PEMEX wellfile allocations (TEC-6 388 kbbl, TEC-2 38 kbbl) are carried
+  data/processed/volumetrics/{summary.json, ooip_by_source.csv, monte_carlo.csv, analogue_rf.csv}, data/processed/tecolutla_production.csv.
+Nothing is interpolated: months without a record are absent, except documented non-producing months (explicit zeros, flagged z=1; see below). Pre-1966 PEMEX wellfile allocations (TEC-6 388 kbbl, TEC-2 38 kbbl) are carried
 as a single lump per well at the end of the allocation period, flagged, never spread over months.
 """
 import json, math, sys
@@ -36,6 +36,35 @@ pb["well"] = pb.well.replace({"FIELD (no well split)": "TEC-6", "FIELD commingle
 pb = pb[pb.well.isin(["TEC-2", "TEC-6", "TEC-7", "TEC-9", "TEC-10", "TEC-11"])]
 A["prod"] = [dict(w=r.well, t=dec(r.month), o=round(float(r.oil_bbl or 0), 1), wt=round(float(r.water_bbl), 1) if pd.notna(r.water_bbl) else None,
                   g=round(float(r.gas_mcf), 1) if pd.notna(r.gas_mcf) else None) for r in pb.itertuples() if pd.notna(r.oil_bbl) or pd.notna(r.water_bbl)]
+# Commingled 2019-22 months (shown as TEC-10): the ticket stream has no water, and the shut-in months of 2022 have no ticket row. Take the
+# CNH-filed / LOS values from opex_monthly.csv for those months (sourced there, row by row); flag f=1.
+ox = pd.read_csv(PR / "opex_monthly.csv"); have = {(r["w"], r["t"]): r for r in A["prod"]}
+for r in ox[(ox.month >= "2019-12") & (ox.month <= "2022-12")].itertuples():
+    k = ("TEC-10", dec(r.month + "-01"))
+    if k in have:
+        if have[k]["wt"] is None and pd.notna(r.water_bbl): have[k]["wt"] = round(float(r.water_bbl), 1); have[k]["f"] = 1
+        if have[k]["o"] == 0 and pd.notna(r.oil_bbl) and r.oil_bbl > 0: have[k]["o"] = round(float(r.oil_bbl), 1); have[k]["f"] = 1   # Dec-2022: ticket books 0, LOS 733 bbl sold
+    elif pd.notna(r.oil_bbl):
+        A["prod"].append(dict(w="TEC-10", t=k[1], o=round(float(r.oil_bbl), 1), wt=round(float(r.water_bbl), 1) if pd.notna(r.water_bbl) else None, g=None, f=1))
+# Reported-zero and shut-in months: a month with no record inside a non-producing segment of the well's status timeline (wells.json, each
+# segment sourced; PEMEX-era internal gaps are CNH-reported zero months, G-34) is an explicit zero, flagged z=1. A month with no record inside
+# a producing segment (1956-59, TEC-2 1956-57, TEC-7 early 1957, the 2019-22 TEC-2 months inside the commingled stream, Jan 2023) stays
+# absent: no monthly record exists. Plugged wells stop at the plugging month. See production_notes.md "Zero months".
+NOW_M = "2026-10"; have = {(r["w"], r["t"]) for r in A["prod"]}
+months = pd.period_range("1956-01", NOW_M, freq="M")
+for w in A["wells"]:
+    if w["well"] not in ("TEC-2", "TEC-6", "TEC-7", "TEC-9", "TEC-10"): continue
+    segs = []
+    for s in w.get("status_timeline") or []:
+        f = pd.Timestamp(str(s["from"]) + ("-01" if len(str(s["from"])) == 7 else ""))
+        u = pd.Timestamp(str(s["to"]) + ("-28" if len(str(s["to"])) == 7 else "")) if s.get("to") else pd.Timestamp(NOW_M + "-28")
+        segs.append((f, u, s["status"]))
+    for m in months:
+        mid = m.to_timestamp() + pd.Timedelta(days=14); st = next((x[2] for x in segs if x[0] <= mid <= x[1]), None)
+        if st == "plugged": break
+        if st in ("shut_in", "workover", "injector") and (w["well"], dec(m.to_timestamp())) not in have:
+            A["prod"].append(dict(w=w["well"], t=dec(m.to_timestamp()), o=0.0, wt=0.0, g=None, z=1))
+A["prod"].sort(key=lambda r: (r["w"], r["t"]))
 # annual table
 an = pd.read_csv(PR / "field_annual.csv")
 A["annual"] = an.to_dict("records"); A["annualCols"] = list(an.columns)
@@ -72,6 +101,9 @@ A["ooip"] = dict(sources=pd.read_csv(P / "volumetrics/ooip_by_source.csv").drop(
 mc = pd.read_csv(P / "volumetrics/monte_carlo.csv").ooip_mmbbl
 hist, edges = np.histogram(mc, bins=np.arange(5.0, 16.01, 0.25))
 A["ooip"]["hist"] = [dict(x0=float(a), x1=float(b), n=int(n)) for a, b, n in zip(edges[:-1], edges[1:], hist)]
+# El Abra analogue recovery (CNH trend table, 45 fields to Apr 2015; docs/07 §3)
+an_rf = pd.read_csv(P / "volumetrics/analogue_rf.csv")
+A["ooip"]["analogues"] = an_rf[["field", "play", "area_km2", "ooip_mmbbl", "prod_mmbbl", "rf_current", "rf_3p_eur", "api", "max_wells"]].round(4).to_dict("records")
 # ---------------- compiled tables (opex, costs, fluids, core, marl) and the coastline
 for k, f in [("opex", "opex_monthly.csv")]:
     if (PR / f).exists(): A[k] = pd.read_csv(PR / f).to_dict("records")

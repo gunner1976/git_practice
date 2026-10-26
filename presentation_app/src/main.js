@@ -35,6 +35,7 @@ async function boot() {
   const [D, M] = await Promise.all([fetch(BASE + 'app_data.json').then(r => r.json()), fetch(BASE + 'viewer_meta.json').then(r => r.json())]);
   const field = new Field3D(M, BASE); const hist = makeHistory(D);
   const narrator = new Narrator();
+  narrator.es = await fetch(BASE + 'narration_es.json').then(r => r.ok ? r.json() : {}).catch(() => ({}));
   const ctx = { D, M, field, hist, narrator, fast: false };
   window.TEC = ctx;
   // ---------------- tabs
@@ -75,6 +76,9 @@ async function boot() {
   if (narrator.voices.length) narrator.onVoices(narrator.voices);
   if (!narrator.synth) { vs.append(h('option', {}, 'No speech in this browser')); vs.disabled = true; }
   vs.onchange = () => narrator.setVoice(vs.value);
+  const setLangUI = () => { $('#langEn').setAttribute('aria-pressed', narrator.lang === 'en'); $('#langEs').setAttribute('aria-pressed', narrator.lang === 'es'); };
+  const chooseLang = l => { if (l === narrator.lang) return; const was = player.playing; narrator.setLang(l); setLangUI(); if (was) player.go(player.si, Math.max(0, player.step), { play: true }); };
+  $('#langEn').onclick = () => chooseLang('en'); $('#langEs').onclick = () => chooseLang('es'); setLangUI();
   $('#rate').oninput = e => { narrator.rate = +e.target.value; $('#rateOut').textContent = narrator.rate.toFixed(2) + '×'; };
   $('#mute').onclick = e => { narrator.muted = !narrator.muted; e.currentTarget.setAttribute('aria-pressed', narrator.muted); e.currentTarget.querySelector('span').textContent = narrator.muted ? 'Voice off' : 'Voice on'; };
   $('#caps').onclick = e => { capOn.v = !capOn.v; e.currentTarget.setAttribute('aria-pressed', capOn.v); cap.classList.toggle('on', capOn.v && !!cap.textContent); };

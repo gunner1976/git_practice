@@ -8,6 +8,7 @@ const d3 = window.d3;
 const NOW = 2026.8;
 export const CURRENT = { 'TEC-10': { status: 'restorable' }, 'TEC-2': { status: 'restorable' } };   // Oct 2026 reading of the evidence (tec10_tec2_status.md)
 const WELLS_P = ['TEC-6', 'TEC-2', 'TEC-7', 'TEC-9', 'TEC-10'];
+const WCUT = '#f2c14e';   // water-cut line on the well charts
 
 // monthly oil-rate matrix by well for stacked charts
 function rateMatrix(D, t0 = 1956, t1 = 2023.99) {
@@ -16,10 +17,22 @@ function rateMatrix(D, t0 = 1956, t1 = 2023.99) {
   for (const r of D.prod) { if (!M[r.w]) continue; const i = idx.get(+r.t.toFixed(4)); if (i == null) continue; const d = new Date(Date.UTC(Math.floor(r.t), Math.round((r.t % 1) * 12) + 1, 0)).getUTCDate(); M[r.w][i] += (r.o || 0) / d; }
   return { months, dates: months.map(DT), M };
 }
+// monthly grid from the first to the last row: rows flagged z are documented zero months (CNH-reported zeros, shut-in segments of the
+// well's status history); months with no row are left null so the line breaks there (no monthly record exists)
 function wellSeries(D, w) {
-  const rows = D.prod.filter(r => r.w === w).sort((a, b) => a.t - b.t);
+  const rows = D.prod.filter(r => r.w === w).sort((a, b) => a.t - b.t); const out = { oil: [], water: [], wcut: [] };
+  if (!rows.length) return out;
   const dim = t => new Date(Date.UTC(Math.floor(t), Math.round((t % 1) * 12) + 1, 0)).getUTCDate();
-  return { oil: rows.map(r => ({ d: DT(r.t), v: (r.o || 0) / dim(r.t) })), water: rows.map(r => ({ d: DT(r.t), v: r.wt != null ? r.wt / dim(r.t) : null })) };
+  const key = t => Math.round(t * 12), by = new Map(rows.map(r => [key(r.t), r]));
+  for (let k = key(rows[0].t); k <= key(rows[rows.length - 1].t); k++) {
+    const t = k / 12, d = DT(t), r = by.get(k);
+    if (!r) { out.oil.push({ d, v: null }); out.water.push({ d, v: null }); out.wcut.push({ d, v: null }); continue; }
+    const o = (r.o || 0) / dim(t), wt = r.wt != null ? r.wt / dim(t) : null;
+    // water cut: volume-weighted over this and the two previous months that flowed; undefined (null) while the well is shut in
+    let so = 0, sw = 0; if (wt != null && o + wt > 0.5) for (let j = 0; j < 3; j++) { const q = by.get(k - j); if (q && q.wt != null && (q.o || 0) + q.wt > 0) { so += q.o || 0; sw += q.wt; } }
+    out.oil.push({ d, v: o }); out.water.push({ d, v: wt }); out.wcut.push({ d, v: so + sw > 0 ? 100 * sw / (so + sw) : null });
+  }
+  return out;
 }
 function animateClock(ctx, from, to, dur, onT) {
   return new Promise(res => {
@@ -43,11 +56,11 @@ export function wellSlides(ctx) {
           <div class="ticker" id="hTick" style="font-size:22px"></div></div>
         <div class="glass" id="hPanel" style="position:absolute;right:70px;top:56px;width:640px;padding:22px 28px"></div>
         <div class="glass" style="position:absolute;left:70px;right:70px;bottom:104px;height:300px;padding:12px 20px 4px"><div id="hChart"></div></div>
-        <div class="src" style="bottom:70px">Monthly records: CNH 1960–2016 (1960–65 field-level, attributed to TEC-6, the only producer then), Tonalli 2018–22 (commingled 2019–22 shown as TEC-10). Gaps = no record. Pressure at 2,300 mSS. Well colours: green producing, amber shut in, blue injector, grey plugged.</div><div class="pg"></div>`;
+        <div class="src" style="bottom:70px">Monthly records: CNH 1960–2016 (1960–65 field-level, attributed to TEC-6, the only producer then), Tonalli 2018–22 (commingled 2019–22 shown as TEC-10). Zero months are reported zeros or shut-ins; hatched 1956–59 = no monthly record. Pressure at 2,300 mSS. Well colours: green producing, amber shut in, blue injector, grey plugged.</div><div class="pg"></div>`;
       const R = rateMatrix(D);
       const pr = D.pressure.filter(p => p.usable).map(p => ({ d: ymd(p.date), v: p.p_mpa }));
       const ch = timeChart($('#hChart', el), { W: 1740, H: 280, m: { l: 86, r: 86, t: 14, b: 40 }, right: true, x: [ymd('1955-06'), ymd('2026-12')], yl: [0, 1000], yr: [0, 30], yticks: 4, ylabel: 'Oil, bbl/d', yrlabel: 'MPa',
-        stack: WELLS_P.map(w => ({ key: w, color: C.wells[w], values: R.M[w] })), stackDates: R.dates,
+        stack: WELLS_P.map(w => ({ key: w, color: C.wells[w], values: R.M[w] })), stackDates: R.dates, bands: [{ from: ymd('1956-06'), to: ymd('1960-01'), hatch: '#9aa6b2', opacity: 0, label: 'no record', vertical: true, size: 16 }],
         series: [{ key: 'p', type: 'dots', color: '#9cc7f0', r: 7, axis: 'r', values: pr }], xticks: 14 });
       const lg = legend($('#hChart', el), [...WELLS_P.map(w => [C.wells[w], w]), ['#9cc7f0', 'pressure, MPa', 'dot']]); lg.style.cssText += ';position:absolute;right:120px;top:12px;font-size:18px;gap:6px 16px';
       let T = 1955.9;
@@ -92,13 +105,15 @@ export function wellSlides(ctx) {
           <div class="row" style="gap:26px;margin-top:16px;flex-wrap:wrap">${o.facts.map(([k, v]) => `<div><div style="font-size:17px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em">${k}</div><div style="font:600 26px var(--serif);color:var(--ink)">${v}</div></div>`).join('')}</div>
           <div id="wChart" style="margin-top:14px"></div><div class="evlist" id="wEv" style="margin-top:14px"></div></div>
           <div class="glass" style="position:absolute;left:70px;top:56px;padding:12px 22px"><div class="big-year" id="wYear" style="font-size:80px">—</div><div class="ticker" id="wTick" style="font-size:21px"></div></div>
-          <div class="src">${o.src || 'PEMEX well files and CNH monthly records; Tonalli operations logs and daily production; events.json and wells.json in data/processed/presentation.'}</div><div class="pg"></div>`;
+          <div class="src">${o.src || 'PEMEX well files and CNH monthly records; Tonalli operations logs and daily production; events.json and wells.json in data/processed/presentation.'} Zero months are CNH-reported zeros or documented shut-ins; hatched = no monthly record exists.</div><div class="pg"></div>`;
         const ser = wellSeries(D, o.series || o.well);
         const x0 = ymd(o.x0 || (W.spud || '1956').slice(0, 7)), x1 = ymd(o.x1 || '2027-01');
         const hasProd = ser.oil.length > 0;
-        const ch = hasProd ? timeChart($('#wChart', el), { W: 740, H: 230, m: { l: 70, r: 20, t: 10, b: 40 }, x: [x0, x1], yl: [0, o.ymax || 600], yticks: 4, xticks: 6, ylabel: 'bbl/d',
-          series: [{ key: 'w', color: C.water, values: ser.water, type: 'area', opacity: 0.3, width: 2 }, { key: 'o', color: C.oil, values: ser.oil, type: 'area', opacity: 0.45, width: 2.6 }] }) : null;
-        if (hasProd) { const l = legend($('#wChart', el), [[C.oil, 'oil, bbl/d'], [C.water, 'water, bbl/d']]); l.style.fontSize = '18px'; }
+        const ch = hasProd ? timeChart($('#wChart', el), { W: 740, H: 240, m: { l: 70, r: 64, t: 10, b: 40 }, right: true, x: [x0, x1], yl: [0, o.ymax || 600], yr: [0, 100], yticks: 4, xticks: 6, ylabel: 'bbl/d', yrlabel: 'water cut %',
+          bands: (o.missing || []).map(([a, b, t, kind]) => kind === 'note' ? { from: ymd(a), to: ymd(b), opacity: 0.06, label: t, ly: 22, size: 16 } : { from: ymd(a), to: ymd(b), hatch: '#9aa6b2', opacity: 0, label: t, vertical: true, size: 16 }),
+          series: [{ key: 'w', color: C.water, values: ser.water, type: 'area', opacity: 0.3, width: 2 }, { key: 'o', color: C.oil, values: ser.oil, type: 'area', opacity: 0.45, width: 2.6 },
+            { key: 'c', color: WCUT, values: ser.wcut, axis: 'r', width: 2.2, alpha: 0.95 }] }) : null;
+        if (hasProd) { const l = legend($('#wChart', el), [[C.oil, 'oil, bbl/d'], [C.water, 'water, bbl/d'], [WCUT, 'water cut, % (right; 3-month)', 'ln']]); l.style.fontSize = '18px'; }
         else $('#wChart', el).innerHTML = `<p style="font-size:24px;margin:6px 0 0">${o.noProd || 'Never produced.'}</p>`;
         const evEl = $('#wEv', el);
         const setT = t => {
@@ -124,7 +139,7 @@ export function wellSlides(ctx) {
     };
   }
 
-  P.w6 = wellSlide({ well: 'TEC-6', eyebrow: 'Well by well · 1', title: 'TEC-6: the field’s workhorse', ymax: 700,
+  P.w6 = wellSlide({ well: 'TEC-6', eyebrow: 'Well by well · 1', title: 'TEC-6: the field’s workhorse', ymax: 700, missing: [['1956-10', '1960-01', 'no monthly record']],
     facts: [['Completed', 'Oct 1956'], ['El Abra top', '−2,294 m'], ['Initial', '480–580 bbl/d'], ['Cumulative', '~900 kbbl']],
     src: 'TEC-6 informe final (1956), PEMEX production expediente and 1976 programme, CNH monthly 1966–2006 (1960–65 field record attributed to TEC-6), 2007 estado mecánico. ~388 kbbl of its total is a PEMEX wellfile allocation.',
     steps: [
@@ -133,7 +148,7 @@ export function wellSlides(ctx) {
       { say: 'In 1971 PEMEX squeezed the original interval and moved up to two thousand three hundred and twenty four metres, then in 1976 up again, to two thousand three hundred and fourteen. Each move bought a new peak, the second at nearly three hundred barrels a day in 1977.', ev: ['1971 · 1976', 'Moved up the column twice', 'Second peak 293 bbl/d, Aug 1977'], t: '1978-01' },
       { say: 'It produced until 2006 and was abandoned in 2007 with its casing parted at three hundred and fifty two metres. It sits beside the TEC-10 pad that TEC-12 will be drilled from, which is why anti-collision is in the programme. In all, about nine hundred thousand barrels.', ev: ['Apr 2007', 'Plugged and abandoned', 'Casing parted at 352 m; poor cement 45–2,000 m'], t: NOW }
     ] });
-  P.w2 = wellSlide({ well: 'TEC-2', eyebrow: 'Well by well · 2', title: 'TEC-2: the discovery, still restorable', ymax: 500,
+  P.w2 = wellSlide({ well: 'TEC-2', eyebrow: 'Well by well · 2', title: 'TEC-2: the discovery, still restorable', ymax: 500, missing: [['1956-06', '1957-04', 'no record'], ['2019-09', '2023-02', 'in TEC-10 stream', 'note']],
     facts: [['Completed', 'Jun 1956'], ['El Abra top', '−2,302 m'], ['Initial', '453 bbl/d'], ['Cumulative', '~371 kbbl']],
     src: 'TEC-2 Forma 19 reports (1955–56), 1971 workover programme, CNH monthly 1972–2016, IHS 2018 well test, Tonalli operations log, GLJ YE2022–25. tec10_tec2_status.md.',
     steps: [
@@ -142,7 +157,7 @@ export function wellSlides(ctx) {
       { say: 'In 2018 Tonalli found the tubing full of paraffin. The well test showed a skin of plus one hundred and ninety six: the well is badly damaged near the wellbore, not depleted. A plug in 2019 shut off the wet deeper perforations.', ev: ['1972–2016', 'Produced 320 kbbl from 2,307–2,311 mMD'], t: '2016-02' },
       { say: 'Its last production was sixteen barrels a day in January 2023, after a December workover. It is a low-rate, intermittent well, cycled on and off to let the water cone settle. It pays when it shares costs with TEC-10, and GLJ carries it as non-producing with a small workover.', ev: ['2018–23', 'Paraffin clean-out; skin +196; 16–50 bbl/d at 75–90 % water', 'Restorable: intermittent, sharing TEC-10’s costs'], t: NOW }
     ] });
-  P.w7 = wellSlide({ well: 'TEC-7', eyebrow: 'Well by well · 3', title: 'TEC-7: oil at the top in 1957, water injector now', ymax: 600,
+  P.w7 = wellSlide({ well: 'TEC-7', eyebrow: 'Well by well · 3', title: 'TEC-7: oil at the top in 1957, water injector now', ymax: 600, missing: [['1957-01', '1957-04', 'no record']],
     facts: [['Completed', 'Jan 1957'], ['El Abra top', '−2,304 m'], ['Initial', '560 bbl/d'], ['Cumulative', '~293 kbbl']],
     src: 'TEC-7 expediente de perforación (215 pp., read Oct 2026), 1971 schematic, CNH monthly, ASEA authorisation 1712/2019, Tonalli 2019 operations log · tec7_expediente_findings.md.',
     steps: [
@@ -168,7 +183,7 @@ export function wellSlides(ctx) {
       { say: 'TEC-5, a kilometre and a half to the north-west, found the reef two hundred and fifty metres lower, off the structure.', ev: ['Jul 1956', 'TEC-5: reef at −2,551 m, off structure'], t: '1956-08', cam: { w: 'TEC-5', dist: 2600, az: -0.9, el: 0.35 } },
       { say: 'TEC-101 in 1972 found the west flank water-invaded at minus two thousand three hundred and thirty four, with the same low-resistivity marl above the reef that TEC-10 later found. All three are plugged.', ev: ['Mar 1972', 'TEC-101: west flank, water-invaded', 'Marl above the reef, as at TEC-10'], t: NOW, cam: { w: 'TEC-101', dist: 2000, az: -0.7, el: 0.3 } }
     ] });
-  P.w10 = wellSlide({ well: 'TEC-10', eyebrow: 'Well by well · 6', title: 'TEC-10: proof the column is still there', ymax: 300, x0: '2018-01',
+  P.w10 = wellSlide({ well: 'TEC-10', eyebrow: 'Well by well · 6', title: 'TEC-10: proof the column is still there', ymax: 300, x0: '2018-01', missing: [['2019-12', '2023-01', 'commingled field stream (TEC-2 in 2020)', 'note']],
     facts: [['Drilled', 'Apr–May 2018'], ['El Abra top', '−2,310 m'], ['Initial', '194 bbl/d'], ['Cumulative', '~77 kbbl']],
     src: 'Weatherford logs and Stratascan core (2018), IHS PTA, TEC-10 daily production Sep 2018–Nov 2019, commingled sales 2019–22 (shown as TEC-10, the main or sole source per CNH filings), GLJ YE2022–25 · tec10_tec2_status.md.',
     steps: [
@@ -223,9 +238,9 @@ export function wellSlides(ctx) {
   P.t11b = {
     id: 'tec11-failures', title: 'TEC-11: what went wrong', section: 'Well by well',
     build(el) {
-      const body = std(el, { eyebrow: 'Well by well · 8 · TEC-11DES, 2018–19', title: 'A chain of failures, and a lateral that probably stayed in the marl', src: 'Directional survey; Jan 2019 depth grid along hole (tec11_vs_grid.csv); recorded LWD sonic (TEC11_logs_mss.csv; marl ~71 µs/ft at TEC-10, El Abra 52–57); Tonalli final schematic (Sep 2019), Halliburton reports, cost summary · tec11_story.md, G-64, G-75.' });
+      const body = std(el, { eyebrow: 'Well by well · 8 · TEC-11DES, 2018–19', title: 'A chain of failures, and a lateral that probably stayed in the marl', src: 'Directional survey; Jan 2019 depth grid along hole (tec11_vs_grid.csv); recorded LWD sonic (TEC11_logs_mss.csv; marl ~71 µs/ft at TEC-10, El Abra 52–57); Tonalli final schematic (Sep 2019), Halliburton reports, cost summary; Tantoyuca test log “Tantoyuca Seguimiento Tec #11 apertura.xlsx” (28 Aug–2 Sep 2019) and Jaguar discussion deck (Sep 2022) · tec11_story.md, G-64, G-75.' });
       body.innerHTML = `<div id="t11h"></div><div class="row" style="gap:30px;align-items:flex-start"><div class="evlist grow" id="t11ev" style="display:grid;grid-template-columns:1fr 1fr;gap:12px 40px"></div>
-        <div class="card" style="width:430px">${S(6, `<div class="kpi"><div class="v">4.40<small>MM</small></div><div class="l">all-in, against a 3.93 MM budget; 0.96 MM of completion invoices of unknown status</div></div>`)}</div></div>`;
+        <div class="card" style="width:430px">${S(7, `<div class="kpi"><div class="v">4.40<small>MM</small></div><div class="l">all-in, against a 3.93 MM budget; 0.96 MM of completion invoices of unknown status</div></div>`)}</div></div>`;
       const G = D.tec11_grid.filter(r => r.mMD >= 2250), L = D.tec11_logs.filter(r => r.md >= 2250);
       const Wc = 1700, Hc = 330, m = { l: 96, r: 30, t: 20, b: 50 };
       const svg = d3.select('#t11h', el).append('svg').attr('viewBox', `0 0 ${Wc} ${Hc}`).attr('width', Wc).attr('height', Hc).style('font-family', 'IBM Plex Sans, sans-serif');
@@ -245,7 +260,7 @@ export function wellSlides(ctx) {
       [['#d9b98a', 'well path, sonic ≥ 65 µs/ft (marl-like)'], ['#7fc3ff', 'sonic < 60 µs/ft (reef-like)']].forEach(([c, t], i) => { lg.append('rect').attr('x', i * 440).attr('width', 30).attr('height', 10).attr('y', -6).attr('fill', c); lg.append('text').attr('x', i * 440 + 40).attr('y', 4).text(t).attr('fill', C.ink).style('font-size', '19px'); });
       const marks = svg.append('g');
       const mark = (md, txt, col, dy = 0, span) => { const g = marks.append('g').attr('opacity', 0); const yy = y(2240 + dy); if (span) g.append('rect').attr('x', x(span[0])).attr('width', x(span[1]) - x(span[0])).attr('y', m.t).attr('height', Hc - m.b - m.t).attr('fill', col).attr('opacity', 0.16); g.append('line').attr('x1', x(md)).attr('x2', x(md)).attr('y1', m.t).attr('y2', Hc - m.b).attr('stroke', col).attr('stroke-width', 2.5).attr('stroke-dasharray', '5 5'); g.append('text').attr('x', x(md) + 8).attr('y', yy).text(txt).attr('fill', col).style('font-size', '19px').attr('font-weight', 600).attr('paint-order', 'stroke').attr('stroke', '#0f151c').attr('stroke-width', 5); return g; };
-      const M = [mark(2354.4, '7 in shoe, 61.6°', '#e8e2d6', 0), mark(2563, 'lateral starts', '#e8e2d6', 8), mark(2866, 'fish 2,866–2,872 · liner ends 2,863', '#ff8f87', 0, [2872, 3283]), mark(2643.5, '5 perfs 2,643–2,746, acid unisolated', '#ffb38a', 16, [2643.5, 2745.5]), mark(2400, 'plug ~2,400 (Aug 2019)', '#c9b6ff', 24)];
+      const M = [mark(2354.4, '7 in shoe, 61.6°', '#e8e2d6', 0), mark(2563, 'lateral starts', '#e8e2d6', 8), mark(2866, 'fish 2,866–2,872 · liner ends 2,863', '#ff8f87', 0, [2872, 3283]), mark(2643.5, '5 perfs 2,643–2,746, acid unisolated', '#ffb38a', 16, [2643.5, 2745.5]), mark(2400, 'plug ~2,400 (Aug 2019)', '#c9b6ff', 24), mark(2361, 'Tantoyuca 2,361–2,364: water', '#f2c14e', 40, [2361, 2364])];
       const ev = $('#t11ev', el);
       const add = (d, t, s) => { ev.insertAdjacentHTML('beforeend', `<div class="ev"><span class="d">${d}</span><span class="t" style="font-size:22px">${t}${s ? `<small>${s}</small>` : ''}</span></div>`); while (ev.children.length > 4) ev.removeChild(ev.firstChild); };
       return [
@@ -253,7 +268,8 @@ export function wellSlides(ctx) {
         { say: 'Colour comes from the sonic log recorded while drilling. Tan is marl-like, blue is reef-like. Almost the whole lateral reads like the marl, seventy three microseconds per foot, and it ran four to ten metres above the mapped reef top. No resistivity was run to check, so this is an interpretation, but the sonic, the grid and the tops table agree. The lateral probably never got into the reef it was aimed at.', run: f => { M[0].transition().duration(f ? 0 : 600).attr('opacity', 1); M[1].transition().duration(f ? 0 : 600).attr('opacity', 1); add('Nov–Dec 2018', 'No pilot hole, no resistivity; steering below plan, hole collapse', 'Casing set at 61.6°; TD 3,283 m on 18 Dec 2018'); } },
         { say: 'Then the completion went wrong in sequence. The liner hanger was damaged and the tie-back failed. In May 2019 a bit and mill were lost in the hole at two thousand eight hundred and sixty six metres, cutting off the last four hundred metres of open hole.', run: f => { M[2].transition().duration(f ? 0 : 600).attr('opacity', 1); add('May 2019', 'Fish at 2,866–2,872 m; 411 m of open hole lost'); } },
         { say: 'Because the selective tool could not pass the damaged hanger, five short intervals were perforated and acid was pumped from surface with no isolation. Pressure broke down at once: the acid most likely opened a fracture to the aquifer.', run: f => { M[3].transition().duration(f ? 0 : 600).attr('opacity', 1); add('Jun 2019', 'Five perforations; acid bull-headed, unisolated'); } },
-        { say: 'The well then made two hundred and sixty to two hundred and eighty six barrels a day of water with traces of oil. In August it was plugged and a shallower Tantoyuca test gave seventeen-degree oil and water.', run: f => { M[4].transition().duration(f ? 0 : 600).attr('opacity', 1); add('Jul–Aug 2019', '260–286 bbl/d water; plugged at ~2,400 m', 'Tantoyuca retest: 17 °API oil, water'); } },
+        { say: 'The well then made two hundred and sixty to two hundred and eighty six barrels a day of water with traces of oil. In August the lateral was plugged off.', run: f => { M[4].transition().duration(f ? 0 : 600).attr('opacity', 1); add('Jul–Aug 2019', 'El Abra: 260–286 bbl/d water, no oil', 'composite plug at ~2,400 m, 11–12 Aug'); } },
+        { say: 'A question that comes up: why not produce the Tantoyuca instead? It was tested above the plug at the end of August 2019, perforated at two thousand three hundred and sixty one to two thousand three hundred and sixty four metres. In four and a half days on a fourteen sixty-fourths choke it flowed only water, a hundred and ninety two barrels a day at first and ninety six at the end, five hundred and twenty eight barrels in all, with no measurable oil. Only a trace of heavy, seventeen-degree oil was sampled. The Tantoyuca here is a tight marl, three to six ohm-metres with no fractures; there is no stabilised oil rate to report because there was none.', run: f => { M[5].transition().duration(f ? 0 : 600).attr('opacity', 1); add('28 Aug – 2 Sep 2019', 'Tantoyuca test: 0 bbl/d oil (trace, 17 °API); 192 → 96 bbl/d water', '14/64 in choke, ~170 psi; 528 bbl water in 4.5 days'); } },
         { say: 'So TEC-11 tested how fast the aquifer reaches a well through acidised fractures. It did not test a horizontal in reservoir rock. The lessons are built into TEC-12: a conventional well, a full log suite before completion, perforation on the data, and no unisolated acid near the water.', run: () => add('Lessons → TEC-12', 'Conventional S-well; log before completing; no unisolated acid') },
         { say: 'All in, it cost four point four million dollars against a three point nine million budget, including about a million of completion invoices whose status is still unresolved.' }
       ];
@@ -264,18 +280,18 @@ export function wellSlides(ctx) {
   P.performance = {
     id: 'performance', title: 'Production performance', section: 'Reservoir',
     build(el) {
-      const body = std(el, { eyebrow: 'Production performance', title: 'Five producers, 1.94–1.98 MMbbl, every one limited by water', src: 'Monthly records (production_by_well.csv; one source per well-month): CNH 1966–2016, field-level 1960–65 (attributed to TEC-6), Tonalli 2018–22. Cumulative per well: By Zone allocation (Mar 2020) and GLJ for TEC-10. White gaps are months with no record, not zeros.' });
+      const body = std(el, { eyebrow: 'Production performance', title: 'Five producers, 1.94–1.98 MMbbl, every one limited by water', src: 'Monthly records (production_by_well.csv; one source per well-month): CNH 1966–2016, field-level 1960–65 (attributed to TEC-6), Tonalli 2018–22. Cumulative per well: By Zone allocation (Mar 2020) and GLJ for TEC-10. Zero months are CNH-reported zeros (G-34) or documented shut-ins. Hatched 1956–59: no monthly record of any kind; those years exist only as PEMEX wellfile allocations.' });
       body.innerHTML = `<div id="pf"></div><div class="row" style="gap:50px;align-items:flex-start"><div style="width:860px">${S(1, `<div id="pfc"></div>`)}</div>
         <div class="col grow" style="gap:20px">${S(2, `<p><b>Water, not pressure, ended every well.</b> Each producer was moved up the column as the water arrived; pressure never fell.</p>`)}${S(3, `<p><b>Damage, not depletion, explains the late decline:</b> wax, scale and skin; cheap solvent and acid jobs restored TEC-9 in 2012 and TEC-10 in 2019–22.</p>`)}</div></div>`;
       const R = rateMatrix(D);
-      const ch = timeChart($('#pf', el), { W: 1700, H: 330, m: { l: 90, r: 30, t: 20, b: 44 }, x: [ymd('1959-06'), ymd('2023-06')], yl: [0, 1000], yticks: 5, xticks: 14, ylabel: 'Oil, bbl/d (monthly)',
+      const ch = timeChart($('#pf', el), { W: 1700, H: 330, m: { l: 90, r: 30, t: 20, b: 44 }, x: [ymd('1956-01'), ymd('2023-06')], yl: [0, 1000], yticks: 5, xticks: 14, ylabel: 'Oil, bbl/d (monthly)', bands: [{ from: ymd('1956-06'), to: ymd('1960-01'), hatch: '#9aa6b2', opacity: 0, label: 'no monthly record', vertical: true, size: 18 }],
         stack: WELLS_P.map(w => ({ key: w, color: C.wells[w], values: R.M[w] })), stackDates: R.dates,
         events: [{ d: ymd('1972-03'), text: '932 bbl/d, Mar 1972', y: 0.04 }, { d: ymd('1999-02'), text: '1999–2003 field shut in', y: 0.3 }, { d: ymd('2018-09'), text: 'TEC-10', y: 0.3, left: true }] });
       legend($('#pf', el), WELLS_P.map(w => [C.wells[w], w]));
       const cum = [['TEC-6', 899785, 'incl. ~388 kbbl wellfile allocation 1956–65'], ['TEC-2', 371177], ['TEC-9', 352601], ['TEC-7', 293001], ['TEC-10', 77100]];
       const b = hbars($('#pfc', el), cum.map(([w, v]) => ({ label: w, value: v / 1000, color: C.wells[w], text: d3.format(',')(Math.round(v / 1000)) + ' kbbl' })), { W: 860, rowH: 40, labelW: 140, max: 1000, ticks: 5, m: { r: 160 } });
       return [
-        { say: 'Here is the whole production record, by well, as a monthly rate. The early years before 1966 are a single field-level record, which is TEC-6, the only producer at the time.', run: f => ch.revealTo(ymd('1971-06'), f ? 0 : 3000) },
+        { say: 'Here is the whole production record, by well, as a monthly rate. One caveat first: there is no monthly record at all for 1956 to 1959, the hatched band. Those years survive only as PEMEX wellfile allocations, so the chart starts in 1960. From 1960 to 1965 there is a single field-level record, which is TEC-6, the only producer at the time. Where the rate drops to zero, the well was reported shut in.', run: f => ch.revealTo(ymd('1971-06'), f ? 0 : 3000) },
         { say: 'Five wells produced oil. TEC-6 made about nine hundred thousand barrels, TEC-2 and TEC-9 about three hundred and fifty thousand each, TEC-7 about three hundred thousand, and TEC-10, in four years, seventy seven thousand. The peak was nine hundred and thirty two barrels a day in March 1972, from three wells right after their recompletions.', run: f => { ch.revealTo(ymd('2000-01'), f ? 0 : 3200); b.show(f); } },
         { say: 'The pattern is the same in every well: strong initial rates, water arriving from below, a recompletion higher up, and a new peak. Water ended each well. Pressure never did.', run: f => ch.revealAll(f ? 0 : 3200) },
         { say: 'And late in life the decline is damage, not depletion. Wax and skin choke the wells, and cheap solvent and acid jobs brought TEC-9 back in 2012 and kept TEC-10 going. That matters for running the field, and for TEC-12.' }

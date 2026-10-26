@@ -41,11 +41,16 @@ export function timeChart(host, o) {
   const ay = g.append('g').call(d3.axisLeft(y).ticks(o.yticks || 5, o.yfmt || (o.ylog ? '~s' : ',~f')).tickSizeOuter(0)); axisStyle(ay); ay.select('.domain').remove();
   if (yr) { const ar = g.append('g').attr('transform', `translate(${w},0)`).call(d3.axisRight(yr).ticks(o.yticks || 5, o.yrfmt || ',~f').tickSizeOuter(0)); axisStyle(ar); ar.select('.domain').remove(); }
   if (o.ylabel) label(g, -72, h / 2, o.ylabel, { anchor: 'middle', rot: -90, size: 22 });
-  if (o.yrlabel) label(g, w + 76, h / 2, o.yrlabel, { anchor: 'middle', rot: 90, size: 22 });
+  if (o.yrlabel) label(g, w + m.r - 20, h / 2, o.yrlabel, { anchor: 'middle', rot: 90, size: 22 });
   const clipId = 'c' + Math.random().toString(36).slice(2); const clip = svg.append('clipPath').attr('id', clipId).append('rect').attr('x', 0).attr('y', -40).attr('height', h + 60).attr('width', o.reveal === false ? w : 0);
   const body = g.append('g').attr('clip-path', `url(#${clipId})`);
   // bands (e.g. shut-in eras)
-  for (const b of o.bands || []) body.append('rect').attr('x', x(b.from)).attr('width', Math.max(1, x(b.to) - x(b.from))).attr('y', 0).attr('height', h).attr('fill', b.color || '#ffffff').attr('opacity', b.opacity ?? 0.05);
+  for (const b of o.bands || []) {
+    body.append('rect').attr('x', x(b.from)).attr('width', Math.max(1, x(b.to) - x(b.from))).attr('y', 0).attr('height', h).attr('fill', b.color || '#ffffff').attr('opacity', b.opacity ?? 0.05);
+    if (b.hatch) { const pid = 'h' + Math.random().toString(36).slice(2); const pt = svg.append('defs').append('pattern').attr('id', pid).attr('width', 10).attr('height', 10).attr('patternUnits', 'userSpaceOnUse').attr('patternTransform', 'rotate(45)'); pt.append('line').attr('y2', 10).attr('stroke', b.hatch).attr('stroke-width', 3).attr('stroke-opacity', 0.45);
+      body.append('rect').attr('x', x(b.from)).attr('width', Math.max(1, x(b.to) - x(b.from))).attr('y', 0).attr('height', h).attr('fill', `url(#${pid})`); }
+    if (b.label) label(g, (x(b.from) + x(b.to)) / 2 + (b.vertical ? 6 : 0), b.ly ?? h / 2, b.label, { anchor: 'middle', size: b.size || 18, fill: b.lcolor || C.ink2, rot: b.vertical ? -90 : 0 }).attr('paint-order', 'stroke').attr('stroke', C.bg).attr('stroke-width', 5);
+  }
   if (o.stack) {
     const keys = o.stack.map(s => s.key), dates = o.stackDates;
     const rows = dates.map((d, i) => { const r = { d }; for (const s of o.stack) r[s.key] = s.values[i] || 0; return r; });

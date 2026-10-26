@@ -227,6 +227,29 @@ export class Field3D {
     o.xmark.visible = st === 'plugged' || st === 'dry_abandoned';
     o.labelEl.dataset.status = st; o.labelEl.innerHTML = `<b>${o.w.well}</b>${s.caption ? `<i>${s.caption}</i>` : ''}`;
   }
+  // surface pads with a faint ground grid (null hides them)
+  setPads(pads, traces = []) {   // traces: [{well, color}] plan-view well paths drawn on the ground
+    if (!this.padGrp) { this.padGrp = new THREE.Group(); this.root.add(this.padGrp); this.padLabels = []; }
+    for (const c of [...this.padGrp.children]) { this.padGrp.remove(c); c.geometry?.dispose(); c.material?.dispose(); }
+    this.padLabels.forEach(p => p.l.remove()); this.padLabels = [];
+    this.padGrp.visible = !!pads; if (!pads) return;
+    const grid = new THREE.GridHelper(3000, 30, 0x6b7682, 0x2a333d); grid.position.copy(this.P(707650, 2262650, 0)); this.padGrp.add(grid);
+    for (const p of pads) {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(p.w || 90, 8, p.h || 90), new THREE.MeshStandardMaterial({ color: 0xc8b58a, transparent: true, opacity: 0.85 }));
+      m.position.copy(this.P(p.x, p.y, 0)); m.position.y = 4; this.padGrp.add(m);
+      const l = Object.assign(document.createElement('span'), { className: 'wl pad', innerHTML: `<b>${p.name}</b>${p.sub ? `<i>${p.sub}</i>` : ''}` });
+      this.labels.appendChild(l); this.padLabels.push({ l, pos: m.position.clone(), dx: p.dx || 0, dy: p.dy || 0 });
+    }
+    for (const t of traces) {
+      const w = this.wellObj[t.well]?.w; if (!w || w.path.length < 2) continue;
+      const pts = w.path.map(p => { const v = this.P(p[0], p[1], 0); v.y = 10; return v; });
+      if (pts[0].distanceTo(pts[pts.length - 1]) < 5) continue;
+      const mat = new THREE.MeshBasicMaterial({ color: t.color || 0xffffff });
+      this.padGrp.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), Math.max(8, pts.length), t.r || 7, 6, false), mat));
+      const bh = new THREE.Mesh(new THREE.CylinderGeometry(t.r ? t.r * 3 : 20, t.r ? t.r * 3 : 20, 6, 20), mat.clone()); bh.position.copy(pts[pts.length - 1]); this.padGrp.add(bh);
+      if (t.label) { const l = Object.assign(document.createElement('span'), { className: 'wl pad bhl', innerHTML: t.label }); this.labels.appendChild(l); this.padLabels.push({ l, pos: bh.position.clone(), dx: t.dx || 0, dy: t.dy || 0 }); }
+    }
+  }
   setHighlight(well) { this.highlight = well; this.setWellStates(this.wellState); for (const [k, o] of Object.entries(this.wellObj)) o.labelEl.classList.toggle('hl', k === well); }
   _labels() {
     if (!this.container) return; const w = this.container.clientWidth, h = this.container.clientHeight, placed = [];
@@ -246,6 +269,11 @@ export class Field3D {
       }
       placed.push({ x: it.x, y, lw: it.lw, lh: it.lh });
       it.o.labelEl.style.transform = `translate(${it.x}px, ${y}px) translate(-50%, -100%)`;
+    }
+    for (const p of this.padLabels || []) {
+      const v = p.pos.clone(); v.y += 30; v.project(this.camera);
+      if (!this.padGrp.visible || v.z > 1) { p.l.style.display = 'none'; continue; }
+      p.l.style.display = ''; p.l.style.transform = `translate(${(v.x * 0.5 + 0.5) * w + p.dx}px, ${(-v.y * 0.5 + 0.5) * h + p.dy}px) translate(-50%, -115%)`;
     }
   }
   // ---------------------------------------------------------------- camera

@@ -42,3 +42,10 @@ The narrated history is written from `events.json`, `wells.json`, `tec11_story.m
 ## Testing
 
 Every slide and both other tabs were run in headless Chromium (ANGLE SwiftShader) with no script errors. Narration was exercised in muted mode only. Voice quality depends on the viewer's browser: Edge and Chrome offer natural voices, and Safari offers Siri voices.
+
+## Round 2 changes (26 Oct 2026)
+
+- Well-by-well charts show a 3-month volume-weighted water cut on a right axis.
+- Documented non-producing months are drawn as zeros (CNH-reported zeros, G-34; shut-in segments of each well's status history). 1956–59 and other months with no monthly record are hatched or left as breaks, never zero. Rule in `data/processed/presentation/production_notes.md` "Zero months"; G-87.
+- Narration: captions show the written text (TEC-10), the speech engine gets the spoken form. Voices are ranked (neural / natural / premium first, novelty voices last); default rate 0.95. EN/ES toggle: Spanish narration and captions from `presentation_app/narration_es.json` (keyed `slideId#step`, translated from `narration_en.json`); slide text stays English.
+- New content: Cerro Azul No. 4 and the TM-01 block on the Golden Lane slide (G-89); the TEC-11 Tantoyuca test (G-88); recovery against 45 El Abra fields with the four nearest pools (`analogue_rf.csv`); TEC-12 opens from a surface view of the pads with plan-view well traces; sales point PEMEX CAB Poza Rica.
