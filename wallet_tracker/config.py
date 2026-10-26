@@ -34,6 +34,7 @@ class EligibilityConfig:
     max_top_trade_profit_share: float = 0.6   # one lucky trade shouldn't carry the record
     min_active_month_ratio: float = 0.5
     min_reputation: float = 0.0               # 0 = off; e.g. 55 keeps tiers A/B only
+    require_dollar_profit: bool = True        # % return without $ profit = won small, lost big (or flow noise)
 
 
 # metric -> (weight, higher_is_better). Each metric is percentile-ranked

@@ -13,7 +13,7 @@ from .operator_type import features as operator_features
 from .operator_type import human_score, operator_label
 from .portfolio import PortfolioResult, simulate
 from .prices import PriceBook, PriceSource
-from .reconstruct import build_events
+from .reconstruct import build_events, seed_opening_balances
 from .regimes import MarketRegimes, conditional_betas, regime_matrix, robustness
 
 
@@ -141,7 +141,7 @@ def tokens_in(hist: WalletHistory) -> set[str]:
 def analyze_wallet(hist: WalletHistory, series: dict[str, dict[int, float]], cfg: Config,
                    now: int | None = None, regimes: MarketRegimes | None = None) -> WalletReport:
     now = now or int(time.time())
-    events = build_events(hist.transfers)
+    events = seed_opening_balances(build_events(hist.transfers))
     book = PriceBook(series)
     res = simulate(events, book, now)
     copy = copy_trade_returns(res, cfg.copy_lag_days, cfg.copy_cost_bps)

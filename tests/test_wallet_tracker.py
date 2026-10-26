@@ -41,6 +41,17 @@ class ReconstructTest(unittest.TestCase):
     def test_weth_wrap_nets_out(self):
         weth = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
         self.assertEqual(build_events([tr("w", 0, "eth", -1), tr("w", 0, weth, 1)]), [])
+        # Real wraps only show the ETH leg (WETH's Deposit event is not a Transfer).
+        self.assertEqual(build_events([tr("w", 0, "eth", -1, cp=weth)]), [])
+        self.assertEqual(build_events([tr("u", 0, "eth", 1, cp=weth)]), [])
+
+    def test_airdropped_spam_is_not_valued(self):
+        spam = "0x" + "5a" * 20
+        evs = build_events([tr("a", 0, USDC, 1000), tr("d", 0, spam, 1e12),
+                            tr("s", 1, spam, -1), tr("s", 1, USDC, 20)])     # dust sale at $20/token
+        book = PriceBook({"eth": {T0 + i * DAY: 2000.0 for i in range(3)}})
+        res = simulate(evs, book, T0 + 2 * DAY)
+        self.assertLess(res.final_equity, 2000)   # not 1e12 x $20
 
 
 class PortfolioTest(unittest.TestCase):
@@ -248,6 +259,17 @@ class KnowledgeBaseTest(unittest.TestCase):
             names = kb.db.execute("SELECT COUNT(*) FROM identities").fetchone()[0]
             self.assertEqual(names, 6)
             kb.close()
+
+
+class ClusterEdgeTest(unittest.TestCase):
+    def test_funder_shared_with_unscreened_wallet(self):
+        from wallet_tracker.cluster import find_clusters
+        w = SyntheticWorld(seed=7, days=200)
+        a, b = w.addresses()[:2]
+        rs = [analyze_wallet(w.history(x), w.prices, Config(), w.end) for x in (a, b)]
+        # The outsider shares a funder with `a` but is not among the clustered wallets.
+        funders = {a: "0xf00", "0xoutsider": "0xf00", b: ""}
+        self.assertEqual(find_clusters(rs, {x: w.history(x) for x in (a, b)}, funders), [])
 
 
 class StrategyTest(unittest.TestCase):

@@ -43,6 +43,11 @@ def build_events(transfers: list[Transfer]) -> list[Event]:
             if t.counterparty == GAS:
                 fee += -abs(t.amount)
                 continue
+            if t.token == "eth" and t.counterparty in WRAPPED_NATIVE:
+                # Wrapping/unwrapping emits no Transfer for the wrapped side,
+                # so the ETH leg alone would look like a withdrawal/deposit.
+                # WETH counts as ETH, so the conversion nets to nothing.
+                continue
             tok = normalise_token(t.token)
             legs[tok] += t.amount
             symbols[tok] = "ETH" if tok == "eth" else t.symbol
@@ -66,3 +71,32 @@ def build_events(transfers: list[Transfer]) -> list[Event]:
 
     events.sort(key=lambda e: (e.block, e.timestamp, e.tx_hash))
     return events
+
+
+def seed_opening_balances(events: list[Event]) -> list[Event]:
+    """Add an opening deposit for holdings that predate the fetched window.
+
+    When history starts mid-life (a lookback window), the wallet sells tokens
+    we never saw arrive and its running balance goes negative. The deficit is
+    what it must already have held, so it enters as starting capital - an
+    external flow, never as profit."""
+    if not events:
+        return events
+    running: dict[str, float] = defaultdict(float)
+    low: dict[str, float] = defaultdict(float)
+    symbols: dict[str, str] = {}
+    for e in events:
+        symbols.update(e.symbols)
+        for tok, amt in e.legs.items():
+            running[tok] += amt
+            low[tok] = min(low[tok], running[tok])
+        if e.fee:
+            running["eth"] -= e.fee
+            low["eth"] = min(low["eth"], running["eth"])
+    deficit = {t: -v for t, v in low.items() if v < -DUST}
+    if not deficit:
+        return events
+    first = events[0]
+    opening = Event(EventKind.DEPOSIT, "opening-balance", first.timestamp - 1, first.block, deficit,
+                    {t: symbols.get(t, "ETH" if t == "eth" else t[:8]) for t in deficit})
+    return [opening] + events

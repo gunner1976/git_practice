@@ -22,7 +22,8 @@ from dataclasses import dataclass, field
 from .models import DAY, ClosedTrade, Event, EventKind
 from .prices import STABLES, PriceBook, day_of
 
-MIN_CAPITAL_USD = 50.0  # below this a day's return is not meaningful
+MIN_IMPLIED_USD = 10.0
+MIN_CAPITAL_USD = 1_000.0  # below this a day's return is not meaningful (dust, between-trade lulls)
 
 
 @dataclass
@@ -61,13 +62,21 @@ class PortfolioResult:
         return self.equity[-1] if self.equity else 0.0
 
 
-def _value(holdings: dict[str, float], book: PriceBook, ts: int) -> tuple[float, dict[str, float]]:
+def _value(holdings: dict[str, float], book: PriceBook, ts: int,
+           bought: dict[str, float] | None = None) -> tuple[float, dict[str, float]]:
+    """USD value per token. Tokens with no market price are valued at the
+    wallet's own implied price, but only up to the quantity it actually
+    bought - free balances (airdrops, spam) never get a made-up value."""
     vals = {}
     for tok, amt in holdings.items():
         if amt <= 0:
             continue
-        p = book.price(tok, ts)
-        if p:
+        p = book.market(tok, ts)
+        if p is None:
+            p = book.price(tok, ts)
+            if p and bought is not None:
+                amt = min(amt, max(bought.get(tok, 0.0), 0.0))
+        if p and amt > 0:
             vals[tok] = amt * p
     return sum(vals.values()), vals
 
@@ -87,6 +96,7 @@ def simulate(events: list[Event], book: PriceBook, end_ts: int, freeze_days: int
     holdings: dict[str, float] = defaultdict(float)
     passive: dict[str, float] = defaultdict(float)
     lots: dict[str, deque[Lot]] = defaultdict(deque)
+    bought: dict[str, float] = defaultdict(float)   # net quantity acquired by swapping
     universe: set[str] = set()
     live_from: int | None = None
     frozen = False
@@ -110,6 +120,8 @@ def simulate(events: list[Event], book: PriceBook, end_ts: int, freeze_days: int
 
             if ev.kind is EventKind.SWAP:
                 _apply_swap(ev, book, holdings, lots, res)
+                for tok, amt in ev.legs.items():
+                    bought[tok] += amt
             elif ev.kind is EventKind.DEPOSIT:
                 v = 0.0
                 for tok, amt in ev.legs.items():
@@ -138,7 +150,7 @@ def simulate(events: list[Event], book: PriceBook, end_ts: int, freeze_days: int
                     pflow -= v
 
         close = d + DAY - 1
-        v, vals = _value(holdings, book, close)
+        v, vals = _value(holdings, book, close, bought)
         if not frozen:
             # Until the freeze the twin *is* the wallet.
             passive = defaultdict(float, {t: a for t, a in holdings.items() if a > 0})
@@ -207,12 +219,13 @@ def _apply_swap(ev: Event, book: PriceBook, holdings, lots, res: PortfolioResult
     sold_v = sum(a * sp[t] for t, a in sold.items() if sp[t]) if all(sp.values()) else None
     bought_v = sum(a * bp[t] for t, a in bought.items() if bp[t]) if all(bp.values()) else None
 
-    # Price an unknown side from the known side (single-token sides only).
-    if sold_v is not None and bought_v is None and len(bought) == 1:
+    # Price an unknown side from the known side (single-token sides only), and
+    # only from trades big enough that the rate means something.
+    if sold_v is not None and bought_v is None and len(bought) == 1 and sold_v >= MIN_IMPLIED_USD:
         (tok, amt), = bought.items()
         book.record_implied(tok, ev.timestamp, sold_v / amt)
         bp[tok], bought_v = sold_v / amt, sold_v
-    elif bought_v is not None and sold_v is None and len(sold) == 1:
+    elif bought_v is not None and sold_v is None and len(sold) == 1 and bought_v >= MIN_IMPLIED_USD:
         (tok, amt), = sold.items()
         book.record_implied(tok, ev.timestamp, bought_v / amt)
         sp[tok], sold_v = bought_v / amt, bought_v

@@ -24,6 +24,8 @@ from .prices import PriceBook, day_of
 from .reconstruct import GAS
 
 MIN_SHARE = 0.5
+MIN_USD = 1_000.0
+SERVICE_FANIN = 3   # a destination many screened wallets send to is a service (exchange, bridge), not a successor
 MAX_SWAPS_AFTER = 3
 SUCCESSOR_WINDOW_DAYS = 14
 
@@ -57,7 +59,7 @@ def detect(reports: list, series: dict, exchanges: dict[str, str] | None = None)
             usd = sum(-a * (book.price(t, e.timestamp) or 0.0) for t, a in e.legs.items())
             i = day_idx.get(day_of(e.timestamp), 0)
             before = res.equity[i - 1] if i else 0.0
-            if before <= 0 or usd / before < MIN_SHARE:
+            if before <= 0 or usd / before < MIN_SHARE or usd < MIN_USD:
                 continue
             if sum(1 for ts in swaps if ts > e.timestamp) > MAX_SWAPS_AFTER:
                 continue
@@ -75,7 +77,10 @@ def detect(reports: list, series: dict, exchanges: dict[str, str] | None = None)
                 m.stitched = stitch(r, by_addr[dest], e.timestamp)
             out.append(m)
             break
-    return out
+    fanin: dict[str, int] = {}
+    for m in out:
+        fanin[m.destination] = fanin.get(m.destination, 0) + 1
+    return [m for m in out if m.verified or fanin[m.destination] < SERVICE_FANIN]
 
 
 def stitch(old, new, at: int) -> dict[str, float]:

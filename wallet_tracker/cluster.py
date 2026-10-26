@@ -106,6 +106,7 @@ def find_clusters(reports: list, histories: dict, funders: dict[str, str],
             if t.counterparty in aset and t.counterparty != a and t.counterparty != GAS:
                 link(a, t.counterparty, "direct transfer")
 
+    funders = {a: f for a, f in funders.items() if a in aset}  # only wallets being clustered
     fanout = Counter(f for f in funders.values() if f)
     by_funder = defaultdict(list)
     for a, f in funders.items():
