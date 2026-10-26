@@ -757,6 +757,80 @@ def cmd_perps_backtest(args) -> None:
             json.dump(results, fh, indent=1)
 
 
+def _perps_sample(args):
+    """Seeded random sample of Hyperliquid accounts by lifetime volume, with histories."""
+    import random
+    from .providers.defillama import DefiLlamaPrices
+    from .providers.hyperliquid_accounts import HyperliquidAccounts
+    hl = HyperliquidAccounts()
+    lb = hl.leaderboard()
+    pool = [a for a, r in lb.items() if r["allTime"]["vlm"] >= args.min_volume]
+    random.Random(args.seed).shuffle(pool)
+    sample = pool[:args.sample]
+    histories = {}
+    for i, a in enumerate(sample, 1):
+        print(f"\r  fetching {i}/{len(sample)}", end="", file=sys.stderr, flush=True)
+        try:
+            histories[a] = hl.history(a)
+        except Exception:
+            continue
+    print(file=sys.stderr)
+    now = int(time.time())
+    bench = DefiLlamaPrices().daily_prices({"eth", "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"}, now - 1100 * DAY, now)
+    return (histories, bench.get("eth", {}), bench.get("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", {}),
+            {a: lb[a]["allTime"]["vlm"] for a in histories}, now)
+
+
+def cmd_portfolio_backtest(args) -> None:
+    from .portfolio_backtest import default_variants, run
+    histories, eth, btc, volume, now = _perps_sample(args)
+    variants = default_variants(1.0) + default_variants(args.kappa)
+    print(f"  simulating {len(variants)} variants over {args.days} days, rebalancing every {args.rebalance} days…",
+          file=sys.stderr)
+    res = run(histories, eth, btc, volume, args.days, args.rebalance, now, variants)
+    print(f"PORTFOLIO BACKTEST: the whole copy strategy as one account, last {args.days} days, leaders re-picked "
+          f"every {args.rebalance} days from data available at the time ({len(histories)} sampled accounts)\n")
+    rows = [[k, f"{v.get('avg_leaders', 0):.1f}", pct(v.get("return", 0)), pct(v.get("cagr", 0)),
+             num(v.get("sharpe", 0)), pct(-v.get("max_drawdown", 0)), pct(v.get("worst_month", 0)),
+             f"{v.get('pct_positive_months', 0):.0%}", pct(v.get("volatility", 0))] for k, v in res.items()]
+    print(table(["strategy", "leaders held", "return", "CAGR", "Sharpe", "max DD", "worst month", "+months", "vol"],
+                rows))
+    print(f"\n'copy keeps {args.kappa:.0%}' scales leader returns to what a daily copier kept in the fidelity test; "
+          "it is an assumption until forward paper trading measures it.")
+    if args.html:
+        from .html_report import CSS, FONTS, JS, growth, legend, line_svg
+        pick = [k for k in res if "[copy" not in k][:4] + [k for k in res if k.startswith("naive") and "[copy" not in k] \
+            + ["hold ETH"]
+        pick = list(dict.fromkeys(pick))[:5]
+        slots = ["s1", "s2", "s3", "s4", "s5"]
+        series = [{"label": k, "short": k.split(",")[0][:18], "cls": "bench" if k == "hold ETH" else slots[i % 5],
+                   "pts": growth(res[k]["days"], res[k]["returns"], res[k]["days"][0]), "dashed": k == "hold ETH"}
+                  for i, k in enumerate(pick)]
+        body = (f"<header class='top'><p class='eyebrow'>Portfolio backtest · {args.days} days</p>"
+                "<h1>Copy Strategy Backtest</h1><p class='lede'>The whole strategy as one account: leaders re-picked "
+                "monthly from data available at the time, with live stops and volatility targeting, against naive "
+                "picks and ETH. Perfect-copy returns; a daily copier keeps less.</p></header>"
+                f"<section>{legend([(x['label'], x['cls'], x['dashed']) for x in series])}"
+                f"<div class='chartbox'>{line_svg('pb', series)}</div></section>"
+                "<section><div class='scroll'><table class='data'><thead><tr>"
+                + "".join(f"<th scope='col'>{h}</th>" for h in ["Strategy", "Leaders", "Return", "Sharpe", "Max DD",
+                                                                "Worst month", "+Months"])
+                + "</tr></thead><tbody>"
+                + "".join(f"<tr><td>{k}</td><td>{v.get('avg_leaders', 0):.1f}</td><td>{pct(v.get('return', 0))}</td>"
+                          f"<td>{v.get('sharpe', 0):.2f}</td><td>{pct(-v.get('max_drawdown', 0))}</td>"
+                          f"<td>{pct(v.get('worst_month', 0))}</td><td>{v.get('pct_positive_months', 0):.0%}</td></tr>"
+                          for k, v in res.items())
+                + "</tbody></table></div></section>")
+        page = (f"<title>Copy Strategy Backtest</title>\n<meta name=\"claude:viewport-fit-sides\" content=\"cover\">\n"
+                f"{FONTS}\n<style>{CSS}</style>\n<main>{body}</main>\n<script>{JS}</script>\n")
+        with open(args.html, "w") as fh:
+            fh.write(page)
+        print(f"wrote {args.html}", file=sys.stderr)
+    if args.json:
+        with open(args.json, "w") as fh:
+            json.dump({k: {kk: vv for kk, vv in v.items() if kk not in ("days",)} for k, v in res.items()}, fh)
+
+
 def cmd_kb(args) -> None:
     kb = KnowledgeBase(args.kb)
     if args.action == "runs":
@@ -934,6 +1008,17 @@ def main(argv: list[str] | None = None) -> None:
     pb.add_argument("--json")
     pb.add_argument("--audit", action="store_true", help="replay the open decision forks (docs/DECISIONS.md)")
     pb.set_defaults(fn=cmd_perps_backtest)
+
+    pf = sub.add_parser("portfolio-backtest", help="backtest the whole copy strategy as one account")
+    pf.add_argument("--sample", type=int, default=3000)
+    pf.add_argument("--min-volume", type=float, default=2_000_000)
+    pf.add_argument("--seed", type=int, default=7)
+    pf.add_argument("--days", type=int, default=300)
+    pf.add_argument("--rebalance", type=int, default=30)
+    pf.add_argument("--kappa", type=float, default=0.4, help="share of leader returns a real copier keeps")
+    pf.add_argument("--html")
+    pf.add_argument("--json")
+    pf.set_defaults(fn=cmd_portfolio_backtest)
 
     k = sub.add_parser("kb", help="query the knowledge base")
     k.add_argument("action", choices=["runs", "top", "wallet", "flows", "movers", "emerging"])

@@ -442,6 +442,39 @@ class ConsensusTest(unittest.TestCase):
         self.assertAlmostEqual(out[0]["LIT"], 0.5)        # never traded: held at today's size
 
 
+class PortfolioBacktestTest(unittest.TestCase):
+    def test_stop_limits_a_crashing_leader(self):
+        from wallet_tracker import portfolio_backtest as pb
+        days = [T0 + i * DAY for i in range(40)]
+        # One leader drifts up, then crashes 80% over ten days.
+        av, pnl, v, p = [], [], 1_000_000.0, 0.0
+        for i, d in enumerate(days):
+            r = 0.01 if i < 20 else (-0.15 if i < 30 else 0.0)
+            p += v * r
+            v *= 1 + r
+            av.append((d + DAY - 1, v))
+            pnl.append((d + DAY - 1, p))
+        h = {"account_value": av, "pnl": pnl}
+        rets = pb.daily_returns(h, days[1:])
+        self.assertTrue(any(x < -0.1 for x in rets.values()))
+        calls = []
+        def fake_screen(histories, t, eth, btc, volume):
+            calls.append(t)
+            return [{"address": "L", "annual_turnover": 50, "pnl_usd": 1.0, "max_drawdown": 0.1,
+                     "evidence": "proven", "recent_return": 0.1, "recent_return_30": 0.1, "off_peak": 0.0,
+                     "dsr_vs_eth": 0.99, "dsr_vs_btc": 0.99, "volatility": 0.5}]
+        orig = pb.screen_at
+        pb.screen_at = fake_screen
+        try:
+            now = days[-1] + 2 * DAY
+            res = pb.run({"L": h}, {}, {}, {}, 38, 100, now,
+                         [pb.Variant("no stop"), pb.Variant("stop", stop=0.25)])
+        finally:
+            pb.screen_at = orig
+        self.assertGreater(res["stop"]["return"], res["no stop"]["return"])
+        self.assertLessEqual(res["stop"]["max_drawdown"], 0.35)
+
+
 class RegimeTest(unittest.TestCase):
     def test_labels_and_robustness(self):
         import random
