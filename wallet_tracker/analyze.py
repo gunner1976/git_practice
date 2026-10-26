@@ -40,6 +40,8 @@ class WalletReport:
     sectors: dict = field(default_factory=dict)   # {"average": {...}, "latest": {...}}
     size_tier: str = ""
     frequency_tier: str = ""
+    venue_returns: list[float] = field(default_factory=list, repr=False)
+    venue_coins: list[str] = field(default_factory=list)
     history: WalletHistory | None = field(default=None, repr=False)
 
     @property

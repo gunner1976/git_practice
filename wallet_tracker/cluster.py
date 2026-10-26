@@ -67,12 +67,13 @@ def _series_stats(rs: list[float]) -> dict[str, float]:
             "max_drawdown": max_drawdown(rs)}
 
 
-def combine(reports: list, copy: bool) -> tuple[list[int], list[float]]:
-    """Value-weighted (actual) or equal-weighted (copy) daily returns."""
+def combine(reports: list, copy: bool, attr: str = "copy_returns") -> tuple[list[int], list[float]]:
+    """Value-weighted (actual) or equal-weighted (copy) daily returns. `attr`
+    picks which copy series to use (e.g. "venue_returns")."""
     by_day: dict[int, list[tuple[float, float]]] = defaultdict(list)
     for r in reports:
         res = r.result
-        series = r.copy_returns if copy else res.returns
+        series = (getattr(r, attr) or r.copy_returns) if copy else res.returns
         for i, d in enumerate(res.days):
             w = 1.0 if copy else (res.equity[i - 1] if i else 0.0)
             if (copy and res.equity[i] > 0) or w > 0:

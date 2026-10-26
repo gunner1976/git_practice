@@ -28,6 +28,7 @@ from .knowledge import KnowledgeBase
 from .models import DAY, WalletClass, history_from_json, history_to_json
 from .pipeline import run_study
 from .metrics import compound
+from .prices import STABLES, PriceBook
 from .sectors import SectorMap
 from .strategy import Leader, Rules, portfolio_returns, select, walk_forward
 from .report import num, pct, rolling, short, study_text, table, to_json, wallet_text
@@ -130,7 +131,7 @@ def _study(addresses: list[str], env: Env, cfg: Config, args):
     if env.world is not None:
         extra = {**env.world.sector_map, **extra}
     smap = SectorMap(extra, online=getattr(args, "sectors_online", False))
-    return run_study(histories, series, cfg, env.now, ids, env.labels, smap)
+    return run_study(histories, series, cfg, env.now, ids, env.labels, smap, _venue(args, env))
 
 
 def cmd_rank(args) -> None:
@@ -225,9 +226,22 @@ def cmd_follow(args) -> None:
                      "flags"], rows))
 
 
+def _venue(args, env: Env):
+    """The execution venue copies are simulated on, or None for frictionless spot copying."""
+    name = getattr(args, "venue", None)
+    if not name:
+        return None
+    if env.world is not None:
+        from .venue import StaticVenue
+        return StaticVenue(env.world.venue_coins, name="demo venue")
+    from .venue import Hyperliquid
+    return Hyperliquid()
+
+
 def _rules(args) -> Rules:
     return Rules(min_dsr=args.min_dsr, min_copy_sharpe=args.min_copy_sharpe, reaction_days=args.reaction_days,
                  require_identity=args.require_identity, max_leaders=args.max_leaders,
+                 min_tradable_share=args.min_tradable,
                  max_weight=args.max_weight, cash_buffer=args.cash_buffer)
 
 
@@ -254,7 +268,8 @@ def cmd_backtest(args) -> None:
     cfg = Config.load(args.config)
     env = Env(args)
     histories, series, ids, smap = _inputs(args, env, cfg)
-    res = walk_forward(histories, series, cfg, env.now, args.holdout_days, _rules(args), ids, env.labels, smap)
+    res = walk_forward(histories, series, cfg, env.now, args.holdout_days, _rules(args), ids, env.labels, smap,
+                       _venue(args, env))
     cut = datetime.fromtimestamp(res["cutoff"], timezone.utc).strftime("%Y-%m-%d")
     print(f"WALK-FORWARD: leaders chosen with data up to {cut}, judged on the {args.holdout_days} days after\n")
     print(_leader_rows(res["leaders"]))
@@ -272,9 +287,9 @@ def cmd_paper(args) -> None:
     env = Env(args)
     if args.action == "init":
         histories, series, ids, smap = _inputs(args, env, cfg)
-        study = run_study(histories, series, cfg, env.now, ids, env.labels, smap)
+        study = run_study(histories, series, cfg, env.now, ids, env.labels, smap, _venue(args, env))
         leaders = select(study, _rules(args))
-        state = {"start": env.now, "capital": args.capital, "chain_id": args.chain_id,
+        state = {"start": env.now, "capital": args.capital, "chain_id": args.chain_id, "venue": args.venue,
                  "leaders": [{"label": p.label, "members": p.members, "weight": p.weight, "stats": p.stats}
                              for p in leaders]}
         os.makedirs(os.path.dirname(args.paper) or ".", exist_ok=True)
@@ -288,7 +303,9 @@ def cmd_paper(args) -> None:
     members = sorted({a for p in state["leaders"] for a in p["members"]})
     histories = [_history(env, a, args) for a in members]
     series = fetch_series(env.prices, histories, env.now)
-    study = run_study(histories, series, cfg, env.now)
+    args.venue = state.get("venue")
+    venue = _venue(args, env)
+    study = run_study(histories, series, cfg, env.now, venue=venue)
     leaders = [Leader(p["label"], p["label"], p["members"], p["weight"], p["stats"]) for p in state["leaders"]]
     start_day = state["start"] - state["start"] % DAY
     days, rs = portfolio_returns(study, leaders, start_day)
@@ -313,12 +330,25 @@ def cmd_paper(args) -> None:
     for r in study.reports:
         syms.update(r.result.symbols)
     cash = 1 - sum(target.values())
-    rows = [[syms.get(t, t[:10]), t, f"{w:.1%}", f"${w * nav:,.0f}"] for t, w in sorted(target.items(), key=lambda x: -x[1])
-            if w >= 0.005]
-    rows.append(["cash", "", f"{cash:.1%}", f"${cash * nav:,.0f}"])
+    book = PriceBook(series)
+    instrument = {}
+    if venue is not None:
+        untradable = 0.0
+        for t in list(target):
+            c = venue.coin_for(t, syms.get(t, ""), book.price(t, env.now))
+            if c and venue.listed_on(c, env.now - env.now % DAY):
+                instrument[t] = f"{c}-PERP long 1x"
+            elif t not in STABLES:
+                untradable += target.pop(t)
+        cash = 1 - sum(target.values())
+        if untradable:
+            print(f"\n{untradable:.1%} of the leaders' book is not tradable on {venue.name}; held as cash")
+    rows = [[syms.get(t, t[:10]), instrument.get(t, "spot" if venue is None else "cash (stablecoin)"), t,
+             f"{w:.1%}", f"${w * nav:,.0f}"] for t, w in sorted(target.items(), key=lambda x: -x[1]) if w >= 0.005]
+    rows.append(["cash", "", "", f"{cash:.1%}", f"${cash * nav:,.0f}"])
     print("\nTARGET HOLDINGS NOW (leaders' latest positions, blended by allocation"
           + (f"; capped at {args.max_token_weight:.0%} per token" if capped else "") + ")")
-    print(table(["token", "address", "weight", "value"], rows))
+    print(table(["token", "instrument", "address", "weight", "value"], rows))
 
 
 def cmd_kb(args) -> None:
@@ -365,6 +395,8 @@ def main(argv: list[str] | None = None) -> None:
     common.add_argument("--config", help="JSON overrides for thresholds/weights")
     common.add_argument("--labels", help="JSON {address: label} of exchanges/entities to exclude")
     common.add_argument("--state", default=DEFAULT_STATE, help="watchlist file")
+    common.add_argument("--venue", choices=["hyperliquid"], help="simulate copies on this venue: only listed "
+                        "instruments, real funding and fees (demo uses a stand-in venue)")
     common.add_argument("--since-days", type=int, default=540, help="history lookback for each wallet")
     common.add_argument("--max-pages", type=int, default=15,
                         help="max 1,000-record pages per tx type; beyond = machine-scale, classed as bot")
@@ -420,6 +452,8 @@ def main(argv: list[str] | None = None) -> None:
                        help="how late you act on a leader's trade; leaders need an edge half-life >= 2x this")
     strat.add_argument("--require-identity", action="store_true", help="only entities with an attested identity")
     strat.add_argument("--max-leaders", type=int, default=8)
+    strat.add_argument("--min-tradable", type=float, default=0.8,
+                       help="share of a leader's risk book that must be tradable on the venue")
     strat.add_argument("--max-weight", type=float, default=0.25)
     strat.add_argument("--cash-buffer", type=float, default=0.10)
 

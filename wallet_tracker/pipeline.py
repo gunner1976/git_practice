@@ -61,6 +61,7 @@ class Study:
     size_summary: dict[str, dict[str, float]] = field(default_factory=dict)
     size_regime: dict[str, dict[str, dict[str, float]]] = field(default_factory=dict)
     size_baskets: dict[str, tuple[list[int], list[float]]] = field(default_factory=dict)
+    venue: object = None
     frequency_summary: dict[str, dict[str, float]] = field(default_factory=dict)
 
 
@@ -94,9 +95,11 @@ def is_smart(r: WalletReport) -> bool:
 
 def run_study(histories: list[WalletHistory], series: dict[str, dict[int, float]], cfg: Config, now: int,
               identities: dict[str, Identity] | None = None, exchanges: dict[str, str] | None = None,
-              sector_map: SectorMap | None = None) -> Study:
+              sector_map: SectorMap | None = None, venue=None) -> Study:
     regimes = MarketRegimes(series.get("eth", {}))
     reports = [analyze_wallet(h, series, cfg, now, regimes) for h in histories]
+    if venue is not None:
+        _venue_fidelity(reports, venue, PriceBook(series), cfg)
     boards = build(reports, cfg)
 
     hist_by = {h.address: h for h in histories}
@@ -134,6 +137,7 @@ def run_study(histories: list[WalletHistory], series: dict[str, dict[int, float]
             r.rank = i
 
     study = Study(reports, boards, clusters, regimes)
+    study.venue = venue
     study.migrations, study.migration_stats = migrations, universe_stats(migrations, traders)
     _matrices(study)
     _capital_map(study, sector_map or SectorMap(), PriceBook(series))
@@ -284,3 +288,32 @@ def _frequency_cohorts(study: Study) -> None:
         for lag in LAGS:
             row[f"copy_sharpe_lag{lag}"] = med(f"copy_sharpe_lag{lag}")
         study.frequency_summary[label] = row
+
+
+def _venue_fidelity(reports: list[WalletReport], venue, book: PriceBook, cfg: Config) -> None:
+    """Copy each trader on the execution venue and measure what survives."""
+    import math
+    from .metrics import live_window
+    from .venue import venue_copy
+    for r in reports:
+        if r.wallet_class not in TRADER_CLASSES | {WalletClass.BUY_HOLD}:
+            continue
+        rs, info = venue_copy(r.result, venue, book, cfg.copy_lag_days)
+        r.venue_returns, r.venue_coins = rs, info["coins"]
+        i0 = live_window(r.result)
+        v, c = rs[i0:], r.copy_returns[i0:]
+        m = r.metrics
+        m["tradable_share"] = info["tradable_share"]
+        sd = st.pstdev(v) if len(v) > 2 else 0.0
+        m["venue_copy_sharpe"] = st.fmean(v) / sd * math.sqrt(365) if sd else 0.0
+        m["venue_copy_cagr"] = annualise_safe(v)
+        diff = [a - b for a, b in zip(v, c)]
+        m["venue_tracking_error"] = st.pstdev(diff) * math.sqrt(365) if len(diff) > 2 else 0.0
+        sv, sc = st.pstdev(v) if len(v) > 2 else 0, st.pstdev(c) if len(c) > 2 else 0
+        m["venue_fidelity"] = (sum((a - st.fmean(v)) * (b - st.fmean(c)) for a, b in zip(v, c)) / len(v) / (sv * sc)
+                               if sv and sc else 0.0)
+
+
+def annualise_safe(rs: list[float]) -> float:
+    from .metrics import annualise
+    return annualise(compound(rs), len(rs)) if rs else 0.0

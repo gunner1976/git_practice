@@ -224,6 +224,27 @@ isn't lost when they switch wallets. Exchange deposit addresses are unique per
 customer and unlabelled, so some flagged destinations will be exchanges.
 Check before acting on them.
 
+### Copy strategy, frequency and execution venue
+
+* `backtest` runs a **walk-forward**: leaders are chosen using only data up to
+  `--holdout-days` ago, then judged on what copying them earned afterwards,
+  against copying every eligible wallet, naively copying the top past returns,
+  and holding ETH. `paper init` / `paper update` run the strategy forward with
+  imaginary capital and print blended target holdings.
+* **Trading frequency**: each wallet gets a tier from its median holding
+  period, and an **edge half-life**: how many days late a copier can act
+  before keeping only half the trader's own Sharpe. Leaders need a half-life
+  of at least twice `--reaction-days`.
+* **Execution venue** (`--venue hyperliquid`): copies are simulated on what we
+  can actually trade. Each token maps to a listed Hyperliquid perp (held long
+  at 1x) only if the perp's price matches the token's (1,000x for `k`
+  contracts), and only from the perp's listing date. Real funding is charged
+  (last 90 days fetched, older days use that average), plus venue costs.
+  Untradable exposure is held as cash. Leaders need at least 80%
+  (`--min-tradable`) of their risk book tradable, and are judged on the venue
+  copy. Funding on long perps has run about 10–13% a year, which weighs most
+  on slow, long-holding leaders.
+
 ### Tuning
 
 Pass `--config my.json` to override any threshold or weight, e.g.

@@ -272,6 +272,29 @@ class StrategyTest(unittest.TestCase):
         self.assertAlmostEqual(sum(p.weight for p in picks), 0.9)
 
 
+class VenueTest(unittest.TestCase):
+    def test_untradable_exposure_is_cash_and_funding_is_paid(self):
+        from wallet_tracker.venue import StaticVenue, venue_copy
+        prices = [1.0, 1.0, 2.0, 2.0]
+        other = "0x" + "ef" * 20
+        evs = build_events([tr("a", 0, USDC, 2000), tr("b", 1, USDC, -1000), tr("b", 1, TOK, 1000),
+                            tr("c", 1, USDC, -1000), tr("c", 1, other, 1000)])
+        book = PriceBook({TOK: {T0 + i * DAY: p for i, p in enumerate(prices)},
+                          other: {T0 + i * DAY: p for i, p in enumerate(prices)},
+                          "eth": {T0 + i * DAY: 2000.0 for i in range(4)}})
+        res = simulate(evs, book, T0 + 3 * DAY)
+        free = StaticVenue({TOK: "TOK"}, funding_apr=0.0, cost_bps=0.0)
+        rs, info = venue_copy(res, free, book, 0)
+        self.assertAlmostEqual(info["tradable_share"], 0.5)
+        self.assertAlmostEqual(metrics.compound(rs), 0.5)          # only TOK's half doubled
+        costly = StaticVenue({TOK: "TOK"}, funding_apr=3.65, cost_bps=0.0)
+        rs2, _ = venue_copy(res, costly, book, 0)
+        self.assertLess(metrics.compound(rs2), metrics.compound(rs))
+        late = StaticVenue({TOK: "TOK"}, funding_apr=0.0, cost_bps=0.0, listed={"TOK": T0 + 3 * DAY})
+        rs3, _ = venue_copy(res, late, book, 0)
+        self.assertAlmostEqual(metrics.compound(rs3), 0.0)          # not listed yet when it mattered
+
+
 class RegimeTest(unittest.TestCase):
     def test_labels_and_robustness(self):
         import random

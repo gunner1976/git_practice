@@ -10,6 +10,9 @@ Selection (all must hold for an entity to lead):
   * robust: Regime Robustness Score above zero;
   * slow enough to follow: the edge's half-life under copying delay is at
     least `min_half_life_multiple` x our reaction time;
+  * tradable: with an execution venue, at least `min_tradable_share` of the
+    leader's risk book maps to instruments we can actually hold there, and
+    the copy is judged on what the venue copy earns (funding and fees paid);
   * clean: no reputation red flags;
   * optionally identifiable: a named member (ENS, Farcaster, curated label).
 
@@ -41,6 +44,7 @@ class Rules:
     min_copy_sharpe: float = 1.0
     reaction_days: float = 1.0          # how late we act; leaders' edges must outlast it
     min_half_life_multiple: float = 2.0  # edge half-life >= this x reaction_days
+    min_tradable_share: float = 0.8     # of the leader's risk book we can hold on the venue
     min_rrs: float = 0.0
     allow_flags: bool = False
     require_identity: bool = False
@@ -78,9 +82,13 @@ def select(study: Study, rules: Rules) -> list[Leader]:
             continue
         if not rules.allow_flags and any(r.reputation and r.reputation.flags for r in rs):
             continue
+        if study.venue is not None and st.median(r.metrics.get("tradable_share", 0.0) for r in scored) \
+                < rules.min_tradable_share:
+            continue
         if rules.require_identity and not any(r.identity is not None and r.identity.attested for r in rs):
             continue
-        days, copy = combine(scored, copy=True)
+        attr = "venue_returns" if study.venue is not None else "copy_returns"
+        days, copy = combine(scored, copy=True, attr=attr)
         _, actual = combine(scored, copy=False)
         live = [x for x in copy if x != 0]
         if len(live) < 60:
@@ -128,7 +136,8 @@ def portfolio_returns(study: Study, leaders: list[Leader], after: int) -> tuple[
     """Daily copy returns of the weighted leaders after `after`; uninvested weight earns 0."""
     by_day: dict[int, float] = {}
     for p in leaders:
-        days, rs = combine([r for r in study.reports if r.address in p.members], copy=True)
+        days, rs = combine([r for r in study.reports if r.address in p.members], copy=True,
+                           attr="venue_returns" if study.venue is not None else "copy_returns")
         for d, x in zip(days, rs):
             if d > after:
                 by_day[d] = by_day.get(d, 0.0) + p.weight * x
@@ -150,19 +159,21 @@ def truncate(h: WalletHistory, cutoff: int) -> WalletHistory:
 
 
 def walk_forward(histories: list[WalletHistory], series, cfg: Config, now: int, holdout_days: int,
-                 rules: Rules, identities=None, exchanges=None, sector_map=None) -> dict:
+                 rules: Rules, identities=None, exchanges=None, sector_map=None, venue=None) -> dict:
     cutoff = now - holdout_days * DAY
     past = run_study([truncate(h, cutoff) for h in histories], series, cfg, cutoff, identities, exchanges,
-                     sector_map)
+                     sector_map, venue)
     leaders = select(past, rules)
-    full = run_study(histories, series, cfg, now, identities, exchanges, sector_map)
+    full = run_study(histories, series, cfg, now, identities, exchanges, sector_map, venue)
     cut_day = cutoff - cutoff % DAY
 
     _, ours = portfolio_returns(full, leaders, cut_day)
 
+    attr = "venue_returns" if venue is not None else "copy_returns"
+
     def equal_basket(addresses: list[str]):
         rs = [r for r in full.reports if r.address in addresses]
-        days, x = combine(rs, copy=True) if rs else ([], [])
+        days, x = combine(rs, copy=True, attr=attr) if rs else ([], [])
         return [v for d, v in zip(days, x) if d > cut_day]
 
     eligible = [r.address for r in past.boards.active]

@@ -46,6 +46,8 @@ class SyntheticWorld:
         sectors = ["DeFi", "DeFi", "AI", "AI", "Memes", "Infrastructure",
                    "RWA & tokenized treasuries", "Gaming & NFT"]
         self.sector_map = {t: sectors[i % len(sectors)] for i, t in enumerate(self.tokens)}
+        # Stand-in execution venue: ETH and most tokens listed, the last two not.
+        self.venue_coins = {"eth": "ETH", **{t: f"TOK{i}" for i, t in enumerate(self.tokens[:-2])}}
         self.identities: dict[str, Identity] = {}   # fictional attestations
         self._counter = 0
         self._build_population()
