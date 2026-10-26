@@ -155,7 +155,7 @@ function makeExplorer(ctx) {
   veO.textContent = '2.5×';
   // the presentation shares this 3-D field: reset everything it may have changed (spin, pads, labels, surface opacity, VE, camera)
   return { enter() {
-    field.paused = false; field.orbit(false); field.setPads(null); field.setShift(0, 0); field.setHighlight(null);
+    field.paused = false; field.orbit(false); field.setPads(null); field.setTarget(null); field.setFocusMode({}); field.setShift(0, 0); field.setHighlight(null);
     field.labelsOn = labC.checked; field.owc.visible = owcC.checked; if (field.ve !== +veR.value) field.setVE(+veR.value);
     field.showSurface(surfC.checked, 1); setYear(st.year); st.vol = volS.value; apply(); field.view('reservoir', 1200);
   } };

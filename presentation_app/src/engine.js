@@ -113,7 +113,10 @@ export class Narrator {
   }
   _wait(ms, gen) { return new Promise(r => { const t0 = performance.now(); const tick = () => { if (gen !== this._gen) return r(); if (performance.now() - t0 >= ms) return r(); setTimeout(tick, 60); }; tick(); }); }
   // pronunciation fixes for the speech engine only (captions keep the written form)
-  say(t) {
+  say(t) {   // years 1900–1999 as spoken English ("nineteen eighty"); 2000s left to the engine
+    const ONES = 'zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen'.split(' '), TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+    const two = n => n < 20 ? ONES[n] : TENS[Math.floor(n / 10)] + (n % 10 ? '-' + ONES[n % 10] : '');
+    t = t.replace(/(?<![\d,.])19(\d\d)(s?)(?!\d|,\d)/g, (m, yy, pl) => { const n = +yy; let w = n === 0 ? 'hundred' : n < 10 ? 'oh ' + ONES[n] : two(n); if (pl) w = w.endsWith('y') ? w.slice(0, -1) + 'ies' : w + 's'; return 'nineteen ' + w; });
     return t.replace(/TEC-(\d+)/g, 'tech $1').replace(/\bmSS\b/g, 'metres subsea').replace(/\bmMD\b/g, 'metres measured depth')
       .replace(/(\d)\s?bbl\/d/g, '$1 barrels a day').replace(/\bbbl\b/g, 'barrels').replace(/\bkbbl\b/g, 'thousand barrels').replace(/\bMMbbl\b/g, 'million barrels')
       .replace(/USD\s?([\d.,]+)\s?MM\b/g, '$1 million dollars').replace(/USD\s?([\d.,]+)\s?k\b/g, '$1 thousand dollars').replace(/\bUSD\b/g, 'US dollars')

@@ -124,7 +124,7 @@ export function wellSlides(ctx) {
           $('#wTick', el).innerHTML = `${o.well}: <b>${STATUS_LABEL[st] || '—'}</b>${s.cum_oil ? `<br>cumulative <b>${Math.round(s.cum_oil / 1000)}</b> kbbl in the record` : ''}`;
         };
         let T = ctx.hist.toT(W.spud || '1956-01') - 0.02;
-        scene(ctx, { year: T, focus: o.focusWell || o.well, focusOpts: o.cam || { dist: 2500, az: -0.55, el: 0.32 }, highlight: o.well, surfaceOpacity: 0.6, shift: [-0.22, 0.02] });
+        scene(ctx, { year: T, dim: true, focus: o.focusWell || o.well, focusOpts: o.cam || { dist: 2500, az: -0.55, el: 0.32 }, highlight: o.well, surfaceOpacity: 0.6, shift: [-0.22, 0.02] });
         setT(T);
         return o.steps.map((st, i) => ({
           say: st.say,
@@ -152,7 +152,7 @@ export function wellSlides(ctx) {
     facts: [['Completed', 'Jun 1956'], ['El Abra top', '−2,302 m'], ['Initial', '453 bbl/d'], ['Cumulative', '~371 kbbl']],
     src: 'TEC-2 Forma 19 reports (1955–56), 1971 workover programme, CNH monthly 1972–2016, IHS 2018 well test, Tonalli operations log, GLJ YE2022–25. tec10_tec2_status.md.',
     steps: [
-      { say: 'TEC-2 discovered the field. Its first test, at the very top of El Abra, flowed gas-rich oil: evidence of a small gas cap at the crest in 1956. It was completed lower down, at four hundred and fifty three barrels a day.', ev: ['May–Jun 1956', 'Discovery: top test gas-rich; 453 bbl/d from 2,335–2,339 mMD'], t: '1956-09' },
+      { say: 'TEC-2 discovered the field. Its first test, at the very top of El Abra, flowed gas-rich oil: possible evidence of a small gas cap at the crest in 1956. It was completed lower down, at four hundred and fifty three barrels a day.', ev: ['May–Jun 1956', 'Discovery: top test gas-rich; 453 bbl/d from 2,335–2,339 mMD'], t: '1956-09' },
       { say: 'Nine months later salt water arrived and it was shut in for fifteen years. In December 1971 it was recompleted thirty metres higher and produced from that interval until 2016: three hundred and twenty thousand barrels.', ev: ['Mar 1957', 'Shut in for salt water'], t: '1972-04' },
       { say: 'In 2018 Tonalli found the tubing full of paraffin. The well test showed a skin of plus one hundred and ninety six: the well is badly damaged near the wellbore, not depleted. A plug in 2019 shut off the wet deeper perforations.', ev: ['1972–2016', 'Produced 320 kbbl from 2,307–2,311 mMD'], t: '2016-02' },
       { say: 'Its last production was sixteen barrels a day in January 2023, after a December workover. It is a low-rate, intermittent well, cycled on and off to let the water cone settle. It pays when it shares costs with TEC-10, and GLJ carries it as non-producing with a small workover.', ev: ['2018–23', 'Paraffin clean-out; skin +196; 16–50 bbl/d at 75–90 % water', 'Restorable: intermittent, sharing TEC-10’s costs'], t: NOW }

@@ -25,7 +25,7 @@ export function wellStates(ctx, year, { captions = true, override = {} } = {}) {
 export function scene(ctx, o = {}) {
   const f = ctx.field; f.labelsOn = o.labels !== false; f.showSurface(o.surface !== false, o.surfaceOpacity ?? 0.95);
   f.owc.visible = !!o.owc; f.setWellStates(wellStates(ctx, o.year ?? 2026.8, { captions: o.captions !== false, override: o.override || {} }));
-  f.setHighlight(o.highlight || null); f.setShift(...(o.shift || [0, 0]));
+  f.setFocusMode({ dim: !!o.dim, columns: o.columns !== false }); f.setHighlight(o.highlight || null); f.setTarget(o.target || null); f.setShift(...(o.shift || [0, 0]));
   f.setSlices(o.slices || null); f.setPads(o.pads || null, o.traces || []);
   if (o.focus) f.focusWell(o.focus, ctx.fast ? 0 : (o.dur ?? 2400), o.focusOpts || {}); else if (o.view) f.view(o.view, ctx.fast ? 0 : (o.dur ?? 2400));
   f.orbit(!!o.orbit, o.orbitSpeed ?? 0.25);
@@ -294,7 +294,7 @@ export function coreSlides(ctx) {
       body.innerHTML = `<div class="row" style="gap:46px;align-items:flex-start">
         <div class="col" style="width:560px">${S(0, `<h3>Oil</h3><div id="apiBars"></div><p style="font-size:24px">Stock-tank 28–31 °API across 1956–2019; sulphur 1.1–1.7 %; dead-oil viscosity 13.7 cSt at 40 °C. Reservoir 97.5–99 °C.</p>`)}</div>
         <div class="col" style="width:520px">${S(1, `<h3>Gas: TEC-10 separator, 2018</h3><div class="row" style="gap:20px;align-items:center"><div id="gasDonut"></div><div id="gasLeg"></div></div><p style="font-size:24px">Sour: H₂S 1.0–1.7 mol %, CO₂ 11 %. Flared under the evaluation-period approval.</p>`)}</div>
-        <div class="col grow">${S(2, `<h3>Gas–oil ratio</h3><div id="gorBars"></div><p style="font-size:24px">Solution GOR about 550–570 scf/bbl from 27 years of production. A small gas cap sat at the crest in 1956.</p>`)}
+        <div class="col grow">${S(2, `<h3>Gas–oil ratio</h3><div id="gorBars"></div><p style="font-size:24px">Solution GOR about 550–570 scf/bbl from 27 years of production. TEC-2’s 1956 top test is possible evidence of a small crestal gas cap.</p>`)}
           ${S(3, `<p style="font-size:24px;color:var(--accent2)"><b>No PVT sample has ever been taken.</b> TEC-12's bottom-hole sample would be the field's first.</p>`)}</div></div>`;
       const api = [['TEC-6 1956', 30.2], ['TEC-7 1957', 30.8], ['TEC-2 1974', 33.2], ['TEC-2 2018', 28.4], ['TEC-10 2018', 26.5], ['TEC-10 tank 2018', 30.4], ['TEC-10 tank 2019', 30.1]];
       const b1 = hbars($('#apiBars', el), api.map(([l, v]) => ({ label: l, value: v, color: C.oil })), { W: 560, rowH: 46, labelW: 210, max: 36, ticks: 4, vfmt: d3.format('.1f') });
@@ -306,7 +306,7 @@ export function coreSlides(ctx) {
       return [
         { say: 'The fluids. The oil is light: twenty eight to thirty one degrees API in every analysis from 1956 to 2019, with one to one point seven percent sulphur. Reservoir temperature is about ninety eight degrees Celsius.', run: f => b1.show(f) },
         { say: 'The gas is mostly methane, but sour: about eleven percent carbon dioxide and one to one point seven percent hydrogen sulphide. Sour-service materials are needed, and the gas is flared under the evaluation-period approval.', run: f => dn.show(f) },
-        { say: 'The gas situation: twenty seven years of production give a solution gas–oil ratio of about five fifty to five seventy standard cubic feet per barrel, and TEC-10 tested at about seven seventy. There was a small gas cap at the crest in 1956, seen in TEC-2’s first test, but field GOR stayed low for decades, so it was small. One flag: the flaring permit was justified at three thirty seven, below every measured value. That needs reconciling with the regulator.', run: f => b3.show(f) },
+        { say: 'The gas situation: twenty seven years of production give a solution gas–oil ratio of about five fifty to five seventy standard cubic feet per barrel, and TEC-10 tested at about seven seventy. TEC-2’s first test, at the crest in 1956, is possible evidence of a small gas cap; field GOR stayed low for decades, so any gas cap was small. One flag: the flaring permit was justified at three thirty seven, below every measured value. That needs reconciling with the regulator.', run: f => b3.show(f) },
         { say: 'And there has never been a laboratory PVT study. Every bubble point and formation volume factor in circulation is a correlation. TEC-12’s bottom-hole sample would be the field’s first.' }
       ];
     }
@@ -490,14 +490,14 @@ export function coreSlides(ctx) {
       const PADS = [{ name: 'TEC-10 / TEC-12 pad', sub: 'TEC-12 kicks off here', x: 707578, y: 2262431, w: 110, h: 90, dx: -120, dy: 30 }, { name: 'TEC-6', sub: 'plugged 2007', x: 707494, y: 2262529, w: 70, h: 70, dx: -60 },
         { name: 'TEC-2 / TEC-11 pad', x: 707596, y: 2263008, w: 100, h: 110 }, { name: 'TEC-9', sub: 'surface location', x: 707834, y: 2262336, w: 70, h: 70, dx: 40, dy: 50 }, { name: 'TEC-7', sub: 'injector', x: 707946, y: 2262706, w: 70, h: 70 }];
       const TRACES = [{ well: 'TEC-12', color: 0xff8a3d, r: 10, label: '<b>TEC-12 bottom hole</b><i>~175 m ENE of the pad</i>', dx: -30, dy: -24 }, { well: 'TEC-9', color: 0xd6dde4, label: '<b>TEC-9 bottom hole</b>', dx: 130, dy: 10 }, { well: 'TEC-10', color: 0xd6dde4, label: '<b>TEC-10 bottom hole</b>', dy: 60 }, { well: 'TEC-11', color: 0xb9a6ff, label: '<b>TEC-11 lateral</b>' }];
-      scene(ctx, { year: 2026.8, highlight: 'TEC-12', surfaceOpacity: 0.4, shift: [0.2, 0], pads: PADS, labels: false, traces: TRACES, override: { 'TEC-10': { status: 'restorable' }, 'TEC-2': { status: 'restorable' } } });
+      scene(ctx, { year: 2026.8, highlight: 'TEC-12', dim: true, columns: false, target: { well: 'TEC-12', z: 2293, label: '<b>TEC-12 reaches the crest</b><i>top El Abra −2,293 m, the highest point on the PSTM</i>' }, surfaceOpacity: 0.4, shift: [0.2, 0], pads: PADS, labels: false, traces: TRACES, override: { 'TEC-10': { status: 'restorable' }, 'TEC-2': { status: 'restorable' } } });
       F.flyTo(F.P(707640, 2262640, 0), 3200, -0.15, 1.25, ctx.fast ? 0 : 2400);
       return [
         { say: 'So to TEC-12, starting at the surface. These are the well pads. TEC-12 is drilled from the existing TEC-10 pad, beside the old TEC-6 location, so there is no new lease, road or flowline. From there it is a deviated S-shaped well: it kicks off and steps out about a hundred and seventy five metres east-north-east to the crest, finishing between TEC-6, TEC-9 and TEC-10.', run: f => F.flyTo(F.P(707660, 2262480, 0), 1900, -0.15, 1.2, f ? 0 : 3000) },
-        { say: 'Follow the well down. The target is the top of El Abra at the crest, about two thousand three hundred metres below sea level.', run: f => { F.labelsOn = true; F.focusWell('TEC-12', f ? 0 : 3200, { dist: 2300, az: -0.9, el: 0.3, lift: 100 }); } },
+        { say: 'Follow the well down. The target is the top of El Abra at the crest, about two thousand three hundred metres below sea level.', run: f => { F.labelsOn = true; F.showSurface(true, 0.92); F.focusWell('TEC-12', f ? 0 : 3200, { dist: 1500, az: -1.15, el: 0.36, lift: 0 }); } },
         { say: 'First, it has never been produced. Every crest well perforated below the top fourteen to twenty seven metres of the reef, chasing the water upward from below. Nothing anywhere has produced from minus two thousand two hundred and ninety four to minus two thousand three hundred and three.', run: f => F.focusWell('TEC-9', f ? 0 : 2400, { dist: 1300, az: -0.4, el: 0.2, lift: 0 }) },
         { say: 'Second, where that top unit has been logged it is oil-bearing. PEMEX’s 1957 electric log in TEC-7, run before any production, shows the top seven metres at thirteen percent water saturation and seventeen percent porosity. TEC-9, a hundred and eighteen metres away, shows its top eight metres porous and at the same saturation as the interval that made three hundred and fifty thousand barrels. PEMEX cemented it and never perforated it.' },
-        { say: 'Third, it is the highest point on the seismic. So the target is the top eight metres or so of El Abra, reached fourteen to twenty metres higher than at TEC-10, with the proven interval below as the fallback.', run: f => F.focusWell('TEC-12', f ? 0 : 2400, { dist: 1500, az: 0.6, el: 0.25, lift: 0 }) }
+        { say: 'Third, it is the highest point on the seismic. So the target is the top eight metres or so of El Abra, reached fourteen to twenty metres higher than at TEC-10, with the proven interval below as the fallback.', run: f => F.focusWell('TEC-12', f ? 0 : 2400, { dist: 1150, az: -0.95, el: 0.42, lift: 0 }) }
       ];
     }
   };

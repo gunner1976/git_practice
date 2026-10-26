@@ -88,6 +88,7 @@ export class Field3D {
     this.tweens = this.tweens.filter(tw => { const f = Math.min(1, (now - tw.t0) / tw.dur); tw.fn(f < 0.5 ? 4 * f * f * f : 1 - Math.pow(-2 * f + 2, 3) / 2); return f < 1; });
     this.controls.update();
     const pulse = 0.5 + 0.5 * Math.sin(now / 380);
+    if (this.target) { const s = 1 + 0.35 * pulse; this.target.ring.scale.set(s, s, s); this.target.ring.material.opacity = 0.35 + 0.5 * (1 - pulse); }
     for (const w of Object.values(this.wellObj)) if (w.ring.visible) { const s = w.ringBase * (1 + 0.18 * pulse); w.ring.scale.set(s, s, s); w.ring.material.opacity = 0.35 + 0.35 * (1 - pulse); }
     this.renderer.render(this.scene, this.camera); this._labels();
   }
@@ -204,6 +205,8 @@ export class Field3D {
     this.owc.position.y = -2374.2 * ve;
     for (const o of Object.values(this.wellObj)) o.make();
     if (this.sliceState) this.setSlices(this.sliceState);
+    if (this.highlight) this.setHighlight(this.highlight);
+    if (this.targetSpec) this.setTarget(this.targetSpec);
   }
   // ---------------------------------------------------------------- well state for a given time
   setWellStates(states) { // {well: {status, oil_bpd, cum_oil, cum_water, visible}}
@@ -221,10 +224,14 @@ export class Field3D {
     o.ringBase = 0.6 + Math.sqrt(q) / 6; o.ring.material.color.setHex(st === 'injector' ? 0x4a90d9 : 0x5dbb63);
     if (st === 'injector') { o.ring.visible = true; o.ringBase = 1.2; }
     const cum = s.cum_oil || 0, h = cum / 1000 * 0.6;     // 0.6 scene units of column per 1,000 bbl, standing on the reef top (display scale)
-    const R = o.resP; o.col.visible = h > 1; o.col.scale.y = Math.max(1, h); o.col.position.set(R.x + 70, R.y + 30 + h / 2, R.z);
-    const hw = (s.cum_water || 0) / 1000 * 0.6; o.waterCol.visible = hw > 1;
+    const R = o.resP; o.col.visible = h > 1 && this.columnsOn !== false; o.col.scale.y = Math.max(1, h); o.col.position.set(R.x + 70, R.y + 30 + h / 2, R.z);
+    const hw = (s.cum_water || 0) / 1000 * 0.6; o.waterCol.visible = hw > 1 && this.columnsOn !== false;
     o.waterCol.scale.y = Math.max(1, hw); o.waterCol.position.set(R.x + 130, R.y + 30 + hw / 2, R.z);
     o.xmark.visible = st === 'plugged' || st === 'dry_abandoned';
+    const faded = this.dim && this.highlight && this.highlight !== o.w.well;   // focus mode: everything but the highlighted well recedes
+    o.mat.transparent = faded || !!o.w.planned; o.mat.opacity = faded ? 0.16 : (o.w.planned ? 0.75 : 1); o.mat.depthWrite = !faded;
+    if (this.highlight === o.w.well) { o.mat.color.setHex(0xff9a2e); o.mat.emissive.setHex(0x7a3300); }
+    o.labelEl.classList.toggle('dim', !!faded);
     o.labelEl.dataset.status = st; o.labelEl.innerHTML = `<b>${o.w.well}</b>${s.caption ? `<i>${s.caption}</i>` : ''}`;
   }
   // surface pads with a faint ground grid (null hides them)
@@ -250,7 +257,26 @@ export class Field3D {
       if (t.label) { const l = Object.assign(document.createElement('span'), { className: 'wl pad bhl', innerHTML: t.label }); this.labels.appendChild(l); this.padLabels.push({ l, pos: bh.position.clone(), dx: t.dx || 0, dy: t.dy || 0 }); }
     }
   }
-  setHighlight(well) { this.highlight = well; this.setWellStates(this.wellState); for (const [k, o] of Object.entries(this.wellObj)) o.labelEl.classList.toggle('hl', k === well); }
+  setHighlight(well) {
+    this.highlight = well;
+    if (this.halo) { this.halo.parent?.remove(this.halo); this.halo.geometry.dispose(); this.halo = null; }
+    const o = well && this.wellObj[well];
+    if (o) { this.halo = new THREE.Mesh(new THREE.TubeGeometry(o.curve, Math.max(24, o.w.path.length * 4), 26, 12, false), new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0.32, depthWrite: false })); o.grp.add(this.halo); }   // glow round the highlighted well
+    this.setWellStates(this.wellState); for (const [k, ob] of Object.entries(this.wellObj)) ob.labelEl.classList.toggle('hl', k === well);
+  }
+  setFocusMode({ dim = false, columns = true } = {}) { this.dim = dim; this.columnsOn = columns; this.setWellStates(this.wellState || {}); }
+  // a pulsing marker where a well meets a depth (e.g. TEC-12 at the El Abra crest), with its own label
+  setTarget(t) {
+    this.targetSpec = t || null;
+    if (this.target) { this.root.remove(this.target.g); this.target.l.remove(); this.target = null; }
+    const o = t && this.wellObj[t.well]; if (!o) return;
+    const g = new THREE.Group(), p = this._pathPoint(o.w, t.z);
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(34, 24, 16), new THREE.MeshStandardMaterial({ color: 0xffd23f, emissive: 0x8a5a00 })); ball.position.copy(p); g.add(ball);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(70, 92, 48), new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false })); ring.rotation.x = -Math.PI / 2; ring.position.copy(p); ring.position.y += 4; g.add(ring);
+    this.root.add(g);
+    const l = Object.assign(document.createElement('span'), { className: 'wl target', innerHTML: t.label || t.well }); this.labels.appendChild(l);
+    this.target = { g, ring, l, pos: p.clone() };
+  }
   _pathPoint(w, z) {   // point on a well path at subsea depth z (first point if the path starts deeper)
     const p = w.path; if (z <= p[0][2]) return this.P(p[0][0], p[0][1], p[0][2]);
     for (let i = 0; i + 1 < p.length; i++) { const a = p[i], b = p[i + 1]; if ((a[2] - z) * (b[2] - z) <= 0 && a[2] !== b[2]) { const t = (z - a[2]) / (b[2] - a[2]); return this.P(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, z); } }
@@ -263,12 +289,15 @@ export class Field3D {
     const items = [];
     for (const o of Object.values(this.wellObj)) {
       if (!o.grp.visible || !this.labelsOn) { o.labelEl.style.display = 'none'; continue; }
-      const top = o.w.top_mss || 2300, colM = o.col.visible ? o.col.scale.y / this.ve : 0;
-      const v = this._pathPoint(o.w, Math.max(0, top - Math.max(140, colM + 60))).project(this.camera);   // on the wellbore, just above its cumulative column
+      const v = o.resP.clone().project(this.camera);   // where the well enters the top of El Abra
       if (v.z > 1 || Math.abs(v.x) > 1.15 || Math.abs(v.y) > 1.15) { o.labelEl.style.display = 'none'; continue; }
       o.labelEl.style.display = ''; items.push({ o, ax: (v.x * 0.5 + 0.5) * w, ay: (-v.y * 0.5 + 0.5) * h, lw: o.labelEl.offsetWidth || 90, lh: o.labelEl.offsetHeight || 30 });
     }
-    items.sort((a, b) => (b.o.w.well === this.highlight) - (a.o.w.well === this.highlight) || a.ay - b.ay);
+    if (this.target) {   // the target label goes first, right beside its marker
+      const v = this.target.pos.clone().project(this.camera), l = this.target.l;
+      if (v.z < 1) { l.style.display = ''; items.unshift({ o: { labelEl: l, w: { well: '__target' } }, ax: (v.x * 0.5 + 0.5) * w, ay: (-v.y * 0.5 + 0.5) * h, lw: l.offsetWidth || 200, lh: l.offsetHeight || 44, first: true }); } else l.style.display = 'none';
+    }
+    items.sort((a, b) => (b.first ? 2 : 0) - (a.first ? 2 : 0) || (b.o.w.well === this.highlight) - (a.o.w.well === this.highlight) || a.ay - b.ay);
     const C = [[0, -22], [80, -34], [-80, -34], [0, -64], [120, -6], [-120, -6], [100, -78], [-100, -78], [0, -110], [160, -46], [-160, -46], [130, -120], [-130, -120], [0, -160], [200, -90], [-200, -90]];
     const hits = (x, y, it) => placed.some(q => Math.abs(q.x - x) < (q.lw + it.lw) / 2 + 6 && Math.abs((q.y - q.lh / 2) - (y - it.lh / 2)) < (q.lh + it.lh) / 2 + 4)
       || items.some(o => o !== it && o.ax > x - it.lw / 2 - 4 && o.ax < x + it.lw / 2 + 4 && o.ay > y - it.lh - 4 && o.ay < y + 4);   // keep labels off other wells' anchor points

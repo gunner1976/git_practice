@@ -23,7 +23,17 @@ def chunks(t):   # same grouping as Narrator.chunks in engine.js
         else: out.append(s)
     return out
 
+ONES = 'zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen'.split()
+TENS = {2: 'twenty', 3: 'thirty', 4: 'forty', 5: 'fifty', 6: 'sixty', 7: 'seventy', 8: 'eighty', 9: 'ninety'}
+def two(n):
+    return ONES[n] if n < 20 else TENS[n // 10] + ('-' + ONES[n % 10] if n % 10 else '')
+def year_en(m):   # 1980 -> "nineteen eighty", 1907 -> "nineteen oh seven", 1960s -> "nineteen sixties" (2000s stay as the engine reads them)
+    y, plural = int(m.group(1)), m.group(2)
+    yy = y % 100; w = 'hundred' if yy == 0 else ('oh ' + ONES[yy] if yy < 10 else two(yy))
+    if plural: w = (w[:-1] + 'ies') if w.endswith('y') else w + 's'
+    return 'nineteen ' + w
 def say_en(t):
+    t = re.sub(r'(?<![\d,.])(19\d\d)(s?)(?!\d|,\d)', year_en, t)
     R = [(r'TEC-(\d+)', r'tech \1'), (r'\bmSS\b', 'metres subsea'), (r'\bmMD\b', 'metres measured depth'), (r'(\d)\s?bbl/d', r'\1 barrels a day'),
          (r'\bbbl\b', 'barrels'), (r'\bkbbl\b', 'thousand barrels'), (r'\bMMbbl\b', 'million barrels'), (r'USD\s?([\d.,]+)\s?MM\b', r'\1 million dollars'),
          (r'USD\s?([\d.,]+)\s?k\b', r'\1 thousand dollars'), (r'\bUSD\b', 'US dollars'), (r'kg/cm²', 'kilograms per square centimetre'), (r'\bpsi\b', 'p s i'),
@@ -60,14 +70,18 @@ else:
         return a
 
 gap_chunk, gap_step = np.zeros(int(0.30 * SR), np.float32), np.zeros(int(0.10 * SR), np.float32)
+import os
+REDO = set(filter(None, os.environ.get('REDO', '').split(',')))
 timing = json.load(open(OUT / f'{vid}.json')) if (OUT / f'{vid}.json').exists() else {}
 by_slide = {}
 for k, v in N.items():
     sid, st = k.rsplit('#', 1); by_slide.setdefault(sid, []).append((int(st), v))
 for sid, steps in by_slide.items():
-    if sid in timing: continue   # resumable
-    T = {}
+    redo = [st for st, _ in steps if f'{sid}#{st}' in REDO]
+    if sid in timing and not redo: continue   # resumable; REDO re-renders listed steps only
+    T = dict(timing.get(sid, {})) if redo else {}
     for st, text in sorted(steps):
+        if redo and st not in redo and str(st) in T: continue
         parts, t, rows = [np.zeros(int(0.05 * SR), np.float32)], 0.05, []
         for c in chunks(text):
             a = synth(spoken(c)); a = a / max(1e-6, np.abs(a).max()) * 0.89
