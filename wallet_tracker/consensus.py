@@ -42,9 +42,17 @@ class HyperliquidBooks:
         self.http = Http(min_interval=0.25, cache_ttl=0)
         self.cached = Http(min_interval=0.25, cache_ttl=6 * 3600)
 
-    def book(self, address: str) -> Book:
+    def book(self, address: str, include_spot: bool = True) -> Book:
+        """Positions as a share of the leader's wealth. With include_spot, idle
+        stablecoins in the Hyperliquid spot wallet count as wealth too - it's
+        collateral they chose not to risk, so weights reflect what share of
+        their total they actually put on."""
         d = self.http.post_json(URL, {"type": "clearinghouseState", "user": address}, cache=False)
         av = float(d["marginSummary"]["accountValue"])
+        if include_spot:
+            spot = self.http.post_json(URL, {"type": "spotClearinghouseState", "user": address}, cache=False)
+            av += sum(float(b["total"]) for b in spot.get("balances", [])
+                      if b["coin"] in ("USDC", "USDT", "USDE", "USDHL", "USDT0"))
         w, det = {}, {}
         for ap in d.get("assetPositions", []):
             p = ap["position"]

@@ -527,7 +527,7 @@ def cmd_group(args) -> None:
         r.update(rec, live_gross=gross)
         why = []
         if gross > args.max_leader_leverage:
-            why.append(f"running {gross:.1f}x > {args.max_leader_leverage:g}x")
+            why.append(f"running {gross:.1f}x of total wealth > {args.max_leader_leverage:g}x")
         if rec["recent_return"] <= 0:
             why.append(f"{rec['recent_return']:+.0%} over the last {args.recent_days}d")
         if rec["off_peak"] > args.kill_switch:
@@ -545,7 +545,7 @@ def cmd_group(args) -> None:
     alloc = leader_weights(leaders, args.max_leader)
     print(f"GROUP PROXY of {len(leaders)} Hyperliquid leaders (weights: luck-test confidence / drawdown, "
           f"capped {args.max_leader:.0%})")
-    print(table(["leader", "alias", "weight", "account", "gross exposure", "positions"],
+    print(table(["leader", "alias", "weight", "wealth (perps + spot cash)", "gross vs wealth", "positions"],
                 [[short(a), (by_addr[a].get("alias") or "")[:14], f"{alloc[a]:.0%}", f"${books[a].account_value:,.0f}",
                   f"{sum(abs(x) for x in books[a].weights.values()):.2f}x",
                   ", ".join(f"{c} {x:+.2f}x" for c, x in sorted(books[a].weights.items(), key=lambda kv: -abs(kv[1]))[:4])]
@@ -603,6 +603,47 @@ def cmd_group(args) -> None:
         print(table(["delay", "group return", "proxy return", "corr", "kept", "group Sharpe", "proxy Sharpe"], rows)
               if rows else "  not enough overlapping data")
     print("  (our limits cut exposure well below the leaders' own leverage, so 'kept' below 100% partly reflects lower risk)")
+
+
+def cmd_networth(args) -> None:
+    """Aggregated value across venues and a leverage profile, per address (or summed as one entity)."""
+    from .networth import networth
+    provider = prices = None
+    if not args.no_ethereum and os.environ.get("ETHERSCAN_API_KEY"):
+        from .providers.defillama import DefiLlamaPrices
+        from .providers.etherscan import Etherscan
+        provider, prices = Etherscan(max_pages=args.max_pages), DefiLlamaPrices()
+    cfg = Config.load(args.config)
+    results = [networth(a, provider, prices, cfg, with_history=not args.no_history) for a in args.addresses]
+    for r in results:
+        lev, hist = r["leverage"], r["history"]
+        print(f"\n{r['address']}   TOTAL VISIBLE VALUE ${r['total']:,.0f}")
+        for k, v in r["components"].items():
+            note = r["notes"].get(k, "")
+            print(f"  {k:22} ${v:>14,.0f}   {note[:110]}")
+        print(f"  {'not visible':22} {r['not_visible']}")
+        print("  LEVERAGE (effective = position notional / equity; exchange max settings ignored)")
+        print(f"    gross ${lev['gross_notional']:,.0f}, net ${lev['net_notional']:+,.0f}  |  "
+              f"{lev['leverage_vs_perps_equity']:.2f}x of perps equity, {lev['leverage_vs_total_wealth']:.2f}x of "
+              f"total visible wealth (net {lev['net_leverage_vs_total_wealth']:+.2f}x)")
+        if lev["liq_distance_weighted"] is not None:
+            print(f"    distance to liquidation (notional-weighted): {lev['liq_distance_weighted']:.0%}")
+        else:
+            print("    distance to liquidation: no liquidation price reported (well collateralised)")
+        for p in lev["positions"][:6]:
+            ld = f"{p['liq_distance']:.0%}" if p["liq_distance"] is not None else "-"
+            print(f"      {p['coin']:6} {p['side']:5} ${p['notional']:>12,.0f}  liq dist {ld:>5}  "
+                  f"unrealised ${p['unrealized']:+,.0f}  ({p['margin']}, max {p['max_leverage_setting']}x allowed)")
+        if hist:
+            rpl = hist["return_per_unit_leverage"]
+            print(f"    last {hist['days']}d: avg leverage {hist['avg_leverage']:.2f}x, peak {hist['peak_leverage']:.2f}x, "
+                  f"return {pct(hist['return'])}" + (f", return per unit of leverage {pct(rpl)}" if rpl is not None else ""))
+    if args.entity and len(results) > 1:
+        total = sum(r["total"] for r in results)
+        gross = sum(r["leverage"]["gross_notional"] for r in results)
+        net = sum(r["leverage"]["net_notional"] for r in results)
+        print(f"\nENTITY TOTAL ({len(results)} addresses): ${total:,.0f} visible; gross ${gross:,.0f} "
+              f"({gross / total if total else 0:.2f}x), net {net / total if total else 0:+.2f}x of total wealth")
 
 
 def cmd_kb(args) -> None:
@@ -754,6 +795,15 @@ def main(argv: list[str] | None = None) -> None:
     g.add_argument("--kill-switch", type=float, default=0.30, help="drop leaders this far below their recent peak")
     g.add_argument("--no-fidelity", action="store_true", help="skip the (slow) fidelity test")
     g.set_defaults(fn=cmd_group)
+
+    nw = sub.add_parser("networth", help="aggregated value across venues + leverage profile of addresses")
+    nw.add_argument("addresses", nargs="+")
+    nw.add_argument("--entity", action="store_true", help="also sum the addresses as one entity")
+    nw.add_argument("--no-ethereum", action="store_true", help="skip rebuilding Ethereum holdings (slow for busy wallets)")
+    nw.add_argument("--no-history", action="store_true", help="skip average/peak leverage from fills")
+    nw.add_argument("--max-pages", type=int, default=8)
+    nw.add_argument("--config")
+    nw.set_defaults(fn=cmd_networth)
 
     k = sub.add_parser("kb", help="query the knowledge base")
     k.add_argument("action", choices=["runs", "top", "wallet", "flows", "movers"])
