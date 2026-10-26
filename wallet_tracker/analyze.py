@@ -13,7 +13,7 @@ from .operator_type import features as operator_features
 from .operator_type import human_score, operator_label
 from .portfolio import PortfolioResult, simulate
 from .prices import PriceBook, PriceSource
-from .reconstruct import build_events, normalise_token
+from .reconstruct import build_events
 from .regimes import MarketRegimes, conditional_betas, regime_matrix, robustness
 
 
@@ -78,7 +78,10 @@ def benchmark_returns(res: PortfolioResult, book: PriceBook, token: str = "eth")
 
 
 def tokens_in(hist: WalletHistory) -> set[str]:
-    return {normalise_token(t.token) for t in hist.transfers} | {"eth"}
+    """Tokens worth pricing: anything the wallet swapped, plus ETH. Tokens that
+    only ever arrived unsolicited (airdrop spam) are skipped."""
+    swapped = {t for e in build_events(hist.transfers) if e.kind.value == "swap" for t in e.legs}
+    return swapped | {"eth"}
 
 
 def analyze_wallet(hist: WalletHistory, series: dict[str, dict[int, float]], cfg: Config,

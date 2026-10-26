@@ -225,6 +225,31 @@ class PipelineTest(unittest.TestCase):
                 self.assertIn(a, json.load(fh)["wallets"])
 
 
+class KnowledgeBaseTest(unittest.TestCase):
+    def test_runs_accumulate(self):
+        from wallet_tracker.knowledge import KnowledgeBase
+        studies = []
+        for seed in (7, 8):
+            w = SyntheticWorld(seed=seed)
+            studies.append(run_study([w.history(a) for a in w.addresses()], w.prices, Config(),
+                                     w.end + DAY - 1, w.identities, sector_map=SectorMap(w.sector_map)))
+        with tempfile.TemporaryDirectory() as d:
+            kb = KnowledgeBase(os.path.join(d, "kb.sqlite"))
+            r1 = kb.record(studies[0], ts=1)
+            r2 = kb.record(studies[1], ts=2)
+            self.assertEqual([r[0] for r in kb.runs()], [r1, r2])
+            top = kb.top(5)
+            self.assertEqual([t[0] for t in top], [1, 2, 3, 4, 5])
+            self.assertTrue(all(t[11] is not None for t in top))     # previous rank known
+            hist = kb.wallet(top[0][1])
+            self.assertEqual(len(hist), 2)
+            self.assertTrue(kb.flows("smart", 3))
+            self.assertTrue(kb.movers()["moved"])
+            names = kb.db.execute("SELECT COUNT(*) FROM identities").fetchone()[0]
+            self.assertEqual(names, 6)
+            kb.close()
+
+
 class RegimeTest(unittest.TestCase):
     def test_labels_and_robustness(self):
         import random

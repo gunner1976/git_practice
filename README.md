@@ -44,7 +44,7 @@ python3 -m wallet_tracker analyze 0xWALLET --addresses candidates.txt
 
 # Follow the top 5 and get alerts on every new trade
 python3 -m wallet_tracker rank --addresses candidates.txt --follow-top 5
-python3 -m wallet_tracker follow add 0xWALLET --note "rotator" --since-days 7
+python3 -m wallet_tracker follow add 0xWALLET --note "rotator" --backfill-days 7
 python3 -m wallet_tracker follow poll --loop --interval 300 --min-usd 5000 --swaps-only
 python3 -m wallet_tracker follow report      # live scorecard + drift flags for followed wallets
 ```

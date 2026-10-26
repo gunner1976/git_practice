@@ -90,3 +90,16 @@ class WalletHistory:
     is_contract: bool = False
     label: str = ""
     deployed_contracts: list[str] = field(default_factory=list)
+    truncated: bool = False          # history exceeded the fetch cap (machine-scale activity)
+
+
+def history_to_json(h: WalletHistory) -> dict:
+    return {"address": h.address, "is_contract": h.is_contract, "label": h.label,
+            "deployed_contracts": h.deployed_contracts, "truncated": h.truncated,
+            "transfers": [[t.tx_hash, t.timestamp, t.block, t.token, t.symbol, t.amount, t.counterparty]
+                          for t in h.transfers]}
+
+
+def history_from_json(d: dict) -> WalletHistory:
+    return WalletHistory(d["address"], [Transfer(*row) for row in d["transfers"]], d["is_contract"],
+                         d["label"], d["deployed_contracts"], d["truncated"])

@@ -24,7 +24,8 @@ from .follow import DEFAULT_STATE, Watchlist, poll
 from .html_report import render_html
 from .identity import load_file as load_identities
 from .identity import resolve
-from .models import DAY, WalletClass
+from .knowledge import KnowledgeBase
+from .models import DAY, WalletClass, history_from_json, history_to_json
 from .pipeline import run_study
 from .sectors import SectorMap
 from .report import num, pct, rolling, short, study_text, table, to_json, wallet_text
@@ -40,6 +41,7 @@ class Env:
             self.provider = self.prices = self.world
             self.labels = {}
             self.now = self.world.end + DAY - 1
+            self.head = self.world.latest_block()
         else:
             from .providers.defillama import DefiLlamaPrices
             from .providers.etherscan import Etherscan
@@ -49,12 +51,14 @@ class Env:
                     labels = json.load(fh)
             self.world = None
             self.labels = labels
-            self.provider = Etherscan(chain_id=args.chain_id, labels=labels)
+            self.provider = Etherscan(chain_id=args.chain_id, labels=labels,
+                                      max_pages=getattr(args, "max_pages", 15))
             chains = {1: "ethereum", 10: "optimism", 8453: "base", 42161: "arbitrum"}
             if args.chain_id not in chains:
                 raise SystemExit(f"chain {args.chain_id} unsupported; ETH-native chains: {sorted(chains)}")
             self.prices = DefiLlamaPrices(chains[args.chain_id])
             self.now = int(time.time())
+            self.head = self.provider.latest_block()
 
 
 def _addresses(args, env: Env) -> list[str]:
@@ -67,6 +71,9 @@ def _addresses(args, env: Env) -> list[str]:
             out += [x.strip() for x in a.split(",") if x.strip()]
     if getattr(args, "discover", None):
         out += env.provider.discover(args.discover.split(","), top=args.discover_top)
+    if getattr(args, "discover_swappers", False):
+        print("  discovering persistent DEX traders…", file=sys.stderr)
+        out += env.provider.discover_swappers(days=args.discover_days, top=args.discover_top)
     if env.world is not None and not out:
         out = env.world.addresses()
     seen, uniq = set(), []
@@ -77,12 +84,32 @@ def _addresses(args, env: Env) -> list[str]:
     return uniq
 
 
+def _history(env: Env, address: str, args):
+    """Fetch one wallet's history, through an optional on-disk cache."""
+    start = 0
+    if env.world is None and getattr(args, "since_days", 0):
+        start = max(0, env.head - int(args.since_days * 7_200))
+    cache_dir = getattr(args, "history_cache", None)
+    path = os.path.join(cache_dir, f"{address}-{args.chain_id}-{getattr(args, 'since_days', 0)}.json") if cache_dir else None
+    if path and os.path.exists(path):
+        with open(path) as fh:
+            return history_from_json(json.load(fh))
+    h = env.provider.history(address, start)
+    if path:
+        os.makedirs(cache_dir, exist_ok=True)
+        with open(path, "w") as fh:
+            json.dump(history_to_json(h), fh)
+    return h
+
+
 def _study(addresses: list[str], env: Env, cfg: Config, args):
     histories = []
+    t0 = time.time()
     for i, a in enumerate(addresses, 1):
-        print(f"\r  fetching {i}/{len(addresses)} {a}", end="", file=sys.stderr, flush=True)
+        print(f"\r  fetching {i}/{len(addresses)} {a}  ({time.time() - t0:.0f}s)", end="",
+              file=sys.stderr, flush=True)
         try:
-            histories.append(env.provider.history(a))
+            histories.append(_history(env, a, args))
         except Exception as exc:  # one bad address shouldn't sink a whole screen
             print(f"\n  skip {a}: {exc}", file=sys.stderr)
     print("\n  pricing…", file=sys.stderr)
@@ -118,6 +145,11 @@ def cmd_rank(args) -> None:
         with open(args.html, "w") as fh:
             fh.write(render_html(study, demo=bool(args.demo)))
         print(f"wrote {args.html}", file=sys.stderr)
+    if args.kb:
+        kb = KnowledgeBase(args.kb)
+        run = kb.record(study, args.chain_id, note="demo" if args.demo else "")
+        kb.close()
+        print(f"stored run {run} in {args.kb}", file=sys.stderr)
     if args.follow_top:
         wl = Watchlist.load(args.state)
         head = env.provider.latest_block()
@@ -151,7 +183,7 @@ def cmd_follow(args) -> None:
     env = Env(args)
     if args.action == "add":
         head = env.provider.latest_block()
-        start = head - int(args.since_days * DAY / 12)  # ~12s blocks
+        start = head - int(args.backfill_days * DAY / 12)  # ~12s blocks
         for a in args.wallets:
             wl.add(a, start, args.note)
         wl.save()
@@ -191,6 +223,40 @@ def cmd_follow(args) -> None:
                      "flags"], rows))
 
 
+def cmd_kb(args) -> None:
+    kb = KnowledgeBase(args.kb)
+    if args.action == "runs":
+        rows = [[str(r[0]), datetime.fromtimestamp(r[1], timezone.utc).strftime("%Y-%m-%d %H:%M"), str(r[2]),
+                 str(r[3]), str(r[4]), f"{r[5]:.2f}", r[6] or ""] for r in kb.runs()]
+        print(table(["run", "time (UTC)", "wallets", "eligible", "significant", "luck Sharpe", "note"], rows))
+    elif args.action == "top":
+        rows = []
+        for (rank, addr, score, sig, tier, rep, op, cagr, sharpe, rrs, copy, prev, name) in kb.top(args.limit):
+            move = "new" if prev is None else (f"{prev - rank:+d}" if prev != rank else "=")
+            rows.append([str(rank), move, name or short(addr), f"{score:.0f}", "yes" if sig else "",
+                         f"{tier} {rep:.0f}", op, pct(cagr), num(sharpe), num(rrs), pct(copy)])
+        print(table(["#", "move", "wallet", "score", "signif", "rep", "operator", "CAGR", "Sharpe", "RRS",
+                     "copy CAGR"], rows))
+    elif args.action == "wallet":
+        rows = [[str(r[0]), datetime.fromtimestamp(r[1], timezone.utc).strftime("%Y-%m-%d"), r[2],
+                 str(r[3] or "-"), f"{r[4]:.0f}", "yes" if r[5] else "", f"{r[6]} {r[7]:.0f}", pct(r[8]),
+                 num(r[9]), f"${r[10]:,.0f}"] for r in kb.wallet(args.address)]
+        print(table(["run", "date", "class", "rank", "score", "signif", "rep", "CAGR", "Sharpe", "equity"], rows)
+              if rows else "wallet not in the knowledge base")
+    elif args.action == "flows":
+        f = kb.flows(args.cohort, args.limit)
+        months = sorted(f)
+        sectors = sorted({s for m in f.values() for s in m})
+        print(table(["sector"] + months, [[sec] + [f"{f[m].get(sec, 0) / 1e6:+.2f}M" for m in months]
+                                          for sec in sectors]) if f else "no flows stored")
+    elif args.action == "movers":
+        mv = kb.movers()
+        for k in ("new", "dropped"):
+            print(f"{k}: " + (", ".join(f"{short(a)} (#{r})" for a, r in mv[k]) or "none"))
+        print("rank changes: " + (", ".join(f"{short(a)} #{b}→#{c}" for a, b, c in mv["moved"]) or "none"))
+    kb.close()
+
+
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(prog="wallet_tracker", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -201,6 +267,10 @@ def main(argv: list[str] | None = None) -> None:
     common.add_argument("--config", help="JSON overrides for thresholds/weights")
     common.add_argument("--labels", help="JSON {address: label} of exchanges/entities to exclude")
     common.add_argument("--state", default=DEFAULT_STATE, help="watchlist file")
+    common.add_argument("--since-days", type=int, default=540, help="history lookback for each wallet")
+    common.add_argument("--max-pages", type=int, default=15,
+                        help="max 1,000-record pages per tx type; beyond = machine-scale, classed as bot")
+    common.add_argument("--history-cache", help="directory to cache fetched histories (re-runs cost no API calls)")
     common.add_argument("--identities", help="JSON {address: {name, kind, source, url}} of public attributions")
     common.add_argument("--ens", action="store_true", help="look up self-published ENS names")
     common.add_argument("--sectors", help="JSON {token_address: sector} to extend the built-in taxonomy")
@@ -213,11 +283,15 @@ def main(argv: list[str] | None = None) -> None:
     r = sub.add_parser("rank", parents=[common], help="screen, classify and rank wallets")
     r.add_argument("--addresses", nargs="*", help="addresses, comma lists, or files of addresses")
     r.add_argument("--discover", help="comma-separated token contracts to source candidate wallets from")
+    r.add_argument("--discover-swappers", action="store_true",
+                   help="source candidates from wallets repeatedly trading through major DEX routers")
+    r.add_argument("--discover-days", type=int, default=90)
     r.add_argument("--discover-top", type=int, default=150)
     r.add_argument("--top", type=int, default=20)
     r.add_argument("--json", help="write full results to this file")
     r.add_argument("--html", help="write the visual report (copy-trade curves, regime and operator matrices)")
     r.add_argument("--follow-top", type=int, default=0, help="add the top N to the watchlist")
+    r.add_argument("--kb", help="SQLite knowledge base to append this run to")
     r.set_defaults(fn=cmd_rank)
 
     a = sub.add_parser("analyze", parents=[common], help="full report for one wallet")
@@ -229,7 +303,7 @@ def main(argv: list[str] | None = None) -> None:
     f.add_argument("action", choices=["add", "remove", "list", "poll", "report"])
     f.add_argument("wallets", nargs="*")
     f.add_argument("--note", default="")
-    f.add_argument("--since-days", type=float, default=0, help="on add: also alert on the last N days")
+    f.add_argument("--backfill-days", type=float, default=0, help="on add: also alert on the last N days")
     f.add_argument("--loop", action="store_true")
     f.add_argument("--interval", type=int, default=300)
     f.add_argument("--min-usd", type=float, default=0)
@@ -239,6 +313,14 @@ def main(argv: list[str] | None = None) -> None:
     f.add_argument("--migration-usd", type=float, default=50_000)
     f.add_argument("--alerts", default=os.path.expanduser("~/.wallet_tracker/alerts.jsonl"))
     f.set_defaults(fn=cmd_follow)
+
+    k = sub.add_parser("kb", help="query the knowledge base")
+    k.add_argument("action", choices=["runs", "top", "wallet", "flows", "movers"])
+    k.add_argument("address", nargs="?")
+    k.add_argument("--kb", default=os.path.expanduser("~/.wallet_tracker/kb.sqlite"))
+    k.add_argument("--limit", type=int, default=25)
+    k.add_argument("--cohort", choices=["smart", "all"], default="smart")
+    k.set_defaults(fn=cmd_kb)
 
     args = p.parse_args(argv)
     args.fn(args)

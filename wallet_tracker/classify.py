@@ -21,6 +21,9 @@ def classify(hist: WalletHistory, m: dict[str, float], cfg: ClassifierConfig) ->
     if hist.label:
         return WalletClass.EXCHANGE, [f"known entity: {hist.label}"]
 
+    if hist.truncated:
+        return WalletClass.BOT, ["transaction count exceeds the fetch cap (machine-scale activity)"]
+
     counterparties = {t.counterparty for t in hist.transfers if t.counterparty and t.counterparty != GAS}
     if len(counterparties) >= cfg.entity_counterparties and m["swaps"] < 0.1 * len(hist.transfers):
         return WalletClass.EXCHANGE, [f"{len(counterparties)} counterparties, mostly plain transfers"]
