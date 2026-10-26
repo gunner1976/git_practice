@@ -357,6 +357,56 @@ def cmd_paper(args) -> None:
     print(table(["token", "instrument", "address", "weight", "value"], rows))
 
 
+def cmd_perps(args) -> None:
+    """Screen Hyperliquid perps traders with the same luck test."""
+    from .providers.hyperliquid_accounts import HyperliquidAccounts, deflate, perp_metrics
+    from .ranking import _percentiles
+    hl = HyperliquidAccounts()
+    lb = hl.leaderboard()
+    addrs = hl.candidates(args.min_value, args.top)
+    rows = []
+    for i, a in enumerate(addrs, 1):
+        print(f"\r  fetching {i}/{len(addrs)}", end="", file=sys.stderr, flush=True)
+        try:
+            m = perp_metrics(hl.history(a))
+        except Exception as exc:
+            print(f"\n  skip {a}: {exc}", file=sys.stderr)
+            continue
+        m["address"], m["alias"] = a, lb[a]["alias"]
+        rows.append(m)
+    print(file=sys.stderr)
+    luck = deflate(rows)
+    scored = [r for r in rows if "dsr" in r and r["span_days"] >= args.min_days]
+    for r in scored:
+        r["class"] = ("market maker / HFT" if r["annual_turnover"] > args.mm_turnover
+                      else "inactive / vault" if r["annual_turnover"] < 5 else "trader")
+    traders = [r for r in scored if r["class"] == "trader"]
+    weights = {"sharpe": (1.5, True), "dsr": (1.5, True), "max_drawdown": (1.0, False),
+               "pct_positive": (1.0, True), "cagr": (1.0, True)}
+    for k, (w, hib) in weights.items():
+        for r, p in zip(traders, _percentiles([r[k] for r in traders], hib)):
+            r["score"] = r.get("score", 0.0) + w * p
+    for r in traders:
+        r["score"] = 100 * r["score"] / sum(w for w, _ in weights.values())
+    traders.sort(key=lambda r: (r["dsr"] >= 0.95, r["score"]), reverse=True)
+    print(f"HYPERLIQUID PERPS TRADERS: {len(rows)} screened (accounts >= ${args.min_value:,.0f}, most active), "
+          f"{len(traders)} directional traders with >= {args.min_days}d history; set aside: "
+          f"{sum(r['class'] == 'market maker / HFT' for r in scored)} market makers / HFT, "
+          f"{sum(r['class'] == 'inactive / vault' for r in scored)} inactive. Luck Sharpe {luck:.2f}")
+    print(table(["#", "account", "alias", "value", "PnL", "CAGR", "Sharpe", "luck test", "max DD", "+periods",
+                 "turnover", "days"],
+                [[str(i), short(r["address"]), (r["alias"] or "")[:22], f"${r['account_value']:,.0f}",
+                  f"${r['pnl_usd']:,.0f}", pct(r["cagr"]), num(r["sharpe"]), f"{r['dsr']:.0%}",
+                  pct(-r["max_drawdown"]), f"{r['pct_positive']:.0%}", f"{r['annual_turnover']:,.0f}x",
+                  f"{r['span_days']:.0f}"] for i, r in enumerate(traders[:args.show], 1)]))
+    sig = sum(r["dsr"] >= 0.95 for r in traders)
+    print(f"\npass the luck test (DSR >= 95%): {sig} of {len(traders)}")
+    if args.json:
+        with open(args.json, "w") as fh:
+            json.dump({"luck_sharpe": luck, "traders": traders,
+                       "market_makers": [r for r in scored if r["class"] != "trader"]}, fh, indent=1, default=str)
+
+
 def cmd_kb(args) -> None:
     kb = KnowledgeBase(args.kb)
     if args.action == "runs":
@@ -473,6 +523,15 @@ def main(argv: list[str] | None = None) -> None:
     pp.add_argument("--max-token-weight", type=float, default=0.20, help="cap on any one token in target holdings")
     pp.add_argument("--paper", default=os.path.expanduser("~/.wallet_tracker/paper.json"))
     pp.set_defaults(fn=cmd_paper)
+
+    pz = sub.add_parser("perps", help="screen Hyperliquid perps traders with the same luck test")
+    pz.add_argument("--top", type=int, default=200, help="accounts to screen (most active by monthly volume)")
+    pz.add_argument("--min-value", type=float, default=50_000)
+    pz.add_argument("--min-days", type=int, default=90)
+    pz.add_argument("--mm-turnover", type=float, default=5_000, help="annual turnover above which = MM/HFT")
+    pz.add_argument("--show", type=int, default=25)
+    pz.add_argument("--json")
+    pz.set_defaults(fn=cmd_perps)
 
     k = sub.add_parser("kb", help="query the knowledge base")
     k.add_argument("action", choices=["runs", "top", "wallet", "flows", "movers"])
