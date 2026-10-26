@@ -189,3 +189,42 @@ def walk_forward(histories: list[WalletHistory], series, cfg: Config, now: int, 
         "eth": _stats([x for d, x in zip(eth_days, eth) if d > cut_day]),
         "past": past, "full": full,
     }
+
+
+def funnel(study: Study, rules: Rules) -> list[dict]:
+    """Wallets surviving each gate, in order; the last gate is replication.
+
+    Each stage keeps the survivors of the one before it, so the drop at each
+    step shows what that gate removes."""
+    from .models import WalletClass
+    m = lambda r, k, d=0.0: r.metrics.get(k, d)  # noqa: E731
+    venue = study.venue is not None
+    gates = [
+        ("screened", lambda r: True),
+        ("real active traders (not bots, contracts, exchanges, holders, dormant)",
+         lambda r: r.wallet_class is WalletClass.ACTIVE),
+        ("made money in dollars", lambda r: m(r, "pnl_usd") > 0),
+        ("trades real markets (illiquid share <= 50%)", lambda r: m(r, "illiquid_share") <= 0.5),
+        ("solid record (history, trades, size, no one-hit wonder)", lambda r: r.eligible),
+        ("beats the market in USD, ETH and BTC terms", lambda r: m(r, "min_numeraire_sharpe") > 0),
+        (f"passes the luck test (DSR >= {rules.min_dsr:.0%})", lambda r: m(r, "dsr") >= rules.min_dsr),
+        ("robust across market regimes (RRS > 0)", lambda r: m(r, "regime_robustness") > rules.min_rrs),
+        (f"edge survives a {rules.reaction_days:g}-day reaction (half-life >= "
+         f"{rules.min_half_life_multiple * rules.reaction_days:g}d)",
+         lambda r: m(r, "edge_half_life_days") >= rules.min_half_life_multiple * rules.reaction_days),
+    ]
+    if venue:
+        gates += [
+            (f"tradable on {study.venue.name} (>= {rules.min_tradable_share:.0%} of book)",
+             lambda r: m(r, "tradable_share") >= rules.min_tradable_share),
+            ("replicates faithfully (corr >= 0.6, keeps >= 50% of return, copy Sharpe >= "
+             f"{rules.min_copy_sharpe:g})",
+             lambda r: m(r, "replication_corr") >= 0.6 and m(r, "replication_capture") >= 0.5
+             and m(r, "venue_copy_sharpe") >= rules.min_copy_sharpe),
+        ]
+    alive = list(study.reports)
+    out = []
+    for name, ok in gates:
+        alive = [r for r in alive if ok(r)]
+        out.append({"stage": name, "count": len(alive), "survivors": [r.address for r in alive]})
+    return out

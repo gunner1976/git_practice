@@ -330,6 +330,37 @@ def frequency_section(study: Study) -> str:
 """
 
 
+# ---------------------------------------------------------------- funnel
+def funnel_section(study: Study) -> str:
+    from .strategy import Rules, funnel
+    stages = funnel(study, Rules())
+    top = stages[0]["count"] or 1
+    rows = []
+    prev = top
+    for i, s in enumerate(stages):
+        w = 100 * s["count"] / top
+        last = " last" if i == len(stages) - 1 else ""
+        drop = f"−{prev - s['count']}" if i and prev != s["count"] else ""
+        rows.append(f'<div class="fstage{last}"><span class="fcount">{s["count"]}</span>'
+                    f'<span class="fbar"><span class="ffill" style="width:{max(w, 0.6):.1f}%"></span></span>'
+                    f'<span class="flabel">{esc(s["stage"])}</span><span class="fdrop">{drop}</span></div>')
+        prev = s["count"]
+    by = {r.address: r for r in study.reports}
+    final = stages[-1]["survivors"]
+    surv = "".join(f"<li><span class='mono'>{short(a)}</span> · {esc(by[a].group)} · CAGR {pct(by[a].metrics['cagr'])}"
+                   f" · copy Sharpe {by[a].metrics.get('venue_copy_sharpe', by[a].metrics.get('copy_sharpe', 0)):.2f}</li>"
+                   for a in final) or "<li>No wallet clears every gate yet.</li>"
+    return f"""
+<section>
+  <h2>The funnel</h2>
+  <p class="sub">Each gate keeps the survivors of the one before. The last gate is replication: can we hold the same
+  exposure on the execution venue, and do our copied returns track theirs closely enough to keep the gains?</p>
+  <div class="funnel">{"".join(rows)}</div>
+  <ul class="survivors">{surv}</ul>
+</section>
+"""
+
+
 # ---------------------------------------------------------------- page
 def tier_chip(rep) -> str:
     if rep is None:
@@ -456,6 +487,8 @@ def render_html(study: Study, demo: bool = False, fragment: bool = False) -> str
   {demo_note}
   <div class="tiles">{"".join(f'<div class="tile"><span class="tv">{esc(v)}</span><span class="tl">{esc(k)}</span></div>' for k, v in tiles)}</div>
 </header>
+
+{funnel_section(study)}
 
 <section>
   <h2>Copy-trade performance by operator</h2>
@@ -629,6 +662,18 @@ table.data { width: 100%; font-size: 13px; background: var(--surface); border: 1
 .ents td:first-child, .ents td:nth-child(4), .ents td.mixtxt { text-align: left; }
 .data td.mixtxt { color: var(--ink-2); font-size: 12px; white-space: normal; min-width: 220px; }
 .miglist { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; }
+.funnel { display: flex; flex-direction: column; gap: 6px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 8px; padding: 14px; }
+.fstage { display: grid; grid-template-columns: 3.5em minmax(80px, 1fr) minmax(0, 1.6fr) 3.5em; gap: 10px; align-items: center;
+  font-size: 13px; }
+.fcount { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.fbar { height: 12px; background: var(--div-mid); border-radius: 3px; overflow: hidden; }
+.ffill { display: block; height: 100%; background: var(--s1); border-radius: 3px; }
+.fstage.last .ffill { background: var(--good); }
+.flabel { color: var(--ink-2); min-width: 0; }
+.fdrop { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+.survivors { margin: 0; padding-left: 18px; font-size: 13.5px; display: flex; flex-direction: column; gap: 3px; }
+@media (max-width: 600px) { .fstage { grid-template-columns: 3em 1fr; } .flabel { grid-column: 2; } .fdrop { display: none; } }
 .foot { margin: 0; font-size: 12.5px; color: var(--muted); max-width: 80ch; }
 .empty { color: var(--muted); margin: 0; }
 .tip { position: fixed; z-index: 20; pointer-events: none; background: var(--surface); color: var(--ink);

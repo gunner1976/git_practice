@@ -334,6 +334,13 @@ def _venue_fidelity(reports: list[WalletReport], venue, book: PriceBook, cfg: Co
         sv, sc = st.pstdev(v) if len(v) > 2 else 0, st.pstdev(c) if len(c) > 2 else 0
         m["venue_fidelity"] = (sum((a - st.fmean(v)) * (b - st.fmean(c)) for a, b in zip(v, c)) / len(v) / (sv * sc)
                                if sv and sc else 0.0)
+        # Replication vs the wallet itself: do our venue fills move with its
+        # actual P&L day by day, and how much of its return do we keep?
+        own = r.result.returns[i0:]
+        so = st.pstdev(own) if len(own) > 2 else 0
+        m["replication_corr"] = (sum((a - st.fmean(v)) * (b - st.fmean(own)) for a, b in zip(v, own)) / len(v)
+                                 / (sv * so) if sv and so else 0.0)
+        m["replication_capture"] = sum(v) / sum(own) if sum(own) > 0 else 0.0
 
 
 def annualise_safe(rs: list[float]) -> float:

@@ -31,7 +31,7 @@ from .metrics import compound
 from .migration import classify_destinations, universe_breakdown
 from .prices import STABLES, PriceBook
 from .sectors import SectorMap
-from .strategy import Leader, Rules, portfolio_returns, select, walk_forward
+from .strategy import Leader, Rules, funnel, portfolio_returns, select, walk_forward
 from .report import num, pct, rolling, short, study_text, table, to_json, wallet_text
 
 
@@ -141,6 +141,30 @@ def _study(addresses: list[str], env: Env, cfg: Config, args):
     return run_study(histories, series, cfg, env.now, ids, env.labels, smap, _venue(args, env))
 
 
+def funnel_text(stages: list[dict], study) -> str:
+    out = ["\nTHE FUNNEL (each gate keeps the survivors of the one before; the last gate is replication)"]
+    top = stages[0]["count"] or 1
+    prev = top
+    for i, s in enumerate(stages):
+        bar = "#" * max(1, round(40 * s["count"] / top)) if s["count"] else ""
+        drop = f"  (-{prev - s['count']})" if i else ""
+        out.append(f"  {s['count']:>5}  {bar:<40}  {s['stage']}{drop}")
+        prev = s["count"]
+    final = stages[-1]["survivors"]
+    by = {r.address: r for r in study.reports}
+    if final:
+        out.append("\n  SURVIVORS:")
+        for a in final:
+            r = by[a]
+            mm = r.metrics
+            out.append(f"   {a}  {r.group}  CAGR {pct(mm['cagr'])}  Sharpe {num(mm['sharpe'])}  "
+                       f"luck {mm.get('dsr', 0):.0%}  copy Sharpe {num(mm.get('venue_copy_sharpe', mm.get('copy_sharpe', 0)))}")
+    else:
+        last = next((s for s in reversed(stages) if s["count"]), stages[0])
+        out.append(f"\n  no wallet clears every gate yet; the furthest anyone got: {last['stage']}")
+    return "\n".join(out)
+
+
 def cmd_rank(args) -> None:
     cfg = Config.load(args.config)
     env = Env(args)
@@ -151,6 +175,7 @@ def cmd_rank(args) -> None:
         classify_destinations(study.migrations, env.provider, env.labels)
         study.migration_stats.update(universe_breakdown(study.migrations, study.migration_stats.get("wallets", 0)))
     print(study_text(study, args.top))
+    print(funnel_text(funnel(study, _rules(args)), study))
     if args.json:
         with open(args.json, "w") as fh:
             fh.write(to_json(lb))
@@ -478,8 +503,20 @@ def main(argv: list[str] | None = None) -> None:
                                                                   "(needs NEYNAR_API_KEY)")
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    r = sub.add_parser("rank", parents=[common], help="screen, classify and rank wallets")
-    r.add_argument("--addresses", nargs="*", help="addresses, comma lists, or files of addresses")
+    strat = argparse.ArgumentParser(add_help=False)
+    strat.add_argument("--addresses", nargs="*", help="addresses, comma lists, or files of addresses")
+    strat.add_argument("--min-dsr", type=float, default=0.8, help="luck-test confidence a leader needs")
+    strat.add_argument("--min-copy-sharpe", type=float, default=1.0)
+    strat.add_argument("--reaction-days", type=float, default=1.0,
+                       help="how late you act on a leader's trade; leaders need an edge half-life >= 2x this")
+    strat.add_argument("--require-identity", action="store_true", help="only entities with an attested identity")
+    strat.add_argument("--max-leaders", type=int, default=8)
+    strat.add_argument("--min-tradable", type=float, default=0.8,
+                       help="share of a leader's risk book that must be tradable on the venue")
+    strat.add_argument("--max-weight", type=float, default=0.25)
+    strat.add_argument("--cash-buffer", type=float, default=0.10)
+
+    r = sub.add_parser("rank", parents=[common, strat], help="screen, classify and rank wallets")
     r.add_argument("--discover", help="comma-separated token contracts to source candidate wallets from")
     r.add_argument("--discover-swappers", action="store_true",
                    help="source candidates from wallets repeatedly trading through major DEX routers")
@@ -514,19 +551,6 @@ def main(argv: list[str] | None = None) -> None:
     f.add_argument("--entity", default="", help="on add: group these wallets as one entity")
     f.add_argument("--alerts", default=os.path.expanduser("~/.wallet_tracker/alerts.jsonl"))
     f.set_defaults(fn=cmd_follow)
-
-    strat = argparse.ArgumentParser(add_help=False)
-    strat.add_argument("--addresses", nargs="*", help="addresses, comma lists, or files of addresses")
-    strat.add_argument("--min-dsr", type=float, default=0.8, help="luck-test confidence a leader needs")
-    strat.add_argument("--min-copy-sharpe", type=float, default=1.0)
-    strat.add_argument("--reaction-days", type=float, default=1.0,
-                       help="how late you act on a leader's trade; leaders need an edge half-life >= 2x this")
-    strat.add_argument("--require-identity", action="store_true", help="only entities with an attested identity")
-    strat.add_argument("--max-leaders", type=int, default=8)
-    strat.add_argument("--min-tradable", type=float, default=0.8,
-                       help="share of a leader's risk book that must be tradable on the venue")
-    strat.add_argument("--max-weight", type=float, default=0.25)
-    strat.add_argument("--cash-buffer", type=float, default=0.10)
 
     b = sub.add_parser("backtest", parents=[common, strat], help="walk-forward test of the copy strategy")
     b.add_argument("--holdout-days", type=int, default=90)
