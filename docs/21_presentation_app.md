@@ -49,3 +49,14 @@ Every slide and both other tabs were run in headless Chromium (ANGLE SwiftShader
 - Documented non-producing months are drawn as zeros (CNH-reported zeros, G-34; shut-in segments of each well's status history). 1956–59 and other months with no monthly record are hatched or left as breaks, never zero. Rule in `data/processed/presentation/production_notes.md` "Zero months"; G-87.
 - Narration: captions show the written text (TEC-10), the speech engine gets the spoken form. Voices are ranked (neural / natural / premium first, novelty voices last); default rate 0.95. EN/ES toggle: Spanish narration and captions from `presentation_app/narration_es.json` (keyed `slideId#step`, translated from `narration_en.json`); slide text stays English.
 - New content: Cerro Azul No. 4 and the TM-01 block on the Golden Lane slide (G-89); the TEC-11 Tantoyuca test (G-88); recovery against 45 El Abra fields with the four nearest pools (`analogue_rf.csv`); TEC-12 opens from a surface view of the pads with plan-view well traces; sales point PEMEX CAB Poza Rica.
+
+## Narration audio (26 Oct 2026)
+
+The browser speech engine gave poor voices, and an English voice when no Spanish one was installed. The narration is now pre-recorded with open-source neural voices and shipped as audio, so it no longer depends on the viewer's browser:
+
+- English: Kokoro v1.0 (`kokoro-onnx`, voice `af_heart`), model `kokoro-v1.0.onnx` sha256 7d5df8ec…, voices `voices-v1.0.bin` sha256 bca610b8… (GitHub release thewh1teagle/kokoro-onnx `model-files-v1.0`).
+- Spanish: Piper `es_MX-claude-high` (rhasspy/piper-voices on Hugging Face), a native Mexican-Spanish voice.
+- `presentation_app/tts/render.py` writes one MP3 per step (`audio/<voice>/<slideId>__<step>.mp3`, mono 48 kbit/s) and caption timings (`audio/<voice>.json`). One file per step means playback never seeks, so it works on hosts without byte-range support.
+- Spoken form follows the same rules as the app (TEC-10 → "tech 10" / "Tec 10"; Spanish strips thousands commas so the engine does not read them as decimals).
+- The speed slider sets the audio playback rate live, with pitch preserved. The browser voices remain in the voice list as a fallback; Spanish never falls back to an English voice.
+- A recogniser check (faster-whisper small) identified all candidate Spanish voices as Spanish with probability ≥ 0.96; it cannot rank naturalness.

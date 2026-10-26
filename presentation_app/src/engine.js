@@ -15,8 +15,9 @@ export function h(tag, attrs = {}, ...kids) {
 // ---------------------------------------------------------------- narrator (Web Speech API, with a timed fallback)
 export class Narrator {
   constructor() {
-    this.synth = window.speechSynthesis || null; this.voice = null; this.rate = 0.95; this.muted = false; this.voices = []; this.all = [];
+    this.synth = window.speechSynthesis || null; this.voice = null; this.rate = 1.0; this.muted = false; this.voices = []; this.all = [];
     this.lang = 'en'; this.es = {};   // Spanish narration keyed 'slideId#step' (data/narration_es.json)
+    this.studio = {}; this.audio = new Audio(); this.audio.preload = 'auto'; this.audio.preservesPitch = true; this._restart = false;
     try { this.lang = localStorage.getItem('tec-lang') === 'es' ? 'es' : 'en'; } catch (e) {}
     this.onSentence = () => {}; this._gen = 0;
     const load = () => {
@@ -25,6 +26,18 @@ export class Narrator {
     };
     if (this.synth) { load(); this.synth.addEventListener?.('voiceschanged', load); setTimeout(load, 600); setTimeout(load, 2000); }
   }
+  // pre-rendered neural narration ("studio" voices): audio/<id>/<slideId>__<step>.mp3, caption timings in audio/<id>.json
+  async loadStudio(base, list) {
+    await Promise.all(list.map(v => fetch(base + v.id + '.json').then(r => r.ok ? r.json() : null).then(T => { if (T) this.studio[v.id] = { ...v, T }; }).catch(() => {})));
+    this.studioBase = base; this._pick(); this.onVoices && this.onVoices(this.voices);
+  }
+  unlock() {}   // play() is called inside the Play click, which satisfies autoplay rules (Safari included)
+  studioVoice() { return this.voice && this.voice.studio ? this.studio[this.voice.id] : null; }
+  rows(key) { const sv = this.studioVoice(); if (!sv || !key) return null; const [sid, st] = key.split('#'); return sv.T[sid]?.[st] || null; }
+  src(key) { const sv = this.studioVoice(); const [sid, st] = key.split('#'); return `${this.studioBase}${sv.id}/${sid}__${st}.mp3`; }
+  prepare(slideId) { const sv = this.studioVoice(); if (!sv || !sv.T[slideId]) return; for (const st of Object.keys(sv.T[slideId])) fetch(this.src(slideId + '#' + st)).catch(() => {}); }   // warm the cache for this slide's steps
+  duration(say, key) { const r = this.rows(key); return r ? (r[r.length - 1][1] / this.rate) * 1000 + 300 : this.estimate(this.text(say, key)); }
+  setRate(r) { this.rate = r; this.audio.playbackRate = r; if (this._speaking && this.synth && !this.studioVoice()) { this._restart = true; this.synth.cancel(); } }   // browser voices: re-say the current sentence at the new rate
   // rank the browser's voices: neural / natural / premium voices first (Edge "Online (Natural)", Safari "Premium", Chrome "Google"), novelty voices last
   _score(v) {
     const n = v.name;
@@ -35,37 +48,68 @@ export class Narrator {
   }
   _pick() {
     const re = this.lang === 'es' ? /^es/i : /^en/i, pool = this.all.filter(v => re.test(v.lang));
-    this.voices = (pool.length ? pool : this.all).slice().sort((a, b) => this._score(b) - this._score(a));
-    let saved = null; try { saved = localStorage.getItem('tec-voice-' + this.lang); } catch (e) {}
+    const studio = Object.values(this.studio).filter(v => v.lang === this.lang).map(v => ({ name: 'studio:' + v.id, label: v.label, lang: v.lang, id: v.id, studio: true }));
+    this.voices = [...studio, ...pool.slice().sort((a, b) => this._score(b) - this._score(a))];   // never an English voice reading Spanish
+    let saved = null; try { saved = localStorage.getItem('tec-voice2-' + this.lang); } catch (e) {}
     this.voice = this.voices.find(v => v.name === saved) || this.voices[0] || null;
   }
   setLang(l) { this.lang = l === 'es' ? 'es' : 'en'; try { localStorage.setItem('tec-lang', this.lang); } catch (e) {} this.cancel(); this._pick(); this.onVoices && this.onVoices(this.voices); }
-  setVoice(name) { this.voice = this.voices.find(v => v.name === name) || this.voice; try { localStorage.setItem('tec-voice-' + this.lang, name); } catch (e) {} }
+  setVoice(name) { this.cancel(); this.voice = this.voices.find(v => v.name === name) || this.voice; try { localStorage.setItem('tec-voice2-' + this.lang, name); } catch (e) {} }
   text(say, key) { return this.lang === 'es' && key && this.es[key] ? this.es[key] : say; }
   estimate(text) { const w = text.split(/\s+/).filter(Boolean).length; return (w / (this.lang === 'es' ? 2.4 : 2.55) / this.rate) * 1000 + 350; }
   sentences(text) { return text.replace(/\s+/g, ' ').trim().split(/(?<=[.!?;])\s+(?=[A-Z0-9“"(‘'¿¡ÁÉÍÓÚÑ])/).map(s => s.trim()).filter(Boolean); }
   // sentences joined into utterances of up to ~220 characters: fewer seams between utterances, short enough for Chrome's network voices
   chunks(text) { const out = []; for (const s of this.sentences(text)) { if (out.length && out[out.length - 1].length + s.length < 220) out[out.length - 1] += ' ' + s; else out.push(s); } return out; }
-  cancel() { this._gen++; if (this.synth) this.synth.cancel(); }
+  cancel() { this._gen++; if (this.synth) this.synth.cancel(); this.audio.pause(); }
   // speak a block (English, or its Spanish version when the toggle is on); captions show the written text, the engine hears the spoken form
   async speak(say, key) {
-    const gen = ++this._gen; const parts = this.chunks(this.text(say, key));
+    const gen = ++this._gen; const rows = this.rows(key);
+    if (rows) return this._speakStudio(rows, key, gen);
+    const parts = this.chunks(this.text(say, key));
     for (const s of parts) {
       if (gen !== this._gen) return false;
       this.onSentence(s);
       if (this.muted || !this.synth || !this.voice) { await this._wait(this.estimate(s), gen); continue; }
-      const ok = await new Promise(res => {
-        const u = new SpeechSynthesisUtterance(this.lang === 'es' ? this.sayEs(s) : this.say(s)); u.voice = this.voice; u.lang = this.voice.lang; u.rate = this.rate; u.pitch = 1;
-        let done = false; const fin = v => { if (!done) { done = true; clearTimeout(guard); res(v); } };
-        u.onend = () => fin(true); u.onerror = () => fin(true);
-        const guard = setTimeout(() => fin(true), this.estimate(s) * 2.2 + 4000);   // never hang on a lost 'end' event
-        this.synth.speak(u);
-      });
+      let ok;
+      do {
+        this._restart = false; this._speaking = true;
+        ok = await new Promise(res => {
+          const u = new SpeechSynthesisUtterance(this.lang === 'es' ? this.sayEs(s) : this.say(s)); u.voice = this.voice; u.lang = this.voice.lang; u.rate = this.rate; u.pitch = 1;
+          let done = false; const fin = v => { if (!done) { done = true; clearTimeout(guard); res(v); } };
+          u.onend = () => fin(true); u.onerror = () => fin(true);
+          const guard = setTimeout(() => fin(true), this.estimate(s) * 2.2 + 4000);   // never hang on a lost 'end' event
+          this.synth.speak(u);
+        });
+        this._speaking = false;
+      } while (this._restart && gen === this._gen);
       if (!ok || gen !== this._gen) return false;
     }
     if (gen !== this._gen) return false;   // cancelled: leave the newer caption alone
     this.onSentence('');
     return true;
+  }
+  // play one step's segment of the slide's MP3; captions follow the recorded timings; the speed slider changes playbackRate live
+  async _speakStudio(rows, key, gen) {
+    const t1 = rows[rows.length - 1][1], a = this.audio;
+    const caption = t => { const r = rows.find(r => t < r[1] + 0.25) || rows[rows.length - 1]; if (this._cap !== r[2]) { this._cap = r[2]; this.onSentence(r[2]); } };
+    this._cap = null;
+    const silent = async () => {   // muted, or the audio failed: walk the captions on the recorded timings
+      for (const r of rows) { if (gen !== this._gen) return false; this.onSentence(r[2]); await this._wait(((r[1] - r[0]) / this.rate) * 1000 + 300, gen); }
+      if (gen !== this._gen) return false; this.onSentence(''); return true;
+    };
+    if (this.muted) return silent();
+    try {
+      a.src = this.src(key); a.playbackRate = this.rate; a.preservesPitch = true;
+      await a.play();
+    } catch (e) { return gen === this._gen ? silent() : false; }
+    const wall0 = performance.now(), limit = (t1 / Math.max(0.5, this.rate)) * 2000 + 8000;
+    while (true) {
+      await new Promise(r => setTimeout(r, 50));
+      if (gen !== this._gen) { a.pause(); return false; }
+      caption(a.currentTime);
+      if (a.ended || a.currentTime >= t1 - 0.02 || performance.now() - wall0 > limit) break;
+    }
+    a.pause(); this.onSentence(''); return gen === this._gen;
   }
   _wait(ms, gen) { return new Promise(r => { const t0 = performance.now(); const tick = () => { if (gen !== this._gen) return r(); if (performance.now() - t0 >= ms) return r(); setTimeout(tick, 60); }; tick(); }); }
   // pronunciation fixes for the speech engine only (captions keep the written form)
@@ -103,7 +147,7 @@ export class Player {
     this.slideLayer.innerHTML = ''; this.slideLayer.className = 'slide-layer kind-' + (slide.kind || 'html') + ' ' + (slide.theme || '');
     const el = h('section', { class: 'slide ' + (slide.cls || ''), 'data-id': slide.id }); this.slideLayer.append(el);
     this.ctx.field.paused = slide.kind !== '3d';   // the 3-D canvas stays mounted; plain slides cover it and rendering pauses
-    this.ctx.slide = slide; this.ctx.fast = false;
+    this.ctx.slide = slide; this.ctx.fast = false; this.ctx.narrator.prepare(slide.id);
     this.steps = (await slide.build(el, this.ctx)) || [{ say: '' }];
     if (gen !== this.runGen) return;
     $$('.pg', el).forEach(p => p.textContent = si + 1);
@@ -131,7 +175,7 @@ export class Player {
         }
         this.step = k; this.ui.onStep(this);
         const st = this.steps[k]; const say = st.say || '';
-        const dur = say ? this.ctx.narrator.estimate(this.ctx.narrator.text(say, this.slides[this.si].id + '#' + k)) : (st.hold || 1200);
+        const dur = say ? this.ctx.narrator.duration(say, this.slides[this.si].id + '#' + k) : (st.hold || 1200);
         this.ctx.stepDuration = dur;
         const runP = this._apply(k, false);
         const ok = say ? await this.ctx.narrator.speak(say, this.slides[this.si].id + '#' + k) : (await sleep(st.hold || 1200), true);

@@ -36,6 +36,7 @@ async function boot() {
   const field = new Field3D(M, BASE); const hist = makeHistory(D);
   const narrator = new Narrator();
   narrator.es = await fetch(BASE + 'narration_es.json').then(r => r.ok ? r.json() : {}).catch(() => ({}));
+  narrator.loadStudio('audio/', [{ id: 'en-heart', lang: 'en', label: 'Studio · English, female (neural)' }, { id: 'es-claude', lang: 'es', label: 'Studio · Mexican Spanish, male (neural)' }]);
   const ctx = { D, M, field, hist, narrator, fast: false };
   window.TEC = ctx;
   // ---------------- tabs
@@ -69,17 +70,17 @@ async function boot() {
   };
   const player = new Player({ stage, slideLayer: $('#slides'), glLayer: $('#glPresent'), slides, ctx, ui });
   ctx.player = player;
-  $('#play').onclick = () => player.toggle(); $('#next').onclick = () => player.next(); $('#prev').onclick = () => player.prev();
+  $('#play').onclick = () => { narrator.unlock(); player.toggle(); }; $('#next').onclick = () => player.next(); $('#prev').onclick = () => player.prev();
   outline.onchange = () => player.go(+outline.value, 0);
   const vs = $('#voice');
-  narrator.onVoices = vv => { vs.innerHTML = ''; vv.slice(0, 40).forEach(v => vs.append(h('option', { value: v.name }, `${v.name.replace(/Microsoft |Google /, '')} · ${v.lang}`))); if (narrator.voice) vs.value = narrator.voice.name; };
+  narrator.onVoices = vv => { vs.innerHTML = ''; vv.slice(0, 40).forEach(v => vs.append(h('option', { value: v.name }, v.studio ? v.label : `Browser · ${v.name.replace(/Microsoft |Google /, '')} · ${v.lang}`))); if (narrator.voice) vs.value = narrator.voice.name; vs.disabled = !vv.length; };
   if (narrator.voices.length) narrator.onVoices(narrator.voices);
-  if (!narrator.synth) { vs.append(h('option', {}, 'No speech in this browser')); vs.disabled = true; }
-  vs.onchange = () => narrator.setVoice(vs.value);
+
+  vs.onchange = () => { const was = player.playing; narrator.setVoice(vs.value); narrator.prepare(player.slides[player.si].id); if (was) player.go(player.si, Math.max(0, player.step), { play: true }); };
   const setLangUI = () => { $('#langEn').setAttribute('aria-pressed', narrator.lang === 'en'); $('#langEs').setAttribute('aria-pressed', narrator.lang === 'es'); };
   const chooseLang = l => { if (l === narrator.lang) return; const was = player.playing; narrator.setLang(l); setLangUI(); if (was) player.go(player.si, Math.max(0, player.step), { play: true }); };
   $('#langEn').onclick = () => chooseLang('en'); $('#langEs').onclick = () => chooseLang('es'); setLangUI();
-  $('#rate').oninput = e => { narrator.rate = +e.target.value; $('#rateOut').textContent = narrator.rate.toFixed(2) + '×'; };
+  $('#rate').oninput = e => { narrator.setRate(+e.target.value); $('#rateOut').textContent = narrator.rate.toFixed(2) + '×'; };
   $('#mute').onclick = e => { narrator.muted = !narrator.muted; e.currentTarget.setAttribute('aria-pressed', narrator.muted); e.currentTarget.querySelector('span').textContent = narrator.muted ? 'Voice off' : 'Voice on'; };
   $('#caps').onclick = e => { capOn.v = !capOn.v; e.currentTarget.setAttribute('aria-pressed', capOn.v); cap.classList.toggle('on', capOn.v && !!cap.textContent); };
   $('#full').onclick = () => { const el = $('#tab-present'); (document.fullscreenElement ? document.exitFullscreen() : el.requestFullscreen?.())?.catch?.(() => {}); };
