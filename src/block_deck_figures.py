@@ -73,12 +73,13 @@ rows = [
  # TEC-7 (1957)
  ("TEC-7","surface",9.625,36,"J-55",0,600.48,"cemented","Anexo 3 estado mecanico final tec-7.pdf (11Wasndd)"),
  ("TEC-7","production",6.625,20,"J-55/N-80 20-24",0,2306.5,"cemented","Anexo 3 estado mecanico final tec-7.pdf"),
- ("TEC-7","liner",4.5,11.6,"J-55",2281,2340,"liner","Anexo 3 estado mecanico final tec-7.pdf"),
+ ("TEC-7","liner",4.5,11.6,"J-55",2281.2,2340,"liner (top 2,281.2 per PEMEX 1957-98 file)","Anexo 3 estado mecanico final tec-7.pdf; TEC-7 expediente (colab_out) p117"),
  ("TEC-7","tubing",2.375,None,"EUE",0,2300,"2 3/8 in tubing + 4.5 in mechanical packer at ~2,300 m (2019 water-injection string)","Anexo 3 estado mecanico final tec-7.pdf"),
  ("TEC-7","perf",None,None,None,2310,2313,"active (last interval)","Perforations CSV; estado mecanico 2019"),
- ("TEC-7","plug",None,None,None,2325,2325.5,"permanent plug","Anexo 3 estado mecanico final tec-7.pdf"),
- ("TEC-7","plug",None,None,None,2330,2330.5,"mechanical plug","BLOQUE_TECOLUTLA_7_ESTADO_MECANICO.pdf (1UZlBMHq)"),
- ("TEC-7","perf",None,None,None,2335,2337,"squeezed / below plug","Perforations CSV; estado mecanico"),
+ ("TEC-7","plug",None,None,None,2325,2325.5,"permanent plug - UNCONFIRMED: only in Tonalli Anexo 3, which copies TEC-2 data (G-58); absent from the PEMEX file to 1998","Anexo 3 estado mecanico final tec-7.pdf"),
+ ("TEC-7","plug",None,None,None,2330,2330.5,"mechanical plug (post-1998; not in the PEMEX file to 1998)","BLOQUE_TECOLUTLA_7_ESTADO_MECANICO.pdf (1UZlBMHq)"),
+ ("TEC-7","plug",None,None,None,2338,2338.5,"cement plug in liner (1957, still reported 1998)","TEC-7 expediente (colab_out) p117, p112"),
+ ("TEC-7","perf",None,None,None,2335,2337,"1957 interval, cement-squeezed Sep-Oct 1971","TEC-7 expediente (colab_out) p114-116"),
  ("TEC-7","td",None,None,None,0,2340,"TD","Well header CSV"),
  # TEC-9 (1973)
  ("TEC-9","surface",9.625,36,"J-55",0,502,"cemented","BLOQUE_TECOLUTLA_9_ESTADO_MECANICO.PDF (1ys9wOiU)"),
@@ -121,7 +122,7 @@ rows = [
  ("TEC-11","td",None,None,None,0,3283,"TD mMD (2,331 mTVD)","Well header CSV; Fideicomiso 2024"),
 ]
 cas = pd.DataFrame(rows, columns=["well","item","od_in","weight_lbft","grade","top_mmd","base_mmd","status","source"])
-kb = {"TEC-2":4.0,"TEC-3":6.0,"TEC-5":4.0,"TEC-6":5.67,"TEC-7":5.0,"TEC-9":5.07,"TEC-101":8.0,"TEC-10":6.13,"TEC-11":4.70}
+kb = {"TEC-2":4.0,"TEC-3":6.0,"TEC-5":4.0,"TEC-6":5.67,"TEC-7":4.8,"TEC-9":5.07,"TEC-101":8.0,"TEC-10":6.13,"TEC-11":4.70}
 cas["kb_m"] = cas.well.map(kb)
 cas.to_csv(OUT / "casing_strings.csv", index=False)
 

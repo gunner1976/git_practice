@@ -120,6 +120,7 @@ Your framing: TEC-12 at the peak of the reef, perforating the highest, under-exp
 - Nothing in the field has ever been produced from 2,294–2,311 mSS except the top 4 m of TEC-2's interval. It is genuinely untested.
 - TEC-10 found oil 7–11 m below the last TEC-2/TEC-7 intervals, so the water front is not a flat plane, and attic oil between and above the old producers is plausible.
 - **TEC-9 (1973 logs):** on the sonic porosity, the window's water saturation is at parity with the interval that made 353 kbbl (window ÷ produced Sw 0.85–1.03 as logged). *(review)* That parity rests on the top 8 m of El Abra (2,296–2,304 mSS: ILD 8, SPHI 15 %); the 6 m below is tight (SPHI 5 %). PEMEX cemented this interval without perforating it.
+- *(26 Oct)* **TEC-7, 1957, before any production:** PEMEX's E-log analysis gives Sw 0.13 and porosity 0.17 over the top 7 m of El Abra (2,310–2,317 m below rotary table, about −2,305 to −2,312 mSS). That is the same top unit TEC-12 targets, oil-bearing at high porosity in original conditions (TEC-7 expediente p85).
 - *(review)* **TEC-10 never sampled the El Abra window.** XRD on the cuttings puts all of 2,294–2,311 mSS in the Tantoyuca (quartz 31 %, clay 9 %, calcite 50 %); El Abra starts at −2,312.9 mSS. The low resistivity there is a marl, and TEC-101 shows the same signature above its El Abra top. So the TEC-10 logs below are not evidence against TEC-12's target, which is the top ~8 m of El Abra where the reef is 14–20 m higher.
 
 **Argues against it:**
