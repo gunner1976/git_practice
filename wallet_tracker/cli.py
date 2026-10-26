@@ -491,6 +491,85 @@ def cmd_perps(args) -> None:
                        "market_makers": [r for r in scored if r["class"] != "trader"]}, fh, indent=1, default=str)
 
 
+def cmd_group(args) -> None:
+    """Build one proxy portfolio tracking a group of Hyperliquid leaders, and test its fidelity."""
+    from .consensus import HyperliquidBooks, combine_books, fidelity, leader_weights, reconstruct
+    from .providers.hyperliquid_accounts import HyperliquidAccounts, interp
+    with open(args.perps) as fh:
+        screen = json.load(fh)["traders"]
+    by_addr = {r["address"]: r for r in screen}
+    if args.addresses:
+        leaders = [by_addr[a.lower()] for a in args.addresses if a.lower() in by_addr]
+    else:
+        leaders = [r for r in screen if r["pnl_usd"] >= 50_000 and r["max_drawdown"] < 0.95
+                   and r.get("dsr_vs_eth", 0) >= args.min_conf and r.get("dsr_vs_btc", 0) >= args.min_conf
+                   and r["annual_turnover"] <= args.max_turnover]
+    if not leaders:
+        print("no leaders match")
+        return
+    hb = HyperliquidBooks()
+    books = {r["address"]: hb.book(r["address"]) for r in leaders}
+    gone = [r for r in leaders if books[r["address"]].account_value < 10_000]
+    if gone:
+        print(f"skipping {len(gone)} leader(s) whose accounts are now closed or near-empty: "
+              + ", ".join(short(r["address"]) for r in gone))
+    leaders = [r for r in leaders if books[r["address"]].account_value >= 10_000]
+    books = {r["address"]: books[r["address"]] for r in leaders}
+    alloc = leader_weights(leaders, args.max_leader)
+    print(f"GROUP PROXY of {len(leaders)} Hyperliquid leaders (weights: luck-test confidence / drawdown, "
+          f"capped {args.max_leader:.0%})")
+    print(table(["leader", "alias", "weight", "account", "gross exposure", "positions"],
+                [[short(a), (by_addr[a].get("alias") or "")[:14], f"{alloc[a]:.0%}", f"${books[a].account_value:,.0f}",
+                  f"{sum(abs(x) for x in books[a].weights.values()):.2f}x",
+                  ", ".join(f"{c} {x:+.2f}x" for c, x in sorted(books[a].weights.items(), key=lambda kv: -abs(kv[1]))[:4])]
+                 for a in alloc]))
+    target = combine_books({a: b.weights for a, b in books.items()}, alloc, args.max_coin, args.max_gross)
+    mids = hb.mids()
+    print(f"\nTARGET for ${args.capital:,.0f} (net per coin, max {args.max_coin:.0%} per coin, gross <= {args.max_gross:.1f}x)")
+    print(table(["coin", "side", "weight", "notional", "mid", "size"],
+                [[c, "LONG" if w > 0 else "SHORT", f"{w:+.1%}", f"${abs(w) * args.capital:,.0f}",
+                  f"{mids.get(c, 0):,.4g}", f"{abs(w) * args.capital / mids[c]:,.4g}" if mids.get(c) else "-"]
+                 for c, w in sorted(target.items(), key=lambda kv: -abs(kv[1]))]))
+    print(f"gross {sum(abs(x) for x in target.values()):.2f}x, net {sum(target.values()):+.2f}x")
+
+    # Fidelity: rebuild books from fills and compare with the leaders' own returns,
+    # daily and hourly - fast traders can only be followed by a fast copier.
+    hl = HyperliquidAccounts()
+    now = int(time.time())
+    fills_by = {}
+    for r in leaders:
+        fills_by[r["address"]] = hb.fills(r["address"], (now - (args.days + 3) * DAY) * 1000)
+    coins = {f["coin"] for fs in fills_by.values() for f in fs} | {c for b in books.values() for c in b.weights}
+    hist = {r["address"]: hl.history(r["address"]) for r in leaders}
+    for step, label, lags, horizon in ((DAY, "day", (0, 1, 2), args.days), (3600, "hour", (0, 1, 4, 12), min(args.days, 28))):
+        end = now - now % step - step
+        grid = [end - i * step for i in range(int(horizon * DAY / step))][::-1]
+        start = grid[0] - 2 * step
+        closes = {c: hb.closes(c, start - step, end + step, step) for c in coins}
+        books_by_day, actual = {}, {}
+        for r in leaders:
+            a = r["address"]
+            av, pn = dict(hist[a]["account_value"]), dict(hist[a]["pnl"])
+            pts = [grid[0] - step] + grid
+            av_d = {d: interp(av, d + step - 1) for d in pts}
+            pn_d = {d: interp(pn, d + step - 1) for d in pts}
+            actual[a] = [(pn_d[d] - pn_d[d - step]) / av_d[d - step] if av_d[d - step] > 100 else 0.0 for d in grid]
+            books_by_day[a] = reconstruct(fills_by[a], av_d, closes, grid, step,
+                                          {c: x["size"] for c, x in books[a].detail.items()})
+        print(f"\nFIDELITY by the {label}, last {horizon} days: proxy rebuilt from fills, acting late, vs the leaders' own returns")
+        rows = []
+        for lag in lags:
+            f = fidelity(books_by_day, actual, alloc, closes, grid, lag, max_coin=args.max_coin,
+                         max_gross=args.max_gross, step=step)
+            if f.get("days", 0) < 5:
+                continue
+            rows.append([f"{lag} {label}(s) late", pct(f["group_return"]), pct(f["proxy_return"]), num(f["correlation"]),
+                         f"{f['capture']:.0%}", num(f["group_sharpe"]), num(f["proxy_sharpe"])])
+        print(table(["delay", "group return", "proxy return", "corr", "kept", "group Sharpe", "proxy Sharpe"], rows)
+              if rows else "  not enough overlapping data")
+    print("  (our limits cut exposure well below the leaders' own leverage, so 'kept' below 100% partly reflects lower risk)")
+
+
 def cmd_kb(args) -> None:
     kb = KnowledgeBase(args.kb)
     if args.action == "runs":
@@ -624,6 +703,18 @@ def main(argv: list[str] | None = None) -> None:
     pz.add_argument("--json")
     pz.add_argument("--kb", help="SQLite knowledge base to append this screen to")
     pz.set_defaults(fn=cmd_perps)
+
+    g = sub.add_parser("group", help="one proxy portfolio tracking a group of Hyperliquid leaders")
+    g.add_argument("--perps", required=True, help="JSON written by 'perps --json'")
+    g.add_argument("--addresses", nargs="*", help="pick these leaders instead of the automatic selection")
+    g.add_argument("--min-conf", type=float, default=0.8, help="min luck-test confidence vs ETH and vs BTC")
+    g.add_argument("--max-turnover", type=float, default=1000, help="skip speed-based (MM-like) accounts")
+    g.add_argument("--max-leader", type=float, default=0.35)
+    g.add_argument("--max-coin", type=float, default=0.35)
+    g.add_argument("--max-gross", type=float, default=1.5)
+    g.add_argument("--capital", type=float, default=100_000)
+    g.add_argument("--days", type=int, default=45)
+    g.set_defaults(fn=cmd_group)
 
     k = sub.add_parser("kb", help="query the knowledge base")
     k.add_argument("action", choices=["runs", "top", "wallet", "flows", "movers"])

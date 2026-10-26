@@ -409,6 +409,30 @@ class LeverageTest(unittest.TestCase):
         self.assertGreater(_lev(p, calm), _lev(p, wild))
 
 
+class ConsensusTest(unittest.TestCase):
+    def test_netting_and_limits(self):
+        from wallet_tracker.consensus import combine_books, leader_weights
+        books = {"a": {"ETH": 2.0, "SOL": 1.0}, "b": {"ETH": -2.0, "BTC": 1.0}}
+        net = combine_books(books, {"a": 0.5, "b": 0.5}, max_coin=0.4, max_gross=0.6)
+        self.assertNotIn("ETH", net)                       # opposite views cancel
+        self.assertLessEqual(sum(abs(x) for x in net.values()), 0.6 + 1e-9)
+        w = leader_weights([{"address": "x", "dsr_vs_eth": 0.9, "dsr_vs_btc": 0.9, "max_drawdown": 0.1},
+                            {"address": "y", "dsr_vs_eth": 0.8, "dsr_vs_btc": 0.95, "max_drawdown": 0.8}], 0.7)
+        self.assertGreater(w["x"], w["y"])                 # steadier, stronger evidence weighs more
+        self.assertAlmostEqual(sum(w.values()), 1.0)
+
+    def test_reconstruct_anchors_untraded_positions(self):
+        from wallet_tracker.consensus import reconstruct
+        days = [T0 + i * DAY for i in range(3)]
+        fills = [{"coin": "ETH", "time": (T0 + DAY + 60) * 1000, "startPosition": "1", "sz": "1", "side": "B"}]
+        closes = {"ETH": {d: 100.0 for d in days}, "LIT": {d: 10.0 for d in days}}
+        av = {d: 1000.0 for d in days}
+        out = reconstruct(fills, av, closes, days, DAY, current={"ETH": 2.0, "LIT": 50.0})
+        self.assertAlmostEqual(out[0]["ETH"], 0.1)        # 1 ETH before the fill
+        self.assertAlmostEqual(out[1]["ETH"], 0.2)        # 2 ETH after it
+        self.assertAlmostEqual(out[0]["LIT"], 0.5)        # never traded: held at today's size
+
+
 class RegimeTest(unittest.TestCase):
     def test_labels_and_robustness(self):
         import random
