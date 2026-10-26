@@ -393,14 +393,18 @@ def cmd_perps(args) -> None:
           f"{len(traders)} directional traders with >= {args.min_days}d history; set aside: "
           f"{sum(r['class'] == 'market maker / HFT' for r in scored)} market makers / HFT, "
           f"{sum(r['class'] == 'inactive / vault' for r in scored)} inactive. Luck Sharpe {luck:.2f}")
-    print(table(["#", "account", "alias", "value", "PnL", "CAGR", "Sharpe", "luck test", "max DD", "+periods",
-                 "turnover", "days"],
+    print(table(["#", "account", "alias", "value", "PnL", "return", "per year", "Sharpe", "luck test", "max DD",
+                 "+periods", "turnover", "days"],
                 [[str(i), short(r["address"]), (r["alias"] or "")[:22], f"${r['account_value']:,.0f}",
-                  f"${r['pnl_usd']:,.0f}", pct(r["cagr"]), num(r["sharpe"]), f"{r['dsr']:.0%}",
+                  f"${r['pnl_usd']:,.0f}", pct(r["total_return"]),
+                  pct(r["cagr"]) if r["span_days"] >= 365 else "(<1y)", num(r["sharpe"]), f"{r['dsr']:.0%}",
                   pct(-r["max_drawdown"]), f"{r['pct_positive']:.0%}", f"{r['annual_turnover']:,.0f}x",
                   f"{r['span_days']:.0f}"] for i, r in enumerate(traders[:args.show], 1)]))
     sig = sum(r["dsr"] >= 0.95 for r in traders)
     print(f"\npass the luck test (DSR >= 95%): {sig} of {len(traders)}")
+    # Percent vs dollars: good while small, then lost money after scaling up.
+    scaled = [r for r in traders if r["total_return"] > 0 and r["pnl_usd"] < 0]
+    print(f"positive % return but negative $ PnL (won small, lost big after scaling up): {len(scaled)}")
     if args.json:
         with open(args.json, "w") as fh:
             json.dump({"luck_sharpe": luck, "traders": traders,

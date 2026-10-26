@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from .classify import classify
 from .config import Config
 from .metrics import compute, live_window
-from .models import ClosedTrade, Event, WalletClass, WalletHistory
+from .models import DAY, ClosedTrade, Event, WalletClass, WalletHistory
 from .operator_type import features as operator_features
 from .operator_type import human_score, operator_label
 from .portfolio import PortfolioResult, simulate
@@ -166,7 +166,29 @@ def analyze_wallet(hist: WalletHistory, series: dict[str, dict[int, float]], cfg
                         history=hist, frequency_tier=freq)
 
 
-def fetch_series(source: PriceSource, histories: list[WalletHistory], now: int) -> dict[str, dict[int, float]]:
+def fetch_series(source: PriceSource, histories: list[WalletHistory], now: int,
+                 max_tokens: int = 1500) -> dict[str, dict[int, float]]:
+    """Daily prices for the tokens these wallets swapped.
+
+    With a source that can tell which tokens it prices (DefiLlama), only those
+    are fetched, each from its first use, most-traded first up to
+    `max_tokens`. Everything else is valued at the price implied by the
+    wallet's own swaps."""
+    if hasattr(source, "known") and hasattr(source, "daily_prices_ranges"):
+        first: dict[str, int] = {}
+        uses: dict[str, int] = {}
+        for h in histories:
+            for e in build_events(h.transfers):
+                if e.kind.value != "swap":
+                    continue
+                for t in e.legs:
+                    first[t] = min(first.get(t, e.timestamp), e.timestamp)
+                    uses[t] = uses.get(t, 0) + 1
+        first.setdefault("eth", min(first.values(), default=now))
+        uses["eth"] = 10 ** 9
+        priced = source.known(set(first)) | {"eth"}
+        keep = sorted(priced, key=lambda t: -uses.get(t, 0))[:max_tokens]
+        return source.daily_prices_ranges({t: (first[t] - 2 * DAY, now) for t in keep})
     tokens: set[str] = set()
     start = now
     for h in histories:
