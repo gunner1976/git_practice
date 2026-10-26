@@ -42,10 +42,11 @@ async function boot() {
   // ---------------- tabs
   const tabs = $$('[data-tab]');
   function setTab(t) {
-    state.tab = t; tabs.forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t)); $$('.tab').forEach(s => s.hidden = s.id !== 'tab-' + t);
-    if (t === 'present') { field.mount($('#glPresent')); field.paused = player.slides[player.si]?.kind !== '3d'; fitStage(); }
+    state.prev = state.tab; state.tab = t; tabs.forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t)); $$('.tab').forEach(s => s.hidden = s.id !== 'tab-' + t);
+    if (t === 'present') { field.mount($('#glPresent')); field.paused = player.slides[player.si]?.kind !== '3d'; fitStage(); if (state.prev === 'field') player.go(player.si, Math.max(0, player.step), { play: false }); }   // put the slide's own scene back
     if (t === 'field') { player.pause(); field.paused = false; field.mount($('#glField')); explorer.enter(); }
     if (t === 'data') player.pause();
+    if (t === 'slides') { player.pause(); deck.enter(); }
     try { history.replaceState(null, '', '#' + t); } catch (e) {}
   }
   tabs.forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
@@ -85,16 +86,17 @@ async function boot() {
   $('#caps').onclick = e => { capOn.v = !capOn.v; e.currentTarget.setAttribute('aria-pressed', capOn.v); cap.classList.toggle('on', capOn.v && !!cap.textContent); };
   $('#full').onclick = () => { const el = $('#tab-present'); (document.fullscreenElement ? document.exitFullscreen() : el.requestFullscreen?.())?.catch?.(() => {}); };
   document.addEventListener('keydown', e => {
+    if (state.tab === 'slides' && !/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return deck.key(e);
     if (state.tab !== 'present' || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
     if (e.key === ' ' || e.key === 'k') { e.preventDefault(); player.toggle(); }
     else if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); player.next(); }
     else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); player.prev(); }
   });
   // ---------------- explorer + data room
-  const explorer = makeExplorer(ctx); makeDataRoom(ctx);
+  const explorer = makeExplorer(ctx); makeDataRoom(ctx); const deck = makeDeck();
   const start = (location.hash || '').replace('#', '');
-  setTab(['present', 'field', 'data'].includes(start) ? start : 'present');
-  await player.go(0, 0, { play: false });
+  await player.go(0, 0, { play: false });   // build the first slide before any tab, so its scene cannot overwrite the explorer's
+  setTab(['present', 'field', 'data', 'slides'].includes(start) ? start : 'present');
   $('#loading').hidden = true;
 }
 
@@ -115,13 +117,13 @@ function makeExplorer(ctx) {
   const playB = h('button', { id: 'xPlay', class: 'btn' }, 'Play history');
   const wellsBox = h('div', { class: 'wellbtns' });
   for (const w of M.wells) wellsBox.append(h('button', { class: 'btn sm', onclick: () => { field.setHighlight(w.well); field.focusWell(w.well); readout(w.well); } }, w.well));
-  const views = h('div', { class: 'wellbtns' }, ...['overview', 'crest', 'section', 'top', 'surface'].map(v => h('button', { class: 'btn sm', onclick: () => field.view(v) }, v[0].toUpperCase() + v.slice(1))));
+  const views = h('div', { class: 'wellbtns' }, ...['reservoir', 'overview', 'crest', 'section', 'top', 'surface'].map(v => h('button', { class: 'btn sm', onclick: () => field.view(v) }, v[0].toUpperCase() + v.slice(1))));
   const ro = h('div', { class: 'readout', id: 'xRead' });
   host.append(
     h('h3', {}, 'Seismic'), row('Volume', volS), row('Colour', cmS),
     h('div', { class: 'ctl2' }, ilC, row('Inline', ilR, ilO)), h('div', { class: 'ctl2' }, xlC, row('Crossline', xlR, xlO)), h('div', { class: 'ctl2' }, kC, row('Depth slice', kR, kO)),
     h('h3', {}, 'Display'), h('div', { class: 'checks' }, h('label', {}, surfC, 'El Abra top (Jan 2019 grid)'), h('label', {}, owcC, 'Lowest known oil −2,374 m'), h('label', {}, labC, 'Well labels')),
-    row('Vertical exaggeration', veR, veO), h('h3', {}, 'History'), row('Date', yrR, yrO), playB,
+    row('Vertical exag.', veR, veO), h('h3', {}, 'History'), row('Date', yrR, yrO), playB,
     h('h3', {}, 'Wells'), wellsBox, h('h3', {}, 'Views'), views, ro,
     h('p', { class: 'fine' }, 'Drag to orbit, right-drag or two fingers to pan, scroll or pinch to zoom. Seismic is an 8-bit display copy of the Colab extracts, for orientation only. The PSTM is placed in depth at the well-tie velocity (2,914–2,951 m/s), exact at the reef top and approximate away from it. Well colours follow the status legend; columns at the wellheads grow with cumulative oil (green) and water (blue).'));
   const legendEl = $('#fieldLegend');
@@ -131,7 +133,7 @@ function makeExplorer(ctx) {
   function apply() {
     const I = st.vol ? info() : null;
     if (I) { ilR.max = I.ni - 1; xlR.max = I.nj - 1; kR.max = I.nk - 1; }
-    const zOf = k => I.axis === 'time_ms' ? `${(I.k0 + k * I.dk).toFixed(0)} ms (≈${((I.k0 + k * I.dk) / 2000 * I.v_field_mps).toFixed(0)} m)` : `${(I.k0 + k * I.dk).toFixed(0)} m`;
+    const zOf = k => I.axis === 'time_ms' ? `≈${Math.round((I.k0 + k * I.dk) / 2000 * I.v_field_mps).toLocaleString()} m` : `${Math.round(I.k0 + k * I.dk).toLocaleString()} m`;   // PSTM: depth at the well-tie velocity
     ilO.textContent = I ? `${(I.inline0 ?? 0) + +ilR.value}` : ''; xlO.textContent = I ? `${(I.crossline0 ?? 0) + +xlR.value}` : ''; kO.textContent = I ? zOf(+kR.value) : '';
     field.setSlices(st.vol ? { vol: st.vol, il: ilC.checked ? +ilR.value : null, xl: xlC.checked ? +xlR.value : null, k: kC.checked ? +kR.value : null, cmap: cmS.value } : null);
   }
@@ -143,7 +145,7 @@ function makeExplorer(ctx) {
   }
   [volS, cmS, ilR, xlR, kR, ilC, xlC, kC].forEach(e => e.addEventListener('input', () => { st.vol = volS.value; apply(); }));
   veR.oninput = () => { veO.textContent = veR.value + '×'; field.setVE(+veR.value); setYear(st.year); };
-  surfC.onchange = () => field.showSurface(surfC.checked); owcC.onchange = () => field.owc.visible = owcC.checked; labC.onchange = () => { field.labelsOn = labC.checked; setYear(st.year); };
+  surfC.onchange = () => field.showSurface(surfC.checked, 1); owcC.onchange = () => field.owc.visible = owcC.checked; labC.onchange = () => { field.labelsOn = labC.checked; setYear(st.year); };
   yrR.oninput = () => setYear(+yrR.value);
   playB.onclick = () => {
     if (st.playing) { st.playing = false; playB.textContent = 'Play history'; return; }
@@ -151,7 +153,33 @@ function makeExplorer(ctx) {
     const t0 = performance.now(), y0 = st.year; const run = () => { if (!st.playing) return; const y = Math.min(2026.8, y0 + (performance.now() - t0) / 1000 * 1.6); setYear(y); if (y < 2026.8) requestAnimationFrame(run); else { st.playing = false; playB.textContent = 'Play history'; } }; run();
   };
   veO.textContent = '2.5×';
-  return { enter() { field.setShift(0, 0); field.setHighlight(null); field.showSurface(surfC.checked); setYear(st.year); st.vol = volS.value; apply(); field.view('overview', 1200); field.orbit(false); } };
+  // the presentation shares this 3-D field: reset everything it may have changed (spin, pads, labels, surface opacity, VE, camera)
+  return { enter() {
+    field.paused = false; field.orbit(false); field.setPads(null); field.setShift(0, 0); field.setHighlight(null);
+    field.labelsOn = labC.checked; field.owc.visible = owcC.checked; if (field.ve !== +veR.value) field.setVE(+veR.value);
+    field.showSurface(surfC.checked, 1); setYear(st.year); st.vol = volS.value; apply(); field.view('reservoir', 1200);
+  } };
+}
+
+// ---------------------------------------------------------------- slides tab: the static technical deck, page by page, printable
+function makeDeck() {
+  const wrap = $('#deckWrap'), stage = $('#deckStage'), notes = $('#deckNotes'), sel = $('#dOutline'); let S = null, i = 0, loading = null;
+  const fit = () => { const s = Math.min((wrap.clientWidth - 24) / 1920, (wrap.clientHeight - 24) / 1080); stage.style.transform = `scale(${s})`; stage.style.left = (wrap.clientWidth - 1920 * s) / 2 + 'px'; stage.style.top = (wrap.clientHeight - 1080 * s) / 2 + 'px'; };
+  new ResizeObserver(() => { if (S) fit(); }).observe(wrap);
+  const show = k => { if (!S) return; i = Math.max(0, Math.min(S.slides.length - 1, k)); const s = S.slides[i]; stage.innerHTML = s.html; notes.innerHTML = s.notes ? `<b>Notes.</b> ${s.notes}` : '<i>No notes for this slide.</i>'; sel.value = i; $('#dNo').textContent = `${i + 1} / ${S.slides.length}`; };
+  const load = () => loading ||= fetch('deck/deck.json').then(r => r.json()).then(d => {
+    S = d; let sec = ''; d.slides.forEach((s, k) => { if (s.section !== sec) { sec = s.section; sel.append(h('option', { disabled: true }, '— ' + sec)); } sel.append(h('option', { value: k }, `${String(k + 1).padStart(2, '0')}  ${s.title}`)); });
+    $('#deckPrint').innerHTML = d.slides.map(s => `<div class="deckslide">${s.html}</div>`).join('');
+    fit(); show(0);
+  }).catch(e => { stage.innerHTML = `<p style="padding:40px;font-size:28px">Could not load the slides: ${e.message}</p>`; });
+  $('#dPrev').onclick = () => show(i - 1); $('#dNext').onclick = () => show(i + 1); sel.onchange = () => show(+sel.value);
+  $('#dNotesB').onclick = e => { notes.hidden = !notes.hidden; e.currentTarget.setAttribute('aria-pressed', !notes.hidden); fit(); };
+  $('#dPrint').onclick = () => load().then(() => window.print());
+  $('#dFull').onclick = () => { const el = $('#tab-slides'); (document.fullscreenElement ? document.exitFullscreen() : el.requestFullscreen?.())?.catch?.(() => {}); };
+  return {
+    enter() { load().then(fit); },
+    key(e) { if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); show(i + 1); } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(i - 1); } else if (e.key === 'n' || e.key === 'N') $('#dNotesB').click(); }
+  };
 }
 
 // ---------------------------------------------------------------- data room tab

@@ -251,25 +251,39 @@ export class Field3D {
     }
   }
   setHighlight(well) { this.highlight = well; this.setWellStates(this.wellState); for (const [k, o] of Object.entries(this.wellObj)) o.labelEl.classList.toggle('hl', k === well); }
+  _pathPoint(w, z) {   // point on a well path at subsea depth z (first point if the path starts deeper)
+    const p = w.path; if (z <= p[0][2]) return this.P(p[0][0], p[0][1], p[0][2]);
+    for (let i = 0; i + 1 < p.length; i++) { const a = p[i], b = p[i + 1]; if ((a[2] - z) * (b[2] - z) <= 0 && a[2] !== b[2]) { const t = (z - a[2]) / (b[2] - a[2]); return this.P(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, z); } }
+    const q = p[p.length - 1]; return this.P(q[0], q[1], q[2]);
+  }
+  // labels sit beside the wellbore they name, joined to it by a leader line; placement avoids overlaps each frame
   _labels() {
     if (!this.container) return; const w = this.container.clientWidth, h = this.container.clientHeight, placed = [];
+    if (!this.leaderSvg) { this.leaderSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); this.leaderSvg.setAttribute('class', 'gl-leaders'); this.leaderSvg.innerHTML = '<path class="ln"/><path class="dt"/>'; this.labels.prepend(this.leaderSvg); }
     const items = [];
     for (const o of Object.values(this.wellObj)) {
       if (!o.grp.visible || !this.labelsOn) { o.labelEl.style.display = 'none'; continue; }
-      const p = o.resP.clone(); p.y += (o.col.visible ? o.col.scale.y + 90 : 160);
-      const v = p.project(this.camera); if (v.z > 1) { o.labelEl.style.display = 'none'; continue; }
-      o.labelEl.style.display = ''; items.push({ o, x: (v.x * 0.5 + 0.5) * w, y: (-v.y * 0.5 + 0.5) * h, lw: o.labelEl.offsetWidth || 90, lh: o.labelEl.offsetHeight || 30 });
+      const top = o.w.top_mss || 2300, colM = o.col.visible ? o.col.scale.y / this.ve : 0;
+      const v = this._pathPoint(o.w, Math.max(0, top - Math.max(140, colM + 60))).project(this.camera);   // on the wellbore, just above its cumulative column
+      if (v.z > 1 || Math.abs(v.x) > 1.15 || Math.abs(v.y) > 1.15) { o.labelEl.style.display = 'none'; continue; }
+      o.labelEl.style.display = ''; items.push({ o, ax: (v.x * 0.5 + 0.5) * w, ay: (-v.y * 0.5 + 0.5) * h, lw: o.labelEl.offsetWidth || 90, lh: o.labelEl.offsetHeight || 30 });
     }
-    items.sort((a, b) => (b.o.w.well === this.highlight) - (a.o.w.well === this.highlight) || a.y - b.y);
-    for (const it of items) {      // greedy: move a label up until it clears the ones already placed
-      let y = it.y;
-      for (let pass = 0; pass < 8; pass++) {
-        const hit = placed.find(q => Math.abs(q.x - it.x) < (q.lw + it.lw) / 2 + 4 && y > q.y - it.lh - 2 && y - it.lh < q.y + 2);
-        if (!hit) break; y = hit.y - hit.lh - 4;
-      }
-      placed.push({ x: it.x, y, lw: it.lw, lh: it.lh });
-      it.o.labelEl.style.transform = `translate(${it.x}px, ${y}px) translate(-50%, -100%)`;
+    items.sort((a, b) => (b.o.w.well === this.highlight) - (a.o.w.well === this.highlight) || a.ay - b.ay);
+    const C = [[0, -22], [80, -34], [-80, -34], [0, -64], [120, -6], [-120, -6], [100, -78], [-100, -78], [0, -110], [160, -46], [-160, -46], [130, -120], [-130, -120], [0, -160], [200, -90], [-200, -90]];
+    const hits = (x, y, it) => placed.some(q => Math.abs(q.x - x) < (q.lw + it.lw) / 2 + 6 && Math.abs((q.y - q.lh / 2) - (y - it.lh / 2)) < (q.lh + it.lh) / 2 + 4)
+      || items.some(o => o !== it && o.ax > x - it.lw / 2 - 4 && o.ax < x + it.lw / 2 + 4 && o.ay > y - it.lh - 4 && o.ay < y + 4);   // keep labels off other wells' anchor points
+    let ln = '', dt = '';
+    for (const it of items) {
+      let best = null;
+      for (const [dx, dy] of C) { const x = Math.min(w - it.lw / 2 - 4, Math.max(it.lw / 2 + 4, it.ax + dx)), y = Math.min(h - 4, Math.max(it.lh + 4, it.ay + dy)); if (!hits(x, y, it)) { best = [x, y]; break; } }
+      if (!best) best = [it.ax, Math.max(it.lh + 4, it.ay - 22)];
+      const [x, y] = best; placed.push({ x, y, lw: it.lw, lh: it.lh });
+      it.o.labelEl.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
+      const ex = Math.min(x + it.lw / 2, Math.max(x - it.lw / 2, it.ax)), ey = it.ay < y - it.lh ? y - it.lh : y;   // nearest point on the label's edge
+      ln += `M${it.ax.toFixed(1)},${it.ay.toFixed(1)}L${ex.toFixed(1)},${ey.toFixed(1)}`;
+      dt += `M${(it.ax - 3.5).toFixed(1)},${it.ay.toFixed(1)}a3.5,3.5 0 1 0 7,0a3.5,3.5 0 1 0 -7,0`;
     }
+    this.leaderSvg.firstChild.setAttribute('d', ln); this.leaderSvg.lastChild.setAttribute('d', dt);
     for (const p of this.padLabels || []) {
       const v = p.pos.clone(); v.y += 30; v.project(this.camera);
       if (!this.padGrp.visible || v.z > 1) { p.l.style.display = 'none'; continue; }
@@ -283,6 +297,7 @@ export class Field3D {
       overview: { target: c, dist: 6200, az: -0.62, el: 0.52 },
       crest: { target: this.P(707680, 2262500, 2300), dist: 2600, az: -0.3, el: 0.42 },
       surface: { target: this.P(707650, 2262620, 2280), dist: 4300, az: -0.75, el: 0.38 },
+      reservoir: { target: this.P(707640, 2262640, 2150), dist: 3900, az: -0.62, el: 0.3 },   // reservoir plus the lower ~600 m of the wellbores
       section: { target: this.P(707680, 2262560, 2310), dist: 2300, az: 0.08, el: 0.12 },
       top: { target: c, dist: 6500, az: 0.0001, el: 1.45 },
     };
@@ -337,5 +352,5 @@ export class Field3D {
     const [ox, oy] = info.origin, [a, b] = info.di, [c, d] = info.dj, dx = p[0] - ox, dy = p[1] - oy, det = a * d - b * c;
     return [(dx * d - dy * c) / det, (a * dy - b * dx) / det];
   }
-  showSurface(on, opacity = 0.95) { this.surface.visible = on; this.contours.visible = on; this.surface.material.opacity = opacity; }
+  showSurface(on, opacity = 1) { const m = this.surface.material; this.surface.visible = on; this.contours.visible = on; m.opacity = opacity; if (m.transparent !== opacity < 0.999) { m.transparent = opacity < 0.999; m.needsUpdate = true; } }   // opaque unless asked: transparent sorting can hide it behind seismic
 }

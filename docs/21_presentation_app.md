@@ -60,3 +60,9 @@ The browser speech engine gave poor voices, and an English voice when no Spanish
 - Spoken form follows the same rules as the app (TEC-10 → "tech 10" / "Tec 10"; Spanish strips thousands commas so the engine does not read them as decimals).
 - The speed slider sets the audio playback rate live, with pitch preserved. The browser voices remain in the voice list as a fallback; Spanish never falls back to an English voice.
 - A recogniser check (faster-whisper small) identified all candidate Spanish voices as Spanish with probability ≥ 0.96; it cannot rank naturalness.
+
+## Slides tab and 3-D explorer fixes (26 Oct 2026)
+
+- **Slides tab.** The static technical deck (formerly the separate Slides artifact K35tjz1TuyDcSzbwPZKdwc, now marked superseded on its first slide) is a tab of the app: 38 slides, notes toggle (N), keyboard paging, Print / PDF (one slide per page). Sources: `presentation_app/deck/slides/*.html` and `deck_order.json`; `build_deck_json.py` bundles them into `deck/deck.json` with images under `deck/img/` (figures captured from the app; not in git).
+- **Field in 3-D.** The explorer now resets everything the presentation may have changed (auto-spin, TEC-12 pad markers, labels off, surface transparency, VE, camera); the first slide is built before the opening tab so it cannot overwrite the explorer. The El Abra surface is opaque unless a slide asks otherwise (transparent sorting could hide it behind seismic). Default view "Reservoir" frames the reef and the lower ~600 m of the wellbores. Well labels are anchored on the wellbore just above its cumulative column, placed to avoid overlaps, and joined to the well by a leader line.
+- Narration audio (both voices, ~28 MB) is published with the app and regenerated with `presentation_app/tts/render.py`; it is not committed.
