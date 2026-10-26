@@ -507,8 +507,8 @@
   "date": "2018-04-11",
   "well": "TEC-10",
   "category": "drilling",
-  "title": "TEC-10DES spudded from the TEC-6 pad",
-  "detail": "Tonalli's first well: J-shape directional from a new pad beside TEC-6, rig DTM-638, AFE USD 2.92 MM; conductor 11 Apr (masterlog spud 16 Apr).",
+  "title": "TEC-10DES spudded from its own pad",
+  "detail": "Tonalli's first well: J-shape directional from its own new pad, wellhead ~123 m SE of TEC-6 (surveyed coordinates; Kevin Gunning, 26 Oct 2026; the 2017 evaluation plan had proposed the rehabilitated TEC-6 location, G-90), rig DTM-638, AFE USD 2.92 MM; conductor 11 Apr (masterlog spud 16 Apr).",
   "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4",
   "uncertain": true,
   "uncertain_why": "spud 11 Apr (QMAX) vs 16 Apr 2018 (masterlog)"
