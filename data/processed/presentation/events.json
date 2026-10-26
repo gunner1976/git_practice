@@ -1,0 +1,1000 @@
+[
+ {
+  "date": "1956-02-10",
+  "well": "TEC-3",
+  "category": "drilling",
+  "title": "PEMEX spuds TEC-3, the first Tecolutla well",
+  "detail": "Exploration well drilled to the top of the El Abra reef; TD 2,380.5 m.",
+  "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4 (PE2017)"
+ },
+ {
+  "date": "1956-03-07",
+  "well": "TEC-3",
+  "category": "abandonment",
+  "title": "TEC-3: oil over salt water on test, plugged",
+  "detail": "Drill-stem test of 2,376.8-2,380.8 m (~2,370-2,375 mSS) recovered 980 m of gassy ~24 API oil and 80 m of salt water in the pipe; plugged 7 Mar 1956. Its lowest known oil (-2,374.2 mSS) is GLJ's oil-water contact.",
+  "source": "data/processed/database_review/cnh_findings.md §4; data/processed/database_review/eng_findings.md item 10; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4"
+ },
+ {
+  "date": "1956-04-16",
+  "well": "TEC-2",
+  "category": "drilling",
+  "title": "TEC-2 spudded 520 m SW of TEC-3",
+  "detail": "The discovery well; vertical, 13 1/4 in hole to 610 m, 9 5/8 in casing at 607.9 m.",
+  "source": "data/processed/deck_notes/geology_geophysics_notes.md §10.2; data/processed/wells/casing_strings.csv"
+ },
+ {
+  "date": "1956-05-24",
+  "well": "TEC-2",
+  "category": "test",
+  "title": "TEC-2 top of El Abra flows gas-rich oil",
+  "detail": "Open hole 2,307.4-2,321.7 m after 1,900 L acid: 41 m3/d (257.9 bbl/d) oil with 47,702 m3/d gas (GOR 1,163 m3/m3, ~6,500 scf/bbl) on a 6 mm choke: gas-cap gas at the top of El Abra.",
+  "source": "docs/17_government_records.md; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4"
+ },
+ {
+  "date": "1956-05-24",
+  "well": "TEC-2",
+  "category": "pressure",
+  "title": "Initial pressure 252 kg/cm2 (24.65 MPa)",
+  "detail": "Static 252.0 kg/cm2 at 2,310 m after only 2 h 45 min shut-in (built up from 243.2); 24.65 MPa (3,575 psia) at the 2,300 mSS datum. PEMEX's 'initial pressure'. PEMEX estimated 263-410 mD from this test.",
+  "source": "docs/05_pressure.md §2-3; data/processed/database_review/eng_findings.md item 5; docs/gaps.md G-36"
+ },
+ {
+  "date": "1956-05-31",
+  "well": "TEC-2",
+  "category": "drilling",
+  "title": "TEC-2 deepened to 2,375 m, liner run",
+  "detail": "Deepened with a 5 5/8 in bit to 2,375 m, logged 27 May (E-log, microlog, radioactive), 4 1/2 in liner 2,288.7-2,375 m cemented 28 May; rig released 31 May 1956.",
+  "source": "docs/17_government_records.md; data/processed/wells/casing_strings.csv"
+ },
+ {
+  "date": "1956-06-08",
+  "well": "TEC-2",
+  "category": "test",
+  "title": "TEC-2 tests 453 bbl/d from 2,335-2,339 m",
+  "detail": "72 m3/d (452.9 bbl/d) oil, GOR 96 m3/m3 (~539 scf/bbl), 5-9 % water of 45,000-50,000 ppm on 6 mm. A deeper test at 2,345-2,349 m gave 56 m3/d (352.2 bbl/d) and was later squeezed.",
+  "source": "docs/17_government_records.md; data/processed/tecolutla_production_gaps_pemex.csv"
+ },
+ {
+  "date": "1956-06-09",
+  "well": "TEC-2",
+  "category": "completion",
+  "title": "Discovery: TEC-2 completed in El Abra",
+  "detail": "Completed 9 Jun 1956 as an oil producer from 2,335-2,339 m (2,331-2,335 mSS) and put on the battery as a flowing well in June 1956.",
+  "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4; data/processed/tecolutla_production_gaps_pemex.csv"
+ },
+ {
+  "date": "1956-07-28",
+  "well": "TEC-5",
+  "category": "abandonment",
+  "title": "TEC-5 finds El Abra 248 m low, plugged",
+  "detail": "El Abra at 2,555 mMD (-2,551 mSS), 248 m lower than TEC-2 and water-bearing; no tests; plugged 28 Jul 1956. Marks the separation from the Miguel Hidalgo field.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md; data/processed/wells/casing_strings.csv"
+ },
+ {
+  "date": "1956-09-08",
+  "well": "TEC-6",
+  "category": "drilling",
+  "title": "TEC-6 spudded",
+  "detail": "Development well on the crest; El Abra reached at 2,302 mMD (-2,296 mSS), 7 m higher than TEC-2.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md"
+ },
+ {
+  "date": "1956-10",
+  "well": "TEC-6",
+  "category": "completion",
+  "title": "TEC-6 completed open hole: ~480-580 bbl/d",
+  "detail": "Open hole 2,336-2,338 m (2,330-2,332 mSS) after 960 L acid: 77 m3/d (484.3 bbl/d) oil, 3.4 % water (final report). The production file gives 92 m3/d (578.7 bbl/d) on 10 mm.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md; data/processed/tecolutla_production_gaps_pemex.csv",
+  "uncertain": true,
+  "uncertain_why": "two PEMEX documents give different initial rates"
+ },
+ {
+  "date": "1956-11-21",
+  "well": "TEC-7",
+  "category": "drilling",
+  "title": "TEC-7 spudded",
+  "detail": "Development well 456 m from TEC-2; TD 2,340 m on 9 Jan 1957.",
+  "source": "data/processed/database_review/tec7_expediente_findings.md"
+ },
+ {
+  "date": "1957-01-23",
+  "well": "TEC-7",
+  "category": "test",
+  "title": "TEC-7 tests 560 bbl/d from 2,335-2,337 m",
+  "detail": "2-hour test on 6 mm: 89 m3/d (559.8 bbl/d) oil, 8,300 m3/d gas, GOR 93 m3/m3. First full day to battery (25 Jan) was 56 m3/d (352.2 bbl/d), the figure usually quoted.",
+  "source": "data/processed/database_review/tec7_expediente_findings.md §4; docs/gaps.md G-81",
+  "uncertain": true,
+  "uncertain_why": "completion date given as 22, 25 or 26 Jan 1957"
+ },
+ {
+  "date": "1957-03",
+  "well": "TEC-2",
+  "category": "shut_in",
+  "title": "TEC-2 shut in for salt water",
+  "detail": "Flowed from 2,335-2,339 m from Jun 1956 to Mar 1957, ending at 45 m3/d (283 bbl/d) with 80 % water on 4 mm; 6.5 x10^3 m3 (40,885 bbl). Closed 'por alto contenido de agua salada' until 1971.",
+  "source": "data/processed/tecolutla_production_gaps_pemex.csv; docs/18_kinjal_briefing.md A4"
+ },
+ {
+  "date": "1957-03-12",
+  "well": "TEC-7",
+  "category": "shut_in",
+  "title": "TEC-7 shut in after 7 weeks: salt water",
+  "detail": "Interval 'rapidly invaded by salt water'; last rate 15 m3/d with 44 % water on 3 mm, 50,000 ppm. 4,129 m3 (26.0 kbbl) produced; the 1971 programme says 3,471 m3.",
+  "source": "data/processed/database_review/tec7_expediente_findings.md §5"
+ },
+ {
+  "date": "1957-04",
+  "well": "FIELD",
+  "category": "production",
+  "title": "TEC-6 alone carries the field to 1971",
+  "detail": "With TEC-2 and TEC-7 closed by salt water, TEC-6 was the only producer from spring 1957 until Oct 1971 (one 40-bbl TEC-7 month in Jun 1968 in the CNH table is not supported by the PEMEX file).",
+  "source": "data/processed/tecolutla_production_gaps_pemex.csv; docs/18_kinjal_briefing.md A4; docs/04_production_database.md §1"
+ },
+ {
+  "date": "1960-01",
+  "well": "FIELD",
+  "category": "production",
+  "title": "First monthly records: about 100 bbl/d",
+  "detail": "CNH field-level monthly series begins (no well split): 1960 average 103 bbl/d; 182 kbbl in 1960-65 at 75-115 bbl/d. Nothing monthly exists before 1960.",
+  "source": "docs/04_production_database.md §2-3; data/processed/tecolutla_field_monthly.csv"
+ },
+ {
+  "date": "1964",
+  "well": "TEC-7",
+  "category": "workover",
+  "title": "TEC-7 repair approved but never done",
+  "detail": "1964 programme: plug at 2,330 m and new perforations at 2,325-2,327 m. Approved, but the well was still shut with 2,335-2,337 m open in Dec 1964.",
+  "source": "data/processed/database_review/tec7_expediente_findings.md §5"
+ },
+ {
+  "date": "1964-12-02",
+  "well": "TEC-6",
+  "category": "pressure",
+  "title": "TEC-6 flowing survey: 194 kg/cm2",
+  "detail": "Flowing 193.63 kg/cm2 at 2,337 m on a 3 mm choke, 9 m3/d (57 bbl/d) oil, 3 % water, RGA 122 m3/m3 (685 scf/bbl). Not a static pressure.",
+  "source": "data/processed/pressure/tecolutla_pressures.csv; docs/05_pressure.md §2"
+ },
+ {
+  "date": "1964-12-08",
+  "well": "FIELD",
+  "category": "pressure",
+  "title": "1964 statics: still ~252 kg/cm2",
+  "detail": "TEC-2 after 75-78 days shut-in and TEC-7 after 95 days read 251.7-252.0 kg/cm2 at gauge: 24.36-24.66 MPa at 2,300 mSS, after ~0.58 MMbbl including wellfile allocations.",
+  "source": "docs/05_pressure.md §2-3; data/processed/pressure/tecolutla_pressures.csv",
+  "uncertain": true,
+  "uncertain_why": "TEC-7 expediente dates its survey 12 Dec 1964 at 251.90 kg/cm2, and the 95-day shut-in conflicts with closure since 1957"
+ },
+ {
+  "date": "1966-01",
+  "well": "TEC-6",
+  "category": "production",
+  "title": "Per-well monthly record begins (TEC-6)",
+  "detail": "CNH per-well record starts; TEC-6 alone at 66-105 bbl/d in 1966 with 2-19 % water.",
+  "source": "data/processed/tecolutla_production.csv (TEC-6 1966)"
+ },
+ {
+  "date": "1971-08-02",
+  "well": "TEC-6",
+  "category": "pressure",
+  "title": "TEC-6 closed for a 74-day build-up",
+  "detail": "Eleven static surveys at 2,337 m, 6 Aug - 18 Oct 1971: 240.3 rising to 251.6 kg/cm2, i.e. 23.24 -> 24.35 MPa at datum. Short shut-ins understate pressure by up to 1 MPa.",
+  "source": "docs/05_pressure.md §2-3; data/processed/pressure/ocr/pressure_scans_ocr_check.csv"
+ },
+ {
+  "date": "1971-10-09",
+  "well": "TEC-7",
+  "category": "workover",
+  "title": "TEC-7 recompleted 25 m higher: 478 bbl/d",
+  "detail": "Rigless workover 9 Sep - 6 Oct 1971: 2,335-2,337 m squeezed with 5,000 kg cement; 2,310-2,313 mbmr (2,305-2,308 mSS) perforated and acidised (2 m3 15 % HCl); 76 m3/d (478.0 bbl/d), GOR 78 m3/m3, 0.2 % water on 5 mm; to battery 9 Oct.",
+  "source": "data/processed/database_review/tec7_expediente_findings.md §6"
+ },
+ {
+  "date": "1971-11",
+  "well": "TEC-6",
+  "category": "workover",
+  "title": "TEC-6 squeezed and moved up to 2,324-2,327 m",
+  "detail": "Original open hole 2,336-2,338 m (~510 kbbl, mostly a wellfile allocation) cement-squeezed in Nov 1971; finished with the rig from TEC-2 (13 Jan 1972); 2,324-2,327 m (2,318-2,321 mSS) on production Feb 1972, test 264 bbl/d, 2 % water.",
+  "source": "data/processed/tecolutla_production_gaps_pemex.csv; data/processed/deck_notes/wells_ops_reserves_notes.md §2.2"
+ },
+ {
+  "date": "1971-12-27",
+  "well": "TEC-2",
+  "category": "workover",
+  "title": "TEC-2 recompleted at 2,307-2,311 m",
+  "detail": "Major workover 27-29 Dec 1971: 2,335-2,339 m cemented, 2,307-2,311 m (2,303-2,307 mSS) perforated and acidised; to battery late Jan 1972. PEMEX's Oct 1971 schematic marks a gas-oil level at 2,319 mKB (~2,315 mSS).",
+  "source": "data/processed/tecolutla_production_gaps_pemex.csv; data/processed/deck_notes/drive_reads_notes.md (Tecolutla-2 Schematic Oct 1971)"
+ },
+ {
+  "date": "1972-01-28",
+  "well": "TEC-101",
+  "category": "drilling",
+  "title": "TEC-101 spudded",
+  "detail": "Exploration/delineation well west of the crest; drilled to 2,804 m by 16 Mar 1972.",
+  "source": "docs/gaps.md G-61"
+ },
+ {
+  "date": "1972-03",
+  "well": "FIELD",
+  "category": "production",
+  "title": "Field peak: 932 bbl/d in March 1972",
+  "detail": "Monthly record: TEC-7 442 + TEC-2 269 + TEC-6 221 = 931.6 bbl/d (28,881 bbl in 31 days), three wells, ~0 % water. The 1972 calendar-day average was 624 bbl/d.",
+  "source": "data/processed/tecolutla_production.csv (CNH monthly, 1972-03); data/processed/tecolutla_field_monthly.csv; Resumen via wells_ops_reserves_notes §1"
+ },
+ {
+  "date": "1972-03-31",
+  "well": "TEC-101",
+  "category": "abandonment",
+  "title": "TEC-101 water-invaded, plugged",
+  "detail": "El Abra at 2,341 mMD (-2,334 mSS), structurally low; open hole 2,718-2,804 m water-invaded; plugged 31 Mar 1972. Never produced.",
+  "source": "docs/gaps.md G-61; data/processed/wells/casing_strings.csv",
+  "uncertain": true,
+  "uncertain_why": "ByZone gives rig release 31 May 1972; header CSV TD 2,363 m vs 2,804 m"
+ },
+ {
+  "date": "1973-04-01",
+  "well": "TEC-9",
+  "category": "drilling",
+  "title": "TEC-9 spudded (deviated to 112 m N)",
+  "detail": "A dropped piece of equipment forced a deviation from 296 m, N6 15'W, max 11 15', 112 m displacement, back to vertical from 1,192 m; TD 2,340 mMD (2,331.2 mTVD) on 7 May 1973.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4"
+ },
+ {
+  "date": "1973-05-19",
+  "well": "TEC-9",
+  "category": "completion",
+  "title": "TEC-9 completed at 2,328-2,333 m",
+  "detail": "Initial test 189 bbl/d, 765 scf/bbl, 0.6 % water (ByZone). The PEMEX estado mecanico gives 91.6 m3/d (576.1 bbl/d) on 3.5 mm, RGA 230. This one interval later made 352,601 bbl.",
+  "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.2, §2.4; data/processed/deck_notes/drive_reads_notes.md",
+  "uncertain": true,
+  "uncertain_why": "initial-rate conflict; interval depth is 2,314-2,319 mSS on the PEMEX TVD but 2,323-2,328 mSS as MD-KB in docs/09"
+ },
+ {
+  "date": "1973-06-04",
+  "well": "TEC-6",
+  "category": "pressure",
+  "title": "TEC-6 flowing survey 232 kg/cm2",
+  "detail": "Flowing 232.2 kg/cm2 at 2,315 m before shut-in (22.68 MPa at datum); flowing BHP 16.6 MPa. The Work Program table lists it as a 22.8 MPa static.",
+  "source": "data/processed/pressure/tecolutla_pressures.csv; data/processed/deck_notes/wells_ops_reserves_notes.md §2.5",
+  "uncertain": true,
+  "uncertain_why": "labelled static in the Work Program, flowing in the scan/IFR summary"
+ },
+ {
+  "date": "1974-10",
+  "well": "FIELD",
+  "category": "shut_in",
+  "title": "Field-wide shut-in, Oct 1974 - Apr 1975",
+  "detail": "CNH monthly table shows zero production in every well for seven months; no reason recorded.",
+  "source": "data/processed/database_review/eng_findings.md item 7; data/processed/database_review/cnh_findings.md §1"
+ },
+ {
+  "date": "1976-03",
+  "well": "TEC-6",
+  "category": "workover",
+  "title": "TEC-6 moved up again to 2,314-2,316 m",
+  "detail": "Feb 1976 repair: 2,324-2,327 m water-invaded after 84,293 bbl; recompleted at 2,314-2,316 m (2,308-2,310 mSS), on production Mar 1976. A bridge plug at 2,303-2,304 m (2,297 mSS) left the window above unperforated.",
+  "source": "data/processed/tecolutla_production_gaps_pemex.csv; docs/Tecolutla_Field_History_and_TEC12_Review_v4.md §2.2; docs/09_log_panel.md §3"
+ },
+ {
+  "date": "1977-08",
+  "well": "TEC-6",
+  "category": "production",
+  "title": "TEC-6 second peak: 293 bbl/d",
+  "detail": "Best month of the 2,314-2,316 m interval (293 bbl/d); field average 347 bbl/d in 1977. This interval made 305,499 bbl to Dec 2006.",
+  "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.2; data/processed/tecolutla_field_monthly.csv"
+ },
+ {
+  "date": "1978-06",
+  "well": "FIELD",
+  "category": "shut_in",
+  "title": "Field-wide shut-in, Jun 1978 - Sep 1979",
+  "detail": "Sixteen months of zero production in all wells (CNH zero rows); 1979 field average 12 bbl/d. Reason not recorded.",
+  "source": "data/processed/database_review/eng_findings.md item 7; data/processed/database_review/cnh_findings.md §1"
+ },
+ {
+  "date": "1980",
+  "well": "FIELD",
+  "category": "production",
+  "title": "1980s: wells cycled at 25-40 bbl/d, 50-80 % water",
+  "detail": "PEMEX sheets show wells tested at 4-6 m3/d (25-38 bbl/d) with 50-80 % water on 2-4 mm chokes, then closed for months; TEC-7 water cut swung 1.6-99 % in 1979-80. Field averaged 3-85 bbl/d in 1980-84.",
+  "source": "data/processed/tecolutla_production_gaps_pemex.csv; data/processed/database_review/tec7_expediente_findings.md §8; data/processed/tecolutla_field_monthly.csv"
+ },
+ {
+  "date": "1990-02",
+  "well": "TEC-7",
+  "category": "shut_in",
+  "title": "TEC-7 closed for 16 years",
+  "detail": "Last month Jan 1990 at ~3 bbl/d; zero rows Feb 1990 - Sep 2006.",
+  "source": "data/processed/tecolutla_production.csv; data/processed/database_review/cnh_findings.md"
+ },
+ {
+  "date": "1998-10-06",
+  "well": "TEC-7",
+  "category": "pressure",
+  "title": "1998: TEC-7 at 250.6 kg/cm2, no depletion",
+  "detail": "Static 250.63 kg/cm2 (3,565 psi) at the 2,311.5 m mid-perforation and 252.23 at 2,325 m; 24.52 MPa at 2,300 mSS after ~1.78 MMbbl (with allocations).",
+  "source": "data/processed/database_review/tec7_expediente_findings.md §7; data/processed/pressure/tecolutla_pressures.csv"
+ },
+ {
+  "date": "1999-01",
+  "well": "TEC-9",
+  "category": "shut_in",
+  "title": "TEC-9 closed; field shut in 1999-2003",
+  "detail": "TEC-9 'closed Jan 1999' (final PEMEX test Sep 1998); CNH shows zero production in every well Feb 1999 - May 2003.",
+  "source": "docs/gaps.md G-62; data/processed/database_review/eng_findings.md item 7"
+ },
+ {
+  "date": "2003-06",
+  "well": "TEC-9",
+  "category": "production",
+  "title": "TEC-9 restarts at ~100-110 bbl/d",
+  "detail": "After four years shut in TEC-9 returned at 112.6 bbl/d (Jul 2003) with zero water recorded; TEC-6 restarted Aug 2003. Field averaged 161-170 bbl/d (calendar-day) in 2004-05.",
+  "source": "data/processed/tecolutla_production.csv; data/processed/tecolutla_field_monthly.csv"
+ },
+ {
+  "date": "2006-09",
+  "well": "TEC-2",
+  "category": "production",
+  "title": "TEC-2 back on after 1999-2006 shut-in",
+  "detail": "TEC-2 resumed in Sep 2006 after zero rows from Feb 1999; TEC-7 produced Oct-Nov 2006 at 37-39 bbl/d with 29-31 % water.",
+  "source": "data/processed/tecolutla_production.csv"
+ },
+ {
+  "date": "2006-12",
+  "well": "TEC-7",
+  "category": "production",
+  "title": "TEC-7 and TEC-6 last production",
+  "detail": "Both wells' last CNH month is Dec 2006 (TEC-7 10 bbl/d at 45 % water; TEC-6 13 bbl/d at 34 % water). TEC-7 cumulative 2,310-2,313 m: 266,988 bbl.",
+  "source": "data/processed/tecolutla_production.csv; docs/Tecolutla_Field_History_and_TEC12_Review_v4.md §2.2"
+ },
+ {
+  "date": "2007-04",
+  "well": "TEC-6",
+  "category": "abandonment",
+  "title": "TEC-6 abandoned: casing parted at 352 m",
+  "detail": "Gas at surface and a 6 5/8 in breach at 352-1,100 m; ran on a PCP to 26 Feb 2007; abandoned Feb-Apr 2007 with plugs at 298 m, a retainer at 1,947.6 m and ~2,235-2,280 m. Cumulative ~900 kbbl (incl. ~388 kbbl allocation).",
+  "source": "data/processed/database_review/cnh_findings.md §6; data/processed/database_review/eng_findings.md item 3; docs/gaps.md G-63",
+  "uncertain": true,
+  "uncertain_why": "a 13 Mar 2007 CCL shows no anomaly at 352 m; dates differ (23 Feb-3 Apr vs 5 Mar-2 Apr 2007)"
+ },
+ {
+  "date": "2010",
+  "well": "TEC-9",
+  "category": "workover",
+  "title": "TEC-9 shallow casing breach repaired",
+  "detail": "9 5/8 in breach at ~70 m repaired in 2010; a second 6 5/8 in breach at ~530-833 m remained.",
+  "source": "data/processed/database_review/cnh_findings.md §6; data/processed/wells/casing_strings.csv"
+ },
+ {
+  "date": "2012",
+  "well": "TEC-9",
+  "category": "stimulation",
+  "title": "TEC-9 solvent + acid: 10 -> 101.6 bopd",
+  "detail": "At 10-11 bopd on a 3 mm choke with carbonate scale at 1,790 m, PEMEX pumped 5 m3 OSA-M solvent, 2 m3 diverter, 3 m3 15 % HCl and 17 m3 diesel; 101.6 bopd net (113 gross) at 710 psi after, then 33-46 bopd Apr-Jul 2012. H2S present.",
+  "source": "data/processed/database_review/cnh_findings.md §5, §7; docs/18_kinjal_briefing.md A5",
+  "uncertain": true,
+  "uncertain_why": "job month not given; CNH monthly jumps from 11.6 bbl/d (Mar 2012) to 35 bbl/d (Apr 2012)"
+ },
+ {
+  "date": "2012-07",
+  "well": "TEC-9",
+  "category": "production",
+  "title": "TEC-9 last production month",
+  "detail": "Jul 2012: 32.6 bbl/d at 55 % water; 352,601 bbl from one interval since 1973.",
+  "source": "data/processed/tecolutla_production.csv"
+ },
+ {
+  "date": "2012-11",
+  "well": "TEC-9",
+  "category": "workover",
+  "title": "TEC-9 workover fails; well squeezed",
+  "detail": "Oct-Nov 2012: a restriction was milled, damaging casing at 544-718 m; squeezed through a retainer at 2,312.36 m with plugs at 736-470 m. The 2,296-2,311 mSS top of El Abra was cemented without ever being perforated.",
+  "source": "data/processed/database_review/reg_findings.md finding 7; data/processed/database_review/cnh_findings.md §6; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4"
+ },
+ {
+  "date": "2013-01-04",
+  "well": "TEC-9",
+  "category": "abandonment",
+  "title": "TEC-9 plugged",
+  "detail": "Plugged 4 Jan 2013. The Work Program later calls it 'closed, not properly abandoned' with a hazardous wellhead; Tonalli returned it to CNH/SENER.",
+  "source": "docs/gaps.md G-62; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4",
+  "uncertain": true,
+  "uncertain_why": "'temporarily abandoned' vs 'plugged' in different files"
+ },
+ {
+  "date": "2014-01-01",
+  "well": "FIELD",
+  "category": "regulatory",
+  "title": "PEMEX: 1.9 MMbbl produced, field at ~9 bbl/d",
+  "detail": "PEMEX field summary: cumulative 1.9 MMbbl oil and 1.7 Bcf gas at 1 Jan 2014; ~9 bbl/d in 2014; booked OOIP 7.8 MMbbl; one producer.",
+  "source": "data/processed/deck_notes/geology_geophysics_notes.md §1; data/processed/deck_notes/wells_ops_reserves_notes.md §1"
+ },
+ {
+  "date": "2014-12",
+  "well": "TEC-2",
+  "category": "production",
+  "title": "TEC-2 last CNH-sourced month: 9 bbl/d",
+  "detail": "Dec 2014: 9 bbl/d oil at 91 % water. The CNH record ends here; 13 later rows (2015-Jan 2016) are hand-entered.",
+  "source": "data/processed/tecolutla_production.csv; data/processed/database_review/cnh_findings.md §1; docs/gaps.md G-33"
+ },
+ {
+  "date": "2015-01-01",
+  "well": "FIELD",
+  "category": "regulatory",
+  "title": "CNH books 1P 0.0 / 2P 0.0 / 3P 0.1 MMbbl",
+  "detail": "CNH table at 1 Jan 2015: original oil 7.8 MMbbl, cumulative 1.9 MMbbl, reserves 1P 0.0, 2P 0.0, 3P 0.1 MMbbl.",
+  "source": "data/processed/database_review/eng_findings.md item 1"
+ },
+ {
+  "date": "2015-09-21",
+  "well": "BLOCK",
+  "category": "corporate",
+  "title": "Tonalli Energia incorporated",
+  "detail": "Founded by Grupo IDESA and Petro Frontera (IFR), 50 % each.",
+  "source": "data/processed/database_review/reg_findings.md finding 11"
+ },
+ {
+  "date": "2015-12",
+  "well": "FIELD",
+  "category": "shut_in",
+  "title": "PEMEX reports: 'no production, field closed'",
+  "detail": "PEMEX's December 2015 measurement report states the field is closed.",
+  "source": "data/processed/database_review/cnh_findings.md §1"
+ },
+ {
+  "date": "2016-01-15",
+  "well": "TEC-2",
+  "category": "production",
+  "title": "TEC-2 last PEMEX production line",
+  "detail": "2017 integrity cedula: last production 15 Jan 2016, 19 m3/d liquid at 80 % water (~24 bbl/d oil, ~96 bbl/d water).",
+  "source": "docs/17_government_records.md",
+  "uncertain": true,
+  "uncertain_why": "CNH record ends Dec 2014; PEMEX said the field was closed in Dec 2015; 2015-16 rows hand-entered"
+ },
+ {
+  "date": "2016-08-25",
+  "well": "BLOCK",
+  "category": "regulatory",
+  "title": "Licence contract CNH-R01-L03-A24/2016",
+  "detail": "Ronda 1 (third tender) licence to Tonalli: 25-year term to 25 Aug 2041 plus two conditional 5-year extensions; guarantee USD 1,764,100; minimum work 4,600 units; change of control needs CNH consent; 7.16 km2 contract area.",
+  "source": "data/processed/database_review/reg_findings.md finding 1, 3; data/processed/database_review/cnh_findings.md finding 10",
+  "uncertain": true,
+  "uncertain_why": "block deck timeline puts the licence at 2016-03 (unsourced); GLJ20 says 'awarded 2018'"
+ },
+ {
+  "date": "2016-11-23",
+  "well": "BLOCK",
+  "category": "corporate",
+  "title": "Acta Hora Cero: PEMEX hands field to Tonalli",
+  "detail": "Acta Protocolo Hora Cero signed by PEP-APPRA and Tonalli on 23 Nov 2016; all wells shut in or abandoned.",
+  "source": "docs/17_government_records.md"
+ },
+ {
+  "date": "2017-03-15",
+  "well": "FIELD",
+  "category": "regulatory",
+  "title": "Integrity cedulas: TEC-2 and TEC-7 closed, sealed",
+  "detail": "Both wells registered as closed and hermetic with heads partly dismantled; accepted without integrity studies because they form part of the plan.",
+  "source": "docs/17_government_records.md"
+ },
+ {
+  "date": "2017-05-19",
+  "well": "BLOCK",
+  "category": "regulatory",
+  "title": "Plan de Evaluacion filed with CNH",
+  "detail": "Programme: TEC-2 major workover (USD 676,372), new TEC-10 directional well with core, 3D reprocessing; plan total ~USD 10.2-10.5 MM over 12 months.",
+  "source": "data/processed/database_review/reg_findings.md; data/processed/deck_notes/geology_geophysics_notes.md §10.4"
+ },
+ {
+  "date": "2018-01-11",
+  "well": "BLOCK",
+  "category": "regulatory",
+  "title": "Plan amended: committed workover moved to TEC-7",
+  "detail": "The Jan 2018 revision moved the USD 676,372 major workover from TEC-2 to TEC-7 (test intervals 2,310-2,313 and 2,313-2,318 m).",
+  "source": "data/processed/database_review/reg_findings.md finding 2",
+  "uncertain": true,
+  "uncertain_why": "CNH approval of the amendment is not in the files (G-66)"
+ },
+ {
+  "date": "2018-03-27",
+  "well": "TEC-2",
+  "category": "pressure",
+  "title": "TEC-2 after 2 years shut-in: 24.16 MPa",
+  "detail": "Static gradient to 2,250 mKB (gauge stopped above the perforations): 240.56 kg/cm2 (23.59 MPa) at gauge; 24.16 MPa (3,504 psia) at 2,300 mSS on a water-gradient extrapolation.",
+  "source": "docs/05_pressure.md §2; data/processed/pressure/tecolutla_pressures.csv"
+ },
+ {
+  "date": "2018-04-11",
+  "well": "TEC-10",
+  "category": "drilling",
+  "title": "TEC-10DES spudded from the TEC-6 pad",
+  "detail": "Tonalli's first well: J-shape directional from a new pad beside TEC-6, rig DTM-638, AFE USD 2.92 MM; conductor 11 Apr (masterlog spud 16 Apr).",
+  "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4",
+  "uncertain": true,
+  "uncertain_why": "spud 11 Apr (QMAX) vs 16 Apr 2018 (masterlog)"
+ },
+ {
+  "date": "2018-04-28",
+  "well": "TEC-10",
+  "category": "drilling",
+  "title": "TEC-10 cores El Abra at 2,352 m",
+  "detail": "Core 1, 2,352-2,353 mMD (~2,317 mSS), 1.30 m recovered: recrystallised miliolid grainstone, plug porosity 2.3-7.6 %, permeability 0.04-1.16 mD.",
+  "source": "docs/gaps.md G-47 (update); data/processed/deck_notes/drive_reads_notes.md"
+ },
+ {
+  "date": "2018-05-01",
+  "well": "TEC-10",
+  "category": "drilling",
+  "title": "TEC-10 at TD 2,490 mMD; full log suite",
+  "detail": "TD 2,490 mMD (2,453.5 mTVD, -2,447.4 mSS), ~19 deg; open-hole suite incl. CMI image 2 May; 4 1/2 in liner 2,133-2,489 m cemented 4 May. El Abra top -2,309.7 mSS; the 2,294-2,311 mSS 'window' above it is Tantoyuca marl on XRD.",
+  "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4; data/raw/geology/Directional Survey/TECOLUTLA DIRECTIONAL SURVEY DATA.CSV; data/processed/database_review/geo_findings.md §1"
+ },
+ {
+  "date": "2018-05-10",
+  "well": "TEC-2",
+  "category": "workover",
+  "title": "TEC-2 cleaned out; tests 50 bbl/d at 90 % water",
+  "detail": "Workover found paraffin in the tubing; test and build-up 8-30 May 2018 ended at 50 bbl/d oil and 453 bbl/d water (16.8 MPa BHFP). Shut in afterwards for lack of water disposal.",
+  "source": "docs/18_kinjal_briefing.md A5; docs/05_pressure.md §5; data/processed/deck_notes/wells_ops_reserves_notes.md §3.3"
+ },
+ {
+  "date": "2018-05-30",
+  "well": "TEC-2",
+  "category": "pressure",
+  "title": "TEC-2 build-up p* 24,190 kPa",
+  "detail": "IHS interpretation: 24,190 kPa (pi 3,508 psia) at 2,309 mKB = 24.14 MPa at 2,300 mSS; k 50 mD, skin +196, constant-pressure (aquifer) boundary at 700 m.",
+  "source": "docs/05_pressure.md §2, §5"
+ },
+ {
+  "date": "2018-06-30",
+  "well": "TEC-10",
+  "category": "test",
+  "title": "TEC-10 deep zones A and B: no oil",
+  "detail": "Zone A (2,433-2,442 mMD) took fluid only at 3,000-3,500 psi and gave no inflow after acid; zone B (2,394.5-2,413.5 mMD) gave weak water inflow (16.9 m3 recovered vs 19.6 m3 injected).",
+  "source": "data/processed/database_review/eng_findings.md item 9; data/processed/deck_notes/drive_reads_notes.md"
+ },
+ {
+  "date": "2018-07-23",
+  "well": "TEC-10",
+  "category": "test",
+  "title": "TEC-10 zone C flowback: up to 194 bbl/d",
+  "detail": "Perforations 2,349.5-2,353 mMD (2,314.3-2,317.6 mSS) after stimulation; 23 Jul-6 Aug on 12/64 in: oil 41 -> 194 bbl/d, water cut 89 -> 39 %, GOR ~743 scf/bbl, WHP 328 -> 863 psig; 1,475 bbl.",
+  "source": "data/processed/welltest/tec10_welltest_2018_daily.csv; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4"
+ },
+ {
+  "date": "2018-08-31",
+  "well": "TEC-10",
+  "category": "pressure",
+  "title": "TEC-10 build-up: 24.14 MPa at datum",
+  "detail": "IHS: 24,304 kPa (pi 3,525 psia) at 2,322.1 mTVD KB = 24.14 MPa at 2,300 mSS; k 18 mD, skin +4.9; aquifer boundary at 195 m and a no-flow boundary at 125 m.",
+  "source": "docs/05_pressure.md §2, §5"
+ },
+ {
+  "date": "2018-09-20",
+  "well": "TEC-10",
+  "category": "production",
+  "title": "TEC-10 on production; first sales to PEMEX",
+  "detail": "Daily production record starts 20 Sep 2018; first truck sales Sep 2018. Oct 2018 averaged 181 bbl/d oil.",
+  "source": "docs/04_production_database.md §4; data/processed/deck_notes/wells_ops_reserves_notes.md §3.3"
+ },
+ {
+  "date": "2018-10-20",
+  "well": "TEC-10",
+  "category": "production",
+  "title": "TEC-10 peak day: 232 bbl/d",
+  "detail": "231.6 bbl/d oil, 78 bbl/d water, 762 scf/bbl at 772 psi tubing pressure.",
+  "source": "data/processed/database_review/pres_findings.md finding 5; data/processed/deck_notes/wells_ops_reserves_notes.md §2.2"
+ },
+ {
+  "date": "2018-11-11",
+  "well": "TEC-11",
+  "category": "drilling",
+  "title": "TEC-11DES horizontal spudded from TEC-2 pad",
+  "detail": "Drilling AFE USD 2.25 MM; planned azimuth ~320 deg to cut natural fractures predicted from TEC-10.",
+  "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4; data/processed/database_review/pres_findings.md finding 4",
+  "uncertain": true,
+  "uncertain_why": "accounting notes give spud 9 Nov 2018"
+ },
+ {
+  "date": "2018-11-25",
+  "well": "TEC-11",
+  "category": "drilling",
+  "title": "TEC-11 7 in casing set at 2,354 m (61 deg)",
+  "detail": "Slow build (auto-driller failure; last 24 h only 25 m); 7 in shoe 2,354.44 mMD (~2,243 mSS) cemented with returns; a hydraulic-arm failure while running casing (51.5 h from casing point to cemented).",
+  "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4; docs/03_tec11_facies.md"
+ },
+ {
+  "date": "2018-12-18",
+  "well": "TEC-11",
+  "category": "drilling",
+  "title": "TEC-11 reaches TD 3,283 mMD",
+  "detail": "80 deg at 2,563 mMD (2,305 mSS), 90 deg at 2,727 mMD (2,323 mSS); TD 3,283 mMD at 2,331 mSS, 1,190 m from surface. 720 m lateral, mostly mudstone-wackestone; liner hanger damaged, tie-back faulty, two cement jobs. Rig released 26 Dec; drilling USD 3.11 MM vs 2.25 MM AFE.",
+  "source": "docs/03_tec11_facies.md §2-3; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4; data/processed/deck_notes/accounting_notes.md §2"
+ },
+ {
+  "date": "2019-01",
+  "well": "BLOCK",
+  "category": "corporate",
+  "title": "Plan: TEC-11/12/13 horizontals at 694 bbl/d",
+  "detail": "Jan 2019 forecast carried TEC-11, TEC-12 and TEC-13 as horizontals at 694 bbl/d each (~0.69 MMbbl per well).",
+  "source": "data/processed/database_review/eng_findings.md item 6"
+ },
+ {
+  "date": "2019-02",
+  "well": "TEC-2",
+  "category": "workover",
+  "title": "TEC-2 add-perf at 2,319-2,320 m",
+  "detail": "Operations log: correlation log 2,325-2,120 m and a 1 11/16 in RTG gun, 3 spm, at 2,319-2,320 mKB (2,315-2,316 mSS).",
+  "source": "docs/gaps.md G-59",
+  "uncertain": true,
+  "uncertain_why": "the May 2019 Tonalli schematic does not show this interval; estado mecanico text reads 2,019-2,020 (typo)"
+ },
+ {
+  "date": "2019-05",
+  "well": "TEC-11",
+  "category": "completion",
+  "title": "TEC-11 completion: fish left at 2,866 m",
+  "detail": "A bit and watermelon mill (5.9 m) were lost at 2,866-2,872 mMD; the 4 1/2 in liner ends at 2,863 m and the 411 m of open hole beyond (2,872-3,283 mMD) could not be re-entered.",
+  "source": "data/processed/wells/casing_strings.csv; data/processed/database_review/eng_findings.md item 2"
+ },
+ {
+  "date": "2019-05",
+  "well": "TEC-2",
+  "category": "workover",
+  "title": "TEC-2 plug shuts off wet deep perforations",
+  "detail": "Permanent plug at 2,322.5 m with packer at 2,292.65 m (schematic 16 May 2019).",
+  "source": "docs/gaps.md G-59; data/processed/database_review/eng_findings.md item 4"
+ },
+ {
+  "date": "2019-06",
+  "well": "TEC-11",
+  "category": "completion",
+  "title": "TEC-11 perforated and acidised unisolated",
+  "detail": "Five 3 m perforations 2,643.5-2,745.5 mMD (2,316-2,323 mSS). The selective acid tool could not pass the damaged liner hanger, so acid was bullheaded; pressure broke down quickly; some oil, then 100 % water.",
+  "source": "data/processed/database_review/eng_findings.md item 2; docs/12_drive_large_files.md §1; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4"
+ },
+ {
+  "date": "2019-06",
+  "well": "TEC-2",
+  "category": "production",
+  "title": "TEC-2 69-day test: 47 bbl/d at 75 % water",
+  "detail": "Test on 2,307-2,311 (+2,319-2,320) m at ~250 psi; 2,045 bbl sold in Jun 2019.",
+  "source": "docs/18_kinjal_briefing.md A5; data/processed/tecolutla_production.csv"
+ },
+ {
+  "date": "2019-06-21",
+  "well": "TEC-10",
+  "category": "stimulation",
+  "title": "TEC-10 APSOL-AP solvent job (1 of 4)",
+  "detail": "2-3 m3 of APSOL-AP 'organic system' (Quimica Apollo or TPM) against wax; further TEC-10 jobs 13 Aug, 1 Nov and 23 Dec 2019. Product composition unconfirmed (not necessarily xylene).",
+  "source": "docs/18_kinjal_briefing.md A6"
+ },
+ {
+  "date": "2019-06-23",
+  "well": "TEC-7",
+  "category": "workover",
+  "title": "TEC-7 reopened: 182 bbl/d of pure water",
+  "detail": "Repair from 16 Jun; 23 Jun stimulation (3.15 bbl solvent, 12.6 bbl acid, 36 bbl brine at 0.5-1 bpm, 250-440 psi). 2,310-2,313 m made 182 bbl/d water, 100 % water cut; bad cement or a leaking plug suspected.",
+  "source": "docs/18_kinjal_briefing.md A5; docs/gaps.md G-57"
+ },
+ {
+  "date": "2019-07-11",
+  "well": "TEC-11",
+  "category": "test",
+  "title": "TEC-11 tests 260 bbl/d water, trace oil",
+  "detail": "On 12/64 in at 195 psi WHP; ~935 bbl of water by 12 Jul at 78,000 ppm Cl (still spent acid). Final schematic: 286 bbl/d water, 100 % water cut.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md; data/processed/database_review/pres_findings.md finding 4"
+ },
+ {
+  "date": "2019-08-07",
+  "well": "TEC-7",
+  "category": "injection",
+  "title": "TEC-7 converted to produced-water injector",
+  "detail": "Triplex-pump injection from 7 Aug 2019; 2 3/8 in string with packer at ~2,300 m (schematic 26 Aug 2019). Short-test injectivity ~700-1,400 bbl/d at <450 psi. Ended water trucking.",
+  "source": "docs/18_kinjal_briefing.md A5; docs/gaps.md G-57; data/processed/deck_notes/wells_ops_reserves_notes.md §2.1"
+ },
+ {
+  "date": "2019-08-11",
+  "well": "TEC-11",
+  "category": "abandonment",
+  "title": "TEC-11 composite plug set at 2,400 m",
+  "detail": "Boss composite blind plug (10,000 psi) set in the 4 1/2 in liner at ~2,400 mMD (~2,263 mSS) on 11-12 Aug 2019; killed with 1.06 g/cc brine; no cement.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md"
+ },
+ {
+  "date": "2019-08-13",
+  "well": "FIELD",
+  "category": "stimulation",
+  "title": "APSOL-AP solvent jobs on TEC-10 and TEC-2",
+  "detail": "Second TEC-10 job and first TEC-2 job of the 2019 programme (2-3 m3 each).",
+  "source": "docs/18_kinjal_briefing.md A6"
+ },
+ {
+  "date": "2019-08-22",
+  "well": "TEC-11",
+  "category": "test",
+  "title": "TEC-11 Tantoyuca test: 17 API oil, water",
+  "detail": "Uphole test above the plug; oil sample from 2,361-2,364 m (~2,246 mSS) was 17.0 API with 31.8 % water; trace oil and 96 bbl/d water. Cost USD 206,225.",
+  "source": "data/processed/deck_notes/fluids_rock_core_notes.md; docs/18_kinjal_briefing.md A5; data/processed/deck_notes/accounting_notes.md §2"
+ },
+ {
+  "date": "2019-09-06",
+  "well": "TEC-11",
+  "category": "completion",
+  "title": "TEC-11 work ends; USD 4.40 MM all-in",
+  "detail": "Completion finished 6 Sep 2019. All-in USD 4,403,743 vs 3,934,870 budget; the tax pool carries only 3.51 MM, the ~0.96 MM gap matching 'Workstrings invoices' of unknown status.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md; data/processed/deck_notes/accounting_notes.md §2; docs/gaps.md G-64"
+ },
+ {
+  "date": "2019-09-06",
+  "well": "TEC-2",
+  "category": "shut_in",
+  "title": "TEC-2 shut in as uneconomic",
+  "detail": "Directors' memo (6 Sep 2019): TEC-2 uneconomic, shut in Sep 2019 (USD 8 k demobilisation); break-even 60 bbl/d at USD 54/bbl.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md"
+ },
+ {
+  "date": "2019-10-18",
+  "well": "TEC-11",
+  "category": "regulatory",
+  "title": "TEC-11 reclassified producer -> injector",
+  "detail": "Filed with CNH; well closed pending possible water injection.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md"
+ },
+ {
+  "date": "2019-11-15",
+  "well": "TEC-7",
+  "category": "regulatory",
+  "title": "ASEA authorises TEC-7 water injection",
+  "detail": "Authorisation ASEA/UGI/DGGEERC/1712/2019 under MIA 1077/2017 (extended to 26 Oct 2023).",
+  "source": "docs/gaps.md G-57; data/processed/deck_notes/drive_reads_notes.md"
+ },
+ {
+  "date": "2019-12-17",
+  "well": "FIELD",
+  "category": "production",
+  "title": "TEC-10 to TEC-2 flowline installed",
+  "detail": "514 m of 2 in sour-service line consolidated tankage and testing at one battery.",
+  "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §3.1.3; docs/18_kinjal_briefing.md A9"
+ },
+ {
+  "date": "2019-12-23",
+  "well": "FIELD",
+  "category": "stimulation",
+  "title": "Last documented APSOL jobs (TEC-10, TEC-2)",
+  "detail": "Fourth TEC-10 and second TEC-2 solvent job of 2019; six jobs in all. Jobs after 2019 are not itemised in the files.",
+  "source": "docs/18_kinjal_briefing.md A6"
+ },
+ {
+  "date": "2020-01-31",
+  "well": "TEC-2",
+  "category": "production",
+  "title": "TEC-2 commingled for testing with TEC-10",
+  "detail": "GLJ note; the 2020 CNH filing names both wells as origin. Per-well volumes after Nov 2019 are not separable.",
+  "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4; docs/gaps.md G-32",
+  "uncertain": true,
+  "uncertain_why": "no per-well data (G-32)"
+ },
+ {
+  "date": "2020-04",
+  "well": "FIELD",
+  "category": "shut_in",
+  "title": "Field shut in Apr-Jun 2020 (price collapse)",
+  "detail": "CNH 2020 filing reports zero production for three months; no sales tickets.",
+  "source": "docs/13_cnh_filings_gis_cmi.md §2"
+ },
+ {
+  "date": "2020-07-02",
+  "well": "BLOCK",
+  "category": "regulatory",
+  "title": "Evaluation report and transition plan filed",
+  "detail": "Tonalli files the Informe de Evaluacion and Programa de Transicion request; CNH dismisses both on 7 Aug 2020.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md"
+ },
+ {
+  "date": "2020-07-21",
+  "well": "BLOCK",
+  "category": "corporate",
+  "title": "PEMEX early-production sales contract",
+  "detail": "Contrato de Compraventa de Petroleo de Produccion Temprana PEP-Tonalli; realised price averaged 0.81 x WTI in 2020-22.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md; docs/18_kinjal_briefing.md A8"
+ },
+ {
+  "date": "2020-09",
+  "well": "TEC-2",
+  "category": "production",
+  "title": "TEC-2 last reported rate: 18 bbl/d",
+  "detail": "18 bbl/d oil at 72 % water cut (Sep 2020); GLJ lists Sep 2020 as last production; ~10.0 kbbl since 2018.",
+  "source": "docs/18_kinjal_briefing.md A5; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4"
+ },
+ {
+  "date": "2020-09",
+  "well": "TEC-12",
+  "category": "regulatory",
+  "title": "TEC-12 drilling programme issued",
+  "detail": "Programa de perforacion: directional from the TEC-10 pad, target El Abra -2,296 mSS at 2,323.2 mMD, TD 2,360 mMD; 7 in to TD; open-hole density, neutron, induction, GR.",
+  "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4"
+ },
+ {
+  "date": "2020-11",
+  "well": "TEC-12",
+  "category": "corporate",
+  "title": "TEC-12 AFE: USD 1,572,724 (S-shape)",
+  "detail": "AFE priced on Nov 2020 (2018 contract) rates; PPI-indexed to Sep 2026 it is USD 2.04 MM.",
+  "source": "docs/Tecolutla_Field_History_and_TEC12_Review_v4.md §6.3; docs/08_afe.md"
+ },
+ {
+  "date": "2020-12",
+  "well": "FIELD",
+  "category": "stimulation",
+  "title": "Stimulation booked Dec 2020 (USD 4,225)",
+  "detail": "2020 lease operating statement carries a USD 4,225 stimulation in December; well not named.",
+  "source": "data/processed/database_review/acc_review.csv (2020 LOS)",
+  "uncertain": true,
+  "uncertain_why": "well and fluid not recorded"
+ },
+ {
+  "date": "2021-02-25",
+  "well": "TEC-10",
+  "category": "production",
+  "title": "TEC-10 choke opened",
+  "detail": "GLJ note: choke increased 25 Feb 2021. TEC-10 was the only producer in 2021: 17,402 bbl net, 81 % water, GOR 859 scf/bbl; 2021 average 47.9 bbl/d (GLJ).",
+  "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4; docs/13_cnh_filings_gis_cmi.md §2"
+ },
+ {
+  "date": "2021-12",
+  "well": "TEC-10",
+  "category": "production",
+  "title": "TEC-10 down to 34 bbl/d at 86 % water",
+  "detail": "Dec 2021: 1,062 bbl oil and 6,453 bbl water; 75.8 kbbl cumulative. GLJ Q4-2021: 35 bbl/d, 210 bbl/d water, GOR 1,127.",
+  "source": "data/processed/cnh/cnh_production_filings_2020_2022.csv; docs/18_kinjal_briefing.md A5; data/processed/deck_notes/wells_ops_reserves_notes.md §2.3"
+ },
+ {
+  "date": "2022-02-04",
+  "well": "FIELD",
+  "category": "shut_in",
+  "title": "CNH rejects evaluation; field shut in",
+  "detail": "CNH resolved the Informe de Evaluacion unfavourably on 3 Feb 2022; on 4 Feb Tonalli withdrew its transition request and stopped production. Jaguar deck: TEC-10 'stim required during restart'.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md; docs/18_kinjal_briefing.md A5",
+  "uncertain": true,
+  "uncertain_why": "other sources date the shut-in to Jul 2022 (CNH filings) or early 2023 (GLJ, environmental permit), G-65"
+ },
+ {
+  "date": "2022-04",
+  "well": "TEC-11",
+  "category": "regulatory",
+  "title": "TEC-11 temporary-abandonment notice",
+  "detail": "Aviso de abandono temporal (art. 54) filed; 100 % water, composite plug at ~2,400 m.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md"
+ },
+ {
+  "date": "2022-07-18",
+  "well": "BLOCK",
+  "category": "regulatory",
+  "title": "CNH approves the Programa de Transicion",
+  "detail": "Resolution CNH.E.56.001/2022; approved programme was 1,400 bbl/month; TEC-12 in the plan.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md; docs/13_cnh_filings_gis_cmi.md §2"
+ },
+ {
+  "date": "2022-08",
+  "well": "FIELD",
+  "category": "production",
+  "title": "238 bbl produced to tank, Aug-Sep 2022",
+  "detail": "CNH monthly reports: 189 bbl (Aug) and 49 bbl (Sep) net oil, no sales; these became the 238 bbl opening inventory of Nov 2022.",
+  "source": "docs/13_cnh_filings_gis_cmi.md §2; data/processed/deck_notes/wells_ops_reserves_notes.md §3.6",
+  "uncertain": true,
+  "uncertain_why": "well not named"
+ },
+ {
+  "date": "2022-08-25",
+  "well": "BLOCK",
+  "category": "corporate",
+  "title": "IDESA exits; Jaguar buys 50 % of Tonalli",
+  "detail": "Petro Frontera bought IDESA's 50 % for MXN 100 and sold 50 % to Jaguar for USD 850,000; Jaguar to become operator.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md"
+ },
+ {
+  "date": "2022-11-24",
+  "well": "TEC-10",
+  "category": "stimulation",
+  "title": "TEC-10 stimulated and restarted",
+  "detail": "Nov 2022 stimulation (USD 20,003); 15 producing days: 2,260 bbl gross, 678 bbl net, 1,582 bbl water (70 %), 0.9 MMcf flared, 30.9 API; 916 bbl delivered 24-30 Nov.",
+  "source": "data/processed/database_review/acc_review.csv (2022 LOS); docs/13_cnh_filings_gis_cmi.md §2"
+ },
+ {
+  "date": "2022-12",
+  "well": "TEC-2",
+  "category": "workover",
+  "title": "TEC-2 worked over; restarts at 23 bopd",
+  "detail": "GLJ YE2022: workover Dec 2022, restarted at 23 bopd but uneconomic; 31 days on in 2022 at 22.8 bbl/d, 80.4 % water.",
+  "source": "data/processed/database_review/res_findings.md finding 3; data/processed/database_review/res_review.csv row 8"
+ },
+ {
+  "date": "2023-01",
+  "well": "FIELD",
+  "category": "shut_in",
+  "title": "Last production: TEC-2 16, TEC-10 2 bbl/d",
+  "detail": "GLJ Table 1: last production month Jan 2023 for both wells; 530 bbl sold in 2023. GLJ cites an environmental permit; IFR representation letters say all permits are in place.",
+  "source": "data/processed/database_review/res_findings.md finding 4; docs/gaps.md G-65; docs/18_kinjal_briefing.md A9",
+  "uncertain": true,
+  "uncertain_why": "shut-in cause unresolved (G-65)"
+ },
+ {
+  "date": "2023-10-01",
+  "well": "BLOCK",
+  "category": "corporate",
+  "title": "Petro Frontera diluted to 42.63 %",
+  "detail": "Default notice 1 Oct 2023: IFR diluted to 44.19 %, then 42.63 % at 31 Dec 2023; Jaguar 57.37 %.",
+  "source": "data/processed/deck_notes/accounting_notes.md §7-8"
+ },
+ {
+  "date": "2023-10-26",
+  "well": "TEC-7",
+  "category": "regulatory",
+  "title": "TEC-7 injection MIA extension ends",
+  "detail": "The MIA 1077/2017 extension under which TEC-7 injected ran 26 Oct 2020 - 26 Oct 2023.",
+  "source": "data/processed/deck_notes/drive_reads_notes.md",
+  "uncertain": true,
+  "uncertain_why": "no document links this to the shut-in; whether it was renewed is not in the files"
+ },
+ {
+  "date": "2024",
+  "well": "FIELD",
+  "category": "shut_in",
+  "title": "2024: no production; holding cost USD 289 k",
+  "detail": "GLJ YE2024 shows zero production; Tonalli P&L opex USD 289 k (one USD 7,003 revenue line in Jul 2024). Abandonment reserve USD 411 k for four wells and facilities.",
+  "source": "data/processed/database_review/res_review.csv rows 14, 21; data/processed/deck_notes/drive_reads_notes.md",
+  "uncertain": true,
+  "uncertain_why": "source of the Jul-2024 revenue not stated"
+ },
+ {
+  "date": "2025-02",
+  "well": "BLOCK",
+  "category": "regulatory",
+  "title": "CNH suspends evaluation and transition clocks",
+  "detail": "Acuerdo CNH.E.08.01.25 suspended exploration/evaluation periods and transition programmes.",
+  "source": "docs/gaps.md G-49"
+ },
+ {
+  "date": "2025-03-18",
+  "well": "BLOCK",
+  "category": "regulatory",
+  "title": "New hydrocarbons law; CNH replaced by CNE",
+  "detail": "Ley del Sector Hidrocarburos: existing contracts keep their terms; CNH functions pass to the Comision Nacional de Energia; Reglamento 3 Oct 2025.",
+  "source": "docs/gaps.md G-49"
+ },
+ {
+  "date": "2026-04-28",
+  "well": "BLOCK",
+  "category": "regulatory",
+  "title": "GLJ YE2025 for Kinjal: 348/903/1,383 kbbl",
+  "detail": "No producing reserves; TEC-10 and TEC-2 PDNP with 15 k$ workovers in Aug 2026; TEC-12 drilled Jul 2028 (text says 2027) at USD 1.9 MM.",
+  "source": "data/processed/database_review/res_findings.md YE2024-25 section"
+ },
+ {
+  "date": "2026-05-25",
+  "well": "BLOCK",
+  "category": "corporate",
+  "title": "Kinjal: Tonalli debt to go at closing",
+  "detail": "Release: all Tonalli indebtedness eliminated at closing; field-wide reserve report planned after closing.",
+  "source": "docs/18_kinjal_briefing.md header"
+ },
+ {
+  "date": "2026-09-03",
+  "well": "BLOCK",
+  "category": "corporate",
+  "title": "IFR agrees to buy Jaguar's 57.37 %",
+  "detail": "Definitive agreement gives the resulting issuer (Kinjal reverse takeover) 100 % of Tonalli and the block, subject to TSXV, shareholder and Mexican (SENER) approvals.",
+  "source": "docs/18_kinjal_briefing.md header"
+ },
+ {
+  "date": "2026-10",
+  "well": "FIELD",
+  "category": "shut_in",
+  "title": "Today: every well shut in or abandoned",
+  "detail": "TEC-10, TEC-2 shut in since Jan 2023; TEC-7 shut-in injector; TEC-11 temporarily abandoned; TEC-3, 5, 6, 9, 101 plugged; TEC-12 undrilled. No record that the planned Aug 2026 workovers took place.",
+  "source": "data/processed/database_review/res_findings.md; docs/18_kinjal_briefing.md B3",
+  "uncertain": true,
+  "uncertain_why": "status as of the files read; no 2026 operations record in the repository"
+ }
+]

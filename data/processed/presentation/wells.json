@@ -1,0 +1,1533 @@
+[
+ {
+  "well": "TEC-2",
+  "alias": "Tecolutla-2 (discovery well)",
+  "uwi": "1030022460",
+  "surface_x": 707586.77,
+  "surface_y": 2262986.35,
+  "coord_source": "data/processed/deck_notes/wells_ops_reserves_notes.md §1.1 (well header CSV, UTM 14N WGS84)",
+  "kb_m": 4.0,
+  "kb_note": "repository uses 4.00 m; PEMEX 1956/1971 and Tonalli 2016 give rotary table 3.80 m (G-58, G-72)",
+  "td_mmd": 2375.0,
+  "td_mss": 2371.0,
+  "td_note": "vertical; TD - KB 4.00 (2,371.2 with KB 3.80); PE2017 table gives TD 2,379 m",
+  "el_abra_top_mss": -2301.6,
+  "el_abra_top_note": "tops table 2,305.64 mMD (-2,301.6 mSS); GLJ map -2,302; cuttings reading 2,320 mMD / -2,316 mSS conflicts (G-77)",
+  "spud": "1956-04-16",
+  "completed": "1956-06-09",
+  "rig_release": "1956-05-31",
+  "type": "vertical",
+  "deviation": null,
+  "purpose": "exploration (discovery well, 520 m SW of TEC-3)",
+  "result": "producer (oil; gas at the top of El Abra on the first test)",
+  "initial_test": {
+   "date": "1956-06-08",
+   "interval_mmd": "2335-2339",
+   "oil_m3_d": 72,
+   "oil_bbl_d": 452.9,
+   "water_pct": "8 (PEMEX expediente); 5-9 (Forma 19); ByZone 'up to 9.4'",
+   "gor_m3_m3": 96,
+   "gor_scf_bbl": 539,
+   "choke": "6 mm",
+   "source": "data/processed/tecolutla_production_gaps_pemex.csv (TEC-2 1956-06 row); docs/17_government_records.md (Forma 19); data/processed/deck_notes/wells_ops_reserves_notes.md §2.2 (ByZone 453 bbl/d, 541 scf/bbl)",
+   "other_tests_1956": [
+    {
+     "interval_mmd": "2307.4-2321.7 (open hole, after 1,900 L acid)",
+     "oil_m3_d": 41,
+     "oil_bbl_d": 257.9,
+     "gas_m3_d": 47702,
+     "gor_m3_m3": 1163,
+     "gor_scf_bbl": 6530,
+     "choke": "6 mm",
+     "note": "gas-cap gas at the top of El Abra; FTP 174 kg/cm2"
+    },
+    {
+     "interval_mmd": "2345-2349",
+     "oil_m3_d": 56,
+     "oil_bbl_d": 352.2,
+     "gas_m3_d": 4320,
+     "gor_m3_m3": 77,
+     "gor_scf_bbl": 432,
+     "note": "later squeezed; 0 bbl produced"
+    }
+   ]
+  },
+  "intervals": [
+   {
+    "interval_mmd": "2335-2339",
+    "interval_mss": "2331-2335",
+    "period": "Jun 1956 - Mar 1957 (squeezed Dec 1971)",
+    "oil_bbl": 40885,
+    "basis": "PEMEX wellfile (6.5 x10^3 m3)"
+   },
+   {
+    "interval_mmd": "2307.4-2311",
+    "interval_mss": "2303.4-2307",
+    "period": "Jan 1972 - Jan 2016; Tonalli 2018-2023",
+    "oil_bbl": 320334,
+    "basis": "CNH monthly to 2016-01 (3,660 bbl of it hand-entered, G-33)"
+   },
+   {
+    "interval_mmd": "2319-2320",
+    "interval_mss": "2315-2316",
+    "period": "add-perf Feb 2019",
+    "oil_bbl": null,
+    "basis": "operations log only (G-59)"
+   }
+  ],
+  "cum_oil_bbl": 371177,
+  "cum_oil_basis": "arithmetic sum of 40,885 (wellfile 1956-57) + 320,334 (CNH 1972-2016) + 9,958 (Tonalli era since 2018, Sep 2022 Jaguar deck per drive_reads_notes). GLJ gives 329.2 kbbl to Dec 2022 (excludes the 1956-57 wellfile volume).",
+  "cum_oil_sources": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.2, §2.3; data/processed/deck_notes/drive_reads_notes.md (task 18 reads); data/processed/database_review/res_review.csv row 8",
+  "status_now": "shut in since Jan 2023; restorable on paper (GLJ YE2025: PDNP, 15 k$ workover planned Aug 2026); no record of the 2026 workover in the repository",
+  "status_timeline": [
+   {
+    "from": "1956-04-16",
+    "to": "1956-05-31",
+    "status": "drilling",
+    "note": "spud 16 Apr 1956; open-hole test of 2,307.4-2,321.7 m and static pressure 24 May; deepened to 2,375 m, logged 27 May, 4 1/2 in liner cemented 28 May; rig release 31 May 1956",
+    "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4; data/processed/wells/casing_strings.csv; docs/17_government_records.md"
+   },
+   {
+    "from": "1956-06-01",
+    "to": "1956-06-08",
+    "status": "testing",
+    "note": "perforated tests 2,345-2,349 and 2,335-2,339 m (8 Jun 1956: 72 m3/d)",
+    "source": "docs/17_government_records.md; data/processed/tecolutla_production_gaps_pemex.csv"
+   },
+   {
+    "from": "1956-06-09",
+    "to": "1957-03",
+    "status": "producing",
+    "note": "completed 9 Jun 1956; flowing from 2,335-2,339 m to the battery to Mar 1957; no monthly volumes exist",
+    "source": "data/processed/tecolutla_production_gaps_pemex.csv (TEC-2 1956-06..1957-03); data/processed/deck_notes/wells_ops_reserves_notes.md §2.4"
+   },
+   {
+    "from": "1957-04",
+    "to": "1971-11",
+    "status": "shut_in",
+    "note": "closed 'por alto contenido de agua salada' (high salt-water cut)",
+    "source": "data/processed/tecolutla_production_gaps_pemex.csv; docs/18_kinjal_briefing.md A4"
+   },
+   {
+    "from": "1971-12-27",
+    "to": "1972-01",
+    "status": "workover",
+    "note": "Reparacion Mayor No.1 (rig 5615) 27-29 Dec 1971: 2,335-2,339 m cemented, 2,307-2,311 m shot and acidised; to battery late Jan 1972",
+    "source": "data/processed/tecolutla_production_gaps_pemex.csv"
+   },
+   {
+    "from": "1972-01",
+    "to": "1974-09",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1974-10",
+    "to": "1975-04",
+    "status": "shut_in",
+    "note": "no production in the CNH record (7 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1975-05",
+    "to": "1978-05",
+    "status": "producing",
+    "note": "CNH monthly record; includes 2 month(s) of short (<3-month) zero-production gaps not shown separately",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1978-06",
+    "to": "1979-09",
+    "status": "shut_in",
+    "note": "no production in the CNH record (16 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1979-10",
+    "to": "1980-08",
+    "status": "producing",
+    "note": "CNH monthly record; includes 3 month(s) of short (<3-month) zero-production gaps not shown separately",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1980-09",
+    "to": "1980-12",
+    "status": "shut_in",
+    "note": "no production in the CNH record (4 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1981-01",
+    "to": "1981-06",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1981-07",
+    "to": "1981-11",
+    "status": "shut_in",
+    "note": "no production in the CNH record (5 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1981-12",
+    "to": "1982-01",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1982-02",
+    "to": "1982-08",
+    "status": "shut_in",
+    "note": "no production in the CNH record (7 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1982-09",
+    "to": "1982-09",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1982-10",
+    "to": "1983-09",
+    "status": "shut_in",
+    "note": "no production in the CNH record (12 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1983-10",
+    "to": "1988-04",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1988-05",
+    "to": "1990-01",
+    "status": "shut_in",
+    "note": "no production in the CNH record (21 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1990-02",
+    "to": "1999-01",
+    "status": "producing",
+    "note": "CNH monthly record; includes 2 month(s) of short (<3-month) zero-production gaps not shown separately",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1999-02",
+    "to": "2006-08",
+    "status": "shut_in",
+    "note": "no production in the CNH record (91 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "2006-09",
+    "to": "2014-12",
+    "status": "producing",
+    "note": "CNH monthly record; includes 7 month(s) of short (<3-month) zero-production gaps not shown separately",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "2015-01",
+    "to": "2016-01",
+    "status": "producing",
+    "note": "13 monthly rows exist only in a later IFR copy, integer bbl/d with water rising exactly 390 bbl/month (hand-entered, G-33); cedula gives last production 15 Jan 2016",
+    "source": "docs/04_production_database.md §3; docs/gaps.md G-33, G-34; docs/17_government_records.md",
+    "uncertain": true,
+    "uncertain_why": "CNH original record ends 2014-12; PEMEX Dec 2015 report says the field was closed; PE2017 gives last production Dec 2014"
+   },
+   {
+    "from": "2016-02",
+    "to": "2018-05",
+    "status": "shut_in",
+    "note": "field shut in at handover (Acta Hora Cero 23 Nov 2016); static gradient run 27 Mar 2018",
+    "source": "docs/04_production_database.md §3; docs/05_pressure.md §2"
+   },
+   {
+    "from": "2018-05",
+    "to": "2018-05-30",
+    "status": "workover",
+    "note": "clean-out found paraffin in tubing; test and IHS build-up 8-30 May 2018 (final flow 50 bbl/d oil, 453 bbl/d water)",
+    "source": "docs/18_kinjal_briefing.md A5; data/processed/deck_notes/wells_ops_reserves_notes.md §3.3; docs/05_pressure.md §5"
+   },
+   {
+    "from": "2018-06",
+    "to": "2018-08",
+    "status": "shut_in",
+    "note": "shut in for lack of water disposal",
+    "source": "docs/18_kinjal_briefing.md A5"
+   },
+   {
+    "from": "2018-09",
+    "to": "2018-09",
+    "status": "testing",
+    "note": "test month, 411 bbl oil sold",
+    "source": "docs/04_production_database.md §4; tecolutla_production.csv (tonalli_monthly_test_2018)"
+   },
+   {
+    "from": "2018-10",
+    "to": "2019-01",
+    "status": "shut_in",
+    "note": "no TEC-2 sales tickets between Sep 2018 and Jun 2019",
+    "source": "data/processed/tecolutla_production.csv (tonalli_trucking_sales: TEC-2 tickets only in 2018-09 and 2019-06)",
+    "uncertain": true,
+    "uncertain_why": "status inferred from the absence of sales tickets, not from a status report"
+   },
+   {
+    "from": "2019-02",
+    "to": "2019-02",
+    "status": "workover",
+    "note": "add-perf 2,319-2,320 mKB (RTG 1 11/16 in, 3 spm) per operations log",
+    "source": "docs/gaps.md G-59; data/processed/wells/casing_strings.csv",
+    "uncertain": true,
+    "uncertain_why": "May 2019 Tonalli schematic does not show this interval (G-59 weakened)"
+   },
+   {
+    "from": "2019-03",
+    "to": "2019-04",
+    "status": "shut_in",
+    "note": "no TEC-2 sales tickets",
+    "source": "data/processed/tecolutla_production.csv",
+    "uncertain": true,
+    "uncertain_why": "inferred from the absence of sales tickets"
+   },
+   {
+    "from": "2019-05",
+    "to": "2019-05",
+    "status": "workover",
+    "note": "permanent plug at 2,322.5 m over wet deeper perforations; packer 2,292.65 m",
+    "source": "docs/gaps.md G-59; data/processed/database_review/eng_findings.md item 4"
+   },
+   {
+    "from": "2019-06",
+    "to": "2019-09",
+    "status": "producing",
+    "note": "69-day test 47 bbl/d oil at 75 % water cut, ~250 psi; 2,045 bbl sold Jun 2019; shut in Sep 2019 as uneconomic",
+    "source": "docs/18_kinjal_briefing.md A5; data/processed/deck_notes/drive_reads_notes.md (directors' memo 6 Sep 2019)"
+   },
+   {
+    "from": "2019-09",
+    "to": "2020-01-30",
+    "status": "shut_in",
+    "note": "uneconomic, USD 8 k demobilisation",
+    "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §3.3"
+   },
+   {
+    "from": "2020-01-31",
+    "to": "2020-03",
+    "status": "producing",
+    "note": "commingled for testing with TEC-10 (GLJ note)",
+    "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4 (GLJ20 Table 2.2 note 2)",
+    "uncertain": true,
+    "uncertain_why": "per-well volumes after Nov 2019 not separable (G-32)"
+   },
+   {
+    "from": "2020-04",
+    "to": "2020-06",
+    "status": "shut_in",
+    "note": "field shut in (price collapse); CNH 2020 filing zeros",
+    "source": "docs/13_cnh_filings_gis_cmi.md §2"
+   },
+   {
+    "from": "2020-07",
+    "to": "2020-09",
+    "status": "producing",
+    "note": "CNH 2020 filing origin 'Pozos Tecolutla 2 y Tecolutla 10'; GLJ Table 1 last production 2020-09; last reported rate 18 bbl/d at 72 % water cut (Sep 2020)",
+    "source": "docs/13_cnh_filings_gis_cmi.md §2; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4; docs/18_kinjal_briefing.md A5",
+    "uncertain": true,
+    "uncertain_why": "no per-well volumes (G-32)"
+   },
+   {
+    "from": "2020-10",
+    "to": "2022-11",
+    "status": "shut_in",
+    "note": "2021 CNH filing names TEC-10 as the only origin",
+    "source": "docs/13_cnh_filings_gis_cmi.md §2"
+   },
+   {
+    "from": "2022-12",
+    "to": "2023-01",
+    "status": "producing",
+    "note": "after a Dec 2022 workover (GLJ YE2022: restarted at 23 bopd 'but uneconomic'); 2022: 31 days on, 22.8 bbl/d on-stream, 80.4 % water cut; last production Jan 2023 at 16 bbl/d (GLJ YE2025 Table 1)",
+    "source": "data/processed/database_review/res_review.csv rows 8, 14, 33; docs/gaps.md G-65"
+   },
+   {
+    "from": "2023-02",
+    "to": null,
+    "status": "shut_in",
+    "note": "shut in since Jan 2023; GLJ YE2025 carries it PDNP with a 15 k$ workover in Aug 2026 (no record that it was done)",
+    "source": "data/processed/database_review/res_findings.md YE2024-25 table; docs/gaps.md G-65",
+    "uncertain": true,
+    "uncertain_why": "shut-in cause and date conflict: GLJ 'early 2023, environmental permit'; CNH filings show the field effectively shut from Jul 2022; Tonalli stopped production 4 Feb 2022"
+   }
+  ]
+ },
+ {
+  "well": "TEC-3",
+  "uwi": "1030022461",
+  "surface_x": 707858.9,
+  "surface_y": 2263433.11,
+  "coord_source": "data/processed/deck_notes/wells_ops_reserves_notes.md §1.1",
+  "kb_m": 6.0,
+  "kb_note": "1956 PEMEX records give 5.78 m (G-54 update, G-72)",
+  "td_mmd": 2380.5,
+  "td_mss": 2374.5,
+  "td_note": "vertical; TD - KB 6.00 (2,374.7 with KB 5.78); header CSV 2,381",
+  "el_abra_top_mss": -2372.6,
+  "el_abra_top_note": "tops table 2,378.58 mMD (geo_findings §3)",
+  "spud": "1956-02-10",
+  "completed": "1956-03-07",
+  "type": "vertical",
+  "deviation": null,
+  "purpose": "exploration (first Tecolutla well)",
+  "result": "dry: oil over salt water on test; plugged ('invaded by water')",
+  "initial_test": {
+   "date": "1956 (before 7 Mar)",
+   "interval_mmd": "2376.8-2380.8 (open hole DST, ~2,370-2,375 mSS)",
+   "oil_bbl_d": null,
+   "recovery": "980 m of gassy oil (0.909 g/cc, ~24 API) + 80 m salt water in 1,060 m of 4 1/2 in pipe (CNH tables mis-transcribe as '980 m3')",
+   "water_pct": "16 (Tecolutla Summary.xlsx)",
+   "gor": null,
+   "choke": null,
+   "pressure": "20/50 kg/cm2 flowing; 230 kg/cm2 after 10-min shut-in",
+   "source": "data/processed/database_review/cnh_findings.md §4; data/processed/database_review/eng_findings.md item 10; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4"
+  },
+  "cum_oil_bbl": 0,
+  "cum_oil_basis": "never produced",
+  "status_now": "plugged and abandoned 1956 (surface shoe 601.7 m; cement plugs 2,310-2,380.5 and 571.7-625 m)",
+  "status_timeline": [
+   {
+    "from": "1956-02-10",
+    "to": "1956-03-07",
+    "status": "drilling",
+    "note": "drilled to the top of El Abra; DST 2,376.8-2,380.8 m",
+    "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4; data/processed/deck_notes/geology_geophysics_notes.md §10.2"
+   },
+   {
+    "from": "1956-03-07",
+    "to": null,
+    "status": "dry_abandoned",
+    "note": "abandoned 7 Mar 1956; lowest known oil -2,374.2 mSS used by GLJ as OWC",
+    "source": "data/processed/wells/casing_strings.csv; data/processed/database_review/cnh_findings.md §4"
+   }
+  ]
+ },
+ {
+  "well": "TEC-5",
+  "uwi": "1030022462",
+  "surface_x": 706443.52,
+  "surface_y": 2263588.88,
+  "coord_source": "data/processed/deck_notes/wells_ops_reserves_notes.md §1.1",
+  "kb_m": 4.0,
+  "kb_note": "LAS header 4.3 m (G-72)",
+  "td_mmd": 2562.1,
+  "td_mss": 2558.1,
+  "td_note": "vertical; TD - KB",
+  "el_abra_top_mss": -2551.0,
+  "el_abra_top_note": "El Abra 2,555 mMD, 5 m penetrated, 248 m lower than TEC-2 (PEMEX 1956 final report)",
+  "spud": "1956-06-25",
+  "completed": "1956-07-28",
+  "type": "vertical",
+  "deviation": null,
+  "purpose": "exploration (1,290 m NW of TEC-2)",
+  "result": "dry: structurally low, water; no tests",
+  "initial_test": null,
+  "cum_oil_bbl": 0,
+  "cum_oil_basis": "never produced",
+  "status_now": "plugged and abandoned 1956",
+  "status_timeline": [
+   {
+    "from": "1956-06-25",
+    "to": "1956-07-28",
+    "status": "drilling",
+    "note": "full column incl. San Felipe 58 m; El Abra 2,555 mMD",
+    "source": "data/processed/deck_notes/drive_reads_notes.md (TEC-5 informe final)"
+   },
+   {
+    "from": "1956-07-28",
+    "to": null,
+    "status": "dry_abandoned",
+    "note": "plugged 28 Jul 1956 (plugging programme dated 31 Jul 1956)",
+    "source": "data/processed/wells/casing_strings.csv; data/processed/database_review/cnh_findings.md §4"
+   }
+  ]
+ },
+ {
+  "well": "TEC-6",
+  "uwi": "1030022463",
+  "surface_x": 707493.99,
+  "surface_y": 2262529.05,
+  "coord_source": "data/processed/deck_notes/wells_ops_reserves_notes.md §1.1",
+  "kb_m": 5.67,
+  "kb_note": "PEMEX 1956 final report 5.67 m; header CSV 6.00 m (pressure work uses 6.0)",
+  "td_mmd": 2338.9,
+  "td_mss": 2333.2,
+  "td_note": "vertical; TD - KB 5.67",
+  "el_abra_top_mss": -2296.0,
+  "el_abra_top_note": "PEMEX 1956: 2,302 mMD / -2,296 mSS (36 m penetrated); tops table -2,294.1; GLJ -2,294",
+  "spud": "1956-09-08",
+  "completed": "1956-10-16",
+  "type": "vertical",
+  "deviation": null,
+  "purpose": "development",
+  "result": "producer",
+  "initial_test": {
+   "date": "1956-10",
+   "interval_mmd": "2336-2338 (open hole, 3 7/8 in, after 960 L acid)",
+   "oil_m3_d": 77,
+   "oil_bbl_d": 484.3,
+   "water_pct": 3.4,
+   "gor_m3_m3": 97,
+   "gor_scf_bbl": 545,
+   "choke": "not stated (TP 40 / TR 7 kg/cm2)",
+   "source": "data/processed/deck_notes/drive_reads_notes.md (TECOLUTLA_6_INFORME_FINAL.pdf)",
+   "conflict": "PEMEX production expediente: 92 m3/d (578.7 bbl/d) on 10 mm, RGA 104, 3.4 % water (data/processed/tecolutla_production_gaps_pemex.csv); ByZone 579 bbl/d, 576 scf/bbl (data/processed/deck_notes/wells_ops_reserves_notes.md §2.2)"
+  },
+  "intervals": [
+   {
+    "interval_mmd": "2336-2338",
+    "interval_mss": "2330-2332",
+    "period": "Oct 1956 - Feb 1972",
+    "oil_bbl": 509993,
+    "basis": "122,004 bbl monthly records + ~388 kbbl PEMEX wellfile allocation"
+   },
+   {
+    "interval_mmd": "2324-2327",
+    "interval_mss": "2318-2321",
+    "period": "Feb 1972 - Jan 1976",
+    "oil_bbl": 84293,
+    "basis": "CNH monthly"
+   },
+   {
+    "interval_mmd": "2314-2316",
+    "interval_mss": "2308-2310",
+    "period": "Mar 1976 - Dec 2006",
+    "oil_bbl": 305499,
+    "basis": "CNH monthly"
+   },
+   {
+    "interval_mmd": "2303-2304",
+    "interval_mss": "2297-2298",
+    "period": "-",
+    "oil_bbl": null,
+    "basis": "bridge plug; window above never perforated"
+   }
+  ],
+  "cum_oil_bbl": 899785,
+  "cum_oil_basis": "ByZone sum of three intervals (509,993 + 84,293 + 305,499); ~388 kbbl of it is a wellfile allocation. CNH monthly 1966-2006 alone: 507,185 bbl (GLJ 507.2 kbbl).",
+  "cum_oil_sources": "docs/Tecolutla_Field_History_and_TEC12_Review_v4.md §2.2; data/processed/deck_notes/wells_ops_reserves_notes.md §2.3",
+  "status_now": "plugged and abandoned 2007 (casing parted at 352 m); beside the TEC-10/TEC-12 pad",
+  "status_timeline": [
+   {
+    "from": "1956-09-08",
+    "to": "1956-10-16",
+    "status": "drilling",
+    "note": "spud 8 Sep, TD 16 Oct 1956 (rig release 15 Oct per ByZone)",
+    "source": "data/processed/deck_notes/drive_reads_notes.md (TEC-6 informe final)"
+   },
+   {
+    "from": "1956-10",
+    "to": "1965-12",
+    "status": "producing",
+    "note": "open hole 2,336-2,338 m; TEC-6 was the field's only producer from Mar 1957 to Oct 1971; no per-well monthly volumes before 1966 (field-level 1960-65)",
+    "source": "data/processed/tecolutla_production_gaps_pemex.csv; docs/04_production_database.md §3; docs/18_kinjal_briefing.md A4"
+   },
+   {
+    "from": "1966-01",
+    "to": "1966-09",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1966-10",
+    "to": "1967-01",
+    "status": "shut_in",
+    "note": "no production in the CNH record (4 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1967-02",
+    "to": "1971-07",
+    "status": "producing",
+    "note": "CNH monthly record; includes 2 month(s) of short (<3-month) zero-production gaps not shown separately",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1971-08-02",
+    "to": "1971-10",
+    "status": "shut_in",
+    "note": "closed 2 Aug 1971 for a pressure build-up; 11 static surveys to 18 Oct 1971",
+    "source": "data/processed/tecolutla_production_gaps_pemex.csv; docs/05_pressure.md §2"
+   },
+   {
+    "from": "1971-11",
+    "to": "1972-01",
+    "status": "workover",
+    "note": "rigless squeeze of 2,336-2,338 m (Nov 1971), finished with rig from TEC-2 (13 Jan 1972); CNH shows 520 bbl in 6 days in Nov 1971",
+    "source": "data/processed/tecolutla_production_gaps_pemex.csv",
+    "uncertain": true,
+    "uncertain_why": "CNH Nov-1971 production row vs expediente 'closed until the Nov-1971 workover'"
+   },
+   {
+    "from": "1972-02",
+    "to": "1973-10",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1973-11",
+    "to": "1974-04",
+    "status": "shut_in",
+    "note": "no production in the CNH record (6 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1974-05",
+    "to": "1974-09",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1974-10",
+    "to": "1975-04",
+    "status": "shut_in",
+    "note": "no production in the CNH record (7 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1975-05",
+    "to": "1975-06",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1975-07",
+    "to": "1975-10",
+    "status": "shut_in",
+    "note": "no production in the CNH record (4 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1975-11",
+    "to": "1976-01",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1976-02",
+    "to": "1976-02",
+    "status": "workover",
+    "note": "Feb 1976 repair: 2,324-2,327 m invaded; recompleted 2,314-2,316 m; post-repair sampling 26-27 Mar 1976",
+    "source": "data/processed/tecolutla_production_gaps_pemex.csv"
+   },
+   {
+    "from": "1976-03",
+    "to": "1976-04",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1976-05",
+    "to": "1976-07",
+    "status": "shut_in",
+    "note": "no production in the CNH record (3 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1976-08",
+    "to": "1978-05",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1978-06",
+    "to": "1979-09",
+    "status": "shut_in",
+    "note": "no production in the CNH record (16 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1979-10",
+    "to": "1979-12",
+    "status": "producing",
+    "note": "CNH monthly record; includes 1 month(s) of short (<3-month) zero-production gaps not shown separately",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1980-01",
+    "to": "1980-03",
+    "status": "shut_in",
+    "note": "no production in the CNH record (3 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1980-04",
+    "to": "1980-06",
+    "status": "producing",
+    "note": "CNH monthly record; includes 1 month(s) of short (<3-month) zero-production gaps not shown separately",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1980-07",
+    "to": "1981-01",
+    "status": "shut_in",
+    "note": "no production in the CNH record (7 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1981-02",
+    "to": "1981-06",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1981-07",
+    "to": "1983-09",
+    "status": "shut_in",
+    "note": "no production in the CNH record (27 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1983-10",
+    "to": "1984-01",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1984-02",
+    "to": "1984-08",
+    "status": "shut_in",
+    "note": "no production in the CNH record (7 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1984-09",
+    "to": "1999-01",
+    "status": "producing",
+    "note": "CNH monthly record; includes 2 month(s) of short (<3-month) zero-production gaps not shown separately",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1999-02",
+    "to": "2003-07",
+    "status": "shut_in",
+    "note": "no production in the CNH record (54 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "2003-08",
+    "to": "2006-06",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "2006-07",
+    "to": "2006-10",
+    "status": "shut_in",
+    "note": "no production in the CNH record (4 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "2006-11",
+    "to": "2006-12",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "2007-01",
+    "to": "2007-02-22",
+    "status": "shut_in",
+    "note": "no 2007 production in the CNH record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)",
+    "uncertain": true,
+    "uncertain_why": "cnh_findings says the well 'ran on a PCP until 2007-02-26'"
+   },
+   {
+    "from": "2007-02-23",
+    "to": "2007-04-03",
+    "status": "workover",
+    "note": "abandonment operations 23 Feb - 3 Apr 2007 (estado mecanico gives last intervention 5 Mar - 2 Apr 2007); gas at surface; 6 5/8 in breach 352-1,100 m",
+    "source": "data/processed/database_review/cnh_findings.md §6; data/processed/database_review/eng_findings.md item 3; docs/gaps.md G-63"
+   },
+   {
+    "from": "2007-04-03",
+    "to": null,
+    "status": "plugged",
+    "note": "plugged and abandoned by PEMEX; plugs 298.06 m, retainer 1,947.62 m, ~2,235-2,280 m",
+    "source": "data/processed/wells/casing_strings.csv; docs/gaps.md G-63"
+   }
+  ]
+ },
+ {
+  "well": "TEC-7",
+  "uwi": "1030022466 (UWIs of TEC-7 and TEC-101 swapped in the header CSV, G-74)",
+  "surface_x": 707945.7,
+  "surface_y": 2262705.9,
+  "coord_source": "data/processed/deck_notes/wells_ops_reserves_notes.md §1.1",
+  "kb_m": 4.8,
+  "kb_note": "all 1956-71 PEMEX records: rotary table 4.80 m, ground 1.34 m (G-58 closed); repository earlier used 5.00",
+  "td_mmd": 2340.0,
+  "td_mss": 2335.2,
+  "td_note": "vertical; driller TD 2,340.0 m; informe final 2,340.5 m / 2,335.5 mbnm",
+  "el_abra_top_mss": -2304.0,
+  "el_abra_top_note": "E-log corrected top 2,309 mbmr / -2,304 mbnm (expediente p70); tops table -2,304.0; GLJ -2,304.2",
+  "spud": "1956-11-21",
+  "completed": "1957-01-25",
+  "completed_note": "22 Jan (schematic), 25 Jan (cedula/informe final) or 26 Jan 1957 (1964 program)",
+  "type": "vertical",
+  "deviation": null,
+  "purpose": "development",
+  "result": "producer (later produced-water injector)",
+  "initial_test": {
+   "date": "1957-01-23",
+   "interval_mmd": "2335-2337",
+   "oil_m3_d": 89,
+   "oil_bbl_d": 559.8,
+   "water_pct": "4.8 (radiogram) / 2.2 (informe final)",
+   "gor_m3_m3": 93,
+   "gor_scf_bbl": 522,
+   "choke": "6 mm",
+   "note": "2-hour test; FTP 68, FCP 54 kg/cm2; gas 8,300 m3/d",
+   "source": "data/processed/database_review/tec7_expediente_findings.md §4",
+   "conflict": "repository/ByZone 352 bbl/d (521 scf/bbl, 7.5 % water) is the 56 m3/d (352.2 bbl/d) first full day to battery, 25 Jan 1957 (G-81)"
+  },
+  "recompletion_test": {
+   "date": "1971-10-06",
+   "interval_mmd": "2310-2313 (2305-2308 mSS)",
+   "oil_m3_d": 76,
+   "oil_bbl_d": 478.0,
+   "water_pct": 0.2,
+   "gor_m3_m3": 78,
+   "gor_scf_bbl": 438,
+   "choke": "5 mm",
+   "source": "data/processed/database_review/tec7_expediente_findings.md §6"
+  },
+  "intervals": [
+   {
+    "interval_mmd": "2335-2337",
+    "interval_mss": "2330-2332",
+    "period": "Jan-Mar 1957 (+40 bbl Jun 1968 in CNH)",
+    "oil_bbl": 25971,
+    "basis": "4,129.0 m3 x 6.2898 (expediente p56; alt. 3,471 m3 = 21832 bbl)"
+   },
+   {
+    "interval_mmd": "2310-2313",
+    "interval_mss": "2305-2308",
+    "period": "Oct 1971 - Dec 2006",
+    "oil_bbl": 266988,
+    "basis": "CNH monthly"
+   }
+  ],
+  "cum_oil_bbl": 293001,
+  "cum_oil_basis": "arithmetic: 266,988 (CNH 1971-2006) + 40 (Jun 1968) + 25,971 (1957, 4,129 m3). GLJ 267.0 kbbl excludes 1957.",
+  "cum_oil_sources": "docs/Tecolutla_Field_History_and_TEC12_Review_v4.md §2.2; data/processed/database_review/tec7_expediente_findings.md",
+  "status_now": "shut in; equipped as produced-water injector (2 3/8 in string, packer ~2,300 m, Aug 2019); current wellhead state unknown (G-57)",
+  "status_timeline": [
+   {
+    "from": "1956-11-21",
+    "to": "1957-01-25",
+    "status": "drilling",
+    "note": "spud 21 Nov 1956 (rig 63); TD 9 Jan 1957 at 2,340.0 m; completion dated 22, 25 or 26 Jan 1957 in different documents; rig released 27 Jan",
+    "source": "data/processed/database_review/tec7_expediente_findings.md header"
+   },
+   {
+    "from": "1957-01-26",
+    "to": "1957-03-12",
+    "status": "producing",
+    "note": "flowing from 2,335-2,337 m; 4,129 m3 (26.0 kbbl) to Mar 1957 (1971 program says 3,471 m3)",
+    "source": "data/processed/database_review/tec7_expediente_findings.md §4-5; data/processed/tecolutla_production_gaps_pemex.csv"
+   },
+   {
+    "from": "1957-03-12",
+    "to": "1971-08",
+    "status": "shut_in",
+    "note": "'rapidly invaded by salt water'; 1964 repair approved but not executed; CNH shows 40 bbl in Jun 1968, not supported by the expediente",
+    "source": "data/processed/database_review/tec7_expediente_findings.md §5; data/processed/tecolutla_production_gaps_pemex.csv",
+    "uncertain": true,
+    "uncertain_why": "Dec-1964 surveys quote 72-95 days shut-in, inconsistent with continuous closure since 1957"
+   },
+   {
+    "from": "1971-08",
+    "to": "1971-10-08",
+    "status": "workover",
+    "note": "rigless workover 9 Sep - 6 Oct 1971: 2,335-2,337 m squeezed; 2,310-2,313 m perforated and acidised",
+    "source": "data/processed/database_review/tec7_expediente_findings.md §6"
+   },
+   {
+    "from": "1971-10",
+    "to": "1973-09",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1973-10",
+    "to": "1975-04",
+    "status": "shut_in",
+    "note": "no production in the CNH record (19 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1975-05",
+    "to": "1975-06",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1975-07",
+    "to": "1975-10",
+    "status": "shut_in",
+    "note": "no production in the CNH record (4 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1975-11",
+    "to": "1975-12",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1976-01",
+    "to": "1976-03",
+    "status": "shut_in",
+    "note": "no production in the CNH record (3 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1976-04",
+    "to": "1976-04",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1976-05",
+    "to": "1977-12",
+    "status": "shut_in",
+    "note": "no production in the CNH record (20 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1978-01",
+    "to": "1978-04",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1978-05",
+    "to": "1979-09",
+    "status": "shut_in",
+    "note": "no production in the CNH record (17 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1979-10",
+    "to": "1980-07",
+    "status": "producing",
+    "note": "CNH monthly record; includes 4 month(s) of short (<3-month) zero-production gaps not shown separately",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1980-08",
+    "to": "1980-12",
+    "status": "shut_in",
+    "note": "no production in the CNH record (5 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1981-01",
+    "to": "1981-06",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1981-07",
+    "to": "1981-11",
+    "status": "shut_in",
+    "note": "no production in the CNH record (5 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1981-12",
+    "to": "1982-01",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1982-02",
+    "to": "1983-06",
+    "status": "shut_in",
+    "note": "no production in the CNH record (17 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1983-07",
+    "to": "1990-01",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1990-02",
+    "to": "2006-09",
+    "status": "shut_in",
+    "note": "no production in the CNH record (200 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "2006-10",
+    "to": "2006-12",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "2007-01",
+    "to": "2019-06-15",
+    "status": "shut_in",
+    "note": "closed after Dec 2006 (PE2017); cedula 15 Mar 2017: closed, hermetic, last line 18.7 bbl/d at 45 % water",
+    "source": "docs/17_government_records.md; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4"
+   },
+   {
+    "from": "2019-06-16",
+    "to": "2019-06-23",
+    "status": "workover",
+    "note": "minor repair from 16 Jun 2019; Quimica Apollo stimulation 23 Jun 2019",
+    "source": "docs/gaps.md G-57"
+   },
+   {
+    "from": "2019-06-24",
+    "to": "2019-08-06",
+    "status": "testing",
+    "note": "2,310-2,313 m made 182 bbl/d water, 100 % water cut; 3,252 bbl hauled Jun-Jul 2019",
+    "source": "docs/18_kinjal_briefing.md A5; docs/04_production_database.md §4"
+   },
+   {
+    "from": "2019-08-07",
+    "to": "2023-01",
+    "status": "injector",
+    "note": "produced-water disposal by triplex pump from 7 Aug 2019; ASEA authorisation 1712/2019 (15 Nov 2019); ASEA compliance reports May-Nov 2020 and Jun-Nov 2021; injection-pump costs Dec 2020 and Sep 2022 (LOS); no volumes or pressures in any file (G-57)",
+    "source": "docs/18_kinjal_briefing.md A5; docs/gaps.md G-57; data/processed/database_review/acc_review.csv",
+    "uncertain": true,
+    "uncertain_why": "end date not recorded; set to the field's last production month (Jan 2023) as the latest date water needed disposal"
+   },
+   {
+    "from": "2023-02",
+    "to": null,
+    "status": "shut_in",
+    "note": "2024 abandonment sheet lists TEC-7 as 'Shut-in' (injection string not mentioned)",
+    "source": "data/processed/deck_notes/drive_reads_notes.md (Fideicomiso 2024-2025)",
+    "uncertain": true,
+    "uncertain_why": "start of shut-in inferred from the field shut-in; current wellhead state unknown (G-57)"
+   }
+  ]
+ },
+ {
+  "well": "TEC-9",
+  "uwi": "1030022465",
+  "surface_x": 707833.5,
+  "surface_y": 2262336.31,
+  "coord_source": "data/processed/deck_notes/wells_ops_reserves_notes.md §1.1 (header CSV); PEMEX estado mecanico prints UTM 707,873.67 / 2,262,243.38 (~100 m away; datum not stated, G-74)",
+  "kb_m": 5.07,
+  "kb_note": "PEMEX estado mecanico 5.07 m (GL 1.24); header CSV 5.00",
+  "td_mmd": 2340.0,
+  "td_mss": 2326.1,
+  "td_note": "PEMEX: TD 2,340 mMD = 2,331.2 mTVD (KB 5.07). Directional survey CSV gives 2,324.85 mTVD / -2,319.85 mSS at 2,340 mMD (conflict)",
+  "el_abra_top_mss": -2296.0,
+  "el_abra_top_note": "2,310 mMD / 2,301 mTVD KB / -2,296 mSS (estado mecanico); GLJ -2,295.87; every source agrees",
+  "spud": "1973-04-01",
+  "completed": "1973-05-19",
+  "type": "deviated",
+  "deviation": {
+   "kickoff_m": 296,
+   "direction": "N6 deg 15 min W",
+   "max_inclination": "11 deg 15 min",
+   "displacement_m": 112,
+   "back_to_vertical_from_mmd": 1192,
+   "cause": "a dropped piece of equipment changed the plan (WP); fish (4 1/2 in slips) at 388 m in the first hole",
+   "source": "data/processed/deck_notes/drive_reads_notes.md (estado mecanico); data/processed/deck_notes/wells_ops_reserves_notes.md §2.4",
+   "conflicts": "Work Program displacement 117.9 m (117.2 N, 12.5 W); directional survey CSV (UWI 1030022465) holds 9.5 deg from 1,928 m to TD and 205 m N at TD"
+  },
+  "purpose": "development",
+  "result": "producer",
+  "initial_test": {
+   "date": "1973-05",
+   "interval_mmd": "2328-2333",
+   "interval_mss": "2314-2319 (estado mecanico TVD 2,319-2,324 mTVD) vs 2,323-2,328 (MD - KB, docs/09)",
+   "oil_bbl_d": 189,
+   "water_pct": 0.6,
+   "gor_scf_bbl": 765,
+   "choke": "3.5 mm (estado mecanico)",
+   "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.2 (ByZone Test Info)",
+   "conflict": "PEMEX estado mecanico: 91.6 m3/d (576.1 bbl/d) on 3.5 mm, RGA 230 m3/m3 (1291 scf/bbl). CNH peak month Dec 1973 155 bbl/d. Estado mecanico 'final Sep 1998' 30 m3/d (188.7 bbl/d) vs CNH Sep 1998 15 bbl/d at 75 % water."
+  },
+  "cum_oil_bbl": 352601,
+  "cum_oil_basis": "CNH monthly May 1973 - Jul 2012 (one interval); 266,478 bbl water",
+  "cum_oil_sources": "docs/Tecolutla_Field_History_and_TEC12_Review_v4.md §2.2; data/processed/deck_notes/wells_ops_reserves_notes.md §2.3",
+  "status_now": "plugged 4 Jan 2013; wellhead flagged as a hazard; returned to CNH/SENER",
+  "status_timeline": [
+   {
+    "from": "1973-04-01",
+    "to": "1973-05-19",
+    "status": "drilling",
+    "note": "spud 1 Apr, TD 7 May, completed 19 May 1973",
+    "source": "data/processed/deck_notes/drive_reads_notes.md (BLOQUE_TECOLUTLA_9_ESTADO_MECANICO)"
+   },
+   {
+    "from": "1973-05",
+    "to": "1974-09",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1974-10",
+    "to": "1975-04",
+    "status": "shut_in",
+    "note": "no production in the CNH record (7 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1975-05",
+    "to": "1978-05",
+    "status": "producing",
+    "note": "CNH monthly record; includes 3 month(s) of short (<3-month) zero-production gaps not shown separately",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1978-06",
+    "to": "1979-09",
+    "status": "shut_in",
+    "note": "no production in the CNH record (16 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1979-10",
+    "to": "1980-08",
+    "status": "producing",
+    "note": "CNH monthly record; includes 3 month(s) of short (<3-month) zero-production gaps not shown separately",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1980-09",
+    "to": "1980-12",
+    "status": "shut_in",
+    "note": "no production in the CNH record (4 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1981-01",
+    "to": "1981-06",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1981-07",
+    "to": "1982-08",
+    "status": "shut_in",
+    "note": "no production in the CNH record (14 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1982-09",
+    "to": "1982-09",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1982-10",
+    "to": "1983-06",
+    "status": "shut_in",
+    "note": "no production in the CNH record (9 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1983-07",
+    "to": "1999-01",
+    "status": "producing",
+    "note": "CNH monthly record; includes 2 month(s) of short (<3-month) zero-production gaps not shown separately",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "1999-02",
+    "to": "2003-05",
+    "status": "shut_in",
+    "note": "closed Jan 1999 (PEMEX estado mecanico); CNH zero rows Feb 1999 - May 2003; field-wide shut-in",
+    "source": "docs/gaps.md G-62; data/processed/database_review/eng_findings.md item 7"
+   },
+   {
+    "from": "2003-06",
+    "to": "2011-08",
+    "status": "producing",
+    "note": "CNH monthly record; includes 3 month(s) of short (<3-month) zero-production gaps not shown separately",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "2011-09",
+    "to": "2012-01",
+    "status": "shut_in",
+    "note": "no production in the CNH record (5 months; reported zero months)",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "2012-02",
+    "to": "2012-07",
+    "status": "producing",
+    "note": "CNH monthly record",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "2012-08",
+    "to": "2012-09",
+    "status": "shut_in",
+    "note": "after Jul 2012 last CNH month",
+    "source": "data/processed/tecolutla_production.csv (CNH monthly, source_kind cnh_monthly_pemex_era); gaps are reported zero-production months per data/processed/database_review/cnh_findings.md §1 (G-34 closed)"
+   },
+   {
+    "from": "2012-10",
+    "to": "2012-11",
+    "status": "workover",
+    "note": "failed workover: restriction milled, casing damage 544-718 m; squeeze with retainer 2,312.36 m, plugs 736-470 m",
+    "source": "data/processed/database_review/reg_findings.md finding 7; data/processed/database_review/cnh_findings.md §6; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4"
+   },
+   {
+    "from": "2012-12",
+    "to": "2013-01-03",
+    "status": "shut_in",
+    "note": "definitive plug pending in Dec 2012 (XPS logs)",
+    "source": "data/processed/database_review/cnh_findings.md"
+   },
+   {
+    "from": "2013-01-04",
+    "to": null,
+    "status": "plugged",
+    "note": "plugged 4 Jan 2013; WP calls it 'closed, not properly abandoned', wellhead a safety/environmental hazard; returned to CNH/SENER by Tonalli",
+    "source": "docs/gaps.md G-62; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4",
+    "uncertain": true,
+    "uncertain_why": "'plugged' (CNH files) vs 'temporarily abandoned Nov 2012' (cnh_findings) vs 'not properly abandoned' (Work Program)"
+   }
+  ]
+ },
+ {
+  "well": "TEC-101",
+  "uwi": "1030022464 (swapped with TEC-7 in header CSV, G-74)",
+  "surface_x": 707336.3,
+  "surface_y": 2262779.0,
+  "coord_source": "data/processed/deck_notes/wells_ops_reserves_notes.md §1.1",
+  "kb_m": 8.0,
+  "kb_note": "LAS header 7.6 m (G-72)",
+  "td_mmd": 2804.0,
+  "td_mss": 2796.0,
+  "td_note": "vertical; PEMEX TD 2,804 m; header CSV 2,363 m is unexplained",
+  "el_abra_top_mss": -2334.0,
+  "el_abra_top_note": "2,341 mMD (CD tops table; casing CSV 2,342); sharp on ILD and sonic",
+  "spud": "1972-01-28",
+  "completed": "1972-03-31",
+  "completed_note": "drilled 28 Jan - 16 Mar 1972, plugged 31 Mar 1972 (G-61); ByZone gives rig release 31 May 1972; the 15 Apr / 31 Oct 1972 dates belong to Cuesta Blanca-2",
+  "type": "vertical",
+  "deviation": null,
+  "purpose": "exploration / delineation",
+  "result": "dry: water-invaded, structurally low",
+  "initial_test": null,
+  "cum_oil_bbl": 0,
+  "cum_oil_basis": "never produced",
+  "status_now": "plugged and abandoned 1972 (plug monument dated 3 Apr 1972)",
+  "status_timeline": [
+   {
+    "from": "1972-01-28",
+    "to": "1972-03-16",
+    "status": "drilling",
+    "note": "logs dated 22 Feb 1972; open hole 8 5/8 in 2,718-2,804 m",
+    "source": "docs/gaps.md G-61; data/processed/wells/casing_strings.csv"
+   },
+   {
+    "from": "1972-03-31",
+    "to": null,
+    "status": "dry_abandoned",
+    "note": "plugged 31 Mar 1972, water-invaded",
+    "source": "docs/gaps.md G-61"
+   }
+  ]
+ },
+ {
+  "well": "TEC-10",
+  "alias": "TEC-10DES",
+  "uwi": "TEC_10",
+  "surface_x": 707574.96,
+  "surface_y": 2262437.07,
+  "coord_source": "data/raw/geology/Directional Survey/TECOLUTLA DIRECTIONAL SURVEY DATA.CSV (row MD 0) and header CSV; masterlog prints surface 707,554.956 / 2,262,437.068 (20 m different in X, unresolved)",
+  "kb_m": 6.13,
+  "kb_note": "adopted by decision 16 Sep 2026 (G-46); masterlog, CBL and Weatherford headers give 5.13; PETRA LAS EKB 6.1",
+  "td_mmd": 2490.0,
+  "td_mss": 2447.39,
+  "td_note": "survey: 2,490 mMD = 2,453.52 mTVD = -2,447.39 mSS",
+  "el_abra_top_mss": -2309.7,
+  "el_abra_top_note": "tops table 2,344.58 mMD (-2,309.7); log top -2,309.5 to -2,310.3; XRD top 2,348 mMD (-2,312.9); GLJ -2,309.93",
+  "spud": "2018-04-11",
+  "completed": "2018-09-20",
+  "completed_note": "TD 1 May 2018; on production from 20 Sep 2018 (daily record) / 7-8 Oct 2018 (transition-plan docx)",
+  "type": "directional",
+  "deviation": {
+   "shape": "J",
+   "kickoff_mmd": "~1,590 (survey inclination exceeds 1 deg from 1,589 mMD)",
+   "inclination": "~18-20 deg from ~1,880 mMD to TD",
+   "azimuth": "~S 8-10 deg E (170-174 deg)",
+   "target_x": 707589.6,
+   "target_y": 2262253.1,
+   "target_source": "masterlog 'Objetivo'",
+   "bhl_x": 707597.8,
+   "bhl_y": 2262198.67,
+   "bhl_source": "data/raw/geology/Directional Survey/TECOLUTLA DIRECTIONAL SURVEY DATA.CSV",
+   "displacement_m": 193.3,
+   "displacement_note": "192.59 m S, 16.56 m E (Work Program)",
+   "source": "data/raw/geology/Directional Survey/TECOLUTLA DIRECTIONAL SURVEY DATA.CSV; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4"
+  },
+  "purpose": "development / appraisal (cored, modern log suite)",
+  "result": "producer (oil from zone C; zones A and B no oil)",
+  "initial_test": {
+   "date": "2018-08-06",
+   "interval_mmd": "2349.5-2350.5 + 2351.5-2353.0 (zone C)",
+   "interval_mss": "2314.3-2317.6 (survey; By Zone sheet 2,311.5-2,315, G-46)",
+   "oil_bbl_d": 193.6,
+   "water_pct": 39.1,
+   "gor_scf_bbl": 743,
+   "choke": "12/64 in",
+   "whp_psig": 863,
+   "note": "last day of the post-stimulation flowback 23 Jul - 6 Aug 2018 (oil 41 -> 194 bbl/d, BS&W 89 -> 39 %, 1,475 bbl). Jaguar deck: 182 bbl/d at 39 % water, ~880 psi (Jul 2018). Peak daily 231.6 bbl/d on 20 Oct 2018 (762 scf/bbl, 25.3 % water, 772 psi)",
+   "source": "data/processed/welltest/tec10_welltest_2018_daily.csv; docs/18_kinjal_briefing.md A5; data/processed/deck_notes/wells_ops_reserves_notes.md §2.2"
+  },
+  "cum_oil_bbl": 77100,
+  "cum_oil_basis": "GLJ YE2022: 77.1 kbbl to 31 Dec 2022 (Jan 2023 adds a few bbl). Other bases: 44,468 (daily sheet to 24 Nov 2019); 47,811 (ByZone to Mar 2020); 58.4 kbbl (GLJ to Dec 2020); 75,832 (Jaguar deck to Dec 2021)",
+  "cum_oil_sources": "data/processed/database_review/res_review.csv row 8; docs/04_production_database.md §4; data/processed/deck_notes/wells_ops_reserves_notes.md §2.3",
+  "status_now": "shut in since Jan 2023; restorable per GLJ (PDNP, paraffin workover 15 k$ planned Aug 2026); no record the workover was done",
+  "status_timeline": [
+   {
+    "from": "2018-04-11",
+    "to": "2018-05-04",
+    "status": "drilling",
+    "note": "spud 11 Apr (QMAX/conductor) or 16 Apr 2018 (masterlog); core 28-30 Apr; TD 1 May; logs 2 May; liner cemented 4 May",
+    "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4; data/processed/deck_notes/drive_reads_notes.md"
+   },
+   {
+    "from": "2018-05-05",
+    "to": "2018-09-19",
+    "status": "testing",
+    "note": "CBL 31 May; zone A injectivity 30 Jun-1 Jul; zone B weak water inflow; zone C flowback 23 Jul-6 Aug; IHS build-up to 31 Aug",
+    "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4; data/processed/database_review/eng_findings.md item 9; docs/05_pressure.md"
+   },
+   {
+    "from": "2018-09-20",
+    "to": "2020-03",
+    "status": "producing",
+    "note": "daily record 20 Sep 2018 - 24 Nov 2019 (44,468 bbl); commingled sales after; last load 20 Mar 2020",
+    "source": "docs/04_production_database.md §4; data/processed/deck_notes/wells_ops_reserves_notes.md §3.3"
+   },
+   {
+    "from": "2020-04",
+    "to": "2020-06",
+    "status": "shut_in",
+    "note": "field shut in (price collapse)",
+    "source": "docs/13_cnh_filings_gis_cmi.md §2"
+   },
+   {
+    "from": "2020-07",
+    "to": "2022-02-04",
+    "status": "producing",
+    "note": "2021 CNH filing: TEC-10 only origin, 17,402 bbl, 81 % water; Dec 2021 ~34 bbl/d at 86 % water",
+    "source": "docs/13_cnh_filings_gis_cmi.md §2; cnh_production_filings_2020_2022.csv"
+   },
+   {
+    "from": "2022-02-04",
+    "to": "2022-11-23",
+    "status": "shut_in",
+    "note": "production stopped 4 Feb 2022 after CNH rejected the evaluation report; Jaguar deck: 'stim required during restart'. CNH monthly shows 189 bbl (Aug) and 49 bbl (Sep 2022) into tank inventory, well not named",
+    "source": "data/processed/deck_notes/drive_reads_notes.md (20220209 Aviso paro); docs/18_kinjal_briefing.md A5; docs/13_cnh_filings_gis_cmi.md §2",
+    "uncertain": true,
+    "uncertain_why": "Aug-Sep 2022 field volumes (238 bbl) are not attributed to a well"
+   },
+   {
+    "from": "2022-11-24",
+    "to": "2023-01",
+    "status": "producing",
+    "note": "restart after a Nov-2022 stimulation (USD 20,003): 15 days, 678 bbl net, 1,582 bbl water; last production Jan 2023 at 2 bbl/d (GLJ)",
+    "source": "docs/13_cnh_filings_gis_cmi.md §2; data/processed/database_review/acc_review.csv (2022 LOS); data/processed/database_review/res_findings.md"
+   },
+   {
+    "from": "2023-02",
+    "to": null,
+    "status": "shut_in",
+    "note": "shut in; GLJ: 'producing at marginal rates and requires a workover to alleviate paraffin' (YE2022), PDNP with 15 k$ workover Aug 2026 (YE2025)",
+    "source": "data/processed/database_review/res_review.csv rows 8, 33",
+    "uncertain": true,
+    "uncertain_why": "shut-in cause and date conflict (G-65)"
+   }
+  ]
+ },
+ {
+  "well": "TEC-11",
+  "alias": "TEC-11DES",
+  "uwi": "TEC-11DES",
+  "surface_x": 707605.0,
+  "surface_y": 2263031.17,
+  "coord_source": "data/raw/geology/Directional Survey/TECOLUTLA DIRECTIONAL SURVEY DATA.CSV (row MD 0; TEC-2 pad)",
+  "kb_m": 4.7,
+  "kb_note": "SLB CBL headers carry 6.13 (copied from TEC-10, G-72)",
+  "td_mmd": 3283.0,
+  "td_mss": 2331.02,
+  "td_note": "survey: 3,283 mMD = 2,335.72 mTVD = -2,331.02 mSS at 81.95 deg",
+  "el_abra_top_mss": null,
+  "el_abra_top_note": "unresolved (G-75): tops table -2,311.9 (2,611.8 mMD); mud-log carbonate onset 2,360 mMD (-2,245 mSS, called 'Tantoyuca_A' in the tops table); lateral 4-10 m above the Jan-2019 grid top; lateral sonic median 73 us/ft like Tantoyuca marl",
+  "spud": "2018-11-11",
+  "spud_note": "11 Nov 2018 (cost tracker day 1, CNH notice); accounting notes say 9 Nov 2018 (pre-spud 9-13 Nov)",
+  "completed": "2019-09-06",
+  "rig_release": "2018-12-26",
+  "type": "horizontal",
+  "deviation": {
+   "kickoff": "below 1,000 mMD",
+   "landing": "80 deg at 2,563 mMD (2,304.6 mSS); 90 deg at 2,727 mMD (2,322.9 mSS)",
+   "azimuth": "316 deg building to 327-331 deg",
+   "lateral_mss": "2,305-2,331, held 2,322-2,324 from 2,727 to 3,140 mMD",
+   "bhl_x": 706847.16,
+   "bhl_y": 2263952.4,
+   "displacement_m": 1190,
+   "source": "docs/03_tec11_facies.md §2; data/raw/geology/Directional Survey/TECOLUTLA DIRECTIONAL SURVEY DATA.CSV"
+  },
+  "purpose": "horizontal development / proof of concept for horizontal wells (TEC-12, TEC-13 were carried as horizontals at 694 bbl/d each in the Jan 2019 forecast)",
+  "result": "water (100 % water cut); trace oil",
+  "initial_test": {
+   "date": "2019-07-11",
+   "interval_mmd": "2643.5-2745.5 (five 3-m perforations, 2,316-2,323 mSS)",
+   "oil_bbl_d": 0,
+   "water_bbl_d": 260,
+   "water_pct": 100,
+   "gor": null,
+   "choke": "12/64 in",
+   "whp_psi": 195,
+   "note": "final Tonalli schematic (25 Sep 2019): 286 bbl/d water, 100 % water cut; Tantoyuca retest Aug 2019 trace 17 API oil and 96 bbl/d water",
+   "source": "data/processed/deck_notes/drive_reads_notes.md (Anexo 4 aviso abandono temporal); docs/18_kinjal_briefing.md A5"
+  },
+  "cum_oil_bbl": 0,
+  "cum_oil_basis": "no oil sold; 4,397 bbl water hauled May-Aug 2019 (only production record)",
+  "status_now": "temporarily abandoned (CNH art. 54 notice Apr 2022); composite plug ~2,400 mMD; reclassified as injector candidate Oct 2019",
+  "status_timeline": [
+   {
+    "from": "2018-11-11",
+    "to": "2018-12-26",
+    "status": "drilling",
+    "note": "TD 18 Dec 2018; rig release 26 Dec 2018",
+    "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4"
+   },
+   {
+    "from": "2018-12-27",
+    "to": "2019-04",
+    "status": "shut_in",
+    "note": "awaiting completion; CBL / wellbore clean-up Jan 2019 (USD 129,360)",
+    "source": "data/processed/deck_notes/accounting_notes.md §2"
+   },
+   {
+    "from": "2019-05",
+    "to": "2019-06",
+    "status": "workover",
+    "note": "completion: fish (bit + watermelon mill) left at 2,866-2,872 mMD; five perforations 2,643.5-2,745.5 mMD; acid bullheaded without isolation",
+    "source": "data/processed/wells/casing_strings.csv; docs/19_database_review.md §2.10; data/processed/deck_notes/drive_reads_notes.md"
+   },
+   {
+    "from": "2019-07",
+    "to": "2019-08-10",
+    "status": "testing",
+    "note": "11 Jul 2019: 260 bbl/d water on 12/64 in, 195 psi",
+    "source": "data/processed/deck_notes/drive_reads_notes.md"
+   },
+   {
+    "from": "2019-08-11",
+    "to": "2019-08-12",
+    "status": "plugged",
+    "note": "Boss composite blind plug set at ~2,400 mMD, killed with 1.06 brine, no cement",
+    "source": "data/processed/deck_notes/drive_reads_notes.md"
+   },
+   {
+    "from": "2019-08-13",
+    "to": "2019-09-06",
+    "status": "testing",
+    "note": "Tantoyuca test (oil sample 22 Aug 2019 from 2,361-2,364 m: 17.0 API); completion finished 6 Sep 2019",
+    "source": "data/processed/deck_notes/fluids_rock_core_notes.md; data/processed/deck_notes/drive_reads_notes.md"
+   },
+   {
+    "from": "2019-09-07",
+    "to": null,
+    "status": "plugged",
+    "note": "closed pending possible water injection; temporary abandonment notice Apr 2022",
+    "source": "data/processed/deck_notes/drive_reads_notes.md",
+    "uncertain": true,
+    "uncertain_why": "temporarily abandoned, not permanently plugged"
+   }
+  ]
+ },
+ {
+  "well": "TEC-12",
+  "alias": "TEC-12DES (planned)",
+  "surface_x": 707582.0,
+  "surface_y": 2262425.0,
+  "coord_source": "Prog12 conductor location (wells_ops_reserves_notes §2.4); seismic_findings.md §5; src/structure_map.py",
+  "kb_m": 8.2,
+  "kb_note": "planned GL 4.5 m + 3.7 m table",
+  "td_mmd": 2360.0,
+  "td_mss": 2332.8,
+  "td_note": "Programa de perforacion Sept 2020: TD 2,360 mMD / 2,341 mTVD / -2,332.8 mSS; Work Program and AFE S-shape: TD 2,370 mMD / 2,352.6 mTVD",
+  "el_abra_top_mss": -2296.0,
+  "el_abra_top_note": "prognosis -2,296 mSS (2,323.2 mMD, 2,304.2 mTVD; a TEC-6 analogue); Jan-2019 grid -2,289.4; PEMEX PSTM estimate -2,293 (+/- ~4 m)",
+  "spud": null,
+  "completed": null,
+  "type": "planned",
+  "deviation": {
+   "shape": "S-shape (build to 13.5-15 deg, drop to vertical by 1,560 mMD) or build-and-hold 14-15 deg",
+   "azimuth_deg": 78.433,
+   "displacement_m": 174.5,
+   "bhl_x": 707754.0,
+   "bhl_y": 2262460.0,
+   "bhl_note": "Prog12 target 707,753 / 2,262,460; seismic_findings/structure_map 707,754 / 2,262,460",
+   "source": "data/processed/deck_notes/wells_ops_reserves_notes.md §2.4; src/structure_map.py"
+  },
+  "purpose": "development / appraisal-producer from the TEC-10 pad; target the top ~8 m of El Abra at the crest (TEC-9 analogue)",
+  "result": "not drilled",
+  "initial_test": null,
+  "cum_oil_bbl": 0,
+  "cum_oil_basis": "not drilled",
+  "planned_cost": "AFE USD 1,572,724 (Nov 2020 pricing); PPI-indexed USD 2.04 MM (Sep 2026); GLJ YE2025 capex 1.9 MM$ in Jul 2028",
+  "status_now": "planned, not drilled (Oct 2026); GLJ YE2025 schedules it for Jul 2028 (text says 2027)",
+  "status_timeline": [
+   {
+    "from": "2019-01",
+    "to": null,
+    "status": "planned",
+    "note": "first appears as a horizontal at 694 bbl/d in the Jan 2019 forecast; directional programme Sept 2020; in the Programa de Transicion approved 18 Jul 2022; GLJ on-stream date slipped May 2021 -> 2022 -> Sep 2023 -> 2025 -> Apr 2027 -> Jul 2028",
+    "source": "data/processed/database_review/eng_findings.md item 6; data/processed/database_review/res_findings.md; data/processed/deck_notes/wells_ops_reserves_notes.md §2.4"
+   }
+  ]
+ }
+]

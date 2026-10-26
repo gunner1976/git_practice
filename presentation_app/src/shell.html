@@ -1,0 +1,197 @@
+<title>Tecolutla Field Story</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap">
+<style>
+/* Layout: a dark screening room. The 16:9 stage is the projector screen; controls sit below it like a transport bar.
+   One committed dark look (the 3-D field and seismic read best on dark), so no light-theme block. */
+:root {
+  color-scheme: dark;
+  --bg: #0b1016; --stage: #0f151c; --panel: #161f29; --panel2: #1d2834; --line: #2a3542;
+  --ink: #ece6db; --ink2: #aab4bf; --ink3: #7d8894;
+  --accent: #e8894f; --accent2: #f3a774; --blue: #5b9bd5; --oil: #5dbb63; --water: #4a90d9; --gas: #e5534b; --press: #f0b44c;
+  --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif; --sans: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--sans); }
+#app { height: 100%; display: flex; flex-direction: column; }
+header.top { display: flex; align-items: center; gap: 24px; padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); border-bottom: 1px solid var(--line); background: #0d131a; flex-wrap: wrap; }
+.brand { font: 600 19px/1.1 var(--serif); letter-spacing: .01em; }
+.brand small { display: block; font: 400 11.5px var(--sans); color: var(--ink3); letter-spacing: .08em; text-transform: uppercase; margin-top: 3px; }
+.tabs { display: flex; gap: 4px; }
+.tabs button { background: none; border: 1px solid transparent; color: var(--ink2); font: 500 14px var(--sans); padding: 7px 14px; border-radius: 6px; cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--ink); background: var(--panel2); border-color: var(--line); }
+.tabs button:hover { color: var(--ink); }
+.tabs button:focus-visible, .btn:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+header .meta { margin-left: auto; color: var(--ink3); font-size: 12px; }
+main { flex: 1; min-height: 0; position: relative; }
+.tab { position: absolute; inset: 0; display: flex; flex-direction: column; }
+#loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink2); font: 500 16px var(--sans); z-index: 50; background: var(--bg); }
+
+/* ---------------- presentation */
+#stageWrap { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+#stage { position: absolute; width: 1920px; height: 1080px; transform-origin: 0 0; background: var(--stage); overflow: hidden; }
+#glPresent { position: absolute; inset: 0; }
+.gl { display: block; }
+.gl-labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.wl { position: absolute; left: 0; top: 0; white-space: nowrap; font: 600 22px var(--sans); color: #fff; background: rgba(9,13,18,.72); border-radius: 4px; padding: 2px 9px 3px; border-left: 4px solid #6b7682; }
+.wl i { display: block; font: 400 italic 16px var(--sans); color: var(--ink2); }
+.wl[data-status="producing"] { border-color: var(--oil); } .wl[data-status="shut_in"] { border-color: #e0b341; } .wl[data-status="restorable"] { border-color: #9fd86b; }
+.wl[data-status="injector"] { border-color: var(--water); } .wl[data-status="testing"], .wl[data-status="workover"], .wl[data-status="planned"] { border-color: var(--accent); }
+.wl.hl { background: rgba(232,137,79,.92); color: #160b04; } .wl.hl i { color: #2a1406; }
+#tab-field .wl { font-size: 13px; padding: 1px 6px 2px; border-left-width: 3px; } #tab-field .wl i { font-size: 11px; }
+.slide-layer { position: absolute; inset: 0; }
+.slide-layer.kind-html { background: var(--stage); }
+.slide { position: absolute; inset: 0; padding: 66px 110px 140px; display: flex; flex-direction: column; gap: 22px; }
+.kind-3d .slide { pointer-events: none; } .kind-3d .slide .pe { pointer-events: auto; }
+.eyebrow { font: 600 22px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.slide h1 { font: 700 96px/1.02 var(--serif); letter-spacing: -.01em; text-wrap: balance; margin: 0; }
+.slide h2 { font: 600 54px/1.08 var(--serif); margin: 0; text-wrap: balance; max-width: 1700px; }
+.slide h3 { font: 600 32px/1.2 var(--serif); margin: 0; }
+.slide p, .slide li { font-size: 28px; line-height: 1.42; color: var(--ink2); margin: 0; }
+.slide b, .slide strong { color: var(--ink); font-weight: 600; }
+.slide .lead { font-size: 32px; color: var(--ink); max-width: 1500px; }
+.slide .src { position: absolute; left: 110px; right: 260px; bottom: 56px; font: 400 17px var(--sans); color: var(--ink3); }
+.slide .pg { position: absolute; right: 110px; bottom: 56px; font: 500 18px var(--mono); color: var(--ink3); }
+.row { display: flex; gap: 48px; align-items: flex-start; } .col { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.grow { flex: 1; min-width: 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 26px 30px; }
+.glass { background: rgba(13,19,26,.9); border: 1px solid rgba(80,96,112,.5); border-radius: 12px; padding: 28px 32px; }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; }
+.kpi .v { font: 600 64px/1 var(--serif); color: var(--ink); font-variant-numeric: tabular-nums; }
+.kpi .v small { font-size: 30px; color: var(--ink2); margin-left: 6px; }
+.kpi .l { font-size: 22px; color: var(--ink2); margin-top: 10px; line-height: 1.35; }
+.kpi.hot .v { color: var(--accent2); }
+[data-step] { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+[data-step].on { opacity: 1; transform: none; }
+[data-step].instant { transition: none; }
+[data-step].fade { transform: none; }
+.caption { position: absolute; left: 50%; bottom: 38px; transform: translateX(-50%); max-width: 1500px; font: 400 27px/1.38 var(--sans); color: #fff; background: rgba(5,8,12,.82); padding: 10px 22px 12px; border-radius: 8px; opacity: 0; transition: opacity .25s; pointer-events: none; text-align: center; z-index: 20; }
+.caption.on { opacity: 1; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px 26px; font-size: 21px; color: var(--ink2); }
+.legend span { display: inline-flex; align-items: center; gap: 9px; }
+.legend i.sw { width: 18px; height: 18px; border-radius: 3px; background: var(--c); display: inline-block; }
+.legend i.ln { width: 30px; height: 4px; background: var(--c); display: inline-block; border-radius: 2px; }
+.legend i.dot { width: 14px; height: 14px; border-radius: 50%; background: var(--c); display: inline-block; }
+.chart text { font-variant-numeric: tabular-nums; }
+.big-year { font: 700 150px/1 var(--serif); color: rgba(236,230,219,.95); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.ticker { font: 500 26px var(--mono); color: var(--ink2); }
+.ticker b { color: var(--ink); font-weight: 500; }
+.pill { display: inline-block; font: 600 18px var(--sans); letter-spacing: .06em; text-transform: uppercase; padding: 4px 12px; border-radius: 999px; border: 1.5px solid currentColor; }
+.tag-ok { color: var(--oil); } .tag-warn { color: #e0b341; } .tag-bad { color: var(--gas); } .tag-blue { color: var(--blue); } .tag-grey { color: var(--ink3); }
+table.st { border-collapse: collapse; width: 100%; font-size: 24px; }
+table.st th { text-align: left; font: 600 19px var(--sans); color: var(--ink3); letter-spacing: .06em; text-transform: uppercase; padding: 0 16px 12px 0; border-bottom: 1px solid var(--line); }
+table.st td { padding: 12px 16px 12px 0; border-bottom: 1px solid var(--line); color: var(--ink2); vertical-align: top; }
+table.st td.n { font-family: var(--mono); text-align: right; color: var(--ink); white-space: nowrap; }
+table.st tr.hl td { color: var(--ink); background: rgba(232,137,79,.10); }
+.evlist { display: flex; flex-direction: column; gap: 12px; }
+.ev { display: grid; grid-template-columns: 130px 1fr; gap: 18px; align-items: baseline; }
+.ev .d { font: 500 21px var(--mono); color: var(--accent2); }
+.ev .t { font-size: 24px; color: var(--ink); line-height: 1.32; }
+.ev .t small { display: block; font-size: 20px; color: var(--ink2); margin-top: 3px; }
+.smap { position: relative; border-radius: 8px; overflow: hidden; }
+.ramp-bar { height: 16px; border-radius: 3px; }
+.navbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); border-top: 1px solid var(--line); background: #0d131a; }
+.btn { display: inline-flex; align-items: center; gap: 7px; background: var(--panel2); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px; font: 500 13.5px var(--sans); cursor: pointer; }
+.btn svg { width: 16px; height: 16px; fill: currentColor; }
+.btn:hover { border-color: var(--accent); }
+.btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent2); }
+.btn.primary { background: var(--accent); color: #1a0d05; border-color: var(--accent); font-weight: 600; }
+.btn.primary[aria-pressed="true"] { background: var(--panel2); color: var(--accent2); }
+.btn.sm { padding: 4px 9px; font-size: 12.5px; }
+select, input[type=range] { accent-color: var(--accent); }
+select { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font: 13px var(--sans); max-width: 100%; }
+#outline { max-width: 340px; }
+#voice { max-width: 220px; }
+.navbar .grp { display: flex; align-items: center; gap: 8px; }
+.navbar .sp { flex: 1; }
+#slideNo { font: 500 13px var(--mono); color: var(--ink2); min-width: 64px; text-align: center; }
+#stepDots { display: flex; gap: 4px; } #stepDots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); display: block; } #stepDots i.done { background: var(--ink3); } #stepDots i.cur { background: var(--accent); }
+.progress { height: 3px; background: var(--line); } #progress { height: 100%; width: 0; background: var(--accent); transition: width .4s; }
+.lbl { font-size: 12px; color: var(--ink3); }
+
+/* ---------------- 3-D explorer */
+#tab-field { flex-direction: row; }
+#fieldCtl { width: 320px; flex: none; overflow-y: auto; padding: 14px 16px 24px; border-right: 1px solid var(--line); background: #0d131a; display: flex; flex-direction: column; gap: 10px; }
+#fieldCtl h3 { font: 600 12px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin: 10px 0 0; }
+.ctl { display: grid; grid-template-columns: 90px 1fr auto; gap: 8px; align-items: center; font-size: 13px; color: var(--ink2); }
+.ctl select { grid-column: 2 / 4; }
+.ctl output { font: 500 12px var(--mono); color: var(--ink); min-width: 54px; text-align: right; }
+.ctl2 { display: grid; grid-template-columns: 20px 1fr; align-items: center; }
+.checks { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--ink2); } .checks label { display: flex; gap: 8px; align-items: center; }
+.wellbtns { display: flex; flex-wrap: wrap; gap: 6px; }
+.readout { font-size: 13px; color: var(--ink2); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; min-height: 40px; }
+.readout:empty { display: none; }
+.fine { font-size: 12px; color: var(--ink3); line-height: 1.5; margin: 6px 0 0; }
+#fieldView { flex: 1; min-width: 0; position: relative; }
+#glField { position: absolute; inset: 0; }
+#fieldLegend { position: absolute; left: 14px; bottom: 14px; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--ink2); background: rgba(9,13,18,.8); padding: 8px 12px; border-radius: 8px; max-width: calc(100% - 28px); }
+#fieldLegend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+#fieldLegend .ramp b { display: inline-block; width: 90px; height: 10px; border-radius: 2px; vertical-align: -1px; margin: 0 6px; }
+
+/* ---------------- data room */
+#tab-data { overflow-y: auto; }
+#dataRoom { max-width: 1280px; margin: 0 auto; padding-block: 24px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 34px; }
+.dsec h2 { font: 600 26px var(--serif); margin: 0 0 6px; }
+.note { color: var(--ink3); font-size: 13px; margin: 0 0 10px; }
+.tblwrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+.tbl { border-collapse: collapse; width: 100%; font-size: 13px; }
+.tbl th { position: sticky; top: 0; background: var(--panel2); text-align: left; font-weight: 600; color: var(--ink2); padding: 8px 10px; white-space: nowrap; }
+.tbl td { padding: 7px 10px; border-top: 1px solid var(--line); color: var(--ink2); vertical-align: top; }
+.tbl td.num { text-align: right; font-family: var(--mono); color: var(--ink); white-space: nowrap; }
+.tbl td.mono { font-family: var(--mono); white-space: nowrap; color: var(--ink); }
+.tbl td.src { color: var(--ink3); font-size: 12px; max-width: 280px; }
+.srcs { color: var(--ink2); font-size: 14px; line-height: 1.6; padding-left: 20px; }
+@media (max-width: 760px) {
+  #tab-field { flex-direction: column; } #fieldCtl { width: auto; max-height: 42%; border-right: 0; border-bottom: 1px solid var(--line); }
+  header .meta { display: none; } #outline { max-width: 160px; } #voice { max-width: 130px; }
+}
+@media (prefers-reduced-motion: reduce) { [data-step] { transition: none; transform: none; } }
+</style>
+
+<div id="app">
+  <header class="top">
+    <div class="brand">Tecolutla<small>Contract Area 24 · El Abra reef · Veracruz</small></div>
+    <nav class="tabs" role="tablist">
+      <button data-tab="present" role="tab" aria-selected="true">Presentation</button>
+      <button data-tab="field" role="tab" aria-selected="false">Field in 3-D</button>
+      <button data-tab="data" role="tab" aria-selected="false">Data</button>
+    </nav>
+    <span class="meta">Prepared for Kinjal · October 2026 · USD unless stated</span>
+  </header>
+  <main>
+    <div id="loading">Loading the field model…</div>
+    <section id="tab-present" class="tab">
+      <div id="stageWrap"><div id="stage"><div id="glPresent"></div><div id="slides" class="slide-layer"></div><div id="caption" class="caption"></div></div></div>
+      <div class="progress"><div id="progress"></div></div>
+      <div class="navbar">
+        <div class="grp">
+          <button class="btn" id="prev" title="Previous (←)"><svg viewBox="0 0 24 24"><path d="M17 5L7 12l10 7z"/></svg></button>
+          <button class="btn primary" id="play" aria-pressed="false" title="Play / pause (space)"><svg viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg><span>Play</span></button>
+          <button class="btn" id="next" title="Next (→)"><svg viewBox="0 0 24 24"><path d="M7 5l10 7-10 7z"/></svg></button>
+          <span id="slideNo"></span><span id="stepDots"></span>
+        </div>
+        <select id="outline" aria-label="Jump to slide"></select>
+        <span class="sp"></span>
+        <div class="grp">
+          <button class="btn" id="mute" aria-pressed="false" title="Narration voice on or off"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/></svg><span>Voice on</span></button>
+          <select id="voice" aria-label="Narration voice"></select>
+          <label class="grp lbl" for="rate">Speed <input type="range" id="rate" min="0.75" max="1.4" step="0.05" value="1"><output id="rateOut" class="lbl">1.00×</output></label>
+          <button class="btn" id="caps" aria-pressed="true" title="Captions">CC</button>
+          <button class="btn" id="full" title="Full screen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5v2H6v3zm10-5h6v5h-2V6h-4zM4 15h2v3h3v2H4zm14 3v-3h2v5h-5v-2z"/></svg></button>
+        </div>
+      </div>
+    </section>
+    <section id="tab-field" class="tab" hidden>
+      <aside id="fieldCtl"></aside>
+      <div id="fieldView"><div id="glField"></div><div id="fieldLegend"></div></div>
+    </section>
+    <section id="tab-data" class="tab" hidden><div id="dataRoom"></div></section>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+/*__APP__*/
+</script>

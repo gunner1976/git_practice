@@ -1,0 +1,40 @@
+year,line_item_as_in_source,usd,group,source
+2018,Separator rental (SIPOMEGA three-phase),89334,Separator rental,data/processed/database_review/acc_review.csv row 1yElwLBJ (Tonalli Operations Statement - TEC 10 2018.xlsx)
+2018,Sampling and measurement,46733,Sampling & lab,data/processed/database_review/acc_review.csv row 1yElwLBJ (Tonalli Operations Statement - TEC 10 2018.xlsx)
+2018,Trucking emulsion,36365,Oil trucking,data/processed/database_review/acc_review.csv row 1yElwLBJ (Tonalli Operations Statement - TEC 10 2018.xlsx)
+2018,Trucking water,30719,Water trucking & disposal,data/processed/database_review/acc_review.csv row 1yElwLBJ (Tonalli Operations Statement - TEC 10 2018.xlsx)
+2018,"Site engineers (PIURZA, 2 supervisors)",33732,Supervision & crew,data/processed/database_review/acc_review.csv row 1yElwLBJ (Tonalli Operations Statement - TEC 10 2018.xlsx)
+2018,Tanks,26295,Tanks,data/processed/database_review/acc_review.csv row 1yElwLBJ (Tonalli Operations Statement - TEC 10 2018.xlsx)
+2018,Transfer pump,20562,Other,data/processed/database_review/acc_review.csv row 1yElwLBJ (Tonalli Operations Statement - TEC 10 2018.xlsx)
+2018,ASSA housing,3474,Other,data/processed/database_review/acc_review.csv row 1yElwLBJ (Tonalli Operations Statement - TEC 10 2018.xlsx)
+2018,SSQ chemicals,4150,"Inj. pump, chemicals & stims",data/processed/database_review/acc_review.csv row 1yElwLBJ (Tonalli Operations Statement - TEC 10 2018.xlsx)
+2019,Separator,186456,Separator rental,"data/processed/database_review/acc_review.csv row 1FCUF9Pp (Tonalli 2019 Operations Statements, Total Company)"
+2019,Site engineers,173474,Supervision & crew,"data/processed/database_review/acc_review.csv row 1FCUF9Pp (Tonalli 2019 Operations Statements, Total Company)"
+2019,Tanks,112290,Tanks,"data/processed/database_review/acc_review.csv row 1FCUF9Pp (Tonalli 2019 Operations Statements, Total Company)"
+2019,Trucking emulsion,91583,Oil trucking,"data/processed/database_review/acc_review.csv row 1FCUF9Pp (Tonalli 2019 Operations Statements, Total Company)"
+2019,Water trucking,83944,Water trucking & disposal,"data/processed/database_review/acc_review.csv row 1FCUF9Pp (Tonalli 2019 Operations Statements, Total Company)"
+2019,Water disposal fee 1.33 USD/bbl (Feb-Aug),32534,Water trucking & disposal,"data/processed/database_review/acc_review.csv row 1FCUF9Pp (Tonalli 2019 Operations Statements, Total Company)"
+2019,Sampling,36139,Sampling & lab,"data/processed/database_review/acc_review.csv row 1FCUF9Pp (Tonalli 2019 Operations Statements, Total Company)"
+2019,Chem/stim,46952,"Inj. pump, chemicals & stims","data/processed/database_review/acc_review.csv row 1FCUF9Pp (Tonalli 2019 Operations Statements, Total Company)"
+2019,Rental equipment for water-injection well (Aug-Dec),75680,"Inj. pump, chemicals & stims","data/processed/database_review/acc_review.csv row 1FCUF9Pp (Tonalli 2019 Operations Statements, Total Company)"
+2020,Trucking,67891,Oil trucking,data/processed/database_review/acc_review.csv row 1MUDIBfZ (Tecolutla 2020 Lease Operations Statements.xlsx)
+2020,Sampling,20715,Sampling & lab,data/processed/database_review/acc_review.csv row 1MUDIBfZ (Tecolutla 2020 Lease Operations Statements.xlsx)
+2020,Separator rental (Jan-Mar only),22494,Separator rental,data/processed/database_review/acc_review.csv row 1MUDIBfZ (Tecolutla 2020 Lease Operations Statements.xlsx)
+2020,Tanks,54199,Tanks,data/processed/database_review/acc_review.csv row 1MUDIBfZ (Tecolutla 2020 Lease Operations Statements.xlsx)
+2020,Field supervision,109287,Supervision & crew,data/processed/database_review/acc_review.csv row 1MUDIBfZ (Tecolutla 2020 Lease Operations Statements.xlsx)
+2020,Demulsifier,7400,"Inj. pump, chemicals & stims",data/processed/database_review/acc_review.csv row 1MUDIBfZ (Tecolutla 2020 Lease Operations Statements.xlsx)
+2020,Injection pump diesel (Dec),3255,"Inj. pump, chemicals & stims",data/processed/database_review/acc_review.csv row 1MUDIBfZ (Tecolutla 2020 Lease Operations Statements.xlsx)
+2020,Injection pump rental (Jan-Mar),46778,"Inj. pump, chemicals & stims",data/processed/database_review/acc_review.csv row 1MUDIBfZ (Tecolutla 2020 Lease Operations Statements.xlsx)
+2020,Stimulation (Dec),4225,"Inj. pump, chemicals & stims",data/processed/database_review/acc_review.csv row 1MUDIBfZ (Tecolutla 2020 Lease Operations Statements.xlsx)
+2021,Trucking,102720,Oil trucking,data/processed/database_review/acc_review.csv row 1l_gSKHt (final 2021 sheet in the Dec-2022 LOS workbook)
+2021,Sampling,25624,Sampling & lab,data/processed/database_review/acc_review.csv row 1l_gSKHt (final 2021 sheet in the Dec-2022 LOS workbook)
+2021,Tanks,24639,Tanks,data/processed/database_review/acc_review.csv row 1l_gSKHt (final 2021 sheet in the Dec-2022 LOS workbook)
+2021,Field supervision,159745,Supervision & crew,data/processed/database_review/acc_review.csv row 1l_gSKHt (final 2021 sheet in the Dec-2022 LOS workbook)
+2021,Demulsifier,7400,"Inj. pump, chemicals & stims",data/processed/database_review/acc_review.csv row 1l_gSKHt (final 2021 sheet in the Dec-2022 LOS workbook)
+2021,Injection pump and stims,29154,"Inj. pump, chemicals & stims",data/processed/database_review/acc_review.csv row 1l_gSKHt (final 2021 sheet in the Dec-2022 LOS workbook)
+2022,Trucking,39573,Oil trucking,data/processed/database_review/acc_review.csv row 1l_gSKHt (Tonalli Operations Statements Dec 31 2022.xlsx)
+2022,Sampling,10241,Sampling & lab,data/processed/database_review/acc_review.csv row 1l_gSKHt (Tonalli Operations Statements Dec 31 2022.xlsx)
+2022,Tanks,25582,Tanks,data/processed/database_review/acc_review.csv row 1l_gSKHt (Tonalli Operations Statements Dec 31 2022.xlsx)
+2022,Field supervision,68172,Supervision & crew,data/processed/database_review/acc_review.csv row 1l_gSKHt (Tonalli Operations Statements Dec 31 2022.xlsx)
+2022,Injection pump (Sep),4713,"Inj. pump, chemicals & stims",data/processed/database_review/acc_review.csv row 1l_gSKHt (Tonalli Operations Statements Dec 31 2022.xlsx)
+2022,Stimulation (Nov),20003,"Inj. pump, chemicals & stims",data/processed/database_review/acc_review.csv row 1l_gSKHt (Tonalli Operations Statements Dec 31 2022.xlsx)

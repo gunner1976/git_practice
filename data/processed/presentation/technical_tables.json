@@ -1,0 +1,1047 @@
+{
+ "oil": {
+  "no_lab_pvt": "No laboratory PVT study exists: no measured bubble point, Rs, Bo, live viscosity or compressibility. Every PVT number in circulation is a correlation or the PEMEX Ezequiel Ordonez-41 analogue.",
+  "api_by_sample": [
+   {
+    "sample": "TEC-2 whole crude, test separator",
+    "date": "2018-05-17",
+    "lab": "SGS Deer Park",
+    "api": 28.4,
+    "sulphur_pct": 1.66,
+    "viscosity": "13.67 cSt @40 °C; 3.911 cSt @98.9 °C",
+    "note": "38 % water as sampled"
+   },
+   {
+    "sample": "TEC-10 Zone C well sample",
+    "date": "2018-07-27",
+    "lab": "SGS Deer Park",
+    "api": 26.5,
+    "sulphur_pct": 1.67,
+    "viscosity": "18.73 cSt @40 °C; 9.369 cSt @60 °C",
+    "note": "early clean-up, 40-44 % water; H2S vapour 1,000 ppm"
+   },
+   {
+    "sample": "TEC-10 shore tank",
+    "date": "2018-11-21",
+    "lab": "Intertek",
+    "api": 30.42,
+    "sulphur_pct": 1.66,
+    "viscosity": null,
+    "note": "OCR"
+   },
+   {
+    "sample": "TEC-10 shore tank",
+    "date": "2018-12-11",
+    "lab": "Intertek",
+    "api": 30.78,
+    "sulphur_pct": 1.08,
+    "viscosity": null,
+    "note": "OCR"
+   },
+   {
+    "sample": "TEC-10 'Tanque 10'",
+    "date": "2019-01-15",
+    "lab": "Intertek",
+    "api": 30.1,
+    "sulphur_pct": 1.57,
+    "viscosity": null,
+    "note": "OCR"
+   },
+   {
+    "sample": "TEC-2 test, field density",
+    "date": "2018-05",
+    "lab": "Weatherford (field)",
+    "api": 28.38,
+    "sulphur_pct": null,
+    "viscosity": null,
+    "note": "0.885 SG @60 °F"
+   },
+   {
+    "sample": "TEC-9",
+    "date": "2012",
+    "lab": "PEMEX",
+    "api": "30.1-30.3",
+    "sulphur_pct": null,
+    "viscosity": "dead oil 13.2 cP @26 °C; 3.4 cP @90 °C",
+    "note": "docs/gaps.md G-31 update 2026-10-25"
+   },
+   {
+    "sample": "CNH monthly filings (field)",
+    "date": "2020-2021",
+    "lab": "filing",
+    "api": "28.4-30.4",
+    "sulphur_pct": null,
+    "viscosity": null,
+    "note": "monthly range"
+   },
+   {
+    "sample": "TEC-10DES (CNH VHP)",
+    "date": "2022-11",
+    "lab": "filing",
+    "api": 30.9,
+    "sulphur_pct": 1.6,
+    "viscosity": null,
+    "note": "salt 48.8 lb/Mbbl"
+   },
+   {
+    "sample": "TEC-11 Tantoyuca (not El Abra)",
+    "date": "2019-08-22",
+    "lab": "Química Apollo",
+    "api": 17.0,
+    "sulphur_pct": null,
+    "viscosity": null,
+    "note": "asphaltenes 9.84 %"
+   }
+  ],
+  "bottom_hole_samples_unexplained": [
+   {
+    "sample": "TEC-10DES Zone A+B",
+    "date": "2018-07-12",
+    "sg": 0.9577,
+    "sulphur_pct": 2.56,
+    "viscosity": "776 SUS @100 °F"
+   },
+   {
+    "sample": "TEC-10DES Zone B",
+    "date": "2018-07-12",
+    "sg": 0.9223,
+    "sulphur_pct": 2.33,
+    "viscosity": "396 SUS @100 °F"
+   }
+  ],
+  "pemex_1956_75_densities_20_4": {
+   "range": [
+    0.857,
+    0.881
+   ],
+   "samples": {
+    "TEC-6 1956": 0.874,
+    "TEC-7 1957": 0.871,
+    "TEC-6 1959": 0.881,
+    "TEC-7 1971": 0.868,
+    "TEC-2 1974": 0.857,
+    "TEC-6 Jun-1974": 0.868,
+    "TEC-6 1975": 0.867,
+    "TEC-7 1975": 0.863
+   },
+   "note": "OCR of handwritten forms"
+  },
+  "pvt_measured_vs_correlated": [
+   {
+    "property": "Oil gravity, °API",
+    "pemex_eo41": "20",
+    "ifr_calculator": "28.4",
+    "ihs_tec2": "28.0",
+    "ihs_tec10": "28.2",
+    "measured": "26.5-30.8 stock tank"
+   },
+   {
+    "property": "Rs, scf/bbl",
+    "pemex_eo41": "336 (59.9 m3/m3)",
+    "ifr_calculator": "552 assumed",
+    "ihs_tec2": "541",
+    "ihs_tec10": "570",
+    "measured": "never measured; produced GOR 565 (1966-92 cum)"
+   },
+   {
+    "property": "Bubble point, psia",
+    "pemex_eo41": "1,877 (132 kg/cm2)",
+    "ifr_calculator": "2,849 hard-coded",
+    "ihs_tec2": "2,901 (IPR)",
+    "ihs_tec10": "3,452 (IPR)",
+    "measured": "never measured"
+   },
+   {
+    "property": "Bo, rb/stb",
+    "pemex_eo41": "1.1923",
+    "ifr_calculator": "1.299 at Pb",
+    "ihs_tec2": "1.283",
+    "ihs_tec10": "1.296",
+    "measured": "never measured"
+   },
+   {
+    "property": "Live-oil viscosity, cP",
+    "pemex_eo41": "11.2",
+    "ifr_calculator": "0.624 at Pb",
+    "ihs_tec2": "0.739",
+    "ihs_tec10": "0.718",
+    "measured": "dead oil only: 13.67 cSt (TEC-2), 18.73 cSt (TEC-10) @40 °C"
+   },
+   {
+    "property": "Reservoir temperature, °C",
+    "pemex_eo41": "65",
+    "ifr_calculator": "95",
+    "ihs_tec2": "101.0",
+    "ihs_tec10": "98.6",
+    "measured": "97.5-99.3 (2018 gradient surveys)"
+   },
+   {
+    "property": "Initial pressure",
+    "pemex_eo41": "252 kg/cm2",
+    "ifr_calculator": "3,684 psia",
+    "ihs_tec2": "24,190 kPa(a) @2,309 m",
+    "ihs_tec10": "24,304 kPa(a) @2,322 mTVD",
+    "measured": "see docs/05_pressure.md"
+   }
+  ],
+  "source": "data/processed/deck_notes/fluids_rock_core_notes.md s.1, s.4; docs/gaps.md G-31"
+ },
+ "gas": {
+  "compositions_mol_pct": [
+   {
+    "well": "TEC-6",
+    "date": "1970-08-28",
+    "sample": "casing gas (PEMEX 105/70, OCR)",
+    "N2": null,
+    "CO2": 4.78,
+    "H2S": 0.66,
+    "C1": 79.81,
+    "C2": 7.91,
+    "C3": 4.24,
+    "iC4": 0.51,
+    "nC4": 1.18,
+    "iC5": 0.25,
+    "nC5": 0.27,
+    "C6plus": 0.42,
+    "gas_gravity": 0.73,
+    "mw": 21.139,
+    "ghv_btu_scf": 1152
+   },
+   {
+    "well": "TEC-2",
+    "date": "2018-05-17",
+    "sample": "separator gas 6.3 kg/cm2a, 38.8 °C",
+    "N2": 0.92,
+    "CO2": 10.572,
+    "H2S": 1.746,
+    "C1": 70.442,
+    "C2": 6.665,
+    "C3": 4.252,
+    "iC4": 1.159,
+    "nC4": 1.697,
+    "iC5": 0.681,
+    "nC5": 0.731,
+    "C6plus": 1.135,
+    "gas_gravity": 0.842,
+    "mw": 24.4,
+    "ghv_btu_scf": 1155
+   },
+   {
+    "well": "TEC-10",
+    "date": "2018-07-27",
+    "sample": "test separator 8.8 kg/cm2a, 32.6 °C",
+    "N2": 0.812,
+    "CO2": 11.142,
+    "H2S": 0.989,
+    "C1": 70.321,
+    "C2": 7.707,
+    "C3": 4.701,
+    "iC4": 1.119,
+    "nC4": 1.545,
+    "iC5": 0.505,
+    "nC5": 0.49,
+    "C6plus": 0.669,
+    "gas_gravity": 0.829,
+    "mw": 24.0,
+    "ghv_btu_scf": 1133
+   }
+  ],
+  "compositions_source": "data/processed/deck_notes/fluids_rock_core_notes.md s.2 (C6plus for 2018 = reported C6+ mol %; TEC-6 = 'hexanos y más pesados')",
+  "produced_gor_history_scf_bbl": [
+   {
+    "period": "1956 initial tests (By Zone)",
+    "gor": "431-576 (TEC-2, 6, 7); TEC-9 1973 765",
+    "source": "data/processed/production_summary.json solution_gor_refs"
+   },
+   {
+    "period": "1964-12 TEC-6 flowing survey",
+    "gor": 685,
+    "source": "docs/gaps.md G-31"
+   },
+   {
+    "period": "1966-1992 cumulative (field)",
+    "gor": 565,
+    "source": "data/processed/production_summary.json cumulative_gor"
+   },
+   {
+    "period": "1993-1999 cumulative",
+    "gor": 1073,
+    "source": "production_summary.json (allocation-affected)"
+   },
+   {
+    "period": "2003-2012 cumulative",
+    "gor": 556,
+    "source": "production_summary.json"
+   },
+   {
+    "period": "2013-2016 cumulative",
+    "gor": 9535,
+    "source": "production_summary.json (TEC-2 late-life allocation artefact)"
+   },
+   {
+    "period": "all 1966-2016",
+    "gor": 667,
+    "source": "production_summary.json"
+   },
+   {
+    "period": "TEC-10 flowback Jul-Aug 2018",
+    "gor": "median 767 (P10-P90 597-942)",
+    "source": "docs/gaps.md G-31"
+   },
+   {
+    "period": "TEC-10 initial test 2018-10-20",
+    "gor": 762,
+    "source": "production_summary.json / By Zone"
+   },
+   {
+    "period": "2020 CNH filing",
+    "gor": "1,157 on gross oil; 1,361 on net",
+    "source": "docs/13_cnh_filings_gis_cmi.md s.2"
+   },
+   {
+    "period": "2021 CNH filing",
+    "gor": 859,
+    "source": "docs/13_cnh_filings_gis_cmi.md s.2"
+   },
+   {
+    "period": "GLJ 12 months to Oct 2019",
+    "gor": "field 1,342; TEC-10 1,265; TEC-2 1,787",
+    "source": "docs/gaps.md G-31 2026-10-25"
+   },
+   {
+    "period": "GLJ TEC-10 Q4-2021",
+    "gor": 1127,
+    "source": "data/processed/deck_notes/wells_ops_reserves_notes.md"
+   },
+   {
+    "period": "GLJ TEC-10 2022",
+    "gor": 8162,
+    "source": "docs/gaps.md G-31 2026-10-25"
+   }
+  ],
+  "tec10_monthly_gor_scf_bbl": {
+   "2018-09-01": 1999.0,
+   "2018-10-01": 1253.0,
+   "2018-11-01": 942.0,
+   "2018-12-01": 920.0,
+   "2019-01-01": 809.0,
+   "2019-02-01": 935.0,
+   "2019-03-01": 882.0,
+   "2019-04-01": 698.0,
+   "2019-05-01": 643.0,
+   "2019-06-01": 1038.0,
+   "2019-07-01": 1253.0,
+   "2019-08-01": 1808.0,
+   "2019-09-01": 1963.0,
+   "2019-10-01": 2471.0,
+   "2019-11-01": 1422.0
+  },
+  "tec10_monthly_gor_source": "data/processed/production_summary.json tec10_monthly_gor (daily sheet; Ptbg 875 -> 450-500 psi)",
+  "situation": {
+   "solution_gor": "about 550-570 scf/bbl (IFR 552 = 1966-92 cumulative 565; IHS TEC-10 570; IHS TEC-2 541); PEMEX 336 scf/bbl does not describe this fluid",
+   "gas_cap_evidence": "1956 TEC-2 open-hole test 2,307.4-2,321.7 mKB (top El Abra): 41 m3/d oil, 47,702 m3/d gas, GOR 1,163 m3/m3 (~6,500 scf/bbl), PTP 174 kg/cm2; deeper tests GOR 77 and 96 m3/m3. PEMEX 1971 TEC-2 schematic gas-oil level at 2,319 mKB (~2,315 mSS). Probably a small crestal gas cap originally; current extent unknown",
+   "flaring": "2017 plan justified flaring with GOR 60 m3/m3 (337 scf/bbl) vs 742-859 measured 2018-21 (~2.5x), under a 98 % utilisation norm; declared 6,000 m3/d produced, 4,000 flared; Nov-2022 0.9 MMcf flared 'quema aprobada' (G-67)",
+   "tec10_gor_rise": "TEC-10 monthly GOR 643-1,038 in the first year, rising above 1,800 from Aug 2019 as tubing pressure fell to 450-500 psi; local gas breakout near the wellbore, consistent with Pb above the flowing pressure",
+   "sources": [
+    "docs/17_government_records.md (TEC-2 1956 tests)",
+    "docs/18_kinjal_briefing.md lines 133, 205",
+    "docs/gaps.md G-67, G-31",
+    "docs/04_production_database.md s.5"
+   ]
+  }
+ },
+ "water": {
+  "analyses": [
+   {
+    "well": "TEC-2",
+    "date": "2018-05-17",
+    "tds_mg_l": 50145.4,
+    "nacl_equiv_ppm": 49912.5,
+    "cl_mg_l": 30250,
+    "resistivity_ohmm_75F": 0.128,
+    "ph": 6.68,
+    "sg": 1.0326
+   },
+   {
+    "well": "TEC-10",
+    "date": "2018-07-27",
+    "tds_mg_l": 36787.5,
+    "nacl_equiv_ppm": 34402.5,
+    "cl_mg_l": 20850,
+    "resistivity_ohmm_75F": 0.196,
+    "ph": 6.98,
+    "sg": 1.0239
+   }
+  ],
+  "other": [
+   {
+    "item": "PEMEX El Abra formation water",
+    "value": "45,000 ppm; Rw 0.075 ohm·m @65 °C"
+   },
+   {
+    "item": "Rw used in repo Archie",
+    "value": "0.054 ohm·m @98.6 °C"
+   },
+   {
+    "item": "Rw from 2018 lab @98.6 °C (Arps, reader's note)",
+    "value": "TEC-10 0.074; TEC-2 0.048 ohm·m"
+   },
+   {
+    "item": "TEC-2 2018 test field salinity",
+    "value": "69,000-90,750 ppm"
+   },
+   {
+    "item": "TEC-10 2018 flowback field salinity",
+    "value": "19,000-22,000 ppm"
+   },
+   {
+    "item": "TEC-11 Tantoyuca water phase",
+    "value": "Cl 31,550 mg/l; salinity 52,058 mg/l"
+   }
+  ],
+  "source": "data/processed/deck_notes/fluids_rock_core_notes.md s.3"
+ },
+ "core": {
+  "well": "TEC-10 core 1",
+  "interval_cut_mMD": "2,352-2,362 attempted",
+  "recovery": "1.20-1.32 m (12-14 %)",
+  "subsea": "~2,317 mSS (inside the perforated interval)",
+  "age_lab": "Cretácico Superior",
+  "plugs": [
+   {
+    "plug": "N1H1",
+    "depth_mMD": 2352.25,
+    "phi_ambient": 0.03,
+    "phi_500psi": 0.0234,
+    "phi_3400psi": 0.0173,
+    "k_air_500_mD": 0.037,
+    "k_klink_500_mD": 0.02,
+    "k_klink_3400_mD": 0.004,
+    "grain_density": 2.696,
+    "so_pct_pv": 58.8,
+    "sw_pct_pv": 23.9,
+    "sg_pct_pv": 17.3
+   },
+   {
+    "plug": "N1H2",
+    "depth_mMD": 2352.7,
+    "phi_ambient": 0.076,
+    "phi_500psi": 0.0665,
+    "phi_3400psi": 0.0633,
+    "k_air_500_mD": 1.158,
+    "k_klink_500_mD": 0.956,
+    "k_klink_3400_mD": 0.356,
+    "grain_density": 2.709,
+    "so_pct_pv": 19.7,
+    "sw_pct_pv": 20.5,
+    "sg_pct_pv": 59.8
+   },
+   {
+    "plug": "N1H3",
+    "depth_mMD": 2352.89,
+    "phi_ambient": 0.079,
+    "phi_500psi": 0.0755,
+    "phi_3400psi": 0.0715,
+    "k_air_500_mD": 0.245,
+    "k_klink_500_mD": 0.174,
+    "k_klink_3400_mD": 0.084,
+    "grain_density": 2.713,
+    "so_pct_pv": 13.8,
+    "sw_pct_pv": 17.8,
+    "sg_pct_pv": 68.4
+   }
+  ],
+  "dean_stark_note": "toluene extraction before cleaning; gas by difference; WBM, no tracer",
+  "petrography": "Six thin sections 2,352.15-2,353.24 m: miliolid/textulariid grainstones (one argillaceous wackestone-packstone with Globotruncana at 2,352.38); recrystallised, calcite-cemented, sealed fractures; visual porosity 1-5 % (intercrystalline, moldic, dissolution 2-4 %); no hydrocarbons or impregnation in thin section; no dolomite/anhydrite; outer-shelf environment",
+  "contrast_with_well_test": "plugs 0.1-0.5 mD Klinkenberg at stress vs 18 mD well-test k on 13.2 m: flow through fractures/vugs",
+  "source": "data/processed/deck_notes/fluids_rock_core_notes.md s.5"
+ },
+ "ooip": {
+  "by_source": [
+   {
+    "label": "IFR (GLJ sheet)",
+    "ooip_mmbbl": 11.164,
+    "area_km2": 2.55,
+    "gross_m": 42.3,
+    "ntg": 0.4,
+    "phi": 0.07,
+    "sw": 0.3,
+    "bo": 1.19,
+    "file": "2023-09-29 Tec-12 Economics.xlsm!Summary (GLJ) D6:D19",
+    "note": "630 acres; the '11.2 MMbbl'"
+   },
+   {
+    "label": "Petrel Robertson, all wells",
+    "ooip_mmbbl": 11.956,
+    "area_km2": 2.55,
+    "gross_m": 46.8,
+    "ntg": 0.427,
+    "phi": 0.0556,
+    "sw": 0.2,
+    "bo": 1.19,
+    "file": "Petrel Robertson Volumetrics.xlsx!B",
+    "note": "Petrel geomodel; bulk 119.1 MMm3"
+   },
+   {
+    "label": "PR, TEC-10 logs",
+    "ooip_mmbbl": 12.044,
+    "area_km2": 2.55,
+    "gross_m": 46.8,
+    "ntg": 0.418,
+    "phi": 0.0616,
+    "sw": 0.189,
+    "bo": 1.299,
+    "file": "Petrel Robertson Volumetrics.xlsx!D",
+    "note": "Rsi 552 scf/bbl"
+   },
+   {
+    "label": "PR, vintage logs",
+    "ooip_mmbbl": 7.589,
+    "area_km2": 2.55,
+    "gross_m": 46.8,
+    "ntg": 0.352,
+    "phi": 0.0474,
+    "sw": 0.21,
+    "bo": 1.299,
+    "file": "Petrel Robertson Volumetrics.xlsx!F",
+    "note": "same bulk rock volume, vintage-log petrophysics"
+   },
+   {
+    "label": "CNH / PEMEX booked",
+    "ooip_mmbbl": 7.818,
+    "area_km2": 3.12,
+    "gross_m": null,
+    "ntg": null,
+    "phi": null,
+    "sw": null,
+    "bo": null,
+    "file": "El Abra Trend Field Analogies.xlsx row Tecolutla, cols VO_Crudo, Superficie; PEMEX Resumen table 'Volumen Original'",
+    "note": "the '7.8 MMbbl'; 1P=2P=3P original volume 7.8; produced 1.913 to Apr 2015; RF 24.5 %; 3P EUR 2.129 (27.2 %)"
+   }
+  ],
+  "monte_carlo_mmbbl": {
+   "p90": 8.1,
+   "p50": 10.0,
+   "p10": 12.2,
+   "mean": 10.09,
+   "draws": 20000,
+   "inputs_triangular": {
+    "area_km2": [
+     2.4,
+     2.55,
+     3.12
+    ],
+    "gross_m": [
+     40,
+     44,
+     47
+    ],
+    "ntg": [
+     0.3,
+     0.4,
+     0.45
+    ],
+    "phi": [
+     0.045,
+     0.06,
+     0.075
+    ],
+    "sw": [
+     0.18,
+     0.25,
+     0.35
+    ],
+    "bo": [
+     1.19,
+     1.25,
+     1.3
+    ]
+   }
+  },
+  "tornado_mmbbl": {
+   "base_mode_case": 10.16,
+   "swing": {
+    "area": {
+     "low": 9.56,
+     "high": 12.43
+    },
+    "gross": {
+     "low": 9.24,
+     "high": 10.86
+    },
+    "ntg": {
+     "low": 7.62,
+     "high": 11.43
+    },
+    "phi": {
+     "low": 7.62,
+     "high": 12.7
+    },
+    "sw": {
+     "low": 8.81,
+     "high": 11.11
+    },
+    "bo": {
+     "low": 9.77,
+     "high": 10.67
+    }
+   }
+  },
+  "recovery_factor_context": {
+   "reef_rim_median_rf_to_date": 0.3,
+   "reef_rim_prod_weighted_rf": 0.29,
+   "reef_rim_3p_eur_rf_p90_median_p10": [
+    0.12,
+    0.31,
+    0.4
+   ],
+   "best_reef_rim_3p": 0.53,
+   "tecolutla_cnh_basis": "24.5 % to Apr 2015; ~25 % with production to 2022 on 7.8 MMbbl",
+   "tecolutla_ifr_basis": "18 % on 11.2 MMbbl",
+   "ooip_density_mmbbl_km2": {
+    "tecolutla": 2.5,
+    "reef_rim_median": 8.3
+   },
+   "n_fields": 45
+  },
+  "produced_mmbbl": {
+   "recorded_to_2022": 1.715,
+   "with_wellfile_allocations": 1.975
+  },
+  "remaining_recoverable_mmbbl": {
+   "formula": "OOIP x RF - 1.98 (allocation basis)",
+   "rf_columns": [
+    "25 %",
+    "29 %",
+    "33 %",
+    "38 %"
+   ],
+   "rows": {
+    "CNH 7.8": [
+     0.0,
+     0.3,
+     0.6,
+     1.0
+    ],
+    "P90 8.1": [
+     0.1,
+     0.4,
+     0.7,
+     1.1
+    ],
+    "P50 10.0": [
+     0.5,
+     0.9,
+     1.3,
+     1.8
+    ],
+    "P10 12.2": [
+     1.1,
+     1.6,
+     2.1,
+     2.7
+    ],
+    "IFR 11.2": [
+     0.8,
+     1.3,
+     1.7,
+     2.3
+    ],
+    "PR 12.0": [
+     1.0,
+     1.5,
+     2.0,
+     2.6
+    ]
+   },
+   "note": "summary.json labels the 29 % column 'RF 28%' (int(0.29*100) truncation in src/volumetrics.py line 63); values are at 29 %. CNH 7.8 at 25 % is -0.02, shown as 0.0. PR 12.0 row rounded here from summary.json"
+  },
+  "handover_message": "0.3-1.6 MMbbl remaining, ~0.9 MMbbl at trend-average recovery on the P50 OOIP",
+  "sources": [
+   "docs/07_volumetrics.md",
+   "data/processed/volumetrics/ooip_by_source.csv",
+   "data/processed/volumetrics/summary.json",
+   "src/volumetrics.py"
+  ]
+ },
+ "marl": {
+  "what_it_is": "The 'marl' above El Abra is the Tantoyuca formation. At TEC-10 the whole 2,294-2,311 mSS TEC-12 window (2,328-2,346 mMD) is Tantoyuca on cuttings XRD; El Abra starts at 2,348 mMD (-2,312.9 mSS; log top 2,309.5-2,310.3 mSS). Low resistivity there is lithology (silty calcareous marl, pyrite 3-6 %), so TEC-10's water-saturated window result does not test crestal El Abra. TEC-101 shows the same signature above a sharp El Abra top at -2,334 mSS; the TEC-11 lateral sonic (~73 µs/ft) matches the marl, suggesting the lateral may never have entered El Abra.",
+  "xrd_tec10": {
+   "file": "RockWise 100851 XRD workbook, Drive 1qbViWE2 (62 cuttings, 2,290-2,490 mMD, 2018-05-02)",
+   "window_10_samples": {
+    "quartz_pct": 31,
+    "quartz_feldspar_pct": "38 (31-47)",
+    "total_clay_pct": "9 (3-16)",
+    "calcite_pct": 50,
+    "dolomite_pct": "0.7 (0-2)",
+    "pyrite_pct": "3 (4-6 at 2,336-2,346 mMD)"
+   },
+   "el_abra": {
+    "calcite_pct": "91-100",
+    "dolomite_pct": "up to 6",
+    "perforated_samples_calcite_pct": "97-98"
+   }
+  },
+  "published_values": {
+   "tec10_window_ILD_median": 5.2,
+   "tec10_window_R85_ohmm": "~5.6 (never above 7)",
+   "tec10_window_PE": 3.86,
+   "tec10_window_GR": 134,
+   "tec10_perforated_PE": 5.09,
+   "tec10_dtc_marl_us_ft": 71,
+   "tec10_dtc_el_abra_us_ft": "52-57",
+   "tec11_lateral_dtc_median_us_ft": 73,
+   "tec10_mechanics_window": "YME ~5 Mpsi, PR 0.31, no Stoneley mobility",
+   "tec101_above_el_abra": "ILD 5-7, SPHI 15-20 %, GR ~100",
+   "ifr_eval": "2,305-2,311 mSS VSH 0.74, SWE 1.0; net pay 5.8 m all at 2,314-2,332 mSS",
+   "note_gr134": "docs/14 window GR 134 and perforated GR 79 are the GRGM curve; the main gr curve reads 85 and 43-45 over the same depths (both in log_ranges below)"
+  },
+  "log_ranges_p10_p50_p90": {
+   "TEC-10_2018_triple_combo": {
+    "file": "data/processed/petrophysics/TEC10_logs_mss.csv (TECOLUTLA-10_LAS_2280.50m-2487.00m_02MAY2018.las; mSS from survey, KB 6.13)",
+    "units": {
+     "Tantoyuca marl (TEC-12 window at TEC-10) 2,294-2,311 mSS": {
+      "GR_gapi": {
+       "p10": 73.708,
+       "p50": 84.633,
+       "p90": 95.086
+      },
+      "GRGM_gapi": {
+       "p10": 118.186,
+       "p50": 134.103,
+       "p90": 148.149
+      },
+      "ILD_ohmm": {
+       "p10": 4.2,
+       "p50": 5.188,
+       "p90": 8.324
+      },
+      "NPHI_limestone_frac": {
+       "p10": 0.093,
+       "p50": 0.112,
+       "p90": 0.146
+      },
+      "DPHI_limestone_frac": {
+       "p10": 0.034,
+       "p50": 0.067,
+       "p90": 0.09
+      },
+      "RHOB_gcc": {
+       "p10": 2.563,
+       "p50": 2.595,
+       "p90": 2.63
+      },
+      "PE_b_e": {
+       "p10": 3.686,
+       "p50": 3.859,
+       "p90": 4.097
+      }
+     },
+     "El Abra, producing interval 2,313-2,332 mSS": {
+      "GR_gapi": {
+       "p10": 30.507,
+       "p50": 44.974,
+       "p90": 66.526
+      },
+      "GRGM_gapi": {
+       "p10": 65.824,
+       "p50": 80.583,
+       "p90": 106.766
+      },
+      "ILD_ohmm": {
+       "p10": 11.366,
+       "p50": 15.995,
+       "p90": 36.713
+      },
+      "NPHI_limestone_frac": {
+       "p10": 0.014,
+       "p50": 0.046,
+       "p90": 0.084
+      },
+      "DPHI_limestone_frac": {
+       "p10": 0.032,
+       "p50": 0.079,
+       "p90": 0.153
+      },
+      "RHOB_gcc": {
+       "p10": 2.458,
+       "p50": 2.569,
+       "p90": 2.654
+      },
+      "PE_b_e": {
+       "p10": 4.784,
+       "p50": 5.068,
+       "p90": 5.249
+      }
+     },
+     "El Abra below, 2,332-2,450 mSS": {
+      "GR_gapi": {
+       "p10": 36.252,
+       "p50": 66.725,
+       "p90": 161.23
+      },
+      "GRGM_gapi": {
+       "p10": 68.137,
+       "p50": 94.562,
+       "p90": 169.101
+      },
+      "ILD_ohmm": {
+       "p10": 33.088,
+       "p50": 46.996,
+       "p90": 59.427
+      },
+      "NPHI_limestone_frac": {
+       "p10": 0.001,
+       "p50": 0.008,
+       "p90": 0.023
+      },
+      "DPHI_limestone_frac": {
+       "p10": 0.023,
+       "p50": 0.04,
+       "p90": 0.065
+      },
+      "RHOB_gcc": {
+       "p10": 2.602,
+       "p50": 2.641,
+       "p90": 2.665
+      },
+      "PE_b_e": {
+       "p10": 4.896,
+       "p50": 5.105,
+       "p90": 5.262
+      }
+     }
+    }
+   },
+   "TEC-10_sonic_and_array_induction": {
+    "file": "data/processed/petrophysics/las/curves_TEC-10_TECOLUTLA_10_SONICO_DIPOLAR_2487.00m-2280.5m_02MAY2018.csv (DTC, DTS); las/curves_TEC-10_TEC-10_Logs.csv (R85O array induction, DTC); MD converted to mSS with the TEC10_logs_mss.csv depth pairs",
+    "units": {
+     "Tantoyuca marl (TEC-12 window at TEC-10) 2,294-2,311 mSS": {
+      "DTC_us_ft_dipole": {
+       "p10": 66.892,
+       "p50": 71.34,
+       "p90": 76.932
+      },
+      "DTS_us_ft": {
+       "p10": 125.886,
+       "p50": 134.98,
+       "p90": 148.704
+      },
+      "R85O_ohmm": {
+       "p10": 4.047,
+       "p50": 5.567,
+       "p90": 9.023
+      }
+     },
+     "El Abra, producing interval 2,313-2,332 mSS": {
+      "DTC_us_ft_dipole": {
+       "p10": 53.661,
+       "p50": 57.078,
+       "p90": 61.527
+      },
+      "DTS_us_ft": {
+       "p10": 105.892,
+       "p50": 124.325,
+       "p90": 144.034
+      },
+      "R85O_ohmm": {
+       "p10": 11.345,
+       "p50": 19.416,
+       "p90": 48.59
+      }
+     },
+     "El Abra below, 2,332-2,450 mSS": {
+      "DTC_us_ft_dipole": {
+       "p10": 50.465,
+       "p50": 52.536,
+       "p90": 55.312
+      },
+      "DTS_us_ft": {
+       "p10": 97.969,
+       "p50": 100.79,
+       "p90": 106.84
+      },
+      "R85O_ohmm": {
+       "p10": 39.963,
+       "p50": 61.095,
+       "p90": 85.509
+      }
+     }
+    }
+   },
+   "TEC-101_1972": {
+    "file": "data/processed/petrophysics/las/curves_TEC-101_BLOQUE_TECOLUTLA_101_CILD_DT_GR_ILD_NEUT_SN_SP_SPHI_1699_2364.csv (KB 8.0 m, vertical; vintage digitised log, scales uncalibrated)",
+    "units": {
+     "Unit above El Abra (same depths as TEC-12 window and below) 2,294-2,333 mSS": {
+      "GR": {
+       "p10": 91.596,
+       "p50": 100.045,
+       "p90": 108.23
+      },
+      "ILD_ohmm": {
+       "p10": 5.32,
+       "p50": 7.005,
+       "p90": 11.289
+      },
+      "SPHI_frac": {
+       "p10": 0.114,
+       "p50": 0.158,
+       "p90": 0.198
+      },
+      "DT_us_ft": {
+       "p10": 207.575,
+       "p50": 227.885,
+       "p90": 246.515
+      }
+     },
+     "El Abra 2,334-2,356 mSS (log ends 2,364 mMD)": {
+      "GR": {
+       "p10": 51.683,
+       "p50": 82.711,
+       "p90": 128.652
+      },
+      "ILD_ohmm": {
+       "p10": 64.489,
+       "p50": 142.73,
+       "p90": 223.52
+      },
+      "SPHI_frac": {
+       "p10": 0.016,
+       "p50": 0.025,
+       "p90": 0.046
+      },
+      "DT_us_ft": {
+       "p10": 161.92,
+       "p50": 166.37,
+       "p90": 175.806
+      }
+     }
+    }
+   },
+   "TEC-9_1973": {
+    "file": "data/processed/petrophysics/TEC9_logs_mss.csv (1973 induction-sonic; no marl at window depth: El Abra top -2,296 mSS)",
+    "units": {
+     "El Abra top unit 2,296-2,304 mSS (TEC-12 analogue)": {
+      "GR": {
+       "p10": 37.569,
+       "p50": 44.132,
+       "p90": 50.759
+      },
+      "ILD_ohmm": {
+       "p10": 4.991,
+       "p50": 8.154,
+       "p90": 9.233
+      },
+      "SPHI_frac": {
+       "p10": 0.127,
+       "p50": 0.151,
+       "p90": 0.21
+      },
+      "DT_us_ft": {
+       "p10": 64.95,
+       "p50": 68.621,
+       "p90": 76.895
+      }
+     },
+     "El Abra tight 2,305-2,311 mSS": {
+      "GR": {
+       "p10": 16.339,
+       "p50": 22.922,
+       "p90": 43.066
+      },
+      "ILD_ohmm": {
+       "p10": 20.667,
+       "p50": 79.96,
+       "p90": 84.315
+      },
+      "SPHI_frac": {
+       "p10": 0.03,
+       "p50": 0.049,
+       "p90": 0.082
+      },
+      "DT_us_ft": {
+       "p10": 50.466,
+       "p50": 54.484,
+       "p90": 58.611
+      }
+     },
+     "El Abra produced 2,323-2,328 mSS": {
+      "GR": {
+       "p10": 14.567,
+       "p50": 16.934,
+       "p90": 18.909
+      },
+      "ILD_ohmm": {
+       "p10": 48.971,
+       "p50": 52.974,
+       "p90": 60.06
+      },
+      "SPHI_frac": {
+       "p10": 0.034,
+       "p50": 0.051,
+       "p90": 0.089
+      },
+      "DT_us_ft": {
+       "p10": 51.806,
+       "p50": 53.393,
+       "p90": 56.419
+      }
+     },
+     "Above El Abra 2,270-2,296 mSS": {
+      "GR": {
+       "p10": 38.599,
+       "p50": 43.006,
+       "p90": 49.384
+      },
+      "ILD_ohmm": {
+       "p10": 4.424,
+       "p50": 5.604,
+       "p90": 6.222
+      },
+      "SPHI_frac": {
+       "p10": 0.162,
+       "p50": 0.185,
+       "p90": 0.202
+      },
+      "DT_us_ft": {
+       "p10": 68.919,
+       "p50": 73.159,
+       "p90": 80.357
+      }
+     }
+    }
+   },
+   "TEC-11_lateral_LWD": {
+    "file": "data/processed/petrophysics/TEC11_logs_mss.csv (LWD GR and compressional sonic; no resistivity recorded)",
+    "units": {
+     "Lateral 2,563-3,283 mMD (2,305-2,331 mSS)": {
+      "GR": {
+       "p10": 20.559,
+       "p50": 46.07,
+       "p90": 62.937
+      },
+      "DTC_us_ft": {
+       "p10": 52.04,
+       "p50": 72.41,
+       "p90": 81.54
+      },
+      "SPHI_wyllie_frac": {
+       "p10": 0.032,
+       "p50": 0.176,
+       "p90": 0.241
+      }
+     }
+    }
+   }
+  },
+  "log_ranges_note": "Computed here from the repo log CSVs (P10/P50/P90 of samples in each unit). TEC-101 and TEC-9 are digitised vintage logs with uncalibrated GR scales; the TEC-101 DT values (160-250) are not in µs/ft as printed and the unit is not stated in the file - use for shape only. TEC-10 DTC from the dipole sonic file.",
+  "sources": [
+   "data/processed/database_review/geo_findings.md finding 1",
+   "docs/gaps.md G-47 (2026-10-25, 2026-10-26), G-75, G-79",
+   "docs/19_database_review.md",
+   "docs/20_seismic.md",
+   "docs/14_sw_sensitivity.md s.1",
+   "data/processed/petrophysics/summary.json tec10_zones"
+  ]
+ }
+}

@@ -1,0 +1,11 @@
+[
+ "PEMEX well files (informes finales, expedientes de perforación y producción, estados mecánicos) from the CNH data room, 1955–2007.",
+ "CNH monthly production by well 1966–2016 and field-level 1960–65 (appraisal_plan workbooks); Tonalli daily production, trucking tickets and PEMEX statements 2018–22; CNH annual filings 2020–22.",
+ "Pressure surveys 1956–2018 (PEMEX forms, IFR summary, IHS 2018 well tests), corrected to 2,300 mSS (docs/05).",
+ "Jan 2019 Top El Abra depth grid; PEMEX PSTM 554702 and DMI PSDM 2019 field windows extracted in Colab (docs/20); directional surveys for TEC-9, TEC-10 and TEC-11.",
+ "Laboratory reports: SGS, Intertek, Corelab, Stratascan (core), RockWise (XRD), PEMEX Engler distillations 1956–75.",
+ "Tonalli budget-to-actual 2018–19, lease operating statements 2018–23, Sep 2020 cost sheet, tax-pool schedule Dec 2023, TEC-11 cost summary, TEC-12 AFE (Nov 2020).",
+ "GLJ reserve reports YE2018–YE2025 (25269 for Kinjal Gas); GLJ price decks Jan 2026 and 1 Oct 2026; econ rebuild src/econ_rebuild.py (docs/10).",
+ "CNH technical opinion on the A24 evaluation-plan modification (gob.mx, retrieved 26 Oct 2026): seven PEMEX wells, four productive (TEC-2, 6, 7, 9), all suspended or abandoned from Feb 2016.",
+ "Open items: TEC-2 2019 perforating ticket (G-59), TEC-11 Workstrings invoices (G-64), shut-in cause and date (G-65), APSOL-AP composition, TEC-7 injector state (G-57), IFR Nov 2023 deck native copy. Government per-well portal (SIH) unreachable from this environment on 26 Oct 2026."
+]

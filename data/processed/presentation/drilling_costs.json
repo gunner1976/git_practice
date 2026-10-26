@@ -1,0 +1,480 @@
+{
+ "title": "Drilling and completion costs: TEC-12 AFE and actual Tonalli wells",
+ "currency": "USD (AFE currency confirmed USD, docs/08_afe.md s.3, G-44)",
+ "tec12_afe": {
+  "afe_total_usd_nov2020": 1572724,
+  "note_5000": "AFE is 1,572,724 not 1,567,724: SUB formula for Drilling Pad Maintenance (5,000) deleted in the Sep-2021 copy",
+  "days": {
+   "pre_spud": 6,
+   "drilling_and_completion": 14,
+   "first_date": "2020-11-09",
+   "last_date": "2020-12-08"
+  },
+  "by_category": [
+   {
+    "label": "Rig & move",
+    "category": "rig & rig move",
+    "usd_2020": 424162.0,
+    "share": 0.27
+   },
+   {
+    "label": "Tubulars & WH",
+    "category": "tubulars & wellhead",
+    "usd_2020": 365233.0,
+    "share": 0.232
+   },
+   {
+    "label": "Mud & fluids",
+    "category": "mud, fluids & disposal",
+    "usd_2020": 277823.0,
+    "share": 0.177
+   },
+   {
+    "label": "Directional & tools",
+    "category": "downhole tools & directional",
+    "usd_2020": 141500.0,
+    "share": 0.09
+   },
+   {
+    "label": "Logs, perf & compl.",
+    "category": "logging, perforating & completion",
+    "usd_2020": 118000.0,
+    "share": 0.075
+   },
+   {
+    "label": "Supervision & eng.",
+    "category": "supervision, engineering & HSE",
+    "usd_2020": 96725.0,
+    "share": 0.062
+   },
+   {
+    "label": "Cementing",
+    "category": "cementing",
+    "usd_2020": 94280.0,
+    "share": 0.06
+   },
+   {
+    "label": "Site & civil",
+    "category": "site & civil",
+    "usd_2020": 55000.0,
+    "share": 0.035
+   }
+  ],
+  "by_phase": [
+   {
+    "label": "Pre-spud (pad, cellar, conductor)",
+    "usd_2020": 203117.0,
+    "days": 6
+   },
+   {
+    "label": "12¼\" hole",
+    "usd_2020": 472718.0,
+    "days": 4
+   },
+   {
+    "label": "8½\" hole",
+    "usd_2020": 624964.0,
+    "days": 7
+   },
+   {
+    "label": "Completion",
+    "usd_2020": 271925.0,
+    "days": 3
+   }
+  ],
+  "by_phase_note": "phase totals summed here from afe_by_day.csv daily totals",
+  "by_day": [
+   {
+    "day": "PS1",
+    "stage": "Pad & Cellar construction, Conductor hammering",
+    "date": "2020-11-09",
+    "daily_usd": 61342.0,
+    "cumulative_usd": 61342.0
+   },
+   {
+    "day": "PS2",
+    "stage": "Pad & Cellar construction, Conductor hammering",
+    "date": "2020-11-10",
+    "daily_usd": 250.0,
+    "cumulative_usd": 61592.0
+   },
+   {
+    "day": "PS3",
+    "stage": "Pad & Cellar construction, Conductor hammering",
+    "date": "2020-11-11",
+    "daily_usd": 30000.0,
+    "cumulative_usd": 91592.0
+   },
+   {
+    "day": "PS4",
+    "stage": "Pad & Cellar construction, Conductor hammering",
+    "date": "2020-11-12",
+    "daily_usd": 35000.0,
+    "cumulative_usd": 126592.0
+   },
+   {
+    "day": "PS5",
+    "stage": "Pad & Cellar construction, Conductor hammering",
+    "date": "2020-11-13",
+    "daily_usd": 36350.0,
+    "cumulative_usd": 162942.0
+   },
+   {
+    "day": "PS6",
+    "stage": "Pad & Cellar construction, Conductor hammering",
+    "date": "2020-11-14",
+    "daily_usd": 40175.0,
+    "cumulative_usd": 203117.0
+   },
+   {
+    "day": "1",
+    "stage": "12 1/4\"",
+    "date": "2020-11-15",
+    "daily_usd": 90141.0,
+    "cumulative_usd": 293258.0
+   },
+   {
+    "day": "2",
+    "stage": "12 1/4\"",
+    "date": "2020-11-16",
+    "daily_usd": 45746.0,
+    "cumulative_usd": 339004.0
+   },
+   {
+    "day": "3",
+    "stage": "12 1/4\"",
+    "date": "2020-11-17",
+    "daily_usd": 45746.0,
+    "cumulative_usd": 384750.0
+   },
+   {
+    "day": "4",
+    "stage": "12 1/4\"",
+    "date": "2020-11-21",
+    "daily_usd": 291085.0,
+    "cumulative_usd": 675835.0
+   },
+   {
+    "day": "5",
+    "stage": "8 1/2\"",
+    "date": "2020-11-22",
+    "daily_usd": 83416.0,
+    "cumulative_usd": 759251.0
+   },
+   {
+    "day": "6",
+    "stage": "8 1/2\"",
+    "date": "2020-11-23",
+    "daily_usd": 62416.0,
+    "cumulative_usd": 821668.0
+   },
+   {
+    "day": "7",
+    "stage": "8 1/2\"",
+    "date": "2020-11-24",
+    "daily_usd": 63416.0,
+    "cumulative_usd": 885084.0
+   },
+   {
+    "day": "8",
+    "stage": "8 1/2\"",
+    "date": "2020-11-27",
+    "daily_usd": 70429.0,
+    "cumulative_usd": 955513.0
+   },
+   {
+    "day": "9",
+    "stage": "8 1/2\"",
+    "date": "2020-12-03",
+    "daily_usd": 92666.0,
+    "cumulative_usd": 1048179.0
+   },
+   {
+    "day": "10",
+    "stage": "8 1/2\"",
+    "date": "2020-12-04",
+    "daily_usd": 67666.0,
+    "cumulative_usd": 1115846.0
+   },
+   {
+    "day": "11",
+    "stage": "8 1/2\"",
+    "date": "2020-12-05",
+    "daily_usd": 184953.0,
+    "cumulative_usd": 1300799.0
+   },
+   {
+    "day": "12",
+    "stage": "Completion",
+    "date": "2020-12-06",
+    "daily_usd": 78575.0,
+    "cumulative_usd": 1379374.0
+   },
+   {
+    "day": "13",
+    "stage": "Completion",
+    "date": "2020-12-07",
+    "daily_usd": 73150.0,
+    "cumulative_usd": 1452524.0
+   },
+   {
+    "day": "14",
+    "stage": "Completion",
+    "date": "2020-12-08",
+    "daily_usd": 120200.0,
+    "cumulative_usd": 1572724.0
+   }
+  ],
+  "top_lines": [
+   {
+    "label": "Mud and chemicals (includes centiguge & trucking)",
+    "vendor": "WFT/Check with CES",
+    "usd_2020": 260323.0
+   },
+   {
+    "label": "Drilling Rig",
+    "vendor": "Simmons",
+    "usd_2020": 203362.0
+   },
+   {
+    "label": "Rig move Trucking in/out",
+    "vendor": "Simmons",
+    "usd_2020": 190000.0
+   },
+   {
+    "label": "Intermediate Casing and Accessories",
+    "vendor": "TENARIS TAMSA",
+    "usd_2020": 187384.0
+   },
+   {
+    "label": "Directional Tools",
+    "vendor": "TIDSA/IGNIS/WFT/HAL/SINOPEC",
+    "usd_2020": 70000.0
+   },
+   {
+    "label": "Production Tubing",
+    "vendor": "TENARIS TAMSA",
+    "usd_2020": 60962.0
+   },
+   {
+    "label": "Cement - Production Casing",
+    "vendor": "HAL / WFT / Check smaller companies",
+    "usd_2020": 58825.0
+   },
+   {
+    "label": "Wireline Logging Services",
+    "vendor": "HIGHBURY / WFT",
+    "usd_2020": 50000.0
+   },
+   {
+    "label": "Wellhead",
+    "vendor": "EMRA / WFT / ZAO",
+    "usd_2020": 42000.0
+   },
+   {
+    "label": "Surface Casing and Accessories",
+    "vendor": "TENARIS TAMSA",
+    "usd_2020": 40895.0
+   },
+   {
+    "label": "Perforating Guns",
+    "vendor": "HIGHBURY",
+    "usd_2020": 40000.0
+   },
+   {
+    "label": "Engineering and Consulting",
+    "vendor": "SINS",
+    "usd_2020": 39500.0
+   }
+  ],
+  "absent_from_afe": "contingency, production casing, cement bond log, owner's costs, insurance",
+  "escalation": [
+   {
+    "case": "low",
+    "factor": 1.15,
+    "usd_2026": 1808632,
+    "cad_spot_1p3915": 2516711
+   },
+   {
+    "case": "base",
+    "factor": 1.297,
+    "usd_2026": 2039822,
+    "cad_spot_1p3915": 2838413
+   },
+   {
+    "case": "high",
+    "factor": 1.4,
+    "usd_2026": 2201813,
+    "cad_spot_1p3915": 3063823
+   }
+  ],
+  "escalation_basis": "base x1.297 = US drilling PPI (FRED PCU213111213111) 401.286 Sep-2026 / 309.400 Nov-2020; low x1.15, high x1.40 kept as range; spent Jan 2027 at USD 2.08 MM in the economics",
+  "other_tec12_cost_quotes": [
+   {
+    "label": "Programme rig-phase cost (Prog12 p.58)",
+    "usd": 804750
+   },
+   {
+    "label": "Work Program 'Total cost'",
+    "usd": 1500000
+   },
+   {
+    "label": "GLJ YE2020 DCET",
+    "usd": 1500000
+   },
+   {
+    "label": "GLJ YE2025 capex (directional, 2023 $)",
+    "usd": 1900000
+   },
+   {
+    "label": "GLJ YE2020 horizontal (2020 $)",
+    "usd": 2400000
+   },
+   {
+    "label": "IFR 2023 economics (TEC-10 re-entry)",
+    "usd": 1800000
+   }
+  ],
+  "other_quotes_sources": "data/processed/deck_notes/wells_ops_reserves_notes.md TEC-12DES; data/processed/database_review/res_findings.md item 7; docs/08_afe.md s.4",
+  "sources": [
+   "data/processed/afe/summary.json",
+   "data/processed/afe/afe_categories.csv",
+   "data/processed/afe/afe_by_day.csv",
+   "data/processed/afe/afe_escalated.csv",
+   "docs/08_afe.md"
+  ]
+ },
+ "actual_wells": {
+  "tax_pool_basis": {
+   "description": "Capital per well, tax-cost basis, Dec-2023 tax-pool schedule (Drive 1YKAgyRk), costs incurred 2017-2021",
+   "wells": [
+    {
+     "label": "TEC-10",
+     "usd": 2956480,
+     "parts": {
+      "Drill": 1682270,
+      "Complete": 569765,
+      "Core": 68200,
+      "Site": 405745,
+      "Casing & tubing": 200000,
+      "Survey, access, roads (2017)": 30500
+     }
+    },
+    {
+     "label": "TEC-11 (HZ)",
+     "usd": 3514960,
+     "parts": {
+      "Drill": 2869365,
+      "Complete": 206225,
+      "Casing & tubing": 439370
+     }
+    },
+    {
+     "label": "TEC-2 workovers",
+     "usd": 860450,
+     "parts": {
+      "Site prep": 71575,
+      "Wellhead": 38790,
+      "Initial workover & swab": 513360,
+      "Site expansion for TEC-11": 143435,
+      "Added perforations": 93290
+     }
+    },
+    {
+     "label": "TEC-7 workover (injector)",
+     "usd": 172225
+    },
+    {
+     "label": "Facilities 2019-20",
+     "usd": 92599,
+     "parts": {
+      "TEC-2/TEC-10 pipeline": 29243,
+      "Separator": 22407,
+      "60 m3 tank": 10302,
+      "Refurbished injection pump": 30647
+     }
+    },
+    {
+     "label": "TEC-12 pad works (2021)",
+     "usd": 15000
+    }
+   ],
+   "pool_total_31dec2023_usd": 7611714,
+   "sources": [
+    "data/processed/database_review/acc_findings.md s.1 finding 4",
+    "data/processed/database_review/acc_review.csv row 1YKAgyRk (part split for TEC-2 and facilities)"
+   ]
+  },
+  "tec10_other": {
+   "afe_usd": 2924760,
+   "afe_ref": "AFE ST028, 1 Jan 2018 basis (TEC-10 Updated Drilling Cost Summary 15Jun2018.xlsx AFE Cover O39)",
+   "actual_to_15jun2018_usd": 2039002,
+   "actual_split": {
+    "Drilling": 1810649,
+    "Tangibles": 228353
+   },
+   "cash_paid_2018_19_usd": 2584844,
+   "sources": [
+    "data/processed/deck_notes/accounting_notes.md s.2",
+    "data/processed/deck_notes/wells_ops_reserves_notes.md TEC-10DES"
+   ]
+  },
+  "tec11_other": {
+   "afe_drilling_usd": 2250000,
+   "afe_ref": "AFE TON2018DR002",
+   "actual_vs_budget_by_phase": [
+    {
+     "label": "Drilling",
+     "actual": 3105308,
+     "budget": 2853870
+    },
+    {
+     "label": "CBL / clean-up",
+     "actual": 129360,
+     "budget": 100000
+    },
+    {
+     "label": "Completion (Workstrings)",
+     "actual": 962850,
+     "budget": 831000
+    },
+    {
+     "label": "Tantoyuca test",
+     "actual": 206225,
+     "budget": 150000
+    },
+    {
+     "label": "Total",
+     "actual": 4403743,
+     "budget": 3934870
+    }
+   ],
+   "tracker_26dec2018_total_usd": 3025996,
+   "tracker_main_items": {
+    "Rig": 582846,
+    "Mud": 449500,
+    "Directional": 230600,
+    "Cement": 232500,
+    "Prod. casing": 219000,
+    "Int. casing": 215000,
+    "Rig move": 195000,
+    "Location": 195000
+   },
+   "caveat": "tax pools carry 3.51 MM vs 4.40 MM 'actual': the 0.96 MM Workstrings completion invoices left the pool in 2020 (possible liability, G-64)",
+   "sources": [
+    "data/processed/afe/summary.json 'tec11'",
+    "data/processed/deck_notes/accounting_notes.md s.2",
+    "data/processed/database_review/acc_findings.md finding 5"
+   ]
+  },
+  "tec2_tec7_cash": {
+   "tec2_workovers_cash_2018_19_usd": 757408,
+   "tec2_detail": {
+    "Initial workover": 656290,
+    "Add. perf and workover (2019)": 101118
+   },
+   "tec7_workover_cash_usd": 95848,
+   "source": "data/processed/deck_notes/accounting_notes.md s.2 table (Monthly Summary capital, cash basis)"
+  }
+ }
+}

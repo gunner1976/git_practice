@@ -1,0 +1,197 @@
+{
+ "title": "Tecolutla field opex at its leanest, and the economic-model cost assumptions",
+ "currency_rule": "Amounts in the source currency; USD only where the source gives USD or states the FX rate.",
+ "leanest_sustained_producing_level": {
+  "statement": "Lowest sustained producing-field opex: USD 24.3-25.4 k/month in Jul-Nov 2020; USD 29.1 k/month average through 2021 (349,282 / 12). Field opex only: excludes G&A, regulatory and area charges.",
+  "jul_nov_2020_range_usd_per_month": [
+   24300,
+   25400
+  ],
+  "avg_2021_usd_per_month": 29107,
+  "sources": [
+   "data/processed/database_review/acc_findings.md s.1 finding 2 (Jul-Nov 2020 24.3-25.4 k/month; 2021 averaged 29.1 k/month)",
+   "data/processed/database_review/acc_review.csv row 1l_gSKHt (final 2021 LOS opex 349,282)"
+  ]
+ },
+ "sep_2020_cost_sheet": {
+  "description": "Monthly operating payments, Tonalli Op Cost 290920.xlsx (Sep 2020), the only line-item monthly cost structure at the lean level",
+  "total_usd_per_month": 28155,
+  "fx_mxn_per_usd_stated_in_source": 21,
+  "items": [
+   {
+    "category": "Crew / field supervision (SIIC 'José')",
+    "amount": 280000,
+    "currency": "MXN",
+    "usd_per_month": 13333.0,
+    "usd_basis": "MXN / 21 (the rate stated in the source sheet)"
+   },
+   {
+    "category": "Vacuum truck (Kefren/TDH)",
+    "amount": 108000,
+    "currency": "MXN",
+    "usd_per_month": 5143.0,
+    "usd_basis": "MXN / 21 (the rate stated in the source sheet)"
+   },
+   {
+    "category": "Diesel",
+    "amount": 60000,
+    "currency": "MXN",
+    "usd_per_month": 2857.0,
+    "usd_basis": "MXN / 21 (the rate stated in the source sheet)"
+   },
+   {
+    "category": "Consumables",
+    "amount": 40000,
+    "currency": "MXN",
+    "usd_per_month": 1905.0,
+    "usd_basis": "MXN / 21 (the rate stated in the source sheet)"
+   },
+   {
+    "category": "Frac tank rental (Oro Negro)",
+    "amount": 32000,
+    "currency": "MXN",
+    "usd_per_month": 1524.0,
+    "usd_basis": "MXN / 21 (the rate stated in the source sheet)"
+   },
+   {
+    "category": "Water analysis (Mensuranda)",
+    "amount": 21000,
+    "currency": "MXN",
+    "usd_per_month": 1000.0,
+    "usd_basis": "MXN / 21 (the rate stated in the source sheet)"
+   },
+   {
+    "category": "Crude analysis (Intertek)",
+    "amount": 1468,
+    "currency": "USD",
+    "usd_per_month": 1468,
+    "usd_basis": "as stated (USD)"
+   },
+   {
+    "category": "Demulsifier (Apollo)",
+    "amount": 925,
+    "currency": "USD",
+    "usd_per_month": 925,
+    "usd_basis": "as stated (USD)"
+   }
+  ],
+  "not_included": "separator rental MXN 216,000/month ended Mar-2020 (invoices Sep-2019 to Mar-2020)",
+  "sources": [
+   "data/processed/deck_notes/drive_reads_notes.md line 19 (Drive 1K3fXnOeKw8A7fzFnb3onriNZPKfBe2P1)",
+   "data/processed/deck_notes/accounting_notes.md s.4 'Sept-2020 run-rate'",
+   "src/overview_figures.py figure 23 (28.155 k bar)"
+  ]
+ },
+ "lean_full_year_2021_by_category": {
+  "description": "2021 lease operating statement by category; usd_per_month = annual / 12 (a period average computed here, not monthly actuals)",
+  "items": [
+   {
+    "category": "Trucking",
+    "usd_year": 102720,
+    "usd_per_month": 8560.0
+   },
+   {
+    "category": "Sampling",
+    "usd_year": 25624,
+    "usd_per_month": 2135.0
+   },
+   {
+    "category": "Tanks",
+    "usd_year": 24639,
+    "usd_per_month": 2053.0
+   },
+   {
+    "category": "Field supervision",
+    "usd_year": 159745,
+    "usd_per_month": 13312.0
+   },
+   {
+    "category": "Demulsifier",
+    "usd_year": 7400,
+    "usd_per_month": 617.0
+   },
+   {
+    "category": "Injection pump and stims",
+    "usd_year": 29154,
+    "usd_per_month": 2430.0
+   }
+  ],
+  "total_usd_year": 349282,
+  "total_usd_per_month": 29107,
+  "source": "data/processed/database_review/acc_review.csv row 1l_gSKHt (final 2021 sheet of the Dec-2022 LOS workbook)"
+ },
+ "shut_in_standby_2022": {
+  "statement": "While shut in (Mar-Oct 2022) standby cost about USD 5-8 k/month: supervision 3.3 k, tanks 2 k, fees 1.3 k; field supervision MXN 68,000/month",
+  "source": "data/processed/database_review/acc_review.csv row 1l_gSKHt interpretation"
+ },
+ "holding_cost_no_production": {
+  "y2023_usd": 627273,
+  "y2023_usd_per_month": 52273,
+  "y2024_usd": 289000,
+  "y2025_usd": 248000,
+  "statement": "2023 care and maintenance ~52 k/month with no split (G-70); 2024-25 opex 289 k and 248 k with no sales (~21-24 k/month)",
+  "sources": [
+   "data/processed/database_review/acc_findings.md s.1 finding 3",
+   "data/processed/database_review/res_findings.md item 5 (Tonalli P&L 1QOiCRJv, 1kPVuMAR)"
+  ]
+ },
+ "excluded_overheads": {
+  "cnh_reported_2022_admin_usd_per_month": 39177,
+  "detail": "Jul-Oct 2022 monthly CNH reports: contract administration fee 8,104, project administration 7,870, office 6,101, information administration 6,101, personnel 11,000 USD/month",
+  "source": "docs/13_cnh_filings_gis_cmi.md s.2 'Costs'",
+  "g_and_a_2019_usd": 673984,
+  "g_and_a_source": "data/processed/deck_notes/accounting_notes.md s.5"
+ },
+ "peak_structure_2019_for_contrast": {
+  "total_usd": 839052,
+  "items": {
+   "Separator rental": 186456,
+   "Site engineers": 173474,
+   "Tanks": 112290,
+   "Trucking emulsion": 91583,
+   "Water trucking": 83944,
+   "Water disposal fee (1.33 USD/bbl)": 32534,
+   "Sampling": 36139,
+   "Chem/stim": 46952,
+   "Water-injection well equipment rental": 75680
+  },
+  "source": "data/processed/database_review/acc_review.csv row 1FCUF9Pp (2019 Total Company LOS)"
+ },
+ "economic_model_assumptions": {
+  "description": "TEC-12 economics rebuild (src/econ_rebuild.py dict P; terms from the 2023 IFR workbook 'Model (Tec-10 & Tec-12)'), 2026 USD, inflated 2 %/yr from 2026",
+  "fixed_usd_per_well_month": 2500,
+  "battery_fixed_usd_per_month": 10000,
+  "disposal_well_fixed_usd_per_month": 1500,
+  "variable_usd_per_bbl_oil": 7.25,
+  "variable_usd_per_bbl_oil_note": "= 5.00 + 2.25 trucking/handling (2023 workbook H15)",
+  "variable_usd_per_bbl_water": 3.25,
+  "variable_usd_per_bbl_water_note": "= 2.25 + 1.00 (2023 workbook H16)",
+  "abandonment_usd": 150000,
+  "inflation_per_yr": 0.02,
+  "cost_base_year": 2026,
+  "incremental_case_fixed": "well fixed 2,500 only (battery, disposal and area fees carried by producing TEC-10)",
+  "area_charges": {
+   "as_paid_usd_per_month": 5224,
+   "as_paid_build": "FMP contractual quota MXN 29,829/month at the model's 18 MXN/USD (= 1,657) + IEEH USD 42,800/yr (= 3,567)",
+   "statutory_exploration_usd_per_month": 2638,
+   "extraction_phase_usd_per_month": 3922,
+   "applies_to": "stand-alone case only"
+  },
+  "glj_comparison": {
+   "glj_ye2025_fixed_usd_per_well_month": 1670,
+   "glj_variable_usd_per_bbl": 5.85,
+   "glj_water_charge": "none",
+   "glj_abandonment_usd_per_well": 75000,
+   "glj_ye2022_field_fixed_usd_per_yr": 227000,
+   "glj_ye2019": "2,200 $/well/month + 294 k$/yr",
+   "source": "docs/10_econ_rebuild.md bridge; data/processed/database_review/res_findings.md item 7"
+  },
+  "sources": [
+   "src/econ_rebuild.py lines 20-31 (P dict)",
+   "data/processed/econ_rebuild/summary.json 'parameters'",
+   "docs/10_econ_rebuild.md",
+   "data/processed/econ_2023/assumptions.csv rows 18-25",
+   "docs/01_econ_2023.md cost table"
+  ]
+ }
+}
