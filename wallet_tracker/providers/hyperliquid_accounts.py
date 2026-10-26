@@ -200,3 +200,25 @@ def deflate(rows: list[dict]) -> float:
                 r[f"dsr_vs_{name}"] = probabilistic_sharpe(r[f"ir_period_vs_{name}"], r["effective_days"],
                                                            r[f"ir_skew_vs_{name}"], r[f"ir_kurt_vs_{name}"], star)
     return star * math.sqrt(365)
+
+
+def recent_stats(h: dict, days: int, now: int) -> dict[str, float]:
+    """Return and max drawdown over the last `days`, deposits excluded."""
+    av, pnl = h["account_value"], h["pnl"]
+    start = now - days * 86_400
+    g = peak = 1.0
+    worst = 0.0
+    seen = 0
+    for i in range(1, min(len(av), len(pnl))):
+        if av[i][0] < start:
+            continue
+        d_pnl = pnl[i][1] - pnl[i - 1][1]
+        base = av[i - 1][1] + max(0.0, (av[i][1] - av[i - 1][1]) - d_pnl)
+        if base <= 100:
+            continue
+        g *= 1 + max(d_pnl / base, -1.0)
+        peak = max(peak, g)
+        worst = min(worst, g / peak - 1)
+        seen += 1
+    return {"recent_return": g - 1, "recent_drawdown": -worst, "recent_points": seen,
+            "off_peak": 1 - g / peak}

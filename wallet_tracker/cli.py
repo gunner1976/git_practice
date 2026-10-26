@@ -514,6 +514,33 @@ def cmd_group(args) -> None:
         print(f"skipping {len(gone)} leader(s) whose accounts are now closed or near-empty: "
               + ", ".join(short(r["address"]) for r in gone))
     leaders = [r for r in leaders if books[r["address"]].account_value >= 10_000]
+    # Lessons from the group test: their return is their leverage, and levered
+    # winners blow up. Follow only moderate leverage, still working, not falling.
+    from .providers.hyperliquid_accounts import recent_stats
+    hl0 = HyperliquidAccounts()
+    now0 = int(time.time())
+    kept, dropped = [], []
+    for r in leaders:
+        a = r["address"]
+        gross = sum(abs(x) for x in books[a].weights.values())
+        rec = recent_stats(hl0.history(a), args.recent_days, now0)
+        r.update(rec, live_gross=gross)
+        why = []
+        if gross > args.max_leader_leverage:
+            why.append(f"running {gross:.1f}x > {args.max_leader_leverage:g}x")
+        if rec["recent_return"] <= 0:
+            why.append(f"{rec['recent_return']:+.0%} over the last {args.recent_days}d")
+        if rec["off_peak"] > args.kill_switch:
+            why.append(f"{rec['off_peak']:.0%} below recent peak (kill switch {args.kill_switch:.0%})")
+        (dropped if why else kept).append((r, why))
+    if dropped:
+        print("dropped by leverage / recency / kill switch:")
+        for r, why in dropped:
+            print(f"  {short(r['address'])} {(r.get('alias') or ''):14} " + "; ".join(why))
+    leaders = [r for r, _ in kept]
+    if not leaders:
+        print("\nno leader passes the leverage, recency and kill-switch gates right now: the basket is 100% cash")
+        return
     books = {r["address"]: books[r["address"]] for r in leaders}
     alloc = leader_weights(leaders, args.max_leader)
     print(f"GROUP PROXY of {len(leaders)} Hyperliquid leaders (weights: luck-test confidence / drawdown, "
@@ -531,7 +558,15 @@ def cmd_group(args) -> None:
                   f"{mids.get(c, 0):,.4g}", f"{abs(w) * args.capital / mids[c]:,.4g}" if mids.get(c) else "-"]
                  for c, w in sorted(target.items(), key=lambda kv: -abs(kv[1]))]))
     print(f"gross {sum(abs(x) for x in target.values()):.2f}x, net {sum(target.values()):+.2f}x")
+    # Where each position comes from: the leaders behind every basket line.
+    print("\nBASKET SOURCES (leader contribution to each net weight, before limits)")
+    for c in sorted(target, key=lambda c: -abs(target[c])):
+        parts = [f"{(by_addr[a].get('alias') or short(a))} {alloc[a] * books[a].weights[c]:+.2f}"
+                 for a in alloc if c in books[a].weights]
+        print(f"  {c:6} " + ", ".join(parts))
 
+    if args.no_fidelity:
+        return
     # Fidelity: rebuild books from fills and compare with the leaders' own returns,
     # daily and hourly - fast traders can only be followed by a fast copier.
     hl = HyperliquidAccounts()
@@ -714,6 +749,10 @@ def main(argv: list[str] | None = None) -> None:
     g.add_argument("--max-gross", type=float, default=1.5)
     g.add_argument("--capital", type=float, default=100_000)
     g.add_argument("--days", type=int, default=45)
+    g.add_argument("--max-leader-leverage", type=float, default=3.0, help="skip leaders running more gross leverage")
+    g.add_argument("--recent-days", type=int, default=60, help="leaders must be profitable over this many days")
+    g.add_argument("--kill-switch", type=float, default=0.30, help="drop leaders this far below their recent peak")
+    g.add_argument("--no-fidelity", action="store_true", help="skip the (slow) fidelity test")
     g.set_defaults(fn=cmd_group)
 
     k = sub.add_parser("kb", help="query the knowledge base")
