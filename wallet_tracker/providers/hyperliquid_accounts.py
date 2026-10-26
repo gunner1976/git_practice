@@ -177,6 +177,7 @@ def perp_metrics(h: dict, eth: dict[int, float] | None = None, btc: dict[int, fl
         "total_return": total,
         "cagr": (1 + total) ** (365 / span_days) - 1 if span_days > 30 and total > -1 else 0.0,
         "sharpe": daily_sr * math.sqrt(365), "sharpe_period": sr, "skew": skew, "kurtosis": kurt,
+        "volatility": math.sqrt(var * 365),
         "psr": probabilistic_sharpe(sr, max(int(span_days), 3), skew, kurt),
         "max_drawdown": max_drawdown(rs),
         "pct_positive": sum(r > 0 for r in rs) / len(rs),

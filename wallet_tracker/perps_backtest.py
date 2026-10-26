@@ -53,6 +53,9 @@ def screen_at(histories: dict[str, dict], cutoff: int, eth, btc, volume: dict[st
         if "sharpe_period" not in m or m.get("span_days", 0) < 30:
             continue
         m.update(recent_stats(t, 60, cutoff), address=a)
+        for w in (30, 90):
+            rs = recent_stats(t, w, cutoff)
+            m[f"recent_return_{w}"], m[f"off_peak_{w}"] = rs["recent_return"], rs["off_peak"]
         rows.append(m)
     deflate(rows)
     return rows
@@ -68,8 +71,42 @@ STRATEGIES = {
 }
 
 
+def funnel_rule(statuses=("proven", "on track"), recency: int | None = 60, kill: float | None = 0.30,
+                max_vol: float | None = None):
+    """The funnel with each open fork as a parameter (decision log D15-D18)."""
+    def rule(r):
+        if r.get("evidence") not in statuses:
+            return False
+        if recency:
+            rec = r["recent_return"] if recency == 60 else r[f"recent_return_{recency}"]
+            if rec <= 0:
+                return False
+        if kill is not None and r["off_peak"] >= kill:
+            return False
+        if max_vol is not None and r.get("volatility", 0) > max_vol:
+            return False
+        return True
+    return rule
+
+
+AUDIT = {
+    "BASE funnel (proven/on track, 60d recency, 30% kill)": funnel_rule(),
+    "D16 no recency gate": funnel_rule(recency=None),
+    "D16 recency 30d": funnel_rule(recency=30),
+    "D16 recency 90d": funnel_rule(recency=90),
+    "D17 no kill switch": funnel_rule(kill=None),
+    "D17 kill at 20%": funnel_rule(kill=0.20),
+    "D17 kill at 50%": funnel_rule(kill=0.50),
+    "D15 + volatility cap 150%/yr": funnel_rule(max_vol=1.5),
+    "D15 + volatility cap 100%/yr": funnel_rule(max_vol=1.0),
+    "D15 + volatility cap 60%/yr": funnel_rule(max_vol=0.6),
+    "D18 + let 'too early' in": funnel_rule(statuses=("proven", "on track", "too early")),
+}
+
+
 def run(histories: dict[str, dict], eth, btc, volume: dict[str, float], cutoffs_days: list[int],
-        horizon_days: int, now: int, mm_turnover: float = 5_000, top_n: int = 20) -> list[dict]:
+        horizon_days: int, now: int, mm_turnover: float = 5_000, top_n: int = 20,
+        strategies: dict | None = None) -> list[dict]:
     results = []
     for back in cutoffs_days:
         cutoff = now - back * DAY
@@ -92,7 +129,7 @@ def run(histories: dict[str, dict], eth, btc, volume: dict[str, float], cutoffs_
                     "blew_up": sum(d > 0.5 for d in dds) / len(dds) if dds else 0.0, "eth_return": eth_ret,
                     "picks": [r["address"] for r in picks]}
 
-        for name, rule in STRATEGIES.items():
+        for name, rule in (strategies or STRATEGIES).items():
             results.append(evaluate(name, [r for r in base if rule(r)]))
         results.append(evaluate(f"naive: top {top_n} by past PnL",
                                 sorted(base, key=lambda r: -r["pnl_usd"])[:top_n]))
@@ -111,6 +148,7 @@ def summarise(results: list[dict]) -> dict[str, dict]:
         valid = [r for r in rs if r["with_data"]]
         out[name] = {
             "cutoffs": len(rs), "avg_picked": st.fmean(r["picked"] for r in rs),
+            "cutoffs_with_picks": len(valid),
             "avg_equal_weight_return": st.fmean(r["equal_weight_return"] for r in valid) if valid else 0.0,
             "avg_median_return": st.fmean(r["median_return"] for r in valid) if valid else 0.0,
             "avg_beat_eth": st.fmean(r["beat_eth"] for r in valid) if valid else 0.0,

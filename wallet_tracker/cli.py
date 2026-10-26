@@ -712,7 +712,32 @@ def cmd_perps_backtest(args) -> None:
     eth, btc = bench.get("eth", {}), bench.get("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", {})
     volume = {a: lb[a]["allTime"]["vlm"] for a in histories}
     cutoffs = [int(x) for x in args.cutoffs.split(",")]
-    results = run(histories, eth, btc, volume, cutoffs, args.horizon, now, top_n=args.top_n)
+    from .perps_backtest import AUDIT
+    results = run(histories, eth, btc, volume, cutoffs, args.horizon, now, top_n=args.top_n,
+                  strategies=AUDIT if args.audit else None)
+    if args.audit:
+        summ = summarise(results)
+        base = summ.get("everyone screened (profitable, non-MM)", {})
+        by_cut = {}
+        for r in results:
+            by_cut.setdefault(r["cutoff_days_ago"], {})[r["strategy"]] = r
+        print("FORK AUDIT: each open decision replayed both ways on the same histories and dates "
+              f"(next {args.horizon} days after each cutoff; see docs/DECISIONS.md)\n")
+        rows = []
+        for name, v in summ.items():
+            wins = sum(1 for c in by_cut.values() if name in c and c[name]["with_data"]
+                       and c[name]["median_return"] > c["everyone screened (profitable, non-MM)"]["median_return"])
+            rows.append([name, f"{v['avg_picked']:.1f}", f"{v['cutoffs_with_picks']}/{v['cutoffs']}",
+                         pct(v["avg_median_return"]), f"{v['avg_beat_eth']:.0%}", f"{v['avg_blew_up']:.0%}",
+                         f"{wins}/{v['cutoffs_with_picks']}"])
+        print(table(["variant", "picks/date", "dates w/ picks", "median fwd return", "beat ETH", "blew up",
+                     "dates beating 'everyone'"], rows))
+        print(f"\nreference: everyone profitable at the time - median {pct(base.get('avg_median_return', 0))}, "
+              f"beat ETH {base.get('avg_beat_eth', 0):.0%}, blew up {base.get('avg_blew_up', 0):.0%}")
+        if args.json:
+            with open(args.json, "w") as fh:
+                json.dump(results, fh, indent=1)
+        return
     print(f"BACKTEST OF THE SELECTION PROCESS: leaders picked at each past date using only data up to then, "
           f"judged on the next {args.horizon} days (their own returns = a perfect, instant copy)\n")
     print(table(["days ago", "strategy", "picked", "equal-wt return", "median", "beat ETH", "blew up (>50% DD)", "ETH"],
@@ -907,6 +932,7 @@ def main(argv: list[str] | None = None) -> None:
     pb.add_argument("--top-n", type=int, default=20)
     pb.add_argument("--seed", type=int, default=7)
     pb.add_argument("--json")
+    pb.add_argument("--audit", action="store_true", help="replay the open decision forks (docs/DECISIONS.md)")
     pb.set_defaults(fn=cmd_perps_backtest)
 
     k = sub.add_parser("kb", help="query the knowledge base")
