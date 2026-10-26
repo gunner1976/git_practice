@@ -686,6 +686,52 @@ def cmd_networth(args) -> None:
               f"({gross / total if total else 0:.2f}x), net {net / total if total else 0:+.2f}x of total wealth")
 
 
+def cmd_perps_backtest(args) -> None:
+    """Re-run the Hyperliquid leader selection at past dates and score what the picks did next."""
+    import random
+    from .perps_backtest import run, summarise
+    from .providers.defillama import DefiLlamaPrices
+    from .providers.hyperliquid_accounts import HyperliquidAccounts
+    hl = HyperliquidAccounts()
+    lb = hl.leaderboard()
+    pool = [a for a, r in lb.items() if r["allTime"]["vlm"] >= args.min_volume]
+    random.Random(args.seed).shuffle(pool)
+    sample = pool[:args.sample]
+    print(f"sampling {len(sample)} of {len(pool)} accounts with >= ${args.min_volume:,.0f} lifetime volume "
+          f"(random, includes accounts that later blew up)", file=sys.stderr)
+    histories = {}
+    for i, a in enumerate(sample, 1):
+        print(f"\r  fetching {i}/{len(sample)}", end="", file=sys.stderr, flush=True)
+        try:
+            histories[a] = hl.history(a)
+        except Exception:
+            continue
+    print(file=sys.stderr)
+    now = int(time.time())
+    bench = DefiLlamaPrices().daily_prices({"eth", "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"}, now - 1100 * DAY, now)
+    eth, btc = bench.get("eth", {}), bench.get("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", {})
+    volume = {a: lb[a]["allTime"]["vlm"] for a in histories}
+    cutoffs = [int(x) for x in args.cutoffs.split(",")]
+    results = run(histories, eth, btc, volume, cutoffs, args.horizon, now, top_n=args.top_n)
+    print(f"BACKTEST OF THE SELECTION PROCESS: leaders picked at each past date using only data up to then, "
+          f"judged on the next {args.horizon} days (their own returns = a perfect, instant copy)\n")
+    print(table(["days ago", "strategy", "picked", "equal-wt return", "median", "beat ETH", "blew up (>50% DD)", "ETH"],
+                [[str(r["cutoff_days_ago"]), r["strategy"], str(r["picked"]), pct(r["equal_weight_return"]),
+                  pct(r["median_return"]), f"{r['beat_eth']:.0%}", f"{r['blew_up']:.0%}", pct(r["eth_return"])]
+                 for r in results]))
+    print("\nAVERAGE ACROSS CUTOFFS")
+    print(table(["strategy", "avg picked", "equal-wt return", "median", "beat ETH", "blew up", "ETH"],
+                [[k, f"{v['avg_picked']:.1f}", pct(v["avg_equal_weight_return"]), pct(v["avg_median_return"]),
+                  f"{v['avg_beat_eth']:.0%}", f"{v['avg_blew_up']:.0%}", pct(v["avg_eth_return"])]
+                 for k, v in summarise(results).items()]))
+    print("\nnotes: candidates sampled by lifetime volume from today's leaderboard (blown-up accounts stay in; "
+          "accounts that vanished entirely are missing, flattering all strategies alike). Market-maker detection "
+          "uses lifetime volume, a mild look-ahead.")
+    if args.json:
+        with open(args.json, "w") as fh:
+            json.dump(results, fh, indent=1)
+
+
 def cmd_kb(args) -> None:
     kb = KnowledgeBase(args.kb)
     if args.action == "runs":
@@ -852,6 +898,16 @@ def main(argv: list[str] | None = None) -> None:
     nw.add_argument("--max-pages", type=int, default=8)
     nw.add_argument("--config")
     nw.set_defaults(fn=cmd_networth)
+
+    pb = sub.add_parser("perps-backtest", help="backtest the Hyperliquid leader-selection process")
+    pb.add_argument("--sample", type=int, default=1500)
+    pb.add_argument("--min-volume", type=float, default=2_000_000, help="lifetime volume floor for candidates")
+    pb.add_argument("--cutoffs", default="240,180,120,90,60", help="days ago to rewind to")
+    pb.add_argument("--horizon", type=int, default=60, help="days after each cutoff to judge the picks")
+    pb.add_argument("--top-n", type=int, default=20)
+    pb.add_argument("--seed", type=int, default=7)
+    pb.add_argument("--json")
+    pb.set_defaults(fn=cmd_perps_backtest)
 
     k = sub.add_parser("kb", help="query the knowledge base")
     k.add_argument("action", choices=["runs", "top", "wallet", "flows", "movers", "emerging"])
