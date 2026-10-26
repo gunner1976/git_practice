@@ -1,0 +1,62 @@
+{
+ "psdm": {
+  "cube": [
+   173,
+   174,
+   451
+  ],
+  "bin_m": 25,
+  "z_axis": "m below sea level (read; no unit in file)",
+  "dominant_wavelength_m": 67,
+  "tracked_fraction": [
+   0.6667762076897799,
+   0.6680906999671377
+  ],
+  "corr_peak_vs_tops": -0.4791023150064919,
+  "note": "reef-level reflectors are highest along the west (TEC-101, TEC-2, north) and lower at TEC-9/TEC-12: the reverse of the log tops"
+ },
+ "pstm": {
+  "volume": "554702 SFSG (raw)",
+  "cube": [
+   171,
+   172,
+   601
+  ],
+  "sample_ms": 2.0,
+  "tracked_fraction": [
+   0.9451919921234001,
+   0.9954053167049557
+  ],
+  "corr_peak_time_vs_tops": 0.6914299624125031,
+  "vavg_peak_mps": {
+   "TEC-6": 2937.0,
+   "TEC-9": 2928.0,
+   "TEC-2": 2918.0,
+   "TEC-7": 2914.0,
+   "TEC-10": 2934.0,
+   "TEC-101": 2951.0
+  },
+  "loo_error_m": {
+   "mean": 1.2500000000000007,
+   "rms": 11.208553281608946,
+   "max_abs": 18.4
+  },
+  "tec12": {
+   "peak_ms": 1565.5,
+   "trough_ms": 1547.3,
+   "v_idw_mps": 2929.156236905517,
+   "depth_est_mss": 2292.797044437793,
+   "depth_range_tec9_tec10_velocity": [
+    2291.508734459675,
+    2296.789271422219
+   ],
+   "grid_mss": 2289.4,
+   "prognosis_mss": 2296.0,
+   "fraction_of_field_traces_with_earlier_peak": 0.03263888888888889
+  },
+  "north_grid_crest": {
+   "peak_ms": 1606.5,
+   "trough_ms": 1567.9
+  }
+ }
+}
