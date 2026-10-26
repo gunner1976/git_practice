@@ -335,6 +335,13 @@ def cmd_backtest(args) -> None:
                             ("copy top past returns (naive)", "copy_top_past_returns"), ("hold ETH", "eth")]]
     print(table(["after cutoff", "return", "CAGR", "Sharpe", "max DD"], rows))
     print(f"\ninvested {sum(p.weight for p in res['leaders']):.0%}; the rest is cash (capped weights + buffer)")
+    if res["leaders"]:
+        print("\nLEVERAGE on the strategy (sized only on past copy returns; daily liquidation model, cross margin)")
+        print(table(["policy", "avg lev", "return", "CAGR", "Sharpe", "max DD", "liquidated", "survives 10/20/30% crash"],
+                    [[x["policy"], f"{x['avg_leverage']:.2f}x", pct(x["return"]), pct(x["cagr"]), num(x["sharpe"]),
+                      pct(-x["max_drawdown"]), "YES" if x["liquidated"] else "no",
+                      "/".join("no" if v else "yes" for v in x["stress"].values())]
+                     for x in res["leverage"]]))
 
 
 def cmd_paper(args) -> None:

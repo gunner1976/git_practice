@@ -388,6 +388,27 @@ class RoutingTest(unittest.TestCase):
         self.assertGreater(corr, 0.9)
 
 
+class LeverageTest(unittest.TestCase):
+    def test_leverage_scales_risk_not_sharpe_and_liquidates(self):
+        from wallet_tracker.leverage import Policy, apply
+        import random
+        rng = random.Random(3)
+        rs = [rng.gauss(0.002, 0.02) for _ in range(300)]
+        one, two = apply(rs, Policy("1x")), apply(rs, Policy("2x", leverage=2.0))
+        self.assertAlmostEqual(one["sharpe"], two["sharpe"], places=6)
+        self.assertGreater(two["max_drawdown"], one["max_drawdown"])
+        crash = rs[:100] + [-0.35] + rs[100:]
+        self.assertTrue(apply(crash, Policy("3x", leverage=3.0))["liquidated"])
+        self.assertFalse(apply(crash, Policy("1x"))["liquidated"])
+
+    def test_vol_target_sizes_down_in_turbulence(self):
+        from wallet_tracker.leverage import Policy, _lev
+        calm = [0.001, -0.001] * 40
+        wild = [0.06, -0.06] * 40
+        p = Policy("vt", kind="vol_target", target_vol=0.4, max_leverage=5)
+        self.assertGreater(_lev(p, calm), _lev(p, wild))
+
+
 class RegimeTest(unittest.TestCase):
     def test_labels_and_robustness(self):
         import random

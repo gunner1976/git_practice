@@ -169,6 +169,10 @@ def walk_forward(histories: list[WalletHistory], series, cfg: Config, now: int, 
     cut_day = cutoff - cutoff % DAY
 
     _, ours = portfolio_returns(full, leaders, cut_day)
+    # Leverage sized only on the copy portfolio's own past (pre-cutoff history
+    # warms up the trailing estimates, results count only after the cutoff).
+    warm_days, warm = portfolio_returns(full, leaders, cut_day - 180 * DAY)
+    pre = [x for d, x in zip(warm_days, warm) if d <= cut_day]
 
     attr = "venue_returns" if venue is not None else "copy_returns"
 
@@ -188,6 +192,7 @@ def walk_forward(histories: list[WalletHistory], series, cfg: Config, now: int, 
         "copy_all_eligible": _stats(equal_basket(eligible)),
         "copy_top_past_returns": _stats(equal_basket(naive)),
         "eth": _stats([x for d, x in zip(eth_days, eth) if d > cut_day]),
+        "leverage": _levered(pre, ours),
         "past": past, "full": full,
     }
 
@@ -228,4 +233,18 @@ def funnel(study: Study, rules: Rules) -> list[dict]:
     for name, ok in gates:
         alive = [r for r in alive if ok(r)]
         out.append({"stage": name, "count": len(alive), "survivors": [r.address for r in alive]})
+    return out
+
+
+def _levered(pre: list[float], post: list[float]) -> list[dict]:
+    """Each leverage policy applied with its sizing warmed up on `pre`,
+    judged only on `post`."""
+    from .leverage import DEFAULT_POLICIES, apply, stress
+    out = []
+    for pol in DEFAULT_POLICIES:
+        res = apply(pre + post, pol)
+        rs = res["returns"][len(pre):] if len(res["returns"]) > len(pre) else ([-1.0] if res["liquidated"] else [])
+        row = {"policy": pol.name, "avg_leverage": res["avg_leverage"], "liquidated": res["liquidated"],
+               **_stats(rs), "stress": stress(pre + post, pol)}
+        out.append(row)
     return out
