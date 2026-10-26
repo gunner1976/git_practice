@@ -421,11 +421,16 @@ def cmd_perps(args) -> None:
     hl = HyperliquidAccounts()
     lb = hl.leaderboard()
     addrs = hl.candidates(args.min_value, args.top)
+    from .providers.defillama import DefiLlamaPrices
+    now = int(time.time())
+    bench = DefiLlamaPrices().daily_prices({"eth", "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"},
+                                           now - 1100 * DAY, now)
+    eth, btc = bench.get("eth", {}), bench.get("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", {})
     rows = []
     for i, a in enumerate(addrs, 1):
         print(f"\r  fetching {i}/{len(addrs)}", end="", file=sys.stderr, flush=True)
         try:
-            m = perp_metrics(hl.history(a))
+            m = perp_metrics(hl.history(a), eth, btc)
         except Exception as exc:
             print(f"\n  skip {a}: {exc}", file=sys.stderr)
             continue
@@ -459,6 +464,17 @@ def cmd_perps(args) -> None:
                   f"{r['span_days']:.0f}"] for i, r in enumerate(traders[:args.show], 1)]))
     sig = sum(r["dsr"] >= 0.95 for r in traders)
     print(f"\npass the luck test (DSR >= 95%): {sig} of {len(traders)}")
+    beat = [r for r in traders if r.get("dsr_vs_eth", 0) >= 0.8 and r.get("dsr_vs_btc", 0) >= 0.8]
+    print(f"beat BOTH ETH and BTC with >= 80% luck-test confidence: {len(beat)}")
+    best = sorted(traders, key=lambda r: min(r.get("dsr_vs_eth", 0), r.get("dsr_vs_btc", 0)), reverse=True)[:args.show]
+    print("\nMARKET-BEATERS (ranked by the weaker of their luck tests vs ETH and vs BTC)")
+    print(table(["account", "alias", "value", "PnL", "excess vs ETH", "vs BTC", "IR vs ETH", "luck vs ETH",
+                 "luck vs BTC", "months > ETH", "max DD", "days"],
+                [[short(r["address"]), (r["alias"] or "")[:18], f"${r['account_value']:,.0f}", f"${r['pnl_usd']:,.0f}",
+                  pct(r.get("excess_total_vs_eth", 0)), pct(r.get("excess_total_vs_btc", 0)), num(r.get("ir_vs_eth", 0)),
+                  f"{r.get('dsr_vs_eth', 0):.0%}", f"{r.get('dsr_vs_btc', 0):.0%}",
+                  f"{r.get('pct_months_beat_eth', 0):.0%}", pct(-r["max_drawdown"]), f"{r['span_days']:.0f}"]
+                 for r in best]))
     # Percent vs dollars: good while small, then lost money after scaling up.
     scaled = [r for r in traders if r["total_return"] > 0 and r["pnl_usd"] < 0]
     print(f"positive % return but negative $ PnL (won small, lost big after scaling up): {len(scaled)}")

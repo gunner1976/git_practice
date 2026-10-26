@@ -99,7 +99,19 @@ class HyperliquidAccounts:
                 "pnl": [(t, pnl_pts[t]) for t in ts], "volume": float(w.get("vlm") or 0)}
 
 
-def perp_metrics(h: dict) -> dict[str, float]:
+def _px(series: dict[int, float], t: int) -> float | None:
+    """Price at time t from a daily series (nearest earlier day)."""
+    if not series:
+        return None
+    d = t - t % 86_400
+    for k in range(4):
+        p = series.get(d - k * 86_400)
+        if p:
+            return p
+    return None
+
+
+def perp_metrics(h: dict, eth: dict[int, float] | None = None, btc: dict[int, float] | None = None) -> dict[str, float]:
     av, pnl = h["account_value"], h["pnl"]
     n = min(len(av), len(pnl))
     rs, gaps = [], []
@@ -112,6 +124,7 @@ def perp_metrics(h: dict) -> dict[str, float]:
             gaps.append(max((av[i][0] - av[i - 1][0]) / 86_400, 1e-3))
     if len(rs) < 8:
         return {"intervals": len(rs)}
+    times = [av[i][0] for i in range(1, n) if (av[i - 1][1] + max(0.0, (av[i][1] - av[i - 1][1]) - (pnl[i][1] - pnl[i - 1][1]))) > 100]
     span_days = (av[n - 1][0] - av[0][0]) / 86_400
     ppy = 365 / st.median(gaps)
     # Intervals are uneven (coarse history, fine recent data), so estimate
@@ -126,7 +139,38 @@ def perp_metrics(h: dict) -> dict[str, float]:
     sr = daily_sr
     total = compound(rs)
     avg_value = st.fmean(v for _, v in av[:n]) or 1.0
+    market = {}
+    for name, series in (("eth", eth), ("btc", btc)):
+        if not series:
+            continue
+        ex, ok_gaps = [], []
+        for r, g, t in zip(rs, gaps, times):
+            p0, p1 = _px(series, int(t - g * 86_400)), _px(series, t)
+            if p0 and p1:
+                ex.append((1 + r) / (p1 / p0) - 1)
+                ok_gaps.append(g)
+        if len(ex) >= 8:
+            mu_x = sum(ex) / sum(ok_gaps)
+            var_x = sum((x - mu_x * g) ** 2 for x, g in zip(ex, ok_gaps)) / sum(ok_gaps)
+            sr_x = mu_x / math.sqrt(var_x) if var_x > 0 else 0.0
+            _, _, sk_x, ku_x = moments([x / math.sqrt(g) for x, g in zip(ex, ok_gaps)])
+            market[f"excess_total_vs_{name}"] = compound(ex)
+            market[f"ir_vs_{name}"] = sr_x * math.sqrt(365)
+            market[f"ir_period_vs_{name}"] = sr_x
+            market[f"ir_skew_vs_{name}"], market[f"ir_kurt_vs_{name}"] = sk_x, ku_x
+            # consistency: share of ~30-day blocks that beat the benchmark
+            block, acc, days_acc = [], 1.0, 0.0
+            for x, g in zip(ex, ok_gaps):
+                acc *= 1 + x
+                days_acc += g
+                if days_acc >= 30:
+                    block.append(acc - 1)
+                    acc, days_acc = 1.0, 0.0
+            win_n = len(block)
+            wins = sum(b > 0 for b in block)
+            market[f"pct_months_beat_{name}"] = wins / win_n if win_n else 0.0
     return {
+        **market,
         "intervals": len(rs), "effective_days": max(int(span_days), 3), "span_days": span_days,
         "periods_per_year": ppy,
         "total_return": total,
@@ -150,4 +194,9 @@ def deflate(rows: list[dict]) -> float:
     star = expected_max_sharpe(1.0 / t_typ, len(scored))
     for r in scored:
         r["dsr"] = probabilistic_sharpe(r["sharpe_period"], r["effective_days"], r["skew"], r["kurtosis"], star)
+        # The claim that matters: beating the market, not just making money.
+        for name in ("eth", "btc"):
+            if f"ir_period_vs_{name}" in r:
+                r[f"dsr_vs_{name}"] = probabilistic_sharpe(r[f"ir_period_vs_{name}"], r["effective_days"],
+                                                           r[f"ir_skew_vs_{name}"], r[f"ir_kurt_vs_{name}"], star)
     return star * math.sqrt(365)
