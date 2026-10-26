@@ -82,6 +82,7 @@ class Etherscan:
         a = address.lower()
         out: list[Transfer] = []
         deployed: list[str] = []
+        targets: dict[str, str] = {}
         normal, t1 = self._paged("txlist", a, start_block, lambda r: r["hash"])
         internal, t2 = self._paged("txlistinternal", a, start_block,
                                    lambda r: (r["hash"], r.get("traceId", ""), r["value"], r["to"]))
@@ -94,6 +95,8 @@ class Etherscan:
             if tx["from"].lower() == a and ok and tx.get("contractAddress") and not tx.get("to"):
                 deployed.append(tx["contractAddress"].lower())
             if tx["from"].lower() == a:
+                if tx.get("to"):
+                    targets[h] = tx["to"].lower()
                 gas = int(tx["gasUsed"]) * int(tx["gasPrice"]) / 1e18
                 out.append(Transfer(h, ts, blk, "eth", "ETH", -gas, GAS))
                 if ok and val and (tx["to"] or "").lower() != a:
@@ -125,7 +128,13 @@ class Etherscan:
 
         return WalletHistory(a, out, is_contract=check_contract and self.is_contract(a),
                              label=self.labels.get(a, ""), deployed_contracts=deployed,
-                             truncated=t1 or t2 or t3)
+                             truncated=t1 or t2 or t3, tx_targets=targets)
+
+    def tx_targets(self, address: str, start_block: int = 0) -> dict[str, str]:
+        """Contracts the wallet called, by tx hash (normal txs only: cheap to backfill)."""
+        a = address.lower()
+        rows, _ = self._paged("txlist", a, start_block, lambda r: r["hash"])
+        return {r["hash"]: r["to"].lower() for r in rows if r["from"].lower() == a and r.get("to")}
 
     def discover_swappers(self, days: int = 90, windows: int = 12, min_windows: int = 2,
                           routers: dict[str, str] | None = None, top: int = 300,

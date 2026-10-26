@@ -19,6 +19,7 @@ from .migration import Migration, detect as detect_migrations, universe_stats
 from .prices import PriceBook
 from .reputation import assess, first_funder
 from .sectors import SectorMap, exposure, flows
+from .trade_venues import venue_activity
 
 BUY_HOLD_ROW = "buy-and-hold (reference)"
 
@@ -62,6 +63,7 @@ class Study:
     size_regime: dict[str, dict[str, dict[str, float]]] = field(default_factory=dict)
     size_baskets: dict[str, tuple[list[int], list[float]]] = field(default_factory=dict)
     venue: object = None
+    trade_venues: dict = field(default_factory=dict)
     frequency_summary: dict[str, dict[str, float]] = field(default_factory=dict)
 
 
@@ -141,6 +143,8 @@ def run_study(histories: list[WalletHistory], series: dict[str, dict[int, float]
     study.migrations, study.migration_stats = migrations, universe_stats(migrations, traders)
     _matrices(study)
     _capital_map(study, sector_map or SectorMap(), PriceBook(series))
+    study.trade_venues = venue_activity([r for r in reports if r.wallet_class in TRADER_CLASSES],
+                                        PriceBook(series), is_smart)
     _size_cohorts(study)
     _frequency_cohorts(study)
     eth = series.get("eth", {})

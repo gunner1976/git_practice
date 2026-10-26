@@ -96,7 +96,13 @@ def _history(env: Env, address: str, args):
     path = os.path.join(cache_dir, f"{address}-{args.chain_id}-{getattr(args, 'since_days', 0)}.json") if cache_dir else None
     if path and os.path.exists(path):
         with open(path) as fh:
-            return history_from_json(json.load(fh))
+            raw = json.load(fh)
+        h = history_from_json(raw)
+        if "tx_targets" not in raw and env.world is None:  # cached before venues were tracked
+            h.tx_targets = env.provider.tx_targets(address, start)
+            with open(path, "w") as fh:
+                json.dump(history_to_json(h), fh)
+        return h
     h = env.provider.history(address, start)
     if path:
         os.makedirs(cache_dir, exist_ok=True)

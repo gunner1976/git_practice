@@ -42,6 +42,8 @@ class WalletReport:
     frequency_tier: str = ""
     venue_returns: list[float] = field(default_factory=list, repr=False)
     venue_coins: list[str] = field(default_factory=list)
+    venue_mix: dict[str, float] = field(default_factory=dict)   # where it trades, by swap volume
+    primary_venue: str = ""
     history: WalletHistory | None = field(default=None, repr=False)
 
     @property

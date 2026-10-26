@@ -149,7 +149,16 @@ class SyntheticWorld:
                 cur = nxt
             if rng.random() < 0.03:  # occasional top-up - must not count as profit
                 self._deposit(out, d, USDC, capital * 0.2, funder)
-        self.histories[a] = WalletHistory(a, out)
+        # Venue habits: software prefers aggregators, people mostly use Uniswap.
+        if style == "agent":
+            routers = ["0x111111125421ca6dc452d289314280a0f8842a65", "0xcf5540fffcdc3d510b18bfca6d2b9987b0772559"]
+        else:
+            routers = ["0x66a9893cc07d91d95644aedd05d03f95e1dba8af"] * 3 + [
+                "0x3328f7f4a1d1c57c35df56bbf0c9dcafca309c49"]
+        main = rng.choice(routers)
+        targets = {t.tx_hash: (main if rng.random() < 0.8 else rng.choice(routers))
+                   for t in out if t.counterparty == "router"}
+        self.histories[a] = WalletHistory(a, out, tx_targets=targets)
         self.truth[a] = {"skill": skill, "style": style}
         self._state[a] = (cur, bal)
         return a
@@ -273,4 +282,4 @@ class SyntheticWorld:
     def history(self, address: str, start_block: int = 0, check_contract: bool = True) -> WalletHistory:
         h = self.histories[address.lower()]
         return WalletHistory(h.address, [t for t in h.transfers if t.block >= start_block],
-                             h.is_contract, h.label, list(h.deployed_contracts))
+                             h.is_contract, h.label, list(h.deployed_contracts), tx_targets=dict(h.tx_targets))

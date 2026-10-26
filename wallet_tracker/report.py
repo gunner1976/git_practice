@@ -145,6 +145,20 @@ def study_text(study, top: int = 20) -> str:
     out.append(table(["frequency", "n", "hold", "swaps/mo", "CAGR", "Sharpe", "signif", "half-life"]
                      + [f"copy@{lag}d" for lag in lags], rows) if rows else "  no traders")
 
+    tv = study.trade_venues or {}
+    if tv.get("summary"):
+        out.append("\nWHERE THE MONEY TRADES (by each wallet's main venue, by swap volume)")
+        rows = [[v, str(x["primary_users"]), str(x["smart_users"]), pct(x["median_cagr"]), num(x["median_sharpe"]),
+                 ", ".join(f"#{rk}" if rk else short(a) for a, rk, _ in x["top"][:3])]
+                for v, x in sorted(tv["summary"].items(), key=lambda kv: -kv[1]["primary_users"])]
+        out.append(table(["venue", "main users", "smart", "CAGR", "Sharpe", "top ranked users"], rows))
+        months = list(tv["smart_share"])[-6:]
+        venues = sorted({v for m in months for v in tv["smart_share"][m]})
+        if months:
+            out.append("  smart-money volume share by venue:")
+            out.append(table(["venue"] + months, [[v] + [share(tv["smart_share"][m].get(v, 0.0)) for m in months]
+                                                  for v in venues]))
+
     ms = study.migration_stats
     out.append(f"\nWALLET MIGRATIONS: {ms.get('migrations', 0)} of {ms.get('wallets', 0)} trading wallets "
                f"({ms.get('rate', 0):.1%}) handed their book to another address; {ms.get('verified', 0)} verified")
