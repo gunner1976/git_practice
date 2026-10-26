@@ -8,6 +8,10 @@ time, Drive md5 and a locally computed SHA256.
 Authentication (one of):
   GDRIVE_SA_JSON='<contents of the service-account key JSON>'
       Same service account as below, but the key text itself in an environment secret.
+  GDRIVE_OAUTH_JSON='{"client_id": ..., "client_secret": ..., "refresh_token": ...}'
+      OAuth "authorized user" credentials for Kevin's own Google account, as JSON text in an
+      environment secret. Use this when the organisation policy blocks service-account keys;
+      the refresh token can come from the OAuth Playground with Kevin's own OAuth client.
   GOOGLE_APPLICATION_CREDENTIALS=/path/to/service_account.json
       Service account. It must be added as a member (Viewer) of the shared
       drive, or of the specific folders, by a drive manager.
@@ -62,17 +66,22 @@ def credentials():
     from google.oauth2 import service_account
     from google.oauth2.credentials import Credentials
 
+    import json
     sa_inline = os.environ.get("GDRIVE_SA_JSON")  # service-account key JSON text, stored as an environment secret
+    oauth_inline = os.environ.get("GDRIVE_OAUTH_JSON")  # authorized-user JSON text (client_id, client_secret, refresh_token)
     sa = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
     tok = os.environ.get("GDRIVE_TOKEN_JSON")
     if sa_inline:
-        import json
         return service_account.Credentials.from_service_account_info(json.loads(sa_inline), scopes=SCOPES)
+    if oauth_inline:  # for when service-account key creation is blocked by organisation policy
+        info = json.loads(oauth_inline)
+        info.setdefault("token_uri", "https://oauth2.googleapis.com/token")
+        return Credentials.from_authorized_user_info(info, SCOPES)
     if sa:
         return service_account.Credentials.from_service_account_file(sa, scopes=SCOPES)
     if tok:
         return Credentials.from_authorized_user_file(tok, SCOPES)
-    sys.exit("No credentials: set GDRIVE_SA_JSON, GOOGLE_APPLICATION_CREDENTIALS or GDRIVE_TOKEN_JSON "
+    sys.exit("No credentials: set GDRIVE_SA_JSON, GDRIVE_OAUTH_JSON, GOOGLE_APPLICATION_CREDENTIALS or GDRIVE_TOKEN_JSON "
              "(see module docstring).")
 
 
