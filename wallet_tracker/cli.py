@@ -226,7 +226,7 @@ def cmd_follow(args) -> None:
 
 
 def _rules(args) -> Rules:
-    return Rules(min_dsr=args.min_dsr, min_copy_sharpe=args.min_copy_sharpe,
+    return Rules(min_dsr=args.min_dsr, min_copy_sharpe=args.min_copy_sharpe, reaction_days=args.reaction_days,
                  require_identity=args.require_identity, max_leaders=args.max_leaders,
                  max_weight=args.max_weight, cash_buffer=args.cash_buffer)
 
@@ -416,6 +416,8 @@ def main(argv: list[str] | None = None) -> None:
     strat.add_argument("--addresses", nargs="*", help="addresses, comma lists, or files of addresses")
     strat.add_argument("--min-dsr", type=float, default=0.8, help="luck-test confidence a leader needs")
     strat.add_argument("--min-copy-sharpe", type=float, default=1.0)
+    strat.add_argument("--reaction-days", type=float, default=1.0,
+                       help="how late you act on a leader's trade; leaders need an edge half-life >= 2x this")
     strat.add_argument("--require-identity", action="store_true", help="only entities with an attested identity")
     strat.add_argument("--max-leaders", type=int, default=8)
     strat.add_argument("--max-weight", type=float, default=0.25)

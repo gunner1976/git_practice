@@ -61,6 +61,7 @@ class Study:
     size_summary: dict[str, dict[str, float]] = field(default_factory=dict)
     size_regime: dict[str, dict[str, dict[str, float]]] = field(default_factory=dict)
     size_baskets: dict[str, tuple[list[int], list[float]]] = field(default_factory=dict)
+    frequency_summary: dict[str, dict[str, float]] = field(default_factory=dict)
 
 
 @dataclass
@@ -137,6 +138,7 @@ def run_study(histories: list[WalletHistory], series: dict[str, dict[int, float]
     _matrices(study)
     _capital_map(study, sector_map or SectorMap(), PriceBook(series))
     _size_cohorts(study)
+    _frequency_cohorts(study)
     eth = series.get("eth", {})
     days = sorted(d for d in eth if d >= min((r.result.days[0] for r in reports if r.result.days), default=now))
     study.eth = (days, [eth[d] / eth[p] - 1 if p in eth else 0.0 for p, d in zip([days[0]] + days, days)])
@@ -261,3 +263,24 @@ def _size_cohorts(study: Study) -> None:
                 cells[reg] = {"median_excess": st.median(vals), "n": len(vals)}
         study.size_regime[label] = cells
         study.size_baskets[label] = combine(members, copy=True)
+
+
+def _frequency_cohorts(study: Study) -> None:
+    """How fast each kind of trader's edge decays when copied late."""
+    from .analyze import FREQUENCY_TIERS, LAGS
+    traders = [r for r in study.reports if r.wallet_class in (WalletClass.ACTIVE, WalletClass.BOT)
+               and r.metrics["history_days"] >= 60]
+    for label, _ in FREQUENCY_TIERS:
+        members = [r for r in traders if r.frequency_tier == label]
+        if not members:
+            continue
+        med = lambda k: st.median(r.metrics.get(k, 0.0) for r in members)  # noqa: E731
+        sig = sum(bool(r.metrics.get("significant")) for r in members)
+        row = {"n": len(members), "median_cagr": med("cagr"), "median_sharpe": med("sharpe"),
+               "median_hold_days": med("median_hold_days"), "median_swaps_per_month": med("swaps_per_month"),
+               "significant": sig, "significant_rate": sig / len(members),
+               "median_half_life": med("edge_half_life_days"),
+               "human_share": sum(r.operator.get("human_score", 0.5) >= 0.6 for r in members) / len(members)}
+        for lag in LAGS:
+            row[f"copy_sharpe_lag{lag}"] = med(f"copy_sharpe_lag{lag}")
+        study.frequency_summary[label] = row

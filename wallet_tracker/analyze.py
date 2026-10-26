@@ -39,6 +39,7 @@ class WalletReport:
     cluster_id: int = 0
     sectors: dict = field(default_factory=dict)   # {"average": {...}, "latest": {...}}
     size_tier: str = ""
+    frequency_tier: str = ""
     history: WalletHistory | None = field(default=None, repr=False)
 
     @property
@@ -66,6 +67,54 @@ def copy_trade_returns(res: PortfolioResult, lag_days: int, cost_bps: float) -> 
         cost = (traded / 2 if held and target else traded) * cost_bps / 1e4
         out.append(r - cost)
         held = target
+    return out
+
+
+LAGS = (0, 1, 2, 3, 5, 7, 14)
+FREQUENCY_TIERS = [("intraday (<1d)", 0.0), ("short swing (1–7d)", 1.0), ("swing (1–4w)", 7.0),
+                   ("position (1–3m)", 30.0), ("long-term (3m+)", 90.0)]
+
+
+def frequency_tier(m: dict) -> str:
+    """By median holding period of closed trades; wallets that rarely close
+    a position are long-term by definition."""
+    if m.get("closed_trades", 0) < 3:
+        return FREQUENCY_TIERS[-1][0]
+    hold = m.get("median_hold_days", 0.0)
+    name = FREQUENCY_TIERS[0][0]
+    for label, floor in FREQUENCY_TIERS:
+        if hold >= floor:
+            name = label
+    return name
+
+
+def _sharpe(rs: list[float]) -> float:
+    if len(rs) < 3:
+        return 0.0
+    mean = sum(rs) / len(rs)
+    sd = (sum((x - mean) ** 2 for x in rs) / len(rs)) ** 0.5
+    return mean / sd * 365 ** 0.5 if sd else 0.0
+
+
+def lag_profile(res: PortfolioResult, cost_bps: float, i0: int, own_sharpe: float) -> dict[str, float]:
+    """Copy Sharpe at increasing reaction delays, and the edge half-life:
+    days of delay after which a copier keeps only half of the wallet's own
+    Sharpe. Fast edges are gone before a daily copier can act (half-life 0);
+    slow, thesis-driven ones last weeks."""
+    out = {f"copy_sharpe_lag{lag}": _sharpe(copy_trade_returns(res, lag, cost_bps)[i0:]) for lag in LAGS}
+    base = own_sharpe
+    if base <= 0 or out["copy_sharpe_lag0"] <= base / 2:
+        out["edge_half_life_days"] = 0.0
+        return out
+    prev_lag, prev = 0, out["copy_sharpe_lag0"]
+    for lag in LAGS[1:]:
+        cur = out[f"copy_sharpe_lag{lag}"]
+        if cur <= base / 2:
+            frac = (prev - base / 2) / (prev - cur) if prev != cur else 1.0
+            out["edge_half_life_days"] = prev_lag + frac * (lag - prev_lag)
+            return out
+        prev_lag, prev = lag, cur
+    out["edge_half_life_days"] = float(LAGS[-1] * 2)  # still >half at the longest lag tested
     return out
 
 
@@ -101,13 +150,16 @@ def analyze_wallet(hist: WalletHistory, series: dict[str, dict[int, float]], cfg
     m.update(robustness(matrix))
     m.update(conditional_betas(res.returns[i0:], bench[i0:], [d in regimes.stress for d in res.days[i0:]]))
 
+    m.update(lag_profile(res, cfg.copy_cost_bps, i0, m["sharpe"]))
+    freq = frequency_tier(m)
+
     cls, reasons = classify(hist, m, cfg.classifier)
     feats = operator_features(hist, events)
     score, conf = human_score(feats, m["swaps_per_active_day"])
     feats.update(human_score=score, human_confidence=conf)
     return WalletReport(hist.address, cls, reasons, m, res, copy_returns=copy, benchmark=bench,
                         regimes=matrix, operator=feats, operator_label=operator_label(score, cls),
-                        history=hist)
+                        history=hist, frequency_tier=freq)
 
 
 def fetch_series(source: PriceSource, histories: list[WalletHistory], now: int) -> dict[str, dict[int, float]]:

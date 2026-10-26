@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS runs (
 CREATE TABLE IF NOT EXISTS wallet_snapshots (
   run_id INTEGER, address TEXT, class TEXT, operator TEXT, eligible INTEGER, rank INTEGER, score REAL,
   significant INTEGER, reputation REAL, tier TEXT, cagr REAL, sharpe REAL, max_drawdown REAL, rrs REAL,
-  copy_cagr REAL, human_score REAL, final_equity REAL, entity TEXT, size_tier TEXT, metrics TEXT,
+  copy_cagr REAL, human_score REAL, final_equity REAL, entity TEXT, size_tier TEXT, frequency_tier TEXT, metrics TEXT,
   PRIMARY KEY (run_id, address));
 CREATE TABLE IF NOT EXISTS identities (
   address TEXT PRIMARY KEY, name TEXT, kind TEXT, sources TEXT, urls TEXT, first_run INTEGER, last_run INTEGER);
@@ -73,12 +73,12 @@ class KnowledgeBase:
             m = r.metrics
             rep = r.reputation
             self.db.execute(
-                "INSERT INTO wallet_snapshots VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO wallet_snapshots VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (run, r.address, r.wallet_class.value, r.group, int(r.eligible), r.rank or None, r.score,
                  int(bool(m.get("significant"))), rep.score if rep else None, rep.tier if rep else None,
                  _clean(m.get("cagr")), _clean(m.get("sharpe")), _clean(m.get("max_drawdown")),
                  _clean(m.get("regime_robustness")), _clean(m.get("copy_cagr")),
-                 r.operator.get("human_score"), m.get("final_equity_usd"), ent_of.get(r.address), r.size_tier,
+                 r.operator.get("human_score"), m.get("final_equity_usd"), ent_of.get(r.address), r.size_tier, r.frequency_tier,
                  json.dumps({k: _clean(v) for k, v in m.items()})))
             ident = r.identity
             if ident is not None and ident.attested:

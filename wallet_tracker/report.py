@@ -136,6 +136,15 @@ def study_text(study, top: int = 20) -> str:
     out.append(table(["size", "n", "CAGR", "Sharpe", "MaxDD", "RRS", "beat ETH", "signif", "copy CAGR",
                       "PnL (median)", "PnL (total)", "human"], rows) if rows else "  no active traders")
 
+    out.append("\nTRADING FREQUENCY (by median holding period) and how fast each edge decays when copied late")
+    lags = (0, 1, 2, 3, 5, 7, 14)
+    rows = [[t, str(v["n"]), f"{v['median_hold_days']:.1f}d", num(v["median_swaps_per_month"], 1), pct(v["median_cagr"]),
+             num(v["median_sharpe"]), f"{v['significant']} ({v['significant_rate']:.0%})",
+             f"{v['median_half_life']:.1f}d"] + [num(v[f"copy_sharpe_lag{lag}"]) for lag in lags]
+            for t, v in study.frequency_summary.items()]
+    out.append(table(["frequency", "n", "hold", "swaps/mo", "CAGR", "Sharpe", "signif", "half-life"]
+                     + [f"copy@{lag}d" for lag in lags], rows) if rows else "  no traders")
+
     ms = study.migration_stats
     out.append(f"\nWALLET MIGRATIONS: {ms.get('migrations', 0)} of {ms.get('wallets', 0)} trading wallets "
                f"({ms.get('rate', 0):.1%}) handed their book to another address; {ms.get('verified', 0)} verified")

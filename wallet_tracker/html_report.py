@@ -298,6 +298,38 @@ def size_section(study: Study, eth_days, eth_rs) -> str:
 """
 
 
+# ---------------------------------------------------------------- frequency
+def frequency_section(study: Study) -> str:
+    if not study.frequency_summary:
+        return ""
+    lags = (0, 1, 2, 3, 5, 7, 14)
+    cols = [f"{lag}d late" for lag in lags]
+    vals = [v[f"copy_sharpe_lag{lag}"] for v in study.frequency_summary.values() for lag in lags]
+    hrows = [(t, [v[f"copy_sharpe_lag{lag}"] for lag in lags],
+              [f"{t}: median copy Sharpe {v[f'copy_sharpe_lag{lag}']:.2f} when copied {lag} day(s) late "
+               f"(their own: {v['median_sharpe']:.2f})" for lag in lags])
+             for t, v in study.frequency_summary.items()]
+    rows = "".join(
+        f"<tr><th scope='row'>{esc(t)}</th><td>{v['n']}</td><td>{v['median_hold_days']:.1f}d</td>"
+        f"<td>{v['median_swaps_per_month']:.1f}</td><td>{pct(v['median_cagr'])}</td><td>{v['median_sharpe']:.2f}</td>"
+        f"<td>{v['significant']} ({v['significant_rate'] * 100:.0f}%)</td><td><strong>{v['median_half_life']:.1f}d</strong></td>"
+        f"<td>{v['human_share'] * 100:.0f}%</td></tr>" for t, v in study.frequency_summary.items())
+    return f"""
+<section>
+  <h2>Trading frequency and edge half-life</h2>
+  <p class="sub">Grouped by median holding period. Edge half-life is how many days late a copier can act before keeping
+  only half of the trader's own Sharpe. A daily follower can only capture edges whose half-life is comfortably above a day.</p>
+  <div class="scroll"><table class="data">
+    <thead><tr><th scope="col">Frequency</th><th scope="col">Wallets</th><th scope="col">Median hold</th>
+    <th scope="col">Swaps / month</th><th scope="col">CAGR</th><th scope="col">Sharpe</th><th scope="col">Pass luck test</th>
+    <th scope="col">Edge half-life</th><th scope="col">Human</th></tr></thead>
+    <tbody>{rows}</tbody></table></div>
+  <h3>Copy Sharpe by reaction delay</h3>
+  {heat(hrows, cols, scale_for(vals), fmt=lambda x: f"{x:.2f}", row_head="Frequency")}
+</section>
+"""
+
+
 # ---------------------------------------------------------------- page
 def tier_chip(rep) -> str:
     if rep is None:
@@ -468,6 +500,8 @@ def render_html(study: Study, demo: bool = False, fragment: bool = False) -> str
 </section>
 
 {size_section(study, eth_days, eth_rs)}
+
+{frequency_section(study)}
 
 {capital_map(study)}
 

@@ -8,6 +8,8 @@ Selection (all must hold for an entity to lead):
     of at least `min_copy_sharpe` (ratios of growth rates are unstable when
     returns are large, so the copy is judged on its own risk-adjusted terms);
   * robust: Regime Robustness Score above zero;
+  * slow enough to follow: the edge's half-life under copying delay is at
+    least `min_half_life_multiple` x our reaction time;
   * clean: no reputation red flags;
   * optionally identifiable: a named member (ENS, Farcaster, curated label).
 
@@ -37,6 +39,8 @@ from .pipeline import Study, is_smart, run_study
 class Rules:
     min_dsr: float = 0.8
     min_copy_sharpe: float = 1.0
+    reaction_days: float = 1.0          # how late we act; leaders' edges must outlast it
+    min_half_life_multiple: float = 2.0  # edge half-life >= this x reaction_days
     min_rrs: float = 0.0
     allow_flags: bool = False
     require_identity: bool = False
@@ -66,6 +70,9 @@ def select(study: Study, rules: Rules) -> list[Leader]:
         if not e.smart or not scored:
             continue
         if not all(r.metrics.get("dsr", 0.0) >= rules.min_dsr for r in scored):
+            continue
+        if st.median(r.metrics.get("edge_half_life_days", 0.0) for r in scored) < \
+                rules.min_half_life_multiple * rules.reaction_days:
             continue
         if not all(is_smart(r) for r in scored):
             continue
