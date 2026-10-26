@@ -10,7 +10,9 @@ from .analyze import WalletReport, analyze_wallet
 from .cluster import Cluster, combine, find_clusters
 from .config import Config
 from .identity import Identity
-from .metrics import compound
+import math
+
+from .metrics import compound, moments, probabilistic_sharpe
 from .models import WalletClass, WalletHistory
 from .operator_type import GROUPS, group
 from .ranking import Leaderboards, build
@@ -82,6 +84,11 @@ class Entity:
     cagr: float
     sharpe: float
     smart: bool
+    pnl_usd: float = 0.0
+    capital_in_usd: float = 0.0
+    max_drawdown: float = 0.0
+    dsr: float = 0.0                   # luck test on the aggregate returns
+    illiquid_share: float = 0.0
 
 
 def _quarter(day: int) -> str:
@@ -237,10 +244,21 @@ def _capital_map(study: Study, smap: SectorMap, book: PriceBook) -> None:
         cl = next((c for c in study.clusters if f"cluster-{c.id}" == eid), None)
         stats = cl.stats if cl else best.metrics
         groups_seen = [r.group for r in rs]
-        study.entities.append(Entity(
+        days, agg = (cl.days, cl.returns) if cl else (best.result.days, best.result.returns)
+        live = agg[next((i for i, x in enumerate(agg) if x != 0), len(agg)):]
+        e = Entity(
             eid, label, members, aum, latest, avg, max(set(groups_seen), key=groups_seen.count),
             best.reputation.score, best.reputation.tier, stats["cagr"], stats["sharpe"],
-            any(is_smart(r) for r in rs)))
+            any(is_smart(r) for r in rs),
+            pnl_usd=sum(r.metrics.get("pnl_usd", 0.0) for r in rs),
+            capital_in_usd=sum(r.metrics.get("capital_in_usd", 0.0) for r in rs),
+            max_drawdown=stats.get("max_drawdown", 0.0),
+            illiquid_share=st.fmean(r.metrics.get("illiquid_share", 0.0) for r in rs))
+        mean, sd, skew, kurt = moments(live)
+        if sd and len(live) > 30:
+            star = study.boards.luck_sharpe / math.sqrt(365)
+            e.dsr = probabilistic_sharpe(mean / sd, len(live), skew, kurt, star)
+        study.entities.append(e)
     study.entities.sort(key=lambda e: (e.smart, e.reputation), reverse=True)
 
 

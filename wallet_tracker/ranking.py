@@ -32,6 +32,8 @@ def _gates(r: WalletReport, cfg: Config) -> list[str]:
         out.append(f"price coverage {m['price_coverage']:.0%} < {e.min_price_coverage:.0%}")
     if m["top_trade_profit_share"] > e.max_top_trade_profit_share:
         out.append(f"one trade = {m['top_trade_profit_share']:.0%} of gross profit")
+    if m.get("illiquid_share", 0.0) > e.max_illiquid_share:
+        out.append(f"{m['illiquid_share']:.0%} of volume in tokens with no real market (manipulation-prone)")
     if e.require_dollar_profit and m.get("pnl_usd", 0.0) <= 0:
         out.append(f"lost money in dollars (${m.get('pnl_usd', 0.0):,.0f}) despite {m['total_return']:+.0%} TWR")
     if m["active_month_ratio"] < e.min_active_month_ratio:

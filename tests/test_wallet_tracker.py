@@ -96,6 +96,16 @@ class PortfolioTest(unittest.TestCase):
         self.assertAlmostEqual(metrics.compound(copy_trade_returns(res, 1, 0)), 0.0)
 
 
+class NumeraireTest(unittest.TestCase):
+    def test_eth_holder_is_flat_in_eth_terms(self):
+        from wallet_tracker.analyze import numeraire_metrics
+        eth = [0.05, -0.02, 0.10, 0.03, -0.01]
+        m = numeraire_metrics(eth, eth, [0.0] * 5)
+        self.assertAlmostEqual(m["total_return_in_eth"], 0.0)
+        self.assertGreater(metrics.compound(eth), 0.1)          # looks good in dollars
+        self.assertLessEqual(m["min_numeraire_sharpe"], 0.0 + 1e-9)
+
+
 class MetricsTest(unittest.TestCase):
     def test_drawdown(self):
         self.assertAlmostEqual(metrics.max_drawdown([0.1, -0.5, 0.2]), 0.5)
@@ -201,6 +211,23 @@ class PipelineTest(unittest.TestCase):
             self.assertIn(new, wl.wallets)
             later = poll(wl, self.world, self.world)
             self.assertTrue(any(a["wallet"] == new for a in later))
+
+    def test_entity_flow_alerts(self):
+        old = next(a for a, t in self.truth.items() if "migrated_to" in t)
+        new = self.truth[old]["migrated_to"]
+        hand_over = next(t.block for t in self.world.histories[old].transfers if t.counterparty == new)
+        with tempfile.TemporaryDirectory() as d:
+            # Same entity: the hand-over is an internal shuffle, not an exodus.
+            wl = Watchlist(os.path.join(d, "a.json"))
+            wl.add(old, hand_over - 10, entity="E")
+            wl.add(new, hand_over - 10, entity="E")
+            alerts = poll(wl, self.world, self.world, flow_alert_usd=1_000)
+            self.assertFalse(any(a["kind"] == "exodus" for a in alerts))
+            # Only the old wallet followed: money left the followed operation.
+            wl2 = Watchlist(os.path.join(d, "b.json"))
+            wl2.add(old, hand_over - 10)
+            alerts = poll(wl2, self.world, self.world, flow_alert_usd=1_000)
+            self.assertTrue(any(a["kind"] == "exodus" for a in alerts))
 
     def test_reputation_flags(self):
         flagged = {r.address: r.reputation for r in self.reports.values() if r.reputation.flags}

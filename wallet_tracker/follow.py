@@ -34,9 +34,9 @@ class Watchlist:
             json.dump({"wallets": self.wallets}, fh, indent=2)
         os.replace(tmp, self.path)
 
-    def add(self, address: str, from_block: int, note: str = "") -> None:
+    def add(self, address: str, from_block: int, note: str = "", entity: str = "") -> None:
         self.wallets.setdefault(address.lower(), {"last_block": from_block, "added": int(time.time()),
-                                                  "note": note})
+                                                  "note": note, "entity": entity or address.lower()})
 
     def remove(self, address: str) -> bool:
         return self.wallets.pop(address.lower(), None) is not None
@@ -67,12 +67,19 @@ def describe(ev, book: PriceBook) -> tuple[str, float]:
 
 def poll(watch: Watchlist, provider, price_source, alerts_path: str | None = None,
          min_usd: float = 0.0, swaps_only: bool = False, follow_migrations: bool = False,
-         migration_usd: float = 50_000.0) -> list[dict]:
+         migration_usd: float = 50_000.0, flow_alert_usd: float = 250_000.0) -> list[dict]:
     """Fetch activity since each wallet's last seen block; return new alerts.
 
     A large outflow to an unlabelled address is flagged as a possible
     migration; with `follow_migrations` the destination is added to the
-    watchlist so a followed trader isn't lost when they switch wallets."""
+    watchlist so a followed trader isn't lost when they switch wallets.
+
+    Deposits and withdrawals are also netted per entity (all wallets one
+    operator controls): a net move of at least `flow_alert_usd` raises an
+    INFLUX or EXODUS alert - capital arriving or leaving the whole operation,
+    not one wallet shuffling to another (transfers between members cancel)."""
+    net_by_entity: dict[str, float] = {}
+    members = {a: st.get("entity", a) for a, st in watch.wallets.items()}
     alerts: list[dict] = []
     successors: list[tuple[str, int, str]] = []
     head = provider.latest_block()
@@ -88,6 +95,12 @@ def poll(watch: Watchlist, provider, price_source, alerts_path: str | None = Non
             for e in events:
                 text, usd = describe(e, book)
                 kind = e.kind.value
+                if e.kind in (EventKind.DEPOSIT, EventKind.WITHDRAWAL):
+                    cps = {t.counterparty for t in hist.transfers if t.tx_hash == e.tx_hash}
+                    ent = members[address]
+                    if not any(members.get(c) == ent for c in cps):  # internal shuffles cancel
+                        net_by_entity[ent] = net_by_entity.get(ent, 0.0) + (usd if e.kind is EventKind.DEPOSIT
+                                                                             else -usd)
                 if e.kind is EventKind.WITHDRAWAL and usd >= migration_usd:
                     dest = max((t for t in hist.transfers if t.tx_hash == e.tx_hash and t.amount < 0
                                 and t.counterparty not in ("", GAS)),
@@ -106,8 +119,14 @@ def poll(watch: Watchlist, provider, price_source, alerts_path: str | None = Non
                                "block": e.block, "tx": e.tx_hash, "kind": kind,
                                "usd": round(usd, 2), "text": text})
         st["last_block"] = max([head] + [e.block for e in events])
+    for ent, net in net_by_entity.items():
+        if abs(net) >= flow_alert_usd:
+            alerts.append({"wallet": ent, "note": "entity", "time": int(time.time()), "block": head, "tx": "",
+                           "kind": "influx" if net > 0 else "exodus", "usd": round(abs(net), 2),
+                           "text": f"{'INFLUX' if net > 0 else 'EXODUS'}  net ${abs(net):,.0f} "
+                                   f"{'into' if net > 0 else 'out of'} entity {ent[:12]}"})
     for dest, block, src in successors:
-        watch.add(dest, block, note=f"possible successor of {src[:8]}…")
+        watch.add(dest, block, note=f"possible successor of {src[:8]}…", entity=members.get(src, src))
     watch.save()
     if alerts_path and alerts:
         os.makedirs(os.path.dirname(alerts_path) or ".", exist_ok=True)

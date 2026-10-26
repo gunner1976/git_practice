@@ -39,6 +39,12 @@ class Migration:
     share: float
     verified: bool
     stitched: dict[str, float] = field(default_factory=dict)
+    destination_type: str = ""
+
+    @property
+    def real(self) -> bool:
+        """A hand-over to a wallet that goes on trading: the same operator."""
+        return self.verified or self.destination_type == "trading wallet"
 
 
 def detect(reports: list, series: dict, exchanges: dict[str, str] | None = None) -> list[Migration]:
@@ -101,3 +107,44 @@ def universe_stats(migrations: list[Migration], reports: list) -> dict[str, floa
     return {"wallets": len(traders), "migrations": len(migrations),
             "verified": sum(m.verified for m in migrations),
             "rate": len(migrations) / len(traders) if traders else 0.0}
+
+
+DEST_TYPES = ("trading wallet", "exchange deposit", "contract / bridge", "holding wallet")
+
+
+def classify_destinations(migrations: list[Migration], provider, exchanges: dict[str, str] | None = None) -> None:
+    """Look at where each unverified hand-over went.
+
+    exchange deposit - forwards to a labelled exchange, or receives from many
+                       unrelated senders (deposit addresses sweep to a hot wallet);
+    contract / bridge - has bytecode (bridges, vaults, smart accounts);
+    trading wallet   - calls DEX routers itself: a likely successor;
+    holding wallet   - none of the above (cold storage, OTC, unknown)."""
+    from .trade_venues import VENUES
+    labelled = set(EXCHANGES) | set(exchanges or {})
+    for m in migrations:
+        if m.verified:
+            m.destination_type = "trading wallet"
+            continue
+        try:
+            p = provider.peek(m.destination)
+        except Exception:
+            m.destination_type = "unknown"
+            continue
+        if p["is_contract"]:
+            m.destination_type = "contract / bridge"
+        elif p["sent_to"] & labelled or len(p["senders"]) >= 20:
+            m.destination_type = "exchange deposit"
+        elif p["called"] & set(VENUES):
+            m.destination_type = "trading wallet"
+        else:
+            m.destination_type = "holding wallet"
+
+
+def universe_breakdown(migrations: list[Migration], wallets: int) -> dict[str, float]:
+    kinds: dict[str, int] = {}
+    for m in migrations:
+        kinds[m.destination_type or "unclassified"] = kinds.get(m.destination_type or "unclassified", 0) + 1
+    real = sum(m.real for m in migrations)
+    return {"wallets": wallets, "large_outflows": len(migrations), "real_migrations": real,
+            "real_rate": real / wallets if wallets else 0.0, **{f"to: {k}": v for k, v in kinds.items()}}

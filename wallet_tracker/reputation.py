@@ -92,6 +92,8 @@ def assess(hist, events, m: dict[str, float], identity: Identity | None, now: in
     else:
         c["identity"] = 0.0
 
+    if m.get("illiquid_share", 0.0) > 0.5:
+        flags.append(f"{m['illiquid_share']:.0%} of volume in tokens with no real market")
     if hist.deployed_contracts:
         flags.append(f"deployed {len(hist.deployed_contracts)} contract(s)")
     if cluster_size >= 4:

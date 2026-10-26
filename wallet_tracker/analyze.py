@@ -122,6 +122,50 @@ def lag_profile(res: PortfolioResult, cost_bps: float, i0: int, own_sharpe: floa
     return out
 
 
+WBTC = "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+
+
+def illiquid_share(res: PortfolioResult, book: PriceBook) -> float:
+    """Share of swap volume in tokens with no market price that day.
+
+    Those markets are thin enough for a large wallet to move on its own:
+    returns there may come from (or be lost to) manipulation, and a copier
+    can't get the same fills."""
+    total = thin = 0.0
+    for e in res.events:
+        if e.kind.value != "swap":
+            continue
+        legs = {t: abs(a) for t, a in e.legs.items()}
+        priced = {t: q * book.market(t, e.timestamp) for t, q in legs.items() if book.market(t, e.timestamp)}
+        if not priced:
+            continue
+        usd = max(priced.values())
+        total += usd
+        if any(book.market(t, e.timestamp) is None for t in legs):
+            thin += usd
+    return thin / total if total else 0.0
+
+
+def numeraire_metrics(rs: list[float], eth: list[float], btc: list[float]) -> dict[str, float]:
+    """The same record measured in ETH and BTC instead of dollars.
+
+    A wallet that rode a bull market looks brilliant in USD and ordinary in
+    ETH. Skill that holds whatever you measure it in is design, not beta."""
+    out = {}
+    for name, bench in (("eth", eth), ("btc", btc)):
+        if not any(bench):
+            continue
+        rel = [(1 + r) / (1 + b) - 1 for r, b in zip(rs, bench)]
+        g = 1.0
+        for x in rel:
+            g *= 1 + x
+        out[f"total_return_in_{name}"] = g - 1
+        out[f"sharpe_in_{name}"] = _sharpe(rel)
+    sharpes = [out.get("sharpe_in_eth"), out.get("sharpe_in_btc"), _sharpe(rs)]
+    out["min_numeraire_sharpe"] = min(x for x in sharpes if x is not None)
+    return out
+
+
 def benchmark_returns(res: PortfolioResult, book: PriceBook, token: str = "eth") -> list[float]:
     out, prev = [], None
     for d in res.days:
@@ -155,6 +199,9 @@ def analyze_wallet(hist: WalletHistory, series: dict[str, dict[int, float]], cfg
     m.update(conditional_betas(res.returns[i0:], bench[i0:], [d in regimes.stress for d in res.days[i0:]]))
 
     m.update(lag_profile(res, cfg.copy_cost_bps, i0, m["sharpe"]))
+    m["illiquid_share"] = illiquid_share(res, book)
+    btc = benchmark_returns(res, book, WBTC)
+    m.update(numeraire_metrics(res.returns[i0:], bench[i0:], btc[i0:]))
     freq = frequency_tier(m)
 
     cls, reasons = classify(hist, m, cfg.classifier)
@@ -184,9 +231,10 @@ def fetch_series(source: PriceSource, histories: list[WalletHistory], now: int,
                 for t in e.legs:
                     first[t] = min(first.get(t, e.timestamp), e.timestamp)
                     uses[t] = uses.get(t, 0) + 1
-        first.setdefault("eth", min(first.values(), default=now))
-        uses["eth"] = 10 ** 9
-        priced = source.known(set(first)) | {"eth"}
+        for anchor in ("eth", WBTC):  # numeraires are always priced
+            first[anchor] = min(first.values(), default=now)
+            uses[anchor] = 10 ** 9
+        priced = source.known(set(first)) | {"eth", WBTC}
         keep = sorted(priced, key=lambda t: -uses.get(t, 0))[:max_tokens]
         return source.daily_prices_ranges({t: (first[t] - 2 * DAY, now) for t in keep})
     tokens: set[str] = set()

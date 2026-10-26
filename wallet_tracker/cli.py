@@ -28,6 +28,7 @@ from .knowledge import KnowledgeBase
 from .models import DAY, WalletClass, history_from_json, history_to_json
 from .pipeline import run_study
 from .metrics import compound
+from .migration import classify_destinations, universe_breakdown
 from .prices import STABLES, PriceBook
 from .sectors import SectorMap
 from .strategy import Leader, Rules, portfolio_returns, select, walk_forward
@@ -145,6 +146,10 @@ def cmd_rank(args) -> None:
     env = Env(args)
     study = _study(_addresses(args, env), env, cfg, args)
     lb = study.boards
+    if study.migrations and hasattr(env.provider, "peek"):
+        print(f"  checking {len(study.migrations)} outflow destinations…", file=sys.stderr)
+        classify_destinations(study.migrations, env.provider, env.labels)
+        study.migration_stats.update(universe_breakdown(study.migrations, study.migration_stats.get("wallets", 0)))
     print(study_text(study, args.top))
     if args.json:
         with open(args.json, "w") as fh:
@@ -163,7 +168,10 @@ def cmd_rank(args) -> None:
         wl = Watchlist.load(args.state)
         head = env.provider.latest_block()
         for r in lb.active[:args.follow_top]:
-            wl.add(r.address, head, note=f"rank {r.rank} score {r.score:.0f}")
+            # Follow the whole entity (node of control), not just the ranked wallet.
+            ent = next((e for e in study.entities if r.address in e.members), None)
+            for a in (ent.members if ent else [r.address]):
+                wl.add(a, head, note=f"rank {r.rank} score {r.score:.0f}", entity=ent.id if ent else a)
         wl.save()
         print(f"following top {args.follow_top} in {wl.path}", file=sys.stderr)
 
@@ -194,13 +202,13 @@ def cmd_follow(args) -> None:
         head = env.provider.latest_block()
         start = head - int(args.backfill_days * DAY / 12)  # ~12s blocks
         for a in args.wallets:
-            wl.add(a, start, args.note)
+            wl.add(a, start, args.note, entity=args.entity)
         wl.save()
         print(f"following {len(args.wallets)} wallet(s); state in {wl.path}")
     elif args.action == "poll":
         while True:
             for al in poll(wl, env.provider, env.prices, args.alerts, args.min_usd, args.swaps_only,
-                           args.follow_migrations, args.migration_usd):
+                           args.follow_migrations, args.migration_usd, args.flow_alert_usd):
                 when = datetime.fromtimestamp(al["time"], timezone.utc).strftime("%Y-%m-%d %H:%M")
                 tag = f" [{al['note']}]" if al["note"] else ""
                 print(f"{when}  {short(al['wallet'])}{tag}  {al['text']}")
@@ -501,6 +509,9 @@ def main(argv: list[str] | None = None) -> None:
     f.add_argument("--follow-migrations", action="store_true",
                    help="auto-follow the destination of a large outflow to an unlabelled address")
     f.add_argument("--migration-usd", type=float, default=50_000)
+    f.add_argument("--flow-alert-usd", type=float, default=250_000,
+                   help="alert when an entity's net inflow/outflow in one poll reaches this")
+    f.add_argument("--entity", default="", help="on add: group these wallets as one entity")
     f.add_argument("--alerts", default=os.path.expanduser("~/.wallet_tracker/alerts.jsonl"))
     f.set_defaults(fn=cmd_follow)
 

@@ -136,6 +136,17 @@ class Etherscan:
         rows, _ = self._paged("txlist", a, start_block, lambda r: r["hash"])
         return {r["hash"]: r["to"].lower() for r in rows if r["from"].lower() == a and r.get("to")}
 
+    def peek(self, address: str, n: int = 100) -> dict:
+        """A cheap look at an address: is it a contract, where has it sent
+        value recently, and which contracts has it called."""
+        a = address.lower()
+        txs = self._call(module="account", action="txlist", address=a, page=1, offset=n, sort="desc")
+        toks = self._call(module="account", action="tokentx", address=a, page=1, offset=n, sort="desc")
+        sent_to = {r["to"].lower() for r in txs + toks if r["from"].lower() == a and r.get("to")}
+        senders = {r["from"].lower() for r in txs + toks if (r.get("to") or "").lower() == a}
+        return {"is_contract": self.is_contract(a), "sent_to": sent_to, "senders": senders,
+                "called": {r["to"].lower() for r in txs if r["from"].lower() == a and r.get("to")}}
+
     def discover_swappers(self, days: int = 90, windows: int = 12, min_windows: int = 2,
                           routers: dict[str, str] | None = None, top: int = 300,
                           max_per_sample: int = 6) -> list[str]:

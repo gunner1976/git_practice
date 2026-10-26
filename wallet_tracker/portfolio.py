@@ -125,7 +125,9 @@ def simulate(events: list[Event], book: PriceBook, end_ts: int, freeze_days: int
             elif ev.kind is EventKind.DEPOSIT:
                 v = 0.0
                 for tok, amt in ev.legs.items():
-                    p = book.price(tok, ev.timestamp)
+                    # Inflows count at market price only: a free token with no
+                    # market is worth nothing to the wallet (same as valuation).
+                    p = book.market(tok, ev.timestamp)
                     v += amt * (p or 0.0)
                     holdings[tok] += amt
                     lots[tok].append(Lot(amt, p, ev.timestamp))
@@ -136,7 +138,13 @@ def simulate(events: list[Event], book: PriceBook, end_ts: int, freeze_days: int
             elif ev.kind is EventKind.WITHDRAWAL:
                 v = 0.0
                 for tok, amt in ev.legs.items():
-                    v += -amt * (book.price(tok, ev.timestamp) or 0.0)
+                    p = book.market(tok, ev.timestamp)
+                    qty = -amt
+                    if p is None:  # implied-priced: only what was bought had a value
+                        p = book.price(tok, ev.timestamp)
+                        qty = min(qty, max(bought.get(tok, 0.0), 0.0))
+                        bought[tok] -= qty
+                    v += qty * (p or 0.0)
                     holdings[tok] += amt
                     _consume(lots[tok], -amt)
                 flow -= v
