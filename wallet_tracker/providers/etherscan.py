@@ -8,6 +8,7 @@ from __future__ import annotations
 import os
 from collections import Counter
 
+from ..labels import EXCHANGES as KNOWN_ENTITIES
 from ..models import Transfer, WalletHistory
 from ..reconstruct import GAS
 from .http import Http
@@ -15,20 +16,6 @@ from .http import Http
 BASE = "https://api.etherscan.io/v2/api"
 PAGE = 10_000
 
-# A starter list of custodial / exchange addresses. Extend via --labels.
-KNOWN_ENTITIES = {
-    "0x28c6c06298d514db089934071355e5743bf21d60": "Binance 14",
-    "0x21a31ee1afc51d94c2efccaa2092ad1028285549": "Binance 15",
-    "0xdfd5293d8e347dfe59e90efd55b2956a1343963d": "Binance 16",
-    "0x71660c4005ba85c37ccec55d0c4493e66fe775d3": "Coinbase 1",
-    "0x503828976d22510aad0201ac7ec88293211d23da": "Coinbase 2",
-    "0xa9d1e08c7793af67e9d92fe308d5697fb81d3e43": "Coinbase 10",
-    "0x2910543af39aba0cd09dbb2d50200b3e800a63d2": "Kraken 13",
-    "0xf977814e90da44bfa03b6295a0616a897441acec": "Binance 8",
-    "0x5a52e96bacdabb82fd05763e25335261b270efcb": "Binance 28",
-    "0x267be1c1d684f78cb4f6a176c4911b741e4ffdc0": "Kraken 4",
-    "0x0d0707963952f2fba59dd06f2b425ace40b492fe": "Gate.io 1",
-}
 
 
 class Etherscan:
@@ -73,17 +60,20 @@ class Etherscan:
     def history(self, address: str, start_block: int = 0, check_contract: bool = True) -> WalletHistory:
         a = address.lower()
         out: list[Transfer] = []
+        deployed: list[str] = []
 
         for tx in self._paged("txlist", a, start_block, lambda r: r["hash"]):
             ts, blk, h = int(tx["timeStamp"]), int(tx["blockNumber"]), tx["hash"]
             ok = tx.get("isError", "0") == "0"
             val = int(tx["value"]) / 1e18
+            if tx["from"].lower() == a and ok and tx.get("contractAddress") and not tx.get("to"):
+                deployed.append(tx["contractAddress"].lower())
             if tx["from"].lower() == a:
                 gas = int(tx["gasUsed"]) * int(tx["gasPrice"]) / 1e18
                 out.append(Transfer(h, ts, blk, "eth", "ETH", -gas, GAS))
-                if ok and val and tx["to"].lower() != a:
-                    out.append(Transfer(h, ts, blk, "eth", "ETH", -val, tx["to"].lower()))
-            elif ok and val and tx["to"].lower() == a:
+                if ok and val and (tx["to"] or "").lower() != a:
+                    out.append(Transfer(h, ts, blk, "eth", "ETH", -val, (tx["to"] or "").lower()))
+            elif ok and val and (tx["to"] or "").lower() == a:
                 out.append(Transfer(h, ts, blk, "eth", "ETH", val, tx["from"].lower()))
 
         for tx in self._paged("txlistinternal", a, start_block,
@@ -110,7 +100,7 @@ class Etherscan:
                                 sign * amt, frm if sign > 0 else to))
 
         return WalletHistory(a, out, is_contract=check_contract and self.is_contract(a),
-                             label=self.labels.get(a, ""))
+                             label=self.labels.get(a, ""), deployed_contracts=deployed)
 
     def discover(self, token_contracts: list[str], per_token: int = 1000, top: int = 200) -> list[str]:
         """Seed candidates: addresses most frequently moving the given tokens

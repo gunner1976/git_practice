@@ -89,3 +89,4 @@ class WalletHistory:
     transfers: list[Transfer]
     is_contract: bool = False
     label: str = ""
+    deployed_contracts: list[str] = field(default_factory=list)

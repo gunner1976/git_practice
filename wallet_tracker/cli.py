@@ -18,12 +18,15 @@ import sys
 import time
 from datetime import datetime, timezone
 
-from .analyze import analyze_wallet, fetch_series
+from .analyze import fetch_series
 from .config import Config
 from .follow import DEFAULT_STATE, Watchlist, poll
+from .html_report import render_html
+from .identity import load_file as load_identities
+from .identity import resolve
 from .models import DAY, WalletClass
-from .ranking import build
-from .report import leaderboard_text, num, pct, rolling, short, table, to_json, wallet_text
+from .pipeline import run_study
+from .report import num, pct, rolling, short, study_text, table, to_json, wallet_text
 
 
 class Env:
@@ -34,6 +37,7 @@ class Env:
             from .providers.synthetic import SyntheticWorld
             self.world = SyntheticWorld(seed=args.seed)
             self.provider = self.prices = self.world
+            self.labels = {}
             self.now = self.world.end + DAY - 1
         else:
             from .providers.defillama import DefiLlamaPrices
@@ -43,6 +47,7 @@ class Env:
                 with open(args.labels) as fh:
                     labels = json.load(fh)
             self.world = None
+            self.labels = labels
             self.provider = Etherscan(chain_id=args.chain_id, labels=labels)
             chains = {1: "ethereum", 10: "optimism", 8453: "base", 42161: "arbitrum"}
             if args.chain_id not in chains:
@@ -71,7 +76,7 @@ def _addresses(args, env: Env) -> list[str]:
     return uniq
 
 
-def _analyze_many(addresses: list[str], env: Env, cfg: Config):
+def _study(addresses: list[str], env: Env, cfg: Config, args):
     histories = []
     for i, a in enumerate(addresses, 1):
         print(f"\r  fetching {i}/{len(addresses)} {a}", end="", file=sys.stderr, flush=True)
@@ -81,19 +86,30 @@ def _analyze_many(addresses: list[str], env: Env, cfg: Config):
             print(f"\n  skip {a}: {exc}", file=sys.stderr)
     print("\n  pricing…", file=sys.stderr)
     series = fetch_series(env.prices, histories, env.now)
-    return [analyze_wallet(h, series, cfg, env.now) for h in histories]
+    addrs = [h.address for h in histories]
+    file_ids = load_identities(args.identities) if getattr(args, "identities", None) else {}
+    if env.world is not None:
+        file_ids = {**env.world.identities, **file_ids}
+    if getattr(args, "ens", False) or getattr(args, "farcaster", False):
+        print("  resolving identities…", file=sys.stderr)
+    ids = resolve(addrs, file_ids, ens=getattr(args, "ens", False), farcaster=getattr(args, "farcaster", False))
+    return run_study(histories, series, cfg, env.now, ids, env.labels)
 
 
 def cmd_rank(args) -> None:
     cfg = Config.load(args.config)
     env = Env(args)
-    reports = _analyze_many(_addresses(args, env), env, cfg)
-    lb = build(reports, cfg)
-    print(leaderboard_text(lb, args.top))
+    study = _study(_addresses(args, env), env, cfg, args)
+    lb = study.boards
+    print(study_text(study, args.top))
     if args.json:
         with open(args.json, "w") as fh:
             fh.write(to_json(lb))
         print(f"\nwrote {args.json}", file=sys.stderr)
+    if args.html:
+        with open(args.html, "w") as fh:
+            fh.write(render_html(study, demo=bool(args.demo)))
+        print(f"wrote {args.html}", file=sys.stderr)
     if args.follow_top:
         wl = Watchlist.load(args.state)
         head = env.provider.latest_block()
@@ -108,9 +124,8 @@ def cmd_analyze(args) -> None:
     env = Env(args)
     addrs = _addresses(args, env) if args.addresses else []
     target = args.address.lower()
-    reports = _analyze_many(list(dict.fromkeys([target] + addrs)), env, cfg)
-    build(reports, cfg)  # fills eligibility, DSR and (with peers) rank
-    print(wallet_text(next(r for r in reports if r.address == target)))
+    study = _study(list(dict.fromkeys([target] + addrs)), env, cfg, args)
+    print(wallet_text(next(r for r in study.reports if r.address == target)))
 
 
 def cmd_follow(args) -> None:
@@ -144,8 +159,7 @@ def cmd_follow(args) -> None:
             time.sleep(args.interval)
     elif args.action == "report":
         cfg = Config.load(args.config)
-        reports = _analyze_many(list(wl.wallets), env, cfg)
-        build(reports, cfg)
+        reports = _study(list(wl.wallets), env, cfg, args).reports
         rows = []
         for r in reports:
             m, rec = r.metrics, rolling(r, 90)
@@ -158,10 +172,13 @@ def cmd_follow(args) -> None:
                 flags.append("deep in drawdown")
             if m.get("copy_capture", 1) < 0.3:
                 flags.append("hard to copy")
-            rows.append([short(r.address), wl.wallets[r.address].get("note", ""), pct(m["cagr"]),
+            if r.reputation and r.reputation.flags:
+                flags += r.reputation.flags
+            rows.append([short(r.address), wl.wallets[r.address].get("note", ""),
+                         f"{r.reputation.tier} {r.reputation.score:.0f}", r.group, pct(m["cagr"]),
                          num(m["sharpe"]), pct(rec["return"]), num(rec["sharpe"]), pct(-rec["current_drawdown"]),
                          pct(m.get("copy_cagr", float("nan"))), ", ".join(flags) or "ok"])
-        print(table(["wallet", "note", "CAGR", "Sharpe", "90d ret", "90d Sharpe", "cur DD", "copy CAGR",
+        print(table(["wallet", "note", "rep", "operator", "CAGR", "Sharpe", "90d ret", "90d Sharpe", "cur DD", "copy CAGR",
                      "flags"], rows))
 
 
@@ -175,6 +192,10 @@ def main(argv: list[str] | None = None) -> None:
     common.add_argument("--config", help="JSON overrides for thresholds/weights")
     common.add_argument("--labels", help="JSON {address: label} of exchanges/entities to exclude")
     common.add_argument("--state", default=DEFAULT_STATE, help="watchlist file")
+    common.add_argument("--identities", help="JSON {address: {name, kind, source, url}} of public attributions")
+    common.add_argument("--ens", action="store_true", help="look up self-published ENS names")
+    common.add_argument("--farcaster", action="store_true", help="look up Farcaster verified addresses "
+                                                                  "(needs NEYNAR_API_KEY)")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     r = sub.add_parser("rank", parents=[common], help="screen, classify and rank wallets")
@@ -183,6 +204,7 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--discover-top", type=int, default=150)
     r.add_argument("--top", type=int, default=20)
     r.add_argument("--json", help="write full results to this file")
+    r.add_argument("--html", help="write the visual report (copy-trade curves, regime and operator matrices)")
     r.add_argument("--follow-top", type=int, default=0, help="add the top N to the watchlist")
     r.set_defaults(fn=cmd_rank)
 

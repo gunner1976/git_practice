@@ -60,17 +60,15 @@ def _deflate(reports: list[WalletReport], cfg: Config) -> float:
     """Deflated Sharpe ratio: test each Sharpe against the best Sharpe that
     `len(reports)` skill-less wallets would produce by chance. When you
     screen thousands of wallets, some look brilliant purely by luck."""
-    srs = [r.metrics["sharpe_daily"] for r in reports]
-    if len(srs) < 2:
+    if len(reports) < 2:
         sr_star = 0.0
     else:
-        # Robust (MAD) spread so a handful of genuine stars don't inflate the
-        # luck bar for everyone; floored at the sampling variance of a
-        # zero-Sharpe estimate over a typical track record (1/T).
-        med = st.median(srs)
-        mad_var = (1.4826 * st.median(abs(x - med) for x in srs)) ** 2
+        # Under the null (no skill) a Sharpe estimate over T days has variance
+        # ~1/T, so the luck bar is the expected best of N such draws. Using the
+        # cross-sectional spread instead would treat genuine skill differences
+        # between wallets as noise and raise the bar for everyone.
         t_typ = st.median(r.metrics["history_days"] for r in reports) or 1
-        sr_star = expected_max_sharpe(max(mad_var, 1.0 / t_typ), len(srs))
+        sr_star = expected_max_sharpe(1.0 / t_typ, len(reports))
     for r in reports:
         m = r.metrics
         m["dsr"] = probabilistic_sharpe(m["sharpe_daily"], int(m["history_days"]),

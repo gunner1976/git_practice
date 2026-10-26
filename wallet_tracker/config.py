@@ -33,6 +33,7 @@ class EligibilityConfig:
     min_price_coverage: float = 0.85
     max_top_trade_profit_share: float = 0.6   # one lucky trade shouldn't carry the record
     min_active_month_ratio: float = 0.5
+    min_reputation: float = 0.0               # 0 = off; e.g. 55 keeps tiers A/B only
 
 
 # metric -> (weight, higher_is_better). Each metric is percentile-ranked
@@ -60,6 +61,12 @@ DEFAULT_WEIGHTS: dict[str, tuple[float, bool]] = {
     "win_rate": (0.5, True),
     "payoff_ratio": (0.5, True),
     "top_trade_profit_share": (0.5, False),
+    # durability across time and market regimes
+    "regime_robustness": (1.5, True),
+    "worst_regime_excess": (0.5, True),
+    "pct_windows_beat_eth": (1.0, True),
+    "min_half_sharpe": (1.0, True),
+    "stress_excess": (0.5, True),
     # can a follower actually capture it?
     "copy_sharpe": (1.0, True),
 }

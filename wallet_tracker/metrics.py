@@ -223,6 +223,9 @@ def compute(res: PortfolioResult, benchmark: list[float], copy_returns: list[flo
     m["fees_usd"] = res.fees_usd
     m["price_coverage"] = res.price_coverage
 
+    # --- long-term persistence --------------------------------------------
+    m.update(persistence(rs, bench, prs))
+
     # --- followability ---------------------------------------------------
     if copy_returns is not None:
         cr = copy_returns[i0:]
@@ -230,6 +233,49 @@ def compute(res: PortfolioResult, benchmark: list[float], copy_returns: list[flo
         m["copy_sharpe"] = _ann_sharpe(cr)
         m["copy_capture"] = (m["copy_cagr"] / m["cagr"]) if m["cagr"] > 0 else 0.0
     return m
+
+
+def persistence(rs: list[float], bench: list[float], prs: list[float],
+                window: int = 90, step: int = 30) -> dict[str, float]:
+    """Is the edge durable, or one good stretch? Rolling-window hit rates,
+    split-half Sharpe agreement and drawdown recovery."""
+    out: dict[str, float] = {"years_tracked": len(rs) / PERIODS}
+    starts = range(0, max(len(rs) - window + 1, 0), step)
+    wins_eth = [compound(rs[i:i + window]) > compound(bench[i:i + window]) for i in starts]
+    wins_hold = [compound(rs[i:i + window]) > compound(prs[i:i + window]) for i in starts]
+    out["rolling_windows"] = len(wins_eth)
+    out["pct_windows_beat_eth"] = sum(wins_eth) / len(wins_eth) if wins_eth else 0.0
+    out["pct_windows_beat_hold"] = sum(wins_hold) / len(wins_hold) if wins_hold else 0.0
+    half = len(rs) // 2
+    a, b = _ann_sharpe(rs[:half]), _ann_sharpe(rs[half:])
+    out["sharpe_first_half"], out["sharpe_second_half"] = a, b
+    out["min_half_sharpe"] = min(a, b)
+
+    # Drawdown recovery and time under water.
+    g = peak = 1.0
+    trough_i = 0
+    worst_peak = 1.0
+    worst = 0.0
+    under = 0
+    curve = []
+    for i, r in enumerate(rs):
+        g *= 1 + r
+        curve.append(g)
+        if g > peak:
+            peak = g
+        dd = g / peak - 1
+        under += dd < -0.10
+        if dd < worst:
+            worst, trough_i, worst_peak = dd, i, peak
+    rec = float("inf")
+    if worst < 0:
+        for j in range(trough_i, len(curve)):
+            if curve[j] >= worst_peak:
+                rec = j - trough_i
+                break
+    out["max_dd_recovery_days"] = rec
+    out["underwater_ratio"] = under / len(rs) if rs else 0.0
+    return out
 
 
 def _sr_moments(rs: list[float]) -> tuple[float, int, float, float]:

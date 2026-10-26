@@ -42,12 +42,14 @@ def leaderboard_text(lb: Leaderboards, top: int = 20) -> str:
     rows = []
     for r in lb.active[:top]:
         m = r.metrics
+        rep = f"{r.reputation.tier} {r.reputation.score:.0f}" if r.reputation else "-"
         rows.append([str(r.rank), short(r.address), num(r.score, 1), "yes" if m["significant"] else "no",
+                     rep, r.group or "-", num(m.get("regime_robustness", float("nan"))),
                      pct(m["cagr"]), num(m["sharpe"]), num(m["sortino"]), pct(-m["max_drawdown"]),
                      share(m["pct_positive_months"]), share(m["win_rate"]), num(m["profit_factor"]),
                      pct(m["active_premium"]), pct(m["alpha_vs_eth"]), pct(m.get("copy_cagr", float("nan"))),
                      num(m["swaps_per_month"], 1)])
-    out.append(table(["#", "wallet", "score", "signif", "CAGR", "Sharpe", "Sortino", "MaxDD", "+months",
+    out.append(table(["#", "wallet", "score", "signif", "rep", "operator", "RRS", "CAGR", "Sharpe", "Sortino", "MaxDD", "+months",
                       "win", "PF", "vs hold", "alpha", "copy CAGR", "swaps/mo"], rows))
 
     out.append("\nBUY-AND-HOLD WALLETS (relative-performance reference)")
@@ -70,6 +72,46 @@ def leaderboard_text(lb: Leaderboards, top: int = 20) -> str:
     out.append("  " + ", ".join(f"{k}: {v}" for k, v in kinds.items()))
     for r in lb.excluded[:top]:
         out.append(f"  {short(r.address)}  {r.wallet_class.value:<20} {'; '.join(r.exclusions[:3])}")
+    return "\n".join(out)
+
+
+def study_text(study, top: int = 20) -> str:
+    from .regimes import REGIMES
+    out = [leaderboard_text(study.boards, top)]
+
+    out.append("\nLINKED-WALLET CLUSTERS (probable single operators)")
+    if not study.clusters:
+        out.append("  none found")
+    for c in study.clusters:
+        s = c.stats
+        out.append(f"  cluster {c.id}: {len(c.members)} wallets  combined CAGR {pct(s['cagr'])} Sharpe {num(s['sharpe'])}"
+                   f"  | copy basket CAGR {pct(s['copy_cagr'])} Sharpe {num(s['copy_sharpe'])}")
+        out.append("    " + ", ".join(short(a) for a in c.members))
+        for e in c.evidence[:4]:
+            out.append(f"    - {e}")
+
+    out.append("\nHUMAN vs AUTOMATED (medians per operator group)")
+    rows = [[g, str(v["n"]), num(v["median_human_score"]), pct(v["median_cagr"]), num(v["median_sharpe"]),
+             pct(-v["median_max_drawdown"]), num(v["median_regime_robustness"]), pct(v["median_copy_cagr"]),
+             str(v["significant"])] for g, v in study.operator_summary.items()]
+    out.append(table(["group", "n", "human", "CAGR", "Sharpe", "MaxDD", "RRS", "copy CAGR", "signif"], rows))
+
+    cols = REGIMES + ["stress"]
+    out.append("\nOPERATOR x MARKET REGIME (median annualised excess return vs ETH; stress = per crash day)")
+    rows = []
+    for g, cells in study.operator_regime.items():
+        rows.append([g] + [(pct(cells[c]["median_excess"] / (365 if c == "stress" else 1)) if c in cells else "")
+                           for c in cols])
+    out.append(table(["group"] + cols, rows))
+
+    out.append("\nWALLET x MARKET REGIME (top ranked; annualised excess return vs ETH)")
+    rows = [[short(r.address)] + [(pct(r.regimes[c]["ann_excess"] / (365 if c == "stress" else 1))
+                                   if r.regimes.get(c, {}).get("days", 0) >= 10 else "") for c in cols]
+            for r in study.boards.active[:min(top, 10)]]
+    out.append(table(["wallet"] + cols, rows))
+    days = {c: study.regimes and sum(1 for v in study.regimes.labels.values() if v == c) for c in REGIMES}
+    out.append("  market days per regime: " + ", ".join(f"{c} {n}" for c, n in days.items())
+               + f", stress {len(study.regimes.stress)}")
     return "\n".join(out)
 
 
@@ -121,6 +163,49 @@ def wallet_text(r: WalletReport) -> str:
     for name, items in groups.items():
         lines.append(f"\n{name}")
         lines += [f"  {k:<28}{v:>14}" for k, v in items]
+
+    groups2 = {
+        "Long-term": [("years tracked", num(m.get("years_tracked", 0))),
+                      ("90d windows beating ETH", share(m.get("pct_windows_beat_eth", 0))),
+                      ("90d windows beating own hold", share(m.get("pct_windows_beat_hold", 0))),
+                      ("Sharpe 1st / 2nd half", f"{num(m.get('sharpe_first_half', 0))} / "
+                                                f"{num(m.get('sharpe_second_half', 0))}"),
+                      ("max-DD recovery", "not yet" if math.isinf(m.get("max_dd_recovery_days", 0))
+                       else f"{m['max_dd_recovery_days']:.0f}d"),
+                      ("time >10% under water", share(m.get("underwater_ratio", 0)))],
+        "Market-regime risk": [("Regime Robustness Score", num(m.get("regime_robustness", 0))),
+                               ("regimes beating ETH", share(m.get("regimes_beaten", 0))),
+                               ("worst-regime excess", pct(m.get("worst_regime_excess", 0))),
+                               ("avg excess on crash days", pct(m.get("stress_excess", 0))),
+                               ("up / down / stress beta", f"{num(m.get('up_beta', 0))} / "
+                                f"{num(m.get('down_beta', 0))} / {num(m.get('stress_beta', 0))}")],
+    }
+    for name, items in groups2.items():
+        lines.append(f"\n{name}")
+        lines += [f"  {k:<28}{v:>14}" for k, v in items]
+    if r.regimes:
+        lines.append("  " + "  ".join(f"{k}: {pct(v['ann_excess'] / (365 if k == 'stress' else 1))} ({v['days']}d)"
+                                      for k, v in r.regimes.items()))
+    if r.operator:
+        o = r.operator
+        lines.append("\nOperator")
+        lines.append(f"  {'group':<28}{r.group or r.operator_label:>24}")
+        lines += [f"  {k:<28}{v:>14}" for k, v in [
+            ("human-likeness", f"{o['human_score']:.2f} (conf {o['human_confidence']:.0%})"),
+            ("longest quiet stretch", f"{o['quiet_hours']}h/day"),
+            ("hour-of-day entropy", num(o["hour_entropy"])),
+            ("round-number entries", share(o["round_amount_ratio"])),
+            ("gap irregularity (CV)", num(o["interval_cv"]))]]
+    if r.identity is not None and getattr(r.identity, "attested", False):
+        lines.append(f"  identity: {r.identity.name} ({r.identity.kind or 'kind unknown'}) via "
+                     f"{', '.join(r.identity.sources)}")
+    if r.reputation is not None:
+        rp = r.reputation
+        lines.append(f"\nReputation  {rp.tier}  {rp.score:.0f}/100")
+        lines.append("  " + ", ".join(f"{k} {v:.2f}" for k, v in rp.components.items()))
+        lines += [f"  + {e}" for e in rp.evidence] + [f"  ! {f}" for f in rp.flags]
+    if r.cluster_id:
+        lines.append(f"  member of linked cluster {r.cluster_id}")
 
     i0 = next((i for i, v in enumerate(res.equity) if v > 0), 0)
     mo = monthly(res.days[i0:], res.returns[i0:])

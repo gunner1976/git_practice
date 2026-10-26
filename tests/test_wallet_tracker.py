@@ -11,7 +11,10 @@ from wallet_tracker.models import DAY, EventKind, Transfer, WalletClass, WalletH
 from wallet_tracker.portfolio import simulate
 from wallet_tracker.prices import PriceBook
 from wallet_tracker.providers.synthetic import USDC, SyntheticWorld
-from wallet_tracker.ranking import build
+from wallet_tracker.html_report import render_html
+from wallet_tracker.identity import load_file as load_identities
+from wallet_tracker.pipeline import run_study
+from wallet_tracker.regimes import REGIMES, MarketRegimes, regime_matrix, robustness
 from wallet_tracker.reconstruct import GAS, build_events
 
 T0 = 1_700_000_000 - 1_700_000_000 % DAY
@@ -101,9 +104,11 @@ class PipelineTest(unittest.TestCase):
         cls.world = SyntheticWorld(seed=7)
         cls.now = cls.world.end + DAY - 1
         cls.cfg = Config()
-        cls.reports = {a: analyze_wallet(cls.world.history(a), cls.world.prices, cls.cfg, cls.now)
-                       for a in cls.world.addresses()}
-        cls.lb = build(list(cls.reports.values()), cls.cfg)
+        cls.study = run_study([cls.world.history(a) for a in cls.world.addresses()], cls.world.prices,
+                              cls.cfg, cls.now, cls.world.identities)
+        cls.reports = {r.address: r for r in cls.study.reports}
+        cls.lb = cls.study.boards
+        cls.truth = cls.world.truth
 
     def test_archetypes_classified(self):
         classes = [r.wallet_class for r in self.reports.values()]
@@ -113,19 +118,61 @@ class PipelineTest(unittest.TestCase):
         self.assertEqual(classes.count(WalletClass.CONTRACT), 1)
         self.assertEqual(classes.count(WalletClass.DORMANT), 1)
 
-    def test_skilled_wallets_rank_first_and_random_never_significant(self):
-        skilled = set(self.world.addresses()[:4])
-        top = {r.address for r in self.lb.active[:4]}
-        self.assertGreaterEqual(len(skilled & top), 3)
-        random_traders = set(self.world.addresses()[4:18])
+    def test_luck_test_only_passes_skilled_wallets(self):
+        significant = [r for r in self.lb.active if r.metrics["significant"]]
+        self.assertGreaterEqual(len(significant), 5)
+        for r in significant:
+            self.assertGreater(self.truth[r.address]["skill"], 0, r.address)
+        self.assertGreater(self.truth[self.lb.active[0].address]["skill"], 0)
+
+    def test_human_vs_automated(self):
         for r in self.lb.active:
-            if r.address in random_traders:
-                self.assertFalse(r.metrics["significant"], r.address)
+            style = self.truth[r.address]["style"]
+            score = r.operator["human_score"]
+            if style == "agent":
+                self.assertLess(score, 0.4, r.address)
+            elif style == "human":
+                self.assertGreater(score, 0.6, r.address)
+        declared = [r for r in self.reports.values() if r.group == "AI agent (declared)"]
+        self.assertEqual(len(declared), 3)
+        bot = next(r for r in self.reports.values() if r.wallet_class is WalletClass.BOT)
+        self.assertEqual(bot.group, "hft/mev bot")
+        self.assertLess(bot.operator["human_score"], 0.4)
+
+    def test_cluster_recovered(self):
+        expected = {a for a, t in self.truth.items() if "cluster" in t}
+        self.assertEqual(len(self.study.clusters), 1)
+        cl = self.study.clusters[0]
+        self.assertEqual(set(cl.members), expected)
+        kinds = " ".join(cl.evidence)
+        for k in ("direct transfer", "common first funder", "co-trading"):
+            self.assertIn(k, kinds)
+        self.assertLess(cl.stats["copy_sharpe"], cl.stats["sharpe"])
+
+    def test_reputation_flags(self):
+        flagged = {r.address: r.reputation for r in self.reports.values() if r.reputation.flags}
+        texts = " ".join(f for rep in flagged.values() for f in rep.flags)
+        self.assertIn("Tornado Cash", texts)
+        self.assertIn("deployed 1 contract", texts)
+        mixer = next(a for a, rep in flagged.items() if any("Tornado" in f for f in rep.flags))
+        self.assertEqual(self.reports[mixer].reputation.components["provenance"], 0.0)
+        top = self.lb.active[0].reputation
+        self.assertIn(top.tier, "AB")
+
+    def test_matrices_and_html(self):
+        self.assertIn("human (behavioural)", self.study.operator_regime)
+        self.assertIn("buy-and-hold (reference)", self.study.operator_summary)
+        self.assertTrue(self.study.operator_quarter["human (behavioural)"])
+        page = render_html(self.study, demo=True)
+        for needle in ("Wallet Edge Report", "Copy-trade performance by operator", "Cluster 1",
+                       "Human vs automated", "Regime risk matrix"):
+            self.assertIn(needle, page)
+        self.assertNotIn("nan", page.replace("Synthetic", ""))
 
     def test_follow_poll(self):
         with tempfile.TemporaryDirectory() as d:
             wl = Watchlist(os.path.join(d, "wl.json"))
-            a = self.world.addresses()[0]
+            a = self.lb.active[0].address
             wl.add(a, self.world.latest_block() - 30 * DAY // 12)
             alerts = poll(wl, self.world, self.world, os.path.join(d, "alerts.jsonl"))
             self.assertTrue(alerts)
@@ -133,6 +180,42 @@ class PipelineTest(unittest.TestCase):
             self.assertEqual(poll(wl, self.world, self.world), [])   # nothing new
             with open(os.path.join(d, "wl.json")) as fh:
                 self.assertIn(a, json.load(fh)["wallets"])
+
+
+class RegimeTest(unittest.TestCase):
+    def test_labels_and_robustness(self):
+        import random
+        rng = random.Random(3)
+        eth, p = {}, 2000.0
+        for i in range(400):
+            p *= 1 + rng.gauss(0.001 if i < 200 else -0.001, 0.03)
+            eth[T0 + i * DAY] = p
+        reg = MarketRegimes(eth)
+        self.assertTrue(set(reg.labels.values()) <= set(REGIMES))
+        self.assertTrue(reg.stress)
+        days = sorted(eth)[1:]
+        bench = [eth[d] / eth[d - DAY] - 1 for d in days]
+        steady = [b + 0.001 + rng.gauss(0, 0.002) for b in bench]     # small edge, every regime
+        lucky = [b * 1.8 for b in bench]                              # pure leverage
+        rob_s = robustness(regime_matrix(days, steady, bench, reg))
+        rob_l = robustness(regime_matrix(days, lucky, bench, reg))
+        self.assertEqual(rob_s["regimes_beaten"], 1.0)
+        self.assertGreater(rob_s["regime_robustness"], rob_l["regime_robustness"])
+
+
+class IdentityTest(unittest.TestCase):
+    def test_file_and_kind_validation(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "ids.json")
+            with open(path, "w") as fh:
+                json.dump({"0xABC": {"name": "Some Fund", "kind": "fund", "source": "fund website"}}, fh)
+            ids = load_identities(path)
+            self.assertEqual(ids["0xabc"].kind, "fund")
+            self.assertTrue(ids["0xabc"].attested)
+            with open(path, "w") as fh:
+                json.dump({"0xabc": {"kind": "celebrity"}}, fh)
+            with self.assertRaises(ValueError):
+                load_identities(path)
 
 
 class ClassifyEdgeTest(unittest.TestCase):

@@ -7,11 +7,14 @@ from dataclasses import dataclass, field
 
 from .classify import classify
 from .config import Config
-from .metrics import compute
-from .models import ClosedTrade, WalletClass, WalletHistory
+from .metrics import compute, live_window
+from .models import ClosedTrade, Event, WalletClass, WalletHistory
+from .operator_type import features as operator_features
+from .operator_type import human_score, operator_label
 from .portfolio import PortfolioResult, simulate
 from .prices import PriceBook, PriceSource
 from .reconstruct import build_events, normalise_token
+from .regimes import MarketRegimes, conditional_betas, regime_matrix, robustness
 
 
 @dataclass
@@ -25,6 +28,20 @@ class WalletReport:
     exclusions: list[str] = field(default_factory=list)
     score: float = 0.0
     rank: int = 0
+    copy_returns: list[float] = field(default_factory=list, repr=False)
+    benchmark: list[float] = field(default_factory=list, repr=False)
+    regimes: dict[str, dict[str, float]] = field(default_factory=dict)
+    operator: dict[str, float] = field(default_factory=dict)   # behavioural features + score
+    operator_label: str = ""
+    group: str = ""                     # human-vs-automated display group
+    identity: object = None
+    reputation: object = None
+    cluster_id: int = 0
+    history: WalletHistory | None = field(default=None, repr=False)
+
+    @property
+    def events(self) -> list[Event]:
+        return self.result.events
 
     @property
     def closed_trades(self) -> list[ClosedTrade]:
@@ -64,15 +81,28 @@ def tokens_in(hist: WalletHistory) -> set[str]:
 
 
 def analyze_wallet(hist: WalletHistory, series: dict[str, dict[int, float]], cfg: Config,
-                   now: int | None = None) -> WalletReport:
+                   now: int | None = None, regimes: MarketRegimes | None = None) -> WalletReport:
     now = now or int(time.time())
     events = build_events(hist.transfers)
     book = PriceBook(series)
     res = simulate(events, book, now)
     copy = copy_trade_returns(res, cfg.copy_lag_days, cfg.copy_cost_bps)
-    m = compute(res, benchmark_returns(res, book), copy, now=now)
+    bench = benchmark_returns(res, book)
+    m = compute(res, bench, copy, now=now)
+
+    regimes = regimes or MarketRegimes(series.get("eth", {}))
+    i0 = live_window(res)
+    matrix = regime_matrix(res.days[i0:], res.returns[i0:], bench[i0:], regimes)
+    m.update(robustness(matrix))
+    m.update(conditional_betas(res.returns[i0:], bench[i0:], [d in regimes.stress for d in res.days[i0:]]))
+
     cls, reasons = classify(hist, m, cfg.classifier)
-    return WalletReport(hist.address, cls, reasons, m, res)
+    feats = operator_features(hist, events)
+    score, conf = human_score(feats, m["swaps_per_active_day"])
+    feats.update(human_score=score, human_confidence=conf)
+    return WalletReport(hist.address, cls, reasons, m, res, copy_returns=copy, benchmark=bench,
+                        regimes=matrix, operator=feats, operator_label=operator_label(score, cls),
+                        history=hist)
 
 
 def fetch_series(source: PriceSource, histories: list[WalletHistory], now: int) -> dict[str, dict[int, float]]:

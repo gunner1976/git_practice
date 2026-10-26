@@ -12,6 +12,8 @@ from __future__ import annotations
 import math
 import random
 
+from ..identity import Identity
+from ..labels import EXCHANGES, MIXERS
 from ..models import DAY, Transfer, WalletHistory
 from ..reconstruct import GAS
 
@@ -39,6 +41,8 @@ class SyntheticWorld:
         self.symbols = {t: f"TOK{i}" for i, t in enumerate(self.tokens)} | {"eth": "ETH", USDC: "USDC"}
         self._make_prices()
         self.histories: dict[str, WalletHistory] = {}
+        self.truth: dict[str, dict] = {}            # ground truth, for tests and the demo
+        self.identities: dict[str, Identity] = {}   # fictional attestations
         self._counter = 0
         self._build_population()
 
@@ -86,17 +90,21 @@ class SyntheticWorld:
         return got
 
     # ---------------------------------------------------------------- wallets
-    def trader(self, skill: float, capital: float, stop_day: int | None = None,
-               hold=(3, 9), start_day: int = 0) -> str:
-        rng, a, out = self.rng, addr(0xB000 + len(self.histories)), []
-        self._deposit(out, self.days[start_day], USDC, capital)
-        self._deposit(out, self.days[start_day], "eth", 1.0)
-        cur, bal = USDC, capital
-        i = start_day + 1
-        last = len(self.days) - 1 if stop_day is None else stop_day
+    def _ts_for(self, d: int, style: str, tz: float) -> int:
+        if style == "agent":            # software: any hour, 24/7
+            return d + self.rng.randint(0, DAY - 1)
+        local = self.rng.uniform(8.0, 23.5)  # people sleep
+        return d + int(((local - tz) % 24) * 3600)
+
+    def _plan(self, skill: float, start_day: int, last: int, style: str) -> list[tuple[int, str]]:
+        """A sequence of (day index, token to rotate into)."""
+        rng, plan, i = self.rng, [], start_day + 1
         universe = self.tokens + ["eth"]
         while i < last:
-            h = rng.randint(*hold)
+            if style == "agent":
+                h = 3                               # fixed cadence
+            else:
+                h = rng.randint(1, 2) if rng.random() < 0.4 else rng.randint(5, 16)  # bursty
             j = min(i + h, len(self.days) - 1)
             if rng.random() < skill:
                 nxt = max(universe, key=lambda t: self.px(t, self.days[j]) / self.px(t, self.days[i]))
@@ -105,15 +113,55 @@ class SyntheticWorld:
             # Skilled wallets also sit in stables when everything looks bad.
             if skill and rng.random() < skill and self.px(nxt, self.days[j]) < self.px(nxt, self.days[i]):
                 nxt = USDC
+            plan.append((i, nxt))
+            i = j
+        return plan
+
+    def trader(self, skill: float, capital: float, stop_day: int | None = None, start_day: int = 0,
+               style: str = "human", funder: str | None = None, plan=None, ts_plan=None,
+               offset_secs: int = 0) -> str:
+        rng, a, out = self.rng, addr(0xB000 + len(self.histories)), []
+        tz = rng.choice([-5, -4, 0, 1, 2, 8, 9])
+        funder = funder or rng.choice(list(EXCHANGES))
+        self._deposit(out, self.days[start_day], USDC, capital, funder)
+        self._deposit(out, self.days[start_day], "eth", 1.0, funder)
+        last = len(self.days) - 1 if stop_day is None else stop_day
+        plan = plan if plan is not None else self._plan(skill, start_day, last, style)
+        cur, bal = USDC, capital
+        for k, (i, nxt) in enumerate(plan):
+            if i >= last:
+                break
+            d = self.days[i]
             if nxt != cur:
-                sell_amt = bal - (GAS_ETH * 50 if cur == "eth" else 0)
-                bal = self._swap(out, self._ts(self.days[i]), cur, sell_amt, nxt, self.days[i])
+                amt = bal - (GAS_ETH * 50 if cur == "eth" else 0)
+                if style == "human" and cur in (USDC, "eth"):
+                    # People type round numbers into the swap box.
+                    step = 500 if cur == USDC else 0.1
+                    amt = max(step, math.floor(amt / step) * step)
+                ts = (ts_plan[k] if ts_plan else self._ts_for(d, style, tz)) + offset_secs
+                bal = self._swap(out, ts, cur, amt, nxt, d)
                 cur = nxt
             if rng.random() < 0.03:  # occasional top-up - must not count as profit
-                self._deposit(out, self.days[i], USDC, capital * 0.2)
-            i = j
+                self._deposit(out, d, USDC, capital * 0.2, funder)
         self.histories[a] = WalletHistory(a, out)
+        self.truth[a] = {"skill": skill, "style": style}
         return a
+
+    def cluster(self, n: int, skill: float) -> list[str]:
+        """One operator running several wallets: common funder, shared trade plan."""
+        funder = addr(0xF00D0 + len(self.histories))
+        plan = self._plan(skill, 0, len(self.days) - 1, "human")
+        ts_plan = [self._ts_for(self.days[i], "human", 1) for i, _ in plan]
+        members = [self.trader(skill, self.rng.uniform(40_000, 120_000), funder=funder, plan=plan,
+                               ts_plan=ts_plan, offset_secs=k * 240) for k in range(n)]
+        # The operator moves money between its wallets now and then.
+        d = self.days[len(self.days) // 2]
+        h, ts = self._tx(), d + 50_000
+        self.histories[members[0]].transfers.append(Transfer(h, ts, block_at(ts), "eth", "ETH", -0.5, members[1]))
+        self.histories[members[1]].transfers.append(Transfer(h, ts, block_at(ts), "eth", "ETH", 0.5, members[0]))
+        for m in members:
+            self.truth[m]["cluster"] = funder
+        return members
 
     def holder(self, capital: float, n_tokens: int = 3) -> str:
         rng, a, out = self.rng, addr(0xC000 + len(self.histories)), []
@@ -126,6 +174,7 @@ class SyntheticWorld:
             self._swap(out, ts, USDC, capital / n_tokens, t, d0)
             ts += 60
         self.histories[a] = WalletHistory(a, out)
+        self.truth[a] = {"skill": 0.0, "style": "holder"}
         return a
 
     def bot(self, capital: float) -> str:
@@ -142,6 +191,7 @@ class SyntheticWorld:
                         Transfer(h, ts, b, USDC, "USDC", capital * 0.1 * 1.0007, "pool")]
                 ts += rng.randint(5, 40)
         self.histories[a] = WalletHistory(a, out)
+        self.truth[a] = {"skill": 0.0, "style": "bot"}
         return a
 
     def exchange(self) -> str:
@@ -152,22 +202,35 @@ class SyntheticWorld:
             for _ in range(rng.randint(1, 5)):
                 self._deposit(out, d, USDC, -rng.uniform(100, 40_000))
         self.histories[a] = WalletHistory(a, out)
+        self.truth[a] = {"skill": 0.0, "style": "exchange"}
         return a
 
     def _build_population(self) -> None:
         rng = self.rng
-        for _ in range(4):
-            self.trader(skill=rng.uniform(0.15, 0.3), capital=rng.uniform(50_000, 400_000))
-        for _ in range(14):
-            self.trader(skill=0.0, capital=rng.uniform(20_000, 300_000))
+        skill = lambda: rng.uniform(0.15, 0.3)  # noqa: E731
+        humans = [self.trader(skill(), rng.uniform(50_000, 400_000)) for _ in range(4)]
+        humans += [self.trader(0.0, rng.uniform(20_000, 300_000)) for _ in range(10)]
+        agents = [self.trader(skill(), rng.uniform(50_000, 400_000), style="agent") for _ in range(4)]
+        agents += [self.trader(0.0, rng.uniform(20_000, 300_000), style="agent") for _ in range(4)]
+        self.cluster(3, 0.22)
         for _ in range(6):
             self.holder(capital=rng.uniform(20_000, 500_000))
-        self.trader(skill=0.15, capital=150_000, stop_day=len(self.days) - 120)  # dormant
-        self.trader(skill=0.15, capital=3_000)                                   # too small
+        self.trader(0.15, 150_000, stop_day=len(self.days) - 120)        # dormant
+        self.trader(0.15, 3_000)                                          # too small
+        self.trader(0.0, 80_000, funder=next(iter(MIXERS)))               # mixer-funded
+        dep = self.trader(0.0, 90_000)
+        self.histories[dep].deployed_contracts = [addr(0xDE9)]             # token deployer
         self.bot(capital=250_000)
         self.exchange()
-        c = self.trader(skill=0.15, capital=100_000)
+        c = self.trader(0.15, 100_000)
         self.histories[c].is_contract = True
+
+        # Fictional, clearly-marked attestations so the identity paths are exercised.
+        for k, a in enumerate(humans[:2] + humans[5:6]):
+            self.identities[a] = Identity(f"demo-trader-{k + 1}.eth", "person",
+                                          ["ENS reverse record", "Farcaster verified address"])
+        for k, a in enumerate(agents[:2] + agents[5:6]):
+            self.identities[a] = Identity(f"demo-agent-{k + 1}", "ai_agent", ["agent registry (demo)"])
 
     # ---------------------------------------------------- provider interface
     def addresses(self) -> list[str]:
@@ -179,4 +242,4 @@ class SyntheticWorld:
     def history(self, address: str, start_block: int = 0, check_contract: bool = True) -> WalletHistory:
         h = self.histories[address.lower()]
         return WalletHistory(h.address, [t for t in h.transfers if t.block >= start_block],
-                             h.is_contract, h.label)
+                             h.is_contract, h.label, list(h.deployed_contracts))
