@@ -344,6 +344,50 @@ class VenueTest(unittest.TestCase):
         self.assertAlmostEqual(metrics.compound(rs3), 0.0)          # not listed yet when it mattered
 
 
+class RoutingTest(unittest.TestCase):
+    def test_spot_then_proxy_then_cash(self):
+        from wallet_tracker.routing import ProxyRouter, Router, SpotRouter, PerpRouter, routed_copy
+        from wallet_tracker.venue import StaticVenue
+        import random
+        rng = random.Random(1)
+        n = 140
+        listed, deep, follower, lone = ("0x" + c * 40 for c in "1234")
+        base = [rng.gauss(0, 0.03) for _ in range(n)]
+        def path(rets):
+            p, out = 1.0, []
+            for r in rets:
+                p *= 1 + r
+                out.append(p)
+            return {T0 + i * DAY: v for i, v in enumerate(out)}
+        series = {listed: path(base), deep: path([rng.gauss(0, 0.03) for _ in range(n)]),
+                  follower: path([1.5 * b + rng.gauss(0, 0.005) for b in base]),
+                  lone: path([rng.gauss(0, 0.03) for _ in range(n)]),
+                  "eth": {T0 + i * DAY: 2000.0 for i in range(n)}}
+        book = PriceBook(series)
+        perp = PerpRouter(StaticVenue({listed: "L"}, funding_apr=0.0, cost_bps=0.0))
+        class Liq:
+            def liquidity(self, t): return 1e9 if t == deep else 0.0
+        router = Router([perp, SpotRouter(Liq()), ProxyRouter(perp, book, {listed: "L"})])
+        d = T0 + 120 * DAY
+        self.assertEqual(router.route(listed, "L", 1, d).kind, "perp")
+        self.assertEqual(router.route(deep, "D", 1, d).kind, "spot")
+        rt = router.route(follower, "F", 1, d)
+        self.assertEqual((rt.kind, rt.target), ("proxy", listed))
+        self.assertAlmostEqual(rt.beta, 1.5, delta=0.2)
+        self.assertIsNone(router.route(lone, "X", 1, d))
+        # A wallet holding the follower token is replicated through its proxy.
+        evs = build_events([tr("a", 100, USDC, 10_000), tr("b", 100, USDC, -10_000), tr("b", 100, follower, 10_000)])
+        res = simulate(evs, book, T0 + 139 * DAY)
+        rs, info = routed_copy(res, router, book, 0)
+        self.assertGreater(info["route_shares"]["proxy"], 0.9)
+        own = res.returns[-30:]
+        cp = rs[-30:]
+        mo, mc = sum(own) / 30, sum(cp) / 30
+        corr = sum((a - mo) * (b - mc) for a, b in zip(own, cp)) / (
+            (sum((a - mo) ** 2 for a in own) * sum((b - mc) ** 2 for b in cp)) ** 0.5)
+        self.assertGreater(corr, 0.9)
+
+
 class RegimeTest(unittest.TestCase):
     def test_labels_and_robustness(self):
         import random

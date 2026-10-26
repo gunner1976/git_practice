@@ -48,6 +48,8 @@ class SyntheticWorld:
         self.sector_map = {t: sectors[i % len(sectors)] for i, t in enumerate(self.tokens)}
         # Stand-in execution venue: ETH and most tokens listed, the last two not.
         self.venue_coins = {"eth": "ETH", **{t: f"TOK{i}" for i, t in enumerate(self.tokens[:-2])}}
+        # Stand-in DEX liquidity: TOK6 has a deep pool (spot-routable), TOK7 a thin one.
+        self.liquidity = _StaticLiquidity({self.tokens[-2]: 5_000_000.0, self.tokens[-1]: 20_000.0})
         self.identities: dict[str, Identity] = {}   # fictional attestations
         self._counter = 0
         self._build_population()
@@ -283,3 +285,11 @@ class SyntheticWorld:
         h = self.histories[address.lower()]
         return WalletHistory(h.address, [t for t in h.transfers if t.block >= start_block],
                              h.is_contract, h.label, list(h.deployed_contracts), tx_targets=dict(h.tx_targets))
+
+
+class _StaticLiquidity:
+    def __init__(self, liq: dict[str, float]):
+        self.liq = liq
+
+    def liquidity(self, token: str) -> float:
+        return self.liq.get(token, 0.0)

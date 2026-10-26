@@ -159,12 +159,13 @@ def truncate(h: WalletHistory, cutoff: int) -> WalletHistory:
 
 
 def walk_forward(histories: list[WalletHistory], series, cfg: Config, now: int, holdout_days: int,
-                 rules: Rules, identities=None, exchanges=None, sector_map=None, venue=None) -> dict:
+                 rules: Rules, identities=None, exchanges=None, sector_map=None, venue=None,
+                 routing: dict | None = None) -> dict:
     cutoff = now - holdout_days * DAY
     past = run_study([truncate(h, cutoff) for h in histories], series, cfg, cutoff, identities, exchanges,
-                     sector_map, venue)
+                     sector_map, venue, routing)
     leaders = select(past, rules)
-    full = run_study(histories, series, cfg, now, identities, exchanges, sector_map, venue)
+    full = run_study(histories, series, cfg, now, identities, exchanges, sector_map, venue, routing)
     cut_day = cutoff - cutoff % DAY
 
     _, ours = portfolio_returns(full, leaders, cut_day)

@@ -104,11 +104,11 @@ def is_smart(r: WalletReport) -> bool:
 
 def run_study(histories: list[WalletHistory], series: dict[str, dict[int, float]], cfg: Config, now: int,
               identities: dict[str, Identity] | None = None, exchanges: dict[str, str] | None = None,
-              sector_map: SectorMap | None = None, venue=None) -> Study:
+              sector_map: SectorMap | None = None, venue=None, routing: dict | None = None) -> Study:
     regimes = MarketRegimes(series.get("eth", {}))
     reports = [analyze_wallet(h, series, cfg, now, regimes) for h in histories]
     if venue is not None:
-        _venue_fidelity(reports, venue, PriceBook(series), cfg)
+        _venue_fidelity(reports, venue, PriceBook(series), cfg, routing)
     boards = build(reports, cfg)
 
     hist_by = {h.address: h for h in histories}
@@ -312,15 +312,37 @@ def _frequency_cohorts(study: Study) -> None:
         study.frequency_summary[label] = row
 
 
-def _venue_fidelity(reports: list[WalletReport], venue, book: PriceBook, cfg: Config) -> None:
-    """Copy each trader on the execution venue and measure what survives."""
+def _venue_fidelity(reports: list[WalletReport], venue, book: PriceBook, cfg: Config,
+                    routing: dict | None = None) -> None:
+    """Copy each trader on the execution venue and measure what survives.
+
+    With `routing`, positions the venue can't hold directly are routed to DEX
+    spot (if deep enough) or a correlated proxy instead of cash."""
     import math
     from .metrics import live_window
     from .venue import venue_copy
+    router = None
+    if routing:
+        from .routing import build_router
+        symbols: dict[str, str] = {}
+        for r in reports:
+            symbols.update(r.result.symbols)
+        liq = routing.get("liquidity")
+        if liq is not None and hasattr(liq, "prefetch"):
+            liq.prefetch({t for r in reports for t in r.result.symbols})
+        router = build_router(venue, book, symbols, liq, routing.get("proxy", True),
+                              routing.get("capital", 100_000.0), routing.get("min_liquidity", 250_000.0))
+        venue.name = router.name
     for r in reports:
         if r.wallet_class not in TRADER_CLASSES | {WalletClass.BUY_HOLD}:
             continue
-        rs, info = venue_copy(r.result, venue, book, cfg.copy_lag_days)
+        if router is not None:
+            from .routing import routed_copy
+            rs, info = routed_copy(r.result, router, book, cfg.copy_lag_days)
+            r.metrics.update({f"route_{k}": v for k, v in info["route_shares"].items()})
+            r.metrics["direct_share"] = info["direct_share"]
+        else:
+            rs, info = venue_copy(r.result, venue, book, cfg.copy_lag_days)
         r.venue_returns, r.venue_coins = rs, info["coins"]
         i0 = live_window(r.result)
         v, c = rs[i0:], r.copy_returns[i0:]

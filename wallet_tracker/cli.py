@@ -138,7 +138,7 @@ def _study(addresses: list[str], env: Env, cfg: Config, args):
     if env.world is not None:
         extra = {**env.world.sector_map, **extra}
     smap = SectorMap(extra, online=getattr(args, "sectors_online", False))
-    return run_study(histories, series, cfg, env.now, ids, env.labels, smap, _venue(args, env))
+    return run_study(histories, series, cfg, env.now, ids, env.labels, smap, _venue(args, env), _routing(args, env))
 
 
 def funnel_text(stages: list[dict], study) -> str:
@@ -277,6 +277,22 @@ def _venue(args, env: Env):
     return Hyperliquid()
 
 
+def _routing(args, env: Env) -> dict | None:
+    """--route spot,proxy: let untradable positions go to DEX spot and/or proxies."""
+    kinds = {k.strip() for k in (getattr(args, "route", "") or "").split(",") if k.strip()}
+    if not kinds or not getattr(args, "venue", None):
+        return None
+    liq = None
+    if "spot" in kinds:
+        if env.world is not None:
+            liq = env.world.liquidity
+        else:
+            from .routing import Dexscreener
+            liq = Dexscreener()
+    return {"liquidity": liq, "proxy": "proxy" in kinds, "capital": args.copy_capital,
+            "min_liquidity": args.min_liquidity}
+
+
 def _rules(args) -> Rules:
     return Rules(min_dsr=args.min_dsr, min_copy_sharpe=args.min_copy_sharpe, reaction_days=args.reaction_days,
                  require_identity=args.require_identity, max_leaders=args.max_leaders,
@@ -308,7 +324,7 @@ def cmd_backtest(args) -> None:
     env = Env(args)
     histories, series, ids, smap = _inputs(args, env, cfg)
     res = walk_forward(histories, series, cfg, env.now, args.holdout_days, _rules(args), ids, env.labels, smap,
-                       _venue(args, env))
+                       _venue(args, env), _routing(args, env))
     cut = datetime.fromtimestamp(res["cutoff"], timezone.utc).strftime("%Y-%m-%d")
     print(f"WALK-FORWARD: leaders chosen with data up to {cut}, judged on the {args.holdout_days} days after\n")
     print(_leader_rows(res["leaders"]))
@@ -326,7 +342,8 @@ def cmd_paper(args) -> None:
     env = Env(args)
     if args.action == "init":
         histories, series, ids, smap = _inputs(args, env, cfg)
-        study = run_study(histories, series, cfg, env.now, ids, env.labels, smap, _venue(args, env))
+        study = run_study(histories, series, cfg, env.now, ids, env.labels, smap, _venue(args, env),
+                          _routing(args, env))
         leaders = select(study, _rules(args))
         state = {"start": env.now, "capital": args.capital, "chain_id": args.chain_id, "venue": args.venue,
                  "leaders": [{"label": p.label, "members": p.members, "weight": p.weight, "stats": p.stats}
@@ -488,6 +505,11 @@ def main(argv: list[str] | None = None) -> None:
     common.add_argument("--config", help="JSON overrides for thresholds/weights")
     common.add_argument("--labels", help="JSON {address: label} of exchanges/entities to exclude")
     common.add_argument("--state", default=DEFAULT_STATE, help="watchlist file")
+    common.add_argument("--route", default="", help="with --venue: route positions the venue can't hold to "
+                        "'spot' (buy on a DEX if the pool is deep enough) and/or 'proxy' (most correlated "
+                        "tradable instrument), e.g. --route spot,proxy")
+    common.add_argument("--copy-capital", type=float, default=100_000, help="copy portfolio size (spot price impact)")
+    common.add_argument("--min-liquidity", type=float, default=250_000, help="minimum DEX pool depth for spot")
     common.add_argument("--venue", choices=["hyperliquid"], help="simulate copies on this venue: only listed "
                         "instruments, real funding and fees (demo uses a stand-in venue)")
     common.add_argument("--since-days", type=int, default=540, help="history lookback for each wallet")
