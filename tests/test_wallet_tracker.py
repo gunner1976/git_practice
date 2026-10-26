@@ -250,6 +250,28 @@ class KnowledgeBaseTest(unittest.TestCase):
             kb.close()
 
 
+class StrategyTest(unittest.TestCase):
+    def test_walk_forward_picks_only_skilled_leaders(self):
+        from wallet_tracker.strategy import Rules, walk_forward
+        w = SyntheticWorld(seed=7)
+        res = walk_forward([w.history(a) for a in w.addresses()], w.prices, Config(), w.end + DAY - 1, 120,
+                           Rules(), w.identities, None, SectorMap(w.sector_map))
+        self.assertTrue(res["leaders"])
+        for p in res["leaders"]:
+            self.assertTrue(all(w.truth[a]["skill"] > 0 for a in p.members), p.label)
+            self.assertLessEqual(p.weight, 0.25 + 1e-9)
+        self.assertLessEqual(sum(p.weight for p in res["leaders"]), 0.9 + 1e-9)
+        self.assertGreater(res["strategy"]["sharpe"], res["copy_all_eligible"]["sharpe"])
+        self.assertGreater(res["strategy"]["return"], res["eth"]["return"])
+
+    def test_allocation_caps(self):
+        from wallet_tracker.strategy import Leader, Rules, allocate
+        picks = [Leader(str(i), str(i), [str(i)], v) for i, v in enumerate([100, 1, 1, 1])]
+        allocate(picks, Rules(max_weight=0.3, cash_buffer=0.1))
+        self.assertAlmostEqual(picks[0].weight, 0.3)
+        self.assertAlmostEqual(sum(p.weight for p in picks), 0.9)
+
+
 class RegimeTest(unittest.TestCase):
     def test_labels_and_robustness(self):
         import random

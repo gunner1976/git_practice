@@ -27,7 +27,9 @@ from .identity import resolve
 from .knowledge import KnowledgeBase
 from .models import DAY, WalletClass, history_from_json, history_to_json
 from .pipeline import run_study
+from .metrics import compound
 from .sectors import SectorMap
+from .strategy import Leader, Rules, portfolio_returns, select, walk_forward
 from .report import num, pct, rolling, short, study_text, table, to_json, wallet_text
 
 
@@ -223,6 +225,102 @@ def cmd_follow(args) -> None:
                      "flags"], rows))
 
 
+def _rules(args) -> Rules:
+    return Rules(min_dsr=args.min_dsr, min_copy_sharpe=args.min_copy_sharpe,
+                 require_identity=args.require_identity, max_leaders=args.max_leaders,
+                 max_weight=args.max_weight, cash_buffer=args.cash_buffer)
+
+
+def _inputs(args, env: Env, cfg: Config):
+    """Histories, prices, identities and sectors - the same inputs `rank` uses."""
+    histories = [_history(env, a, args) for a in _addresses(args, env)]
+    series = fetch_series(env.prices, histories, env.now)
+    file_ids = load_identities(args.identities) if args.identities else {}
+    if env.world is not None:
+        file_ids = {**env.world.identities, **file_ids}
+    ids = resolve([h.address for h in histories], file_ids, ens=args.ens)
+    extra = {**(env.world.sector_map if env.world is not None else {})}
+    return histories, series, ids, SectorMap(extra)
+
+
+def _leader_rows(leaders) -> str:
+    return table(["leader", "wallets", "weight", "copy Sharpe", "copy CAGR", "RRS", "rep"],
+                 [[p.label, str(len(p.members)), f"{p.weight:.0%}", num(p.stats["copy_sharpe"]),
+                   pct(p.stats["copy_cagr"]), num(p.stats["rrs"]), f"{p.stats['reputation']:.0f}"]
+                  for p in leaders]) if leaders else "  no entity passed the selection rules"
+
+
+def cmd_backtest(args) -> None:
+    cfg = Config.load(args.config)
+    env = Env(args)
+    histories, series, ids, smap = _inputs(args, env, cfg)
+    res = walk_forward(histories, series, cfg, env.now, args.holdout_days, _rules(args), ids, env.labels, smap)
+    cut = datetime.fromtimestamp(res["cutoff"], timezone.utc).strftime("%Y-%m-%d")
+    print(f"WALK-FORWARD: leaders chosen with data up to {cut}, judged on the {args.holdout_days} days after\n")
+    print(_leader_rows(res["leaders"]))
+    print()
+    rows = [[name, pct(res[k]["return"]), pct(res[k]["cagr"]), num(res[k]["sharpe"]), pct(-res[k]["max_drawdown"])]
+            for name, k in [("strategy (selected leaders)", "strategy"),
+                            ("copy every eligible wallet", "copy_all_eligible"),
+                            ("copy top past returns (naive)", "copy_top_past_returns"), ("hold ETH", "eth")]]
+    print(table(["after cutoff", "return", "CAGR", "Sharpe", "max DD"], rows))
+    print(f"\ninvested {sum(p.weight for p in res['leaders']):.0%}; the rest is cash (capped weights + buffer)")
+
+
+def cmd_paper(args) -> None:
+    cfg = Config.load(args.config)
+    env = Env(args)
+    if args.action == "init":
+        histories, series, ids, smap = _inputs(args, env, cfg)
+        study = run_study(histories, series, cfg, env.now, ids, env.labels, smap)
+        leaders = select(study, _rules(args))
+        state = {"start": env.now, "capital": args.capital, "chain_id": args.chain_id,
+                 "leaders": [{"label": p.label, "members": p.members, "weight": p.weight, "stats": p.stats}
+                             for p in leaders]}
+        os.makedirs(os.path.dirname(args.paper) or ".", exist_ok=True)
+        with open(args.paper, "w") as fh:
+            json.dump(state, fh, indent=2)
+        print(_leader_rows(leaders))
+        print(f"\npaper portfolio of ${args.capital:,.0f} started; state in {args.paper}")
+        return
+    with open(args.paper) as fh:
+        state = json.load(fh)
+    members = sorted({a for p in state["leaders"] for a in p["members"]})
+    histories = [_history(env, a, args) for a in members]
+    series = fetch_series(env.prices, histories, env.now)
+    study = run_study(histories, series, cfg, env.now)
+    leaders = [Leader(p["label"], p["label"], p["members"], p["weight"], p["stats"]) for p in state["leaders"]]
+    start_day = state["start"] - state["start"] % DAY
+    days, rs = portfolio_returns(study, leaders, start_day)
+    eth_days, eth = study.eth
+    eth_after = [x for d, x in zip(eth_days, eth) if d > start_day]
+    nav = state["capital"] * (1 + compound(rs))
+    print(f"PAPER PORTFOLIO since {datetime.fromtimestamp(state['start'], timezone.utc):%Y-%m-%d} "
+          f"({len(rs)} days): ${state['capital']:,.0f} -> ${nav:,.0f} ({pct(compound(rs))}); "
+          f"ETH {pct(compound(eth_after))}")
+    # What to hold now: leaders' latest token weights, blended by allocation.
+    target: dict[str, float] = {}
+    for p in leaders:
+        rs_ = [r for r in study.reports if r.address in p.members]
+        eq = sum(r.result.final_equity for r in rs_) or 1.0
+        for r in rs_:
+            for tok, w in (r.result.weights[-1] if r.result.weights else {}).items():
+                target[tok] = target.get(tok, 0.0) + p.weight * w * r.result.final_equity / eq
+    capped = [t for t, w in target.items() if w > args.max_token_weight]
+    for t in capped:  # leaders crowding into one token is concentration risk: excess stays in cash
+        target[t] = args.max_token_weight
+    syms = {}
+    for r in study.reports:
+        syms.update(r.result.symbols)
+    cash = 1 - sum(target.values())
+    rows = [[syms.get(t, t[:10]), t, f"{w:.1%}", f"${w * nav:,.0f}"] for t, w in sorted(target.items(), key=lambda x: -x[1])
+            if w >= 0.005]
+    rows.append(["cash", "", f"{cash:.1%}", f"${cash * nav:,.0f}"])
+    print("\nTARGET HOLDINGS NOW (leaders' latest positions, blended by allocation"
+          + (f"; capped at {args.max_token_weight:.0%} per token" if capped else "") + ")")
+    print(table(["token", "address", "weight", "value"], rows))
+
+
 def cmd_kb(args) -> None:
     kb = KnowledgeBase(args.kb)
     if args.action == "runs":
@@ -313,6 +411,26 @@ def main(argv: list[str] | None = None) -> None:
     f.add_argument("--migration-usd", type=float, default=50_000)
     f.add_argument("--alerts", default=os.path.expanduser("~/.wallet_tracker/alerts.jsonl"))
     f.set_defaults(fn=cmd_follow)
+
+    strat = argparse.ArgumentParser(add_help=False)
+    strat.add_argument("--addresses", nargs="*", help="addresses, comma lists, or files of addresses")
+    strat.add_argument("--min-dsr", type=float, default=0.8, help="luck-test confidence a leader needs")
+    strat.add_argument("--min-copy-sharpe", type=float, default=1.0)
+    strat.add_argument("--require-identity", action="store_true", help="only entities with an attested identity")
+    strat.add_argument("--max-leaders", type=int, default=8)
+    strat.add_argument("--max-weight", type=float, default=0.25)
+    strat.add_argument("--cash-buffer", type=float, default=0.10)
+
+    b = sub.add_parser("backtest", parents=[common, strat], help="walk-forward test of the copy strategy")
+    b.add_argument("--holdout-days", type=int, default=90)
+    b.set_defaults(fn=cmd_backtest)
+
+    pp = sub.add_parser("paper", parents=[common, strat], help="paper-trade the copy strategy forward")
+    pp.add_argument("action", choices=["init", "update"])
+    pp.add_argument("--capital", type=float, default=10_000)
+    pp.add_argument("--max-token-weight", type=float, default=0.20, help="cap on any one token in target holdings")
+    pp.add_argument("--paper", default=os.path.expanduser("~/.wallet_tracker/paper.json"))
+    pp.set_defaults(fn=cmd_paper)
 
     k = sub.add_parser("kb", help="query the knowledge base")
     k.add_argument("action", choices=["runs", "top", "wallet", "flows", "movers"])
