@@ -37,6 +37,7 @@ class WalletReport:
     identity: object = None
     reputation: object = None
     cluster_id: int = 0
+    sectors: dict = field(default_factory=dict)   # {"average": {...}, "latest": {...}}
     history: WalletHistory | None = field(default=None, repr=False)
 
     @property

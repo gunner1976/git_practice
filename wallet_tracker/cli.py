@@ -26,6 +26,7 @@ from .identity import load_file as load_identities
 from .identity import resolve
 from .models import DAY, WalletClass
 from .pipeline import run_study
+from .sectors import SectorMap
 from .report import num, pct, rolling, short, study_text, table, to_json, wallet_text
 
 
@@ -93,7 +94,14 @@ def _study(addresses: list[str], env: Env, cfg: Config, args):
     if getattr(args, "ens", False) or getattr(args, "farcaster", False):
         print("  resolving identities…", file=sys.stderr)
     ids = resolve(addrs, file_ids, ens=getattr(args, "ens", False), farcaster=getattr(args, "farcaster", False))
-    return run_study(histories, series, cfg, env.now, ids, env.labels)
+    extra = {}
+    if getattr(args, "sectors", None):
+        with open(args.sectors) as fh:
+            extra = json.load(fh)
+    if env.world is not None:
+        extra = {**env.world.sector_map, **extra}
+    smap = SectorMap(extra, online=getattr(args, "sectors_online", False))
+    return run_study(histories, series, cfg, env.now, ids, env.labels, smap)
 
 
 def cmd_rank(args) -> None:
@@ -150,7 +158,8 @@ def cmd_follow(args) -> None:
         print(f"following {len(args.wallets)} wallet(s); state in {wl.path}")
     elif args.action == "poll":
         while True:
-            for al in poll(wl, env.provider, env.prices, args.alerts, args.min_usd, args.swaps_only):
+            for al in poll(wl, env.provider, env.prices, args.alerts, args.min_usd, args.swaps_only,
+                           args.follow_migrations, args.migration_usd):
                 when = datetime.fromtimestamp(al["time"], timezone.utc).strftime("%Y-%m-%d %H:%M")
                 tag = f" [{al['note']}]" if al["note"] else ""
                 print(f"{when}  {short(al['wallet'])}{tag}  {al['text']}")
@@ -194,6 +203,9 @@ def main(argv: list[str] | None = None) -> None:
     common.add_argument("--state", default=DEFAULT_STATE, help="watchlist file")
     common.add_argument("--identities", help="JSON {address: {name, kind, source, url}} of public attributions")
     common.add_argument("--ens", action="store_true", help="look up self-published ENS names")
+    common.add_argument("--sectors", help="JSON {token_address: sector} to extend the built-in taxonomy")
+    common.add_argument("--sectors-online", action="store_true",
+                        help="tag unknown tokens from CoinGecko categories (slow: public rate limit)")
     common.add_argument("--farcaster", action="store_true", help="look up Farcaster verified addresses "
                                                                   "(needs NEYNAR_API_KEY)")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -222,6 +234,9 @@ def main(argv: list[str] | None = None) -> None:
     f.add_argument("--interval", type=int, default=300)
     f.add_argument("--min-usd", type=float, default=0)
     f.add_argument("--swaps-only", action="store_true")
+    f.add_argument("--follow-migrations", action="store_true",
+                   help="auto-follow the destination of a large outflow to an unlabelled address")
+    f.add_argument("--migration-usd", type=float, default=50_000)
     f.add_argument("--alerts", default=os.path.expanduser("~/.wallet_tracker/alerts.jsonl"))
     f.set_defaults(fn=cmd_follow)
 

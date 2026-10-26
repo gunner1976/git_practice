@@ -15,7 +15,10 @@ from .models import WalletClass, WalletHistory
 from .operator_type import GROUPS, group
 from .ranking import Leaderboards, build
 from .regimes import REGIMES, MarketRegimes
+from .migration import Migration, detect as detect_migrations, universe_stats
+from .prices import PriceBook
 from .reputation import assess, first_funder
+from .sectors import SectorMap, exposure, flows
 
 BUY_HOLD_ROW = "buy-and-hold (reference)"
 TRADER_CLASSES = {WalletClass.ACTIVE, WalletClass.BOT, WalletClass.DORMANT}
@@ -35,6 +38,29 @@ class Study:
     # group -> (days, equal-weight copy-basket daily returns)
     baskets: dict[str, tuple[list[int], list[float]]] = field(default_factory=dict)
     eth: tuple[list[int], list[float]] = field(default_factory=lambda: ([], []))
+    migrations: list[Migration] = field(default_factory=list)
+    migration_stats: dict[str, float] = field(default_factory=dict)
+    entities: list["Entity"] = field(default_factory=list)
+    # month -> sector -> net USD bought, for "smart money" and for all traders
+    flows_smart: dict[str, dict[str, float]] = field(default_factory=dict)
+    flows_all: dict[str, dict[str, float]] = field(default_factory=dict)
+
+
+@dataclass
+class Entity:
+    """A cluster of linked wallets, or a single unlinked wallet."""
+    id: str
+    label: str
+    members: list[str]
+    aum_usd: float
+    sectors: dict[str, float]          # latest value-weighted sector mix
+    sectors_avg: dict[str, float]      # time-weighted mix over the record
+    group: str
+    reputation: float
+    tier: str
+    cagr: float
+    sharpe: float
+    smart: bool
 
 
 def _quarter(day: int) -> str:
@@ -42,16 +68,26 @@ def _quarter(day: int) -> str:
     return f"{dt.year}-Q{(dt.month - 1) // 3 + 1}"
 
 
+def is_smart(r: WalletReport) -> bool:
+    """Eligible and either luck-tested or reputable: the cohort whose flows we follow."""
+    return r.eligible and (bool(r.metrics.get("significant")) or
+                           (r.reputation is not None and r.reputation.tier in ("A", "B")))
+
+
 def run_study(histories: list[WalletHistory], series: dict[str, dict[int, float]], cfg: Config, now: int,
-              identities: dict[str, Identity] | None = None, exchanges: dict[str, str] | None = None) -> Study:
+              identities: dict[str, Identity] | None = None, exchanges: dict[str, str] | None = None,
+              sector_map: SectorMap | None = None) -> Study:
     regimes = MarketRegimes(series.get("eth", {}))
     reports = [analyze_wallet(h, series, cfg, now, regimes) for h in histories]
     boards = build(reports, cfg)
 
     hist_by = {h.address: h for h in histories}
     funders = {r.address: first_funder(r.history, r.events) for r in reports}
-    clusters = find_clusters([r for r in reports if r.wallet_class in TRADER_CLASSES | {WalletClass.BUY_HOLD}],
-                             hist_by, funders)
+    traders = [r for r in reports if r.wallet_class in TRADER_CLASSES | {WalletClass.BUY_HOLD}]
+    migrations = detect_migrations(traders, series, exchanges)
+    clusters = find_clusters(traders, hist_by, funders,
+                             [(m.source, m.destination, "verified migration (whole book handed over)")
+                              for m in migrations if m.verified])
     size = {}
     for c in clusters:
         for a in c.members:
@@ -80,7 +116,9 @@ def run_study(histories: list[WalletHistory], series: dict[str, dict[int, float]
             r.rank = i
 
     study = Study(reports, boards, clusters, regimes)
+    study.migrations, study.migration_stats = migrations, universe_stats(migrations, traders)
     _matrices(study)
+    _capital_map(study, sector_map or SectorMap(), PriceBook(series))
     eth = series.get("eth", {})
     days = sorted(d for d in eth if d >= min((r.result.days[0] for r in reports if r.result.days), default=now))
     study.eth = (days, [eth[d] / eth[p] - 1 if p in eth else 0.0 for p, d in zip([days[0]] + days, days)])
@@ -128,3 +166,51 @@ def _matrices(study: Study) -> None:
             "significant": sum(bool(r.metrics.get("significant")) for r in members),
         }
         study.baskets[g] = combine(members, copy=True)
+
+
+def _capital_map(study: Study, smap: SectorMap, book: PriceBook) -> None:
+    """Sector exposure per wallet and entity, and sector flows by month."""
+    by_addr = {r.address: r for r in study.reports}
+    for r in study.reports:
+        r.sectors = exposure(r, smap)
+
+    def add(dst, src):
+        for month, secs in src.items():
+            for sec, usd in secs.items():
+                dst.setdefault(month, {}).setdefault(sec, 0.0)
+                dst[month][sec] += usd
+
+    for r in study.reports:
+        if r.wallet_class not in TRADER_CLASSES:
+            continue
+        f = flows(r, smap, book.price)
+        add(study.flows_all, f)
+        if is_smart(r):
+            add(study.flows_smart, f)
+
+    groups = [(f"cluster-{c.id}", c.members) for c in study.clusters]
+    clustered = {a for c in study.clusters for a in c.members}
+    groups += [(r.address, [r.address]) for r in study.reports
+               if r.address not in clustered and r.wallet_class in TRADER_CLASSES]
+    for eid, members in groups:
+        rs = [by_addr[a] for a in members]
+        aum = sum(r.result.final_equity for r in rs)
+        latest: dict[str, float] = {}
+        avg: dict[str, float] = {}
+        for r in rs:
+            w = r.result.final_equity / aum if aum else 1 / len(rs)
+            for k, v in r.sectors["latest"].items():
+                latest[k] = latest.get(k, 0.0) + w * v
+            for k, v in r.sectors["average"].items():
+                avg[k] = avg.get(k, 0.0) + v / len(rs)
+        named = next((r.identity.name for r in rs if r.identity is not None and r.identity.name), "")
+        label = named or (f"Cluster {eid.split('-')[1]}" if eid.startswith("cluster") else eid[:6] + "…" + eid[-4:])
+        best = max(rs, key=lambda r: r.reputation.score)
+        cl = next((c for c in study.clusters if f"cluster-{c.id}" == eid), None)
+        stats = cl.stats if cl else best.metrics
+        groups_seen = [r.group for r in rs]
+        study.entities.append(Entity(
+            eid, label, members, aum, latest, avg, max(set(groups_seen), key=groups_seen.count),
+            best.reputation.score, best.reputation.tier, stats["cagr"], stats["sharpe"],
+            any(is_smart(r) for r in rs)))
+    study.entities.sort(key=lambda e: (e.smart, e.reputation), reverse=True)

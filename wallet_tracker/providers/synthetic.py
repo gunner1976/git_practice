@@ -42,6 +42,10 @@ class SyntheticWorld:
         self._make_prices()
         self.histories: dict[str, WalletHistory] = {}
         self.truth: dict[str, dict] = {}            # ground truth, for tests and the demo
+        self._state: dict[str, tuple[str, float]] = {}
+        sectors = ["DeFi", "DeFi", "AI", "AI", "Memes", "Infrastructure",
+                   "RWA & tokenized treasuries", "Gaming & NFT"]
+        self.sector_map = {t: sectors[i % len(sectors)] for i, t in enumerate(self.tokens)}
         self.identities: dict[str, Identity] = {}   # fictional attestations
         self._counter = 0
         self._build_population()
@@ -145,7 +149,31 @@ class SyntheticWorld:
                 self._deposit(out, d, USDC, capital * 0.2, funder)
         self.histories[a] = WalletHistory(a, out)
         self.truth[a] = {"skill": skill, "style": style}
+        self._state[a] = (cur, bal)
         return a
+
+    def migrator(self, skill: float, capital: float) -> tuple[str, str]:
+        """A trader that hands its whole book to a fresh wallet half way through."""
+        m = len(self.days) // 2
+        plan = self._plan(skill, 0, len(self.days) - 1, "human")
+        ts_plan = [self._ts_for(self.days[i], "human", 2) for i, _ in plan]
+        old = self.trader(skill, capital, stop_day=m, plan=[p for p in plan if p[0] < m],
+                          ts_plan=[t for p, t in zip(plan, ts_plan) if p[0] < m])
+        cur, bal = self._state[old]
+        d = self.days[m]
+        out = self.histories[old].transfers
+        if cur != USDC:
+            bal = self._swap(out, d + 3600, cur, bal, USDC, d)
+        new_addr = addr(0xB000 + len(self.histories))
+        h, ts = self._tx(), d + 7200
+        out.append(Transfer(h, ts, block_at(ts), USDC, "USDC", -bal, new_addr))
+        later = [(i, t) for i, t in plan if i > m]
+        new = self.trader(skill, bal, start_day=m, funder=old, plan=later,
+                          ts_plan=[t for p, t in zip(plan, ts_plan) if p[0] > m])
+        assert new == new_addr
+        self.truth[old]["migrated_to"] = new
+        self.truth[new]["migrated_from"] = old
+        return old, new
 
     def cluster(self, n: int, skill: float) -> list[str]:
         """One operator running several wallets: common funder, shared trade plan."""
@@ -213,6 +241,7 @@ class SyntheticWorld:
         agents = [self.trader(skill(), rng.uniform(50_000, 400_000), style="agent") for _ in range(4)]
         agents += [self.trader(0.0, rng.uniform(20_000, 300_000), style="agent") for _ in range(4)]
         self.cluster(3, 0.22)
+        self.migrator(0.25, 120_000)
         for _ in range(6):
             self.holder(capital=rng.uniform(20_000, 500_000))
         self.trader(0.15, 150_000, stop_day=len(self.days) - 120)        # dormant

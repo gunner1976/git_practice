@@ -189,6 +189,41 @@ funded only a few of the screened wallets, or when they repeatedly buy the same
 token within the same hour. Each cluster reports value-weighted combined
 performance and an equal-weight copy basket.
 
+### Capital map: entities, sectors and flows
+
+Linked wallets roll up into **entities** (a cluster, or one unlinked
+wallet). Each entity reports AUM, operator group, best reputation, and its
+**sector mix**: time-weighted from daily portfolio weights, and the latest one.
+
+Tokens are tagged into sectors (`sectors.py`): ETH & staking, Bitcoin, DeFi,
+Infrastructure, AI, Memes, Gaming & NFT, **RWA & tokenized treasuries**
+(BUIDL, USDY, OUSG, ONDO, … so TradFi capital arriving on-chain is its own
+line), Stablecoins and Other. Tagging comes from a curated map, your own
+`--sectors file.json`, and optionally CoinGecko categories (`--sectors-online`,
+cached 30 days, slow on the public rate limit).
+
+**Smart-money flows** are net USD bought minus sold per sector per month,
+from swaps only (funding moves never count), summed over the "smart" cohort:
+eligible wallets that pass the luck test or have reputation tier A/B. The same
+flows for all traders are kept for comparison.
+
+### Wallet migrations
+
+Do good traders hide their record by moving to new wallets? `migration.py`
+measures it. A migration is one withdrawal of at least half a wallet's value
+to an unlabelled address, after which the wallet stops trading. If the
+destination is a screened wallet that started around then, it is a
+**verified successor**: the two are linked as one entity and their records
+are stitched into one continuous track record. The universe migration rate is
+reported, so the "most don't bother" assumption is checked against data.
+
+Following: `follow poll --follow-migrations` flags any outflow ≥
+`--migration-usd` (default $50k) to an unlabelled address as a possible
+migration and adds the destination to the watchlist, so a followed trader
+isn't lost when they switch wallets. Exchange deposit addresses are unique per
+customer and unlabelled, so some flagged destinations will be exchanges.
+Check before acting on them.
+
 ### Tuning
 
 Pass `--config my.json` to override any threshold or weight, e.g.

@@ -7,9 +7,10 @@ import os
 import time
 from dataclasses import dataclass, field
 
+from .labels import EXCHANGES, MIXERS
 from .models import DAY, EventKind
 from .prices import PriceBook
-from .reconstruct import build_events
+from .reconstruct import GAS, build_events
 
 DEFAULT_STATE = os.path.expanduser("~/.wallet_tracker/watchlist.json")
 
@@ -65,27 +66,48 @@ def describe(ev, book: PriceBook) -> tuple[str, float]:
 
 
 def poll(watch: Watchlist, provider, price_source, alerts_path: str | None = None,
-         min_usd: float = 0.0, swaps_only: bool = False) -> list[dict]:
-    """Fetch activity since each wallet's last seen block; return new alerts."""
+         min_usd: float = 0.0, swaps_only: bool = False, follow_migrations: bool = False,
+         migration_usd: float = 50_000.0) -> list[dict]:
+    """Fetch activity since each wallet's last seen block; return new alerts.
+
+    A large outflow to an unlabelled address is flagged as a possible
+    migration; with `follow_migrations` the destination is added to the
+    watchlist so a followed trader isn't lost when they switch wallets."""
     alerts: list[dict] = []
+    successors: list[tuple[str, int, str]] = []
     head = provider.latest_block()
-    for address, st in watch.wallets.items():
+    for address, st in list(watch.wallets.items()):
         hist = provider.history(address, st["last_block"] + 1, check_contract=False)
         events = [e for e in build_events(hist.transfers) if e.kind is not EventKind.FEE]
         if swaps_only:
-            events = [e for e in events if e.kind is EventKind.SWAP]
+            events = [e for e in events if e.kind in (EventKind.SWAP, EventKind.WITHDRAWAL)]
         if events:
             tokens = {t for e in events for t in e.legs} | {"eth"}
             series = price_source.daily_prices(tokens, events[0].timestamp - DAY, events[-1].timestamp)
             book = PriceBook(series)
             for e in events:
                 text, usd = describe(e, book)
-                if usd < min_usd:
+                kind = e.kind.value
+                if e.kind is EventKind.WITHDRAWAL and usd >= migration_usd:
+                    dest = max((t for t in hist.transfers if t.tx_hash == e.tx_hash and t.amount < 0
+                                and t.counterparty not in ("", GAS)),
+                               key=lambda t: -t.amount * (book.price(t.token, t.timestamp) or 0), default=None)
+                    if dest and dest.counterparty not in EXCHANGES and dest.counterparty not in MIXERS:
+                        kind = "possible_migration"
+                        text += f"  ->  {dest.counterparty}"
+                        if follow_migrations and dest.counterparty not in watch.wallets:
+                            successors.append((dest.counterparty, e.block - 1, address))
+                            text += "  (now following)"
+                elif swaps_only and e.kind is EventKind.WITHDRAWAL:
+                    continue
+                if usd < min_usd and kind != "possible_migration":
                     continue
                 alerts.append({"wallet": address, "note": st.get("note", ""), "time": e.timestamp,
-                               "block": e.block, "tx": e.tx_hash, "kind": e.kind.value,
+                               "block": e.block, "tx": e.tx_hash, "kind": kind,
                                "usd": round(usd, 2), "text": text})
         st["last_block"] = max([head] + [e.block for e in events])
+    for dest, block, src in successors:
+        watch.add(dest, block, note=f"possible successor of {src[:8]}…")
     watch.save()
     if alerts_path and alerts:
         os.makedirs(os.path.dirname(alerts_path) or ".", exist_ok=True)

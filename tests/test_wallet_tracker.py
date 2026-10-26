@@ -14,6 +14,7 @@ from wallet_tracker.providers.synthetic import USDC, SyntheticWorld
 from wallet_tracker.html_report import render_html
 from wallet_tracker.identity import load_file as load_identities
 from wallet_tracker.pipeline import run_study
+from wallet_tracker.sectors import SectorMap, flows
 from wallet_tracker.regimes import REGIMES, MarketRegimes, regime_matrix, robustness
 from wallet_tracker.reconstruct import GAS, build_events
 
@@ -105,7 +106,7 @@ class PipelineTest(unittest.TestCase):
         cls.now = cls.world.end + DAY - 1
         cls.cfg = Config()
         cls.study = run_study([cls.world.history(a) for a in cls.world.addresses()], cls.world.prices,
-                              cls.cfg, cls.now, cls.world.identities)
+                              cls.cfg, cls.now, cls.world.identities, sector_map=SectorMap(cls.world.sector_map))
         cls.reports = {r.address: r for r in cls.study.reports}
         cls.lb = cls.study.boards
         cls.truth = cls.world.truth
@@ -116,7 +117,8 @@ class PipelineTest(unittest.TestCase):
         self.assertEqual(classes.count(WalletClass.BOT), 1)
         self.assertEqual(classes.count(WalletClass.EXCHANGE), 1)
         self.assertEqual(classes.count(WalletClass.CONTRACT), 1)
-        self.assertEqual(classes.count(WalletClass.DORMANT), 1)
+        migrated = sum("migrated_to" in t for t in self.truth.values())
+        self.assertEqual(classes.count(WalletClass.DORMANT), 1 + migrated)   # predecessors stop trading
 
     def test_luck_test_only_passes_skilled_wallets(self):
         significant = [r for r in self.lb.active if r.metrics["significant"]]
@@ -132,7 +134,8 @@ class PipelineTest(unittest.TestCase):
             if style == "agent":
                 self.assertLess(score, 0.4, r.address)
             elif style == "human":
-                self.assertGreater(score, 0.6, r.address)
+                # Short records are shrunk toward 0.5; confident ones must clear 0.6.
+                self.assertGreater(score, 0.6 if r.operator["human_confidence"] >= 0.9 else 0.5, r.address)
         declared = [r for r in self.reports.values() if r.group == "AI agent (declared)"]
         self.assertEqual(len(declared), 3)
         bot = next(r for r in self.reports.values() if r.wallet_class is WalletClass.BOT)
@@ -141,13 +144,52 @@ class PipelineTest(unittest.TestCase):
 
     def test_cluster_recovered(self):
         expected = {a for a, t in self.truth.items() if "cluster" in t}
-        self.assertEqual(len(self.study.clusters), 1)
-        cl = self.study.clusters[0]
+        cl = next(c for c in self.study.clusters if expected & set(c.members))
         self.assertEqual(set(cl.members), expected)
         kinds = " ".join(cl.evidence)
         for k in ("direct transfer", "common first funder", "co-trading"):
             self.assertIn(k, kinds)
         self.assertLess(cl.stats["copy_sharpe"], cl.stats["sharpe"])
+
+    def test_migration_verified_and_stitched(self):
+        old = next(a for a, t in self.truth.items() if "migrated_to" in t)
+        new = self.truth[old]["migrated_to"]
+        found = [m for m in self.study.migrations if m.source == old]
+        self.assertEqual(len(found), 1)
+        m = found[0]
+        self.assertEqual(m.destination, new)
+        self.assertTrue(m.verified)
+        self.assertGreater(m.stitched["days"], 500)
+        # Successor and predecessor become one entity.
+        self.assertTrue(any({old, new} <= set(c.members) for c in self.study.clusters))
+        # Nobody else is flagged as migrating.
+        self.assertEqual(self.study.migration_stats["migrations"], 1)
+
+    def test_capital_map(self):
+        ents = self.study.entities
+        self.assertTrue(any(e.smart for e in ents))
+        for e in ents:
+            self.assertAlmostEqual(sum(e.sectors_avg.values()), 1.0, delta=0.05)
+        self.assertTrue(self.study.flows_smart)
+        sectors = {k for m in self.study.flows_all.values() for k in m}
+        self.assertIn("RWA & tokenized treasuries", sectors)
+        self.assertNotIn("Other", sectors)
+        # Flows come from swaps only: a wallet that only moves funds in and out has none.
+        exch = next(r for r in self.study.reports if r.wallet_class is WalletClass.EXCHANGE)
+        self.assertEqual(flows(exch, SectorMap(self.world.sector_map), lambda t, ts: 1.0), {})
+
+    def test_follow_picks_up_successor(self):
+        old = next(a for a, t in self.truth.items() if "migrated_to" in t)
+        new = self.truth[old]["migrated_to"]
+        hand_over = next(t.block for t in self.world.histories[old].transfers if t.counterparty == new)
+        with tempfile.TemporaryDirectory() as d:
+            wl = Watchlist(os.path.join(d, "wl.json"))
+            wl.add(old, hand_over - 10)
+            alerts = poll(wl, self.world, self.world, follow_migrations=True)
+            self.assertTrue(any(a["kind"] == "possible_migration" for a in alerts))
+            self.assertIn(new, wl.wallets)
+            later = poll(wl, self.world, self.world)
+            self.assertTrue(any(a["wallet"] == new for a in later))
 
     def test_reputation_flags(self):
         flagged = {r.address: r.reputation for r in self.reports.values() if r.reputation.flags}
@@ -165,7 +207,8 @@ class PipelineTest(unittest.TestCase):
         self.assertTrue(self.study.operator_quarter["human (behavioural)"])
         page = render_html(self.study, demo=True)
         for needle in ("Wallet Edge Report", "Copy-trade performance by operator", "Cluster 1",
-                       "Human vs automated", "Regime risk matrix"):
+                       "Human vs automated", "Regime risk matrix", "Capital map", "Where smart money",
+                       "Wallet migrations"):
             self.assertIn(needle, page)
         self.assertNotIn("nan", page.replace("Synthetic", ""))
 

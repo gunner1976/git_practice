@@ -109,9 +109,33 @@ def study_text(study, top: int = 20) -> str:
                                    if r.regimes.get(c, {}).get("days", 0) >= 10 else "") for c in cols]
             for r in study.boards.active[:min(top, 10)]]
     out.append(table(["wallet"] + cols, rows))
-    days = {c: study.regimes and sum(1 for v in study.regimes.labels.values() if v == c) for c in REGIMES}
+    days = {c: sum(1 for v in study.regimes.labels.values() if v == c) for c in REGIMES}
     out.append("  market days per regime: " + ", ".join(f"{c} {n}" for c, n in days.items())
                + f", stress {len(study.regimes.stress)}")
+
+    out.append("\nCAPITAL MAP: ENTITIES (smart money first; sector mix = time-weighted over the record)")
+    rows = []
+    for e in study.entities[:top]:
+        mix = ", ".join(f"{k} {v:.0%}" for k, v in sorted(e.sectors_avg.items(), key=lambda x: -x[1])[:3] if v >= 0.05)
+        rows.append([e.label, str(len(e.members)), f"${e.aum_usd:,.0f}", e.group, f"{e.tier} {e.reputation:.0f}",
+                     "yes" if e.smart else "", pct(e.cagr), mix])
+    out.append(table(["entity", "wallets", "AUM", "operator", "rep", "smart", "CAGR", "top sectors"], rows))
+
+    months = sorted(study.flows_smart)[-6:]
+    sectors = sorted({s for m in months for s in study.flows_smart[m]})
+    out.append("\nSMART-MONEY NET FLOWS BY SECTOR (USD bought minus sold via swaps, last 6 months)")
+    rows = [[sec] + [f"{study.flows_smart[m].get(sec, 0) / 1e6:+.1f}M" for m in months] for sec in sectors]
+    out.append(table(["sector"] + months, rows) if rows else "  no smart-money swaps")
+
+    ms = study.migration_stats
+    out.append(f"\nWALLET MIGRATIONS: {ms.get('migrations', 0)} of {ms.get('wallets', 0)} trading wallets "
+               f"({ms.get('rate', 0):.1%}) handed their book to another address; {ms.get('verified', 0)} verified")
+    for m in study.migrations:
+        line = f"  {short(m.source)} -> {short(m.destination)}  {m.share:.0%} of value (${m.usd:,.0f})  " \
+               f"{'verified successor' if m.verified else 'destination not screened'}"
+        if m.stitched:
+            line += f"  | stitched record CAGR {pct(m.stitched['cagr'])} Sharpe {num(m.stitched['sharpe'])}"
+        out.append(line)
     return "\n".join(out)
 
 

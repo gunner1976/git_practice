@@ -6,7 +6,9 @@ Links between screened wallets, each with its evidence:
 * funder     - both were first funded by the same address, and that address
                is not an exchange and funded only a few of the screened wallets;
 * co-trading - repeatedly bought the same token within the same hour
-               (same operator, or one copying the other).
+               (same operator, or one copying the other);
+* migration  - one wallet handed its whole book to a newly started one
+               (see migration.py).
 
 Linked wallets are merged with union-find. A cluster's performance is the
 value-weighted combination of its members; its copy performance is an
@@ -83,7 +85,8 @@ def combine(reports: list, copy: bool) -> tuple[list[int], list[float]]:
     return days, out
 
 
-def find_clusters(reports: list, histories: dict, funders: dict[str, str]) -> list[Cluster]:
+def find_clusters(reports: list, histories: dict, funders: dict[str, str],
+                  extra_links: list[tuple[str, str, str]] = ()) -> list[Cluster]:
     addrs = [r.address for r in reports]
     aset = set(addrs)
     uf = _UF(addrs)
@@ -94,6 +97,9 @@ def find_clusters(reports: list, histories: dict, funders: dict[str, str]) -> li
             uf.union(a, b)
             why.setdefault(tuple(sorted((a, b))), reason)
 
+    for a, b, reason in extra_links:
+        if a in aset and b in aset:
+            link(a, b, reason)
     for a in addrs:
         for t in histories[a].transfers:
             if t.counterparty in aset and t.counterparty != a and t.counterparty != GAS:

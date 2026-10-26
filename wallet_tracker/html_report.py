@@ -160,6 +160,92 @@ def scale_for(values: list[float]) -> float:
     return max(vals[int(0.9 * (len(vals) - 1))], 1e-6)
 
 
+# ---------------------------------------------------------------- capital map
+def money(x: float) -> str:
+    a = abs(x)
+    if a < 500:
+        return "$0"
+    s = f"{a / 1e9:.1f}B" if a >= 1e9 else f"{a / 1e6:.1f}M" if a >= 1e6 else f"{a / 1e3:.0f}k"
+    return ("+" if x >= 0 else "−") + "$" + s
+
+
+def capital_map(study: Study) -> str:
+    ents = study.entities[:15]
+    totals: dict[str, float] = {}
+    for e in study.entities:
+        for k, v in e.sectors_avg.items():
+            totals[k] = totals.get(k, 0.0) + v * e.aum_usd
+    top = [k for k, _ in sorted(totals.items(), key=lambda x: -x[1]) if k != "Other"][:5]
+    slot = {k: f"s{i + 1}" for i, k in enumerate(top)}
+
+    def bar(mix: dict[str, float]) -> str:
+        segs, other = [], 0.0
+        for k in top:
+            v = mix.get(k, 0.0)
+            if v > 0.005:
+                segs.append(f'<span class="seg {slot[k]}" style="flex-grow:{v:.4f}" title="{esc(k)} {v:.0%}"></span>')
+        other = max(0.0, 1 - sum(mix.get(k, 0.0) for k in top))
+        if other > 0.005:
+            segs.append(f'<span class="seg other" style="flex-grow:{other:.4f}" title="Other {other:.0%}"></span>')
+        return f'<span class="mix" role="img" aria-label="sector mix">{"".join(segs)}</span>'
+
+    rows = []
+    for e in ents:
+        mix_txt = ", ".join(f"{k} {v:.0%}" for k, v in sorted(e.sectors_avg.items(), key=lambda x: -x[1])[:3]
+                            if v >= 0.05)
+        rows.append(f"<tr><td>{esc(e.label)}</td><td>{len(e.members)}</td><td>${e.aum_usd:,.0f}</td>"
+                    f"<td>{esc(e.group)}</td><td><span class='chip tier-{e.tier}'>{e.tier} {e.reputation:.0f}</span></td>"
+                    f"<td>{'<span class=\"chip sig\">smart</span>' if e.smart else '–'}</td><td>{pct(e.cagr)}</td>"
+                    f"<td class='mixcell'>{bar(e.sectors_avg)}</td><td class='mixtxt'>{esc(mix_txt)}</td></tr>")
+    legend_html = legend([(k, slot[k], False) for k in top] + [("Other", "other", False)]).replace(
+        'class="ln ', 'class="ln seg-key ')
+
+    months = sorted(study.flows_smart)[-9:]
+    sectors = sorted({k for m in months for k in study.flows_smart[m]})
+    vals = [study.flows_smart[m].get(k) for m in months for k in sectors]
+    frows = [(k, [study.flows_smart[m].get(k) for m in months],
+              [f"{k} · {m}: smart money net {money(study.flows_smart[m].get(k, 0))}" for m in months])
+             for k in sectors]
+
+    ms = study.migration_stats
+    mig = "".join(
+        f"<li><span class='mono'>{short(m.source)} → {short(m.destination)}</span> moved {m.share:.0%} "
+        f"(${m.usd:,.0f}) on {date(m.timestamp)} · "
+        + ("<strong>verified successor</strong>, stitched record CAGR "
+           f"{pct(m.stitched.get('cagr'))}, Sharpe {m.stitched.get('sharpe', 0):.2f}" if m.verified
+           else "destination not in the screened set") + "</li>"
+        for m in study.migrations) or "<li>No migrations detected.</li>"
+
+    return f"""
+<section>
+  <h2>Capital map: who the money is</h2>
+  <p class="sub">Linked wallets roll up into entities. Sector mix is time-weighted over each record; smart money means eligible
+  and either passing the luck test or reputation tier A/B.</p>
+  {legend_html}
+  <div class="scroll"><table class="data ents">
+    <thead><tr><th scope="col">Entity</th><th scope="col">Wallets</th><th scope="col">AUM</th><th scope="col">Operator</th>
+    <th scope="col">Reputation</th><th scope="col">Cohort</th><th scope="col">CAGR</th><th scope="col">Sector mix</th>
+    <th scope="col">Top sectors</th></tr></thead>
+    <tbody>{"".join(rows)}</tbody></table></div>
+</section>
+
+<section>
+  <h2>Where smart money is deploying</h2>
+  <p class="sub">Net USD bought minus sold through swaps, by sector and month. Deposits and withdrawals are excluded, so this
+  is conviction, not funding.</p>
+  {heat(frows, months, scale_for(vals), fmt=money, row_head="Sector") if frows else '<p class="empty">No smart-money swaps.</p>'}
+</section>
+
+<section>
+  <h2>Wallet migrations</h2>
+  <p class="sub">{ms.get('migrations', 0)} of {ms.get('wallets', 0)} trading wallets ({ms.get('rate', 0):.1%}) handed at least half
+  their value to another address and stopped trading; {ms.get('verified', 0)} went to a wallet we also screen, so the
+  records were stitched into one.</p>
+  <ul class="miglist">{mig}</ul>
+</section>
+"""
+
+
 # ---------------------------------------------------------------- page
 def tier_chip(rep) -> str:
     if rep is None:
@@ -271,6 +357,7 @@ def render_html(study: Study, demo: bool = False, fragment: bool = False) -> str
     span = f"{date(eth_days[0])} to {date(eth_days[-1])}" if eth_days else ""
     tiles = [("Wallets screened", len(study.reports)), ("Eligible active traders", len(lb.active)),
              ("Pass the luck test", m_sig), ("Linked clusters", len(study.clusters)),
+             ("Wallet migrations", study.migration_stats.get("migrations", 0)),
              ("Sharpe expected from luck", f"{lb.luck_sharpe:.2f}")]
     demo_note = ('<p class="note"><strong>Synthetic demo data.</strong> Wallets, prices and identities '
                  '(e.g. demo-trader-1.eth) are generated by the built-in simulator, not real accounts.</p>'
@@ -328,6 +415,8 @@ def render_html(study: Study, demo: bool = False, fragment: bool = False) -> str
   {heat(w_rows, COLS, scale_for(wvals), row_head="Wallet")}
 </section>
 
+{capital_map(study)}
+
 <section>
   <h2>Ranked active traders</h2>
   <p class="sub">Significant = Sharpe beats the best result this many skill-less wallets would show by luck (deflated Sharpe ≥ 95%).
@@ -360,7 +449,7 @@ CSS = """
 :root {
   --bg: #f4f6f8; --surface: #ffffff; --ink: #10161c; --ink-2: #47515c; --muted: #77818c;
   --grid: #e2e6ea; --axis: #c2c9d0; --line: rgba(16,22,28,0.10);
-  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --bench: #77818c;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --bench: #77818c;
   --div-pos: #1c5cab; --div-neg: #c53a39; --div-mid: #eef0f2;
   --good: #0ca30c; --warn: #fab219; --serious: #ec835a; --crit: #d03b3b;
   --f-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
@@ -370,12 +459,12 @@ CSS = """
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #0e1215; --surface: #161b20; --ink: #edf1f4; --ink-2: #b6bfc8; --muted: #8a949e;
   --grid: #252b31; --axis: #39424a; --line: rgba(255,255,255,0.10);
-  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --bench: #8a949e;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --bench: #8a949e;
   --div-pos: #3987e5; --div-neg: #e66767; --div-mid: #262c33; color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #0e1215; --surface: #161b20; --ink: #edf1f4; --ink-2: #b6bfc8; --muted: #8a949e;
   --grid: #252b31; --axis: #39424a; --line: rgba(255,255,255,0.10);
-  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --bench: #8a949e;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --bench: #8a949e;
   --div-pos: #3987e5; --div-neg: #e66767; --div-mid: #262c33; color-scheme: dark; }
 body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--f-body); }
 main { max-width: 1080px; margin: 0 auto; padding-block: 28px 56px;
@@ -443,6 +532,15 @@ table.data { width: 100%; font-size: 13px; background: var(--surface); border: 1
 .tier-C { background: color-mix(in oklab, var(--surface), var(--serious) 24%); }
 .tier-D { background: color-mix(in oklab, var(--surface), var(--crit) 22%); }
 .chip.sig { background: color-mix(in oklab, var(--surface), var(--s1) 18%); font-weight: 500; }
+.mix { display: flex; gap: 2px; width: 180px; height: 10px; }
+.seg { display: block; min-width: 2px; border-radius: 2px; }
+.seg.s1 { background: var(--s1); } .seg.s2 { background: var(--s2); } .seg.s3 { background: var(--s3); }
+.seg.s4 { background: var(--s4); } .seg.s5 { background: var(--s5); } .seg.other { background: var(--axis); }
+.ln.s4 { stroke: var(--s4); } .ln.s5 { stroke: var(--s5); } .ln.other { stroke: var(--axis); }
+.ln.seg-key { stroke-width: 8; stroke-linecap: butt; }
+.ents td:first-child, .ents td:nth-child(4), .ents td.mixtxt { text-align: left; }
+.data td.mixtxt { color: var(--ink-2); font-size: 12px; white-space: normal; min-width: 220px; }
+.miglist { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; }
 .foot { margin: 0; font-size: 12.5px; color: var(--muted); max-width: 80ch; }
 .empty { color: var(--muted); margin: 0; }
 .tip { position: fixed; z-index: 20; pointer-events: none; background: var(--surface); color: var(--ink);
