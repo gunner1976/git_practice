@@ -1,6 +1,8 @@
 """Parse every Tecolutla LAS file on disk and write a catalogue plus per-file curve CSVs.
 
-Inputs : data/raw/petrophysics/LAS/*.las|*.LAS  (plus data/raw/geology/tec10_image_log/*.las)
+Inputs : data/raw/petrophysics/LAS/*.las|*.LAS  (plus data/raw/geology/tec10_image_log/*.las and
+         data/raw/colab_out/las/*.las, the gunzipped Colab copies of files too large for the connector;
+         name map in data/processed/petrophysics/las/colab_las_name_map.csv)
          data/manifest.csv                     (Drive id, sha256 for each file)
          data/processed/wells/casing_strings.csv (KB per well, for reference only)
 Outputs: data/processed/petrophysics/las/las_catalog.csv      one row per file
@@ -25,7 +27,8 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-RAW = [ROOT / "data/raw/petrophysics/LAS", ROOT / "data/raw/geology/tec10_image_log"]
+RAW = [ROOT / "data/raw/petrophysics/LAS", ROOT / "data/raw/geology/tec10_image_log",
+       ROOT / "data/raw/colab_out/las"]  # last, so Colab copies are flagged duplicate_of earlier files
 OUT = ROOT / "data/processed/petrophysics/las"
 MANIFEST = ROOT / "data/manifest.csv"
 CASING = ROOT / "data/processed/wells/casing_strings.csv"

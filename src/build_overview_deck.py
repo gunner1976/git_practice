@@ -135,12 +135,22 @@ two_figs("Regional setting: a small high on the Golden Lane reef rim", [IMG + "r
 two_figs("Structure and well locations", [IMG + "resumen_campo_04_Figura_iii_2_Mapa_estructural_en_profundidad_del_yacimiento.jpeg", "figures/25_el_abra_structure.png"], [3.4, 4.9], [
     "NW-SE elongated culmination on the reef rim; normal faults on both flanks parallel to the axis (PEMEX); no faults between TEC-6 and TEC-9 (Petrel Robertson).",
     "Top El Abra (mSS): TEC-6 2,294; TEC-9 2,296; TEC-2 2,302; TEC-7 2,304; TEC-10 2,310 (2,313 on XRD); TEC-101 2,334; TEC-3 2,373.",
-    "Jan 2019 depth grid (right, 50 m nodes): ties all eight vertical-well tops within ±2 m; southern high ~2,286 at TEC-6/TEC-12, northern culmination 2,284 with no El Abra penetration; the -2,374 lowest-known-oil contour closes around the field.",
+    "Jan 2019 depth grid (right, 50 m nodes): ties all eight vertical-well tops within ±2 m; southern high ~2,286 at TEC-6/TEC-12; the -2,374 lowest-known-oil contour closes around the field. Its northern culmination (2,284) is not supported by the PEMEX PSTM (next slide).",
     "Flank wells TEC-3 (NE), TEC-5 (NW) and TEC-101 found the El Abra low and wet; they define the edges.",
-    "TEC-12 bottom hole: on the southern high, 118 m from TEC-9; grid -2,289 mSS against the -2,296 prognosis."], size=10,
+    "TEC-12 bottom hole: on the southern high, 118 m from TEC-9; grid -2,289, PSTM-based -2,293, prognosis -2,296 mSS."], size=10,
     notes=Q(("How reliable is the depth map?", "PEMEX 3D reprocessed by Earth Signal (PSTM, 2017-18) and DMI (PSDM, 2018), interpreted in Petrel and tied to MH-412. The Jan 2019 grid honours all eight vertical-well tops within 2.1 m (data/processed/seismic/el_abra_grid_ties.csv). The PSDM volume (710 MB) and the Petrel project are on the data room drive but have not been opened by us; the gathers, angle stacks and velocity models are not in the data room (G-55). TEC-10 came in a few metres low against prognosis."),
-              ("What about the northern culmination?", "Mapped at -2,284 mSS with no El Abra penetration. TEC-11 passed about 170 m from it while still building angle, above the mapped El Abra, and its lateral ran down the north-west plunge (G-75). It is a follow-up idea only until the seismic is re-examined."),
-              ("Where is the oil-water contact?", "Not one flat number. Original FWL 2,380 mTVDss (2019 operator deck); PEMEX 1956 oil-salt-water ~2,373 and GLJ lowest known oil 2,374.2, both from the TEC-3 DST (980 m of 24 °API oil and 80 m of salt water); a possible current FWL ~2,316 (2019 deck); 'water at 2,350 m' (2017 plan); wet TEC-2 perforations at 2,331-2,345 mSS. Production history shows coning around producers (slide 8).")))
+              ("What about the northern culmination?", "It is on the Jan 2019 grid at -2,284 mSS but the PEMEX PSTM puts it 20-40 ms (roughly 30-60 m) below TEC-12; it appears to follow the PSDM reflector, which does not track the El Abra top (G-75, G-79). Not a target until re-mapped."),
+              ("Where is the oil-water contact?", "Not one flat number. Original FWL 2,380 mTVDss (2019 operator deck); PEMEX 1956 oil-salt-water ~2,373 and GLJ lowest known oil 2,374.2, both from the TEC-3 DST (980 m of 24 °API oil and 80 m of salt water); a possible current FWL ~2,316 (2019 deck); 'water at 2,350 m' (2017 plan); wet TEC-2 perforations at 2,331-2,345 mSS. Production history shows coning around producers (slide 9).")))
+
+# ============================ 4b. Seismic ============================
+wide_fig("Seismic check: the PEMEX PSTM puts TEC-12 on top of the southern crest", "figures/27_seismic_structure_maps.png", [
+    ("PEMEX PSTM (2011-15 processing, read in full Oct 2026): ", "reef-top time high on TEC-6 / TEC-12 / TEC-9 / TEC-10; TEC-12 earlier than every well except TEC-6; time correlates with the well tops (r = +0.69)."),
+    ("Depth at TEC-12: ", "-2,293 mSS from the crestal wells' velocities (2,928-2,937 m/s; leave-one-out error +-2.5-2.7 m at TEC-6/9/10), between the grid (-2,289) and the prognosis (-2,296): 3 m above TEC-9, 17 m above TEC-10."),
+    ("DMI PSDM (2018): ", "visually sharper but its reef reflectors are highest in the west, opposite to the tops; it images the top of the carbonate package, not the El Abra top (a marl thickens off the crest). The grid's northern high is not supported by the PSTM."),
+], fig_h=3.9, size=10.5,
+    notes=Q(("So which seismic do you trust?", "For structure at the El Abra top, the PEMEX PSTM: it ties the wells and needs only a smooth well-velocity field. The PSDM is not wrong as data, but its strongest reflector is not the El Abra top (docs/20_seismic.md, G-79)."),
+              ("Can the seismic tell you whether the window is reservoir?", "No. Its dominant wavelength is ~67 m; whether El Abra starts at the top of the carbonate package (as at TEC-9) or ~20 m lower (as at TEC-10) is below resolution. That is what TEC-12's logs and test decide."),
+              ("What is still missing?", "The Earth Signal PSTM, DMI gathers, angle stacks and velocity model (G-55). The volumes we read are the DMI PSDM stack and the PEMEX PSTM cuts.")))
 
 # ============================ 5. Rock and fluids ============================
 table("Reservoir rock and fluids", ["Property", "Value", "Basis"], [
@@ -169,7 +179,7 @@ slide("Drive mechanism: a strong bottom-water aquifer", [
     ("Implication for new wells. ", "Low drawdown, completion high in the column, and in-field water disposal."),
 ], fig="figures/05_pressure_depletion.png", fig_w=7.4,
     notes=Q(("How confident is the pressure data?", "18 PEMEX survey forms were OCR'd and checked against IFR's transcription (15 of 16 agree to the last digit), plus the 2018 Tonalli gradient and two IHS build-ups. All corrected to 2,300 mSS at 10.5 kPa/m (docs/05_pressure.md)."),
-              ("Could it be a gas cap and not an aquifer?", "No: pressure maintenance with rising water cut in every well is aquifer behaviour. There was a small gas cap at the crest in 1956 (TEC-2 top test, GOR ~6,500 scf/bbl), which is a separate point for TEC-12 (slide 17).")))
+              ("Could it be a gas cap and not an aquifer?", "No: pressure maintenance with rising water cut in every well is aquifer behaviour. There was a small gas cap at the crest in 1956 (TEC-2 top test, GOR ~6,500 scf/bbl), which is a separate point for TEC-12 (slide 18).")))
 
 # ============================ 7. Production history ============================
 slide("Production history: 1956-2022", [
@@ -200,8 +210,8 @@ table("IFR/Tonalli programme 2018-2019: what was done and what it showed", ["Wel
     ["TEC-10DES (Apr-May 2018)", "New J-shape well from a new pad; modern logs (incl. image log), core at 2,352 m, three zones tested", "Zone A no inflow; zone B weak water inflow. Zone C 2,314-2,318 mSS: 182 bbl/d oil at 39 % WC, ~880 psi FTP; 75.8 kbbl to Dec 2021", "Oil column intact below the last PEMEX intervals; flowing well"],
     ["TEC-2 (2018, 2019)", "Wellhead repair, clean-out (paraffin); 2019 add-perf 2,315-2,316 mSS and plug over wet deep perfs", "2018: 50 bbl/d oil at 90 % WC; 2019: 47 bbl/d at 75 % WC, ~250 psi; 10.0 kbbl since 2018", "Old wells can be restored; water shut-off pays"],
     ["TEC-7 (Jun-Aug 2019)", "Workover, acid; tested 2,305-2,308 mSS", "182 bbl/d water, no oil", "Converted to produced-water disposal (triplex pump, ASEA-authorised)"],
-    ["TEC-11DES (Nov-Dec 2018)", "720 m open-hole horizontal from the TEC-2 pad, aimed at the top of the zone for low drawdown", "Lateral at 2,305-2,331 mSS in tight mudstone; open hole lost; five liner perfs 2,643.5-2,745.5 mMD, 286 bbl/d water", "Execution failure; the concept is untested (slide 12)"],
-    ["Facilities (2019)", "TEC-10 to TEC-2 flowline; separator purchased; in-field disposal", "One battery; water trucking ended Aug 2019", "Field opex down by about two-thirds (slide 13)"],
+    ["TEC-11DES (Nov-Dec 2018)", "720 m open-hole horizontal from the TEC-2 pad, aimed at the top of the zone for low drawdown", "Lateral at 2,305-2,331 mSS in tight mudstone; open hole lost; five liner perfs 2,643.5-2,745.5 mMD, 286 bbl/d water", "Execution failure; the concept is untested (slide 13)"],
+    ["Facilities (2019)", "TEC-10 to TEC-2 flowline; separator purchased; in-field disposal", "One battery; water trucking ended Aug 2019", "Field opex down by about two-thirds (slide 14)"],
 ], colw=[1.9, 3.6, 3.9, 3.0], fs=9.5,
     notes=Q(("Why didn't TEC-10's deeper zones flow?", "Zone A (2,433-2,442 mMD) gave no inflow after acid; the 2018 injectivity test needed 2,120 psi. Zone B (2,394.5-2,413.5 mMD) gave weak water inflow: 16.9 m³ back against 19.6 m³ injected, inconclusive. Both isolated below a bridge plug at 2,382 m. Zone C had 140 ppm H2S."),
               ("What did the programme cost?", "Drilling to rig release: TEC-10 USD 2.04 MM against a 2.92 MM AFE; TEC-11 USD 3.03 MM against 2.25 MM. All-in tax pools: TEC-10 2.96 MM, TEC-11 3.51 MM (4.40 MM in the cost summary; ~0.96 MM of Workstrings invoices of unknown status, G-64), TEC-2 0.86 MM, TEC-7 0.17 MM."),
@@ -276,7 +286,7 @@ slide("Volumes: in place, produced and remaining", [
     ("Produced. ", "1.98 MMbbl to end-2022 (1.72 monthly record + PEMEX wellfile allocations): 18-25 % of OOIP."),
     ("Analogue recovery. ", "45 El Abra fields: reef-rim 3P EUR recovery P90/median/P10 12 / 31 / 40 %; best 53 %."),
     ("Remaining recoverable. ", "0.3-1.6 MMbbl; most likely ~0.9 MMbbl at trend-average recovery."),
-    ("Where it is. ", "Between and above the old producers on the crest, where the aquifer has coned rather than swept (slide 8)."),
+    ("Where it is. ", "Between and above the old producers on the crest, where the aquifer has coned rather than swept (slide 9)."),
     ("Booked. ", "PEMEX 1 Jan 2015: 1P 0.0, 2P 0.0, 3P 0.1 MMbbl. GLJ YE2025 for Kinjal: 348 / 903 / 1,383 kbbl, none producing; TEC-12 EUR 250 / 399 / 578 kbbl."),
     ("The lever is petrophysics. ", "Porosity and net-to-gross, not area, drive the 4 MMbbl OOIP uncertainty; TEC-12's logs measure it directly."),
 ], fig="figures/07_volumetrics.png", fig_w=7.6, size=10.5,
@@ -291,7 +301,7 @@ table("TEC-12: the remaining opportunity is the unswept top of the El Abra on th
     ["TEC-2", "2,300-2,302", "2,303", "1-3 m", "320 kbbl 1972-2016; 10 kbbl 2018-20"],
     ["TEC-7", "2,304", "2,305", "1 m", "267 kbbl; 100 % water 2019"],
     ["TEC-10 (2018)", "2,310 (2,313 XRD)", "2,314", "1-4 m", "oil at 30-60 % cut, 75.8 kbbl"],
-    ["TEC-12 (planned)", "2,296 prognosis; 2,289 grid", "to be chosen on logs", "target: top ~8 m of El Abra", "crest, 118 m from TEC-9, 175 m from TEC-10"],
+    ["TEC-12 (planned)", "2,296 prog.; 2,289 grid; 2,293 PSTM", "to be chosen on logs", "target: top ~8 m of El Abra", "crest, 118 m from TEC-9, 175 m from TEC-10"],
 ], colw=[1.5, 1.4, 1.6, 1.5, 2.2], fs=10, bw=4.0, bullets=[
     "Every well that produced from near its top El Abra (TEC-2, TEC-7) did so 6-10 m lower on structure than the crest.",
     "On the crest, the top 14-27 m of the El Abra was left unperforated by PEMEX: it is the highest, least-drained part of the field. At TEC-9 its top 8 m has SPHI ~15 % and ILD ~8 ohm·m; the 6 m below is tight.",
