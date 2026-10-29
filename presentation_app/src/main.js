@@ -34,7 +34,7 @@ export function makeHistory(D) {
 async function boot() {
   const [D, M] = await Promise.all([fetch(BASE + 'app_data.json').then(r => r.json()), fetch(BASE + 'viewer_meta.json').then(r => r.json())]);
   const field = new Field3D(M, BASE); const hist = makeHistory(D);
-  const narrator = new Narrator();
+  const narrator = new Narrator();   // never throws: a broken browser speech engine leaves the recorded narration working
   narrator.es = await fetch(BASE + 'narration_es.json').then(r => r.ok ? r.json() : {}).catch(() => ({}));
   narrator.loadStudio('audio/', [{ id: 'en-heart', lang: 'en', label: 'Studio · English, female (neural)' }, { id: 'es-claude', lang: 'es', label: 'Studio · Mexican Spanish, male (neural)' }]);
   const ctx = { D, M, field, hist, narrator, fast: false };

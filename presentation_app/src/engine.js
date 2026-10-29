@@ -15,17 +15,20 @@ export function h(tag, attrs = {}, ...kids) {
 // ---------------------------------------------------------------- narrator (Web Speech API, with a timed fallback)
 export class Narrator {
   constructor() {
-    this.synth = window.speechSynthesis || null; this.voice = null; this.rate = 1.0; this.muted = false; this.voices = []; this.all = [];
+    try { this.synth = window.speechSynthesis || null; } catch (e) { this.synth = null; }   // the browser engine is optional: any failure only disables the fallback voices
+    this.voice = null; this.rate = 1.0; this.muted = false; this.voices = []; this.all = [];
     this.lang = 'en'; this.es = {};   // Spanish narration keyed 'slideId#step' (data/narration_es.json)
     this.studio = {}; this.audio = new Audio(); this.audio.preload = 'auto'; this.audio.preservesPitch = true; this._restart = false;
     try { this.lang = localStorage.getItem('tec-lang') === 'es' ? 'es' : 'en'; } catch (e) {}
     this.onSentence = () => {}; this._gen = 0;
     const load = () => {
-      if (!this.synth) return; const all = this.synth.getVoices(); if (!all.length) return;
+      if (!this.synth) return; let all; try { all = Array.from(this.synth.getVoices() || []).filter(v => v && typeof v.lang === 'string'); } catch (e) { this._noSynth(e); return; } if (!all.length) return;
       this.all = all; this._pick(); this.onVoices && this.onVoices(this.voices);
     };
-    if (this.synth) { load(); this.synth.addEventListener?.('voiceschanged', load); setTimeout(load, 600); setTimeout(load, 2000); }
+    if (this.synth) { load(); try { this.synth.addEventListener?.('voiceschanged', load); } catch (e) { this._noSynth(e); } setTimeout(load, 600); setTimeout(load, 2000); }
   }
+  _noSynth(e) { console.warn('Browser speech unavailable; using recorded narration only.', e); this.synth = null; this.all = []; this._pick(); this.onVoices && this.onVoices(this.voices); }
+  _synth(fn) { try { if (this.synth) fn(this.synth); } catch (e) { this._noSynth(e); } }
   // pre-rendered neural narration ("studio" voices): audio/<id>/<slideId>__<step>.mp3, caption timings in audio/<id>.json
   async loadStudio(base, list) {
     await Promise.all(list.map(v => fetch(base + v.id + '.json').then(r => r.ok ? r.json() : null).then(T => { if (T) this.studio[v.id] = { ...v, T }; }).catch(() => {})));
@@ -37,7 +40,7 @@ export class Narrator {
   src(key) { const sv = this.studioVoice(); const [sid, st] = key.split('#'); return `${this.studioBase}${sv.id}/${sid}__${st}.mp3`; }
   prepare(slideId) { const sv = this.studioVoice(); if (!sv || !sv.T[slideId]) return; for (const st of Object.keys(sv.T[slideId])) fetch(this.src(slideId + '#' + st)).catch(() => {}); }   // warm the cache for this slide's steps
   duration(say, key) { const r = this.rows(key); return r ? (r[r.length - 1][1] / this.rate) * 1000 + 300 : this.estimate(this.text(say, key)); }
-  setRate(r) { this.rate = r; this.audio.playbackRate = r; if (this._speaking && this.synth && !this.studioVoice()) { this._restart = true; this.synth.cancel(); } }   // browser voices: re-say the current sentence at the new rate
+  setRate(r) { this.rate = r; this.audio.playbackRate = r; if (this._speaking && this.synth && !this.studioVoice()) { this._restart = true; this._synth(x => x.cancel()); } }   // browser voices: re-say the current sentence at the new rate
   // rank the browser's voices: neural / natural / premium voices first (Edge "Online (Natural)", Safari "Premium", Chrome "Google"), novelty voices last
   _score(v) {
     const n = v.name;
@@ -60,7 +63,7 @@ export class Narrator {
   sentences(text) { return text.replace(/\s+/g, ' ').trim().split(/(?<=[.!?;])\s+(?=[A-Z0-9“"(‘'¿¡ÁÉÍÓÚÑ])/).map(s => s.trim()).filter(Boolean); }
   // sentences joined into utterances of up to ~220 characters: fewer seams between utterances, short enough for Chrome's network voices
   chunks(text) { const out = []; for (const s of this.sentences(text)) { if (out.length && out[out.length - 1].length + s.length < 220) out[out.length - 1] += ' ' + s; else out.push(s); } return out; }
-  cancel() { this._gen++; if (this.synth) this.synth.cancel(); this.audio.pause(); }
+  cancel() { this._gen++; this._synth(x => x.cancel()); try { this.audio.pause(); } catch (e) {} }
   // speak a block (English, or its Spanish version when the toggle is on); captions show the written text, the engine hears the spoken form
   async speak(say, key) {
     const gen = ++this._gen; const rows = this.rows(key);
@@ -69,16 +72,16 @@ export class Narrator {
     for (const s of parts) {
       if (gen !== this._gen) return false;
       this.onSentence(s);
-      if (this.muted || !this.synth || !this.voice) { await this._wait(this.estimate(s), gen); continue; }
+      if (this.muted || !this.synth || !this.voice || this.voice.studio) { await this._wait(this.estimate(s), gen); continue; }
       let ok;
       do {
         this._restart = false; this._speaking = true;
         ok = await new Promise(res => {
-          const u = new SpeechSynthesisUtterance(this.lang === 'es' ? this.sayEs(s) : this.say(s)); u.voice = this.voice; u.lang = this.voice.lang; u.rate = this.rate; u.pitch = 1;
+          let u; try { u = new SpeechSynthesisUtterance(this.lang === 'es' ? this.sayEs(s) : this.say(s)); u.voice = this.voice; u.lang = this.voice.lang; u.rate = this.rate; u.pitch = 1; } catch (e) { this._noSynth(e); return res(true); }
           let done = false; const fin = v => { if (!done) { done = true; clearTimeout(guard); res(v); } };
           u.onend = () => fin(true); u.onerror = () => fin(true);
           const guard = setTimeout(() => fin(true), this.estimate(s) * 2.2 + 4000);   // never hang on a lost 'end' event
-          this.synth.speak(u);
+          try { this.synth.speak(u); } catch (e) { this._noSynth(e); fin(true); }
         });
         this._speaking = false;
       } while (this._restart && gen === this._gen);
