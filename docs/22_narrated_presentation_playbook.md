@@ -76,3 +76,10 @@ The working code is in this repository:
 - `presentation_app/src/engine.js` (narrator: studio audio, browser fallback, rates, captions, player).
 - `presentation_app/src/field3d.js` (labels with leaders, focus mode, target marker, pads).
 - `presentation_app/narration_en.json` and `presentation_app/narration_es.json` (source and translated scripts).
+
+## 7. Safari / iPhone lessons (added 29 Oct 2026)
+
+- **Guard every `speechSynthesis` call.** On an iPhone viewing the public link, the speech API threw during start-up ("undefined is not an object (evaluating 'Object.getPrototypeOf(voice)')"). The narrator now treats the browser engine as optional; any failure only removes the fallback voices.
+- **Never let a cancelled step touch the shared `<audio>` element.** The old loop's late `pause()` aborted the new clip (WebKit reports `AbortError`). Only `cancel()` pauses; a stale loop just returns.
+- **Test in WebKit on Linux:** install Playwright WebKit into its own folder (`PLAYWRIGHT_BROWSERS_PATH=<dir> node <playwright>/cli.js install webkit`) plus the apt libraries it lists (GTK 4, GStreamer GL/bad/good/libav and others). Run with `devices['iPhone 14']` and the landscape variant, and log `play()` and `pause()` calls. The live claude.ai link cannot be opened by an automated browser (bot check), so test a local copy.
+- **Phones:** let control groups wrap, hide text labels and keep icons, and compact the header in short landscape viewports. Recommend landscape or a laptop for the 3-D tab.

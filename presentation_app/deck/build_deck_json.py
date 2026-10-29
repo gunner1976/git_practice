@@ -2,7 +2,7 @@ import json, re, html
 from pathlib import Path
 D=json.load(open('tecdeck/project/deck.json')); secs={v['start']:v['description'] for v in D['sections'].values()}
 out=[]; cur=''
-for sid in D['order']:
+for sid in [x for x in D['order'] if x != 'moved']:   # the 'moved' notice belongs to the retired standalone deck only
     t=Path(f'tecdeck/project/slides/{sid}.html').read_text(); t=re.sub(r'/_blob/([0-9a-f]{32})', r'deck/img/\1.png', t)
     note=''; m=re.search(r'<aside>(.*?)</aside>', t, re.S)
     if m: note=m.group(1).strip(); t=t.replace(m.group(0),'')

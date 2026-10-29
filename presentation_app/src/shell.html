@@ -171,6 +171,16 @@ select { background: var(--panel); color: var(--ink); border: 1px solid var(--li
   #tab-field { flex-direction: column; } #fieldCtl { width: auto; max-height: 42%; border-right: 0; border-bottom: 1px solid var(--line); }
   header .meta { display: none; } #outline { max-width: 160px; } #voice { max-width: 130px; }
 }
+/* phones: controls wrap instead of running off screen; landscape keeps the slide as large as possible */
+@media (max-width: 560px) {
+  .navbar { gap: 6px 8px; padding-block: 6px; } .navbar .grp { flex-wrap: wrap; gap: 6px; } .navbar .sp { display: none; }
+  #mute span, label[for="rate"] > :not(input):not(output) { display: none; } label[for="rate"] { font-size: 0; } #rate { width: 84px; } #rateOut { font-size: 12px; }
+  #outline, #dOutline { max-width: 100%; flex: 1 1 160px; } #voice { max-width: 150px; } #stepDots { display: none; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  header.top { padding-block: 3px; gap: 4px 14px; } .brand { font-size: 16px; } .brand small, header .meta { display: none; } .tabs button { padding: 4px 10px; font-size: 13px; }
+  .navbar { padding-block: 4px; gap: 6px; } .btn { padding: 4px 9px; font-size: 12.5px; } #mute span { display: none; } #stepDots { display: none; } #outline { max-width: 220px; }
+}
 @media (prefers-reduced-motion: reduce) { [data-step] { transition: none; transform: none; } }
 </style>
 

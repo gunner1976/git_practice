@@ -108,11 +108,12 @@ export class Narrator {
     const wall0 = performance.now(), limit = (t1 / Math.max(0.5, this.rate)) * 2000 + 8000;
     while (true) {
       await new Promise(r => setTimeout(r, 50));
-      if (gen !== this._gen) { a.pause(); return false; }
+      if (gen !== this._gen) return false;   // cancelled: cancel() already paused; never touch the player a newer step now owns
       caption(a.currentTime);
       if (a.ended || a.currentTime >= t1 - 0.02 || performance.now() - wall0 > limit) break;
     }
-    a.pause(); this.onSentence(''); return gen === this._gen;
+    if (gen !== this._gen) return false;
+    a.pause(); this.onSentence(''); return true;
   }
   _wait(ms, gen) { return new Promise(r => { const t0 = performance.now(); const tick = () => { if (gen !== this._gen) return r(); if (performance.now() - t0 >= ms) return r(); setTimeout(tick, 60); }; tick(); }); }
   // pronunciation fixes for the speech engine only (captions keep the written form)
