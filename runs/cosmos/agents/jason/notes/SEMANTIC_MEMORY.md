@@ -45,3 +45,4 @@ One section per topic. Within each topic, tag bullets by type when useful:
 - *verified* Even a speed-30 throw at the tower's mid-height did not topple it (block just dropped at its base); pickup needs ≤~2-3 units (7 units failed: PickupFailed:OutOfRange). Throws don't seem to push other blocks much, so toppling towers isn't a fun mechanic.
 - *verified* Can hold only one object at a time (pickup while holding -> PickupFailed:AlreadyHolding). Place reach (~3.7u) is longer than pickup reach (~2.5u).
 - Build site: tower at (-3,-20) (3 blocks + Ring) and second pillar at (-5,-20) (2 blocks). Block_2 was being carried when session ended; remaining loose blocks: 2,3,4,5,6,8,10 and Rock.
+- Build site status: 3x3 wall (x=-3,-4,-5; z=-20; heights 1-3) complete, Ring on top of x=-3 column. Stands stable. Loose blocks: 3, 5, 8 and Rock. Nothing more to discover; island is fully explored.

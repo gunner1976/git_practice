@@ -32,3 +32,4 @@
 - *verified* Throw calibration: direction vector [-4.6,1.5,-2.1] (target 5 away, slight upward) at speed 10 landed the Rock right beside its target. Direction is normalized by aim; speed ~10 reaches ~5 units, so range grows with speed (14 reached ~11). Light rock does not topple the tower.
 - *verified* Throw calibration: direction [-4.6,1.5,-2.1] (target ~5 away, slight upward) at speed 10 landed the Rock right beside the tower; speed 14 earlier reached ~11. Range grows with speed. A light rock does not topple the tower.
 - *verified* Block thrown at speed 13 (direction [-1,0.15,0]) from 8 units away stopped ~1.5 short of the tower and did not topple it; rough rule: flat range ≈ speed/2 to speed*0.8 units. The tower is very stable.
+- *verified* Peak summit (12,4,12) is empty: no buttons or objects. Peak is the plain top of a hill (height ~4). Nothing pressable found anywhere so far; world seems to have no interactive entities besides movable parts.

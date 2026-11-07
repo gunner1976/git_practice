@@ -11,3 +11,5 @@
 {"timestamp":"2026-05-02T05:36:29Z","summary":"Threw the Rock toward the tower; it fell short and left an ImpactBlock debris entity.","detail":"Picked up the Rock from Hill_1 and threw it at the tower from ~15 units away. It landed about 5 units shy, and an ImpactBlock_1 appeared at the landing point."}
 {"timestamp":"2026-05-02T07:06:26Z","summary":"Second Rock throw landed next to the tower.","detail":"Retrieved the Rock and threw it from ~5 units at moderate speed; it landed beside the tower without toppling it."}
 {"timestamp":"2026-05-02T08:42:48Z","summary":"Threw Block_2 at the tower; it fell just short and the tower stayed up.","detail":"Fetched Block_2 and threw it horizontally from 8 units away; it landed near the base. Tower unscathed."}
+{"timestamp": "2026-05-02T09:08:37Z", "summary": "Observed the world: tower still intact, nothing new found."}
+{"timestamp": "2026-05-02T09:59:01Z", "summary": "Climbed Peak summit; nothing there."}

@@ -1,0 +1,8 @@
+{"session":1,"event":"First session: observed island, walked to Block_12, picked it up."}
+{"session":1,"event":"Placed Block_12 at (-5,-17), stacked Block_7 on it. Stacking verified."}
+{"session":1,"event":"Built 4-block tower at (-5,-17): Block_12, 7, 11, 1 (y 1.83 to 4.83). Remaining loose blocks: 2,3,4,5,6,8,9,10."}
+{"session":1,"event":"Carried Ring to the tower at (-5,-17) and placed it on top (y~5.4). Route via waypoints (-8,1,12),(-3,1.5,0) avoids Spire."}
+{"session":1,"event":"Threw Rock from (7,2.4,-10); it landed at (-5.3,1.7,-16.1) next to tower. Ring confirmed stable on top."}
+{"session":1,"event":"Point-blank throw failed to topple tower. Reorganized semantic memory. Started arch beside tower: Block_10 placed at (-8,-17) as pillar 1. Plan: pillar 2 at (-10,-17), lintel on top, using Blocks 2,8,9,6 etc."}
+{"session":1,"event":"Arch attempt: pillars Block_10 (-8,-17) and Block_2 (-10,-17); lintel Block_6 fell through the 1-wide gap to (-9,1.79,-17). Lesson recorded. Tower (Blocks 12,7,11,1 + Ring) at (-5,-17) intact. Loose blocks: 3,4,5,8,9. Next: fix arch by moving a pillar to x=-9.5 or retry lintel offset."}
+{"session":1,"event":"Arch retry: moved Block_2 to x=-9.5, placed Block_6 lintel at -8.75; it settled stacked on Block_2 (not bridging). Gave up on arch for now; try other designs (stairs, walls, pyramid)."}

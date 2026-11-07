@@ -1,0 +1,5 @@
+{"event":"first session: island has hills, 12 Blocks, Ring, Rock. move_to then pickup within ~1 unit works (picked Block_12)."}
+{"event":"built a tower at (-5,-18) from Blocks 12,7,11,1 (4 high). Staging spot (-2,1.2,-19) works for placing."}
+{"event":"carried Ring from (-19,18) back and placed it on top of tower at (-5,-18). Tower complete: 4 blocks, Rock, Ring."}
+{"event":"session end: tower at (-5,-18) stands (4 blocks+Rock+Ring). Lost Block_10 to a speed-10 throw. Calibrated throw range ≈1.13×speed. Was holding Block_2 at (0,-17.5), about to test throwing a block into the tower to see if it topples. Ideas next: knock tower test, build a wall/bridge from remaining blocks, press buttons on other things."}
+{"event":"started staircase beside tower: Block_2 and Block_6 stacked at (-3.9,-17.9) (2 high). Need a 1-high step at ~(-2.9,-17.9) and then jump up chain to test climbing the tower. Blocks left loose: 3,4,5,8,9."}

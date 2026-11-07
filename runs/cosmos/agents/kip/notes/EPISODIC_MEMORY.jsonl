@@ -13,3 +13,4 @@
 {"timestamp":"2026-05-02T05:53:49Z","summary":"Tried to grab the Rock from atop the tower and failed with NoBlock.","detail":"Stood at the top edge and attempted pickup of the Rock, which failed; no throw was possible. World unchanged."}
 {"timestamp":"2026-05-02T06:43:47Z","summary":"Retried the Rock pickup from the tower edge, failed again, and climbed down.","detail":"Second NoBlock failure. Decided to stop fighting it and go back to ground level."}
 {"timestamp":"2026-05-02T08:00:00Z","summary":"Tried to fetch Block_5 via the west edge and fell into water twice.","detail":"Learned the west edge by the tower is ocean. Jumped out both times; Block_5 not retrieved."}
+{"timestamp": "2026-05-02T09:09:43Z", "summary": "Woke at (-20.5,2) holding Block_5 (got it from the west side); placed it down nearby. Tower and stair intact."}
