@@ -6,8 +6,7 @@ Goals each agent declared out of reach, and whether it earned the verdict: did i
 |---|---|---|---|---|---|---|---|---|---|
 | christian | the Spire top | 1 | 3.35 | yes | 6 | yes | 4.19 | 5 | 1.00 |
 | christian | the Spire top | 2 | 5.8 | yes | 7 | yes | never | 3 | 0.25 |
-| christian | the moon | 1 | 2.0 | no | 5 | yes | 12.0 | 123 | 1.00 |
-| christian | the moon | 2 | 13.0 | no | 1 | no | never | 10 | 0.00 |
+| christian | the moon | 1 | 2.0 | no | 5 | yes | never | 134 | 0.00 |
 | christian | the tower | 1 | 6.21 | yes | 7 | no | never | 0 | 0.50 |
 | eric | none closed | | | | | | | | 1.00 |
 | fitch | the tower | 1 | 2.33 | no | 6 | yes | 3.53 | 11 | 1.00 |
@@ -48,12 +47,6 @@ Measured first: > That wouldn't help anyway, since the Spire is only about 5.7 u
 ### christian: the moon (episode 1)
 
 Closed: > Realistically the moon is way too far to reach with blocks, and my tower only gets to about 7 high, which isn't enough.
-
-Reopened: > I'm sticking to my idle policy: no re-testing of the tower, moon or Spire climb unless a new idea comes up.
-
-### christian: the moon (episode 2)
-
-Closed: > The Tower, the Spire and the moon are all still out of reach, so I took no action.
 
 ### christian: the tower (episode 1)
 

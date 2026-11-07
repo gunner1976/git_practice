@@ -49,31 +49,9 @@
    "grounded": false,
    "measured": "",
    "locked_in": true,
-   "reopened": {
-    "at": [
-     12,
-     0
-    ],
-    "quote": "I'm sticking to my idle policy: no re-testing of the tower, moon or Spire climb unless a new idea comes up."
-   },
-   "restated": 123,
-   "approaches": 5,
-   "pending": false
-  },
-  {
-   "topic": "the moon",
-   "episode": 2,
-   "closed": [
-    13,
-    0
-   ],
-   "quote": "The Tower, the Spire and the moon are all still out of reach, so I took no action.",
-   "grounded": false,
-   "measured": "",
-   "locked_in": false,
    "reopened": null,
-   "restated": 10,
-   "approaches": 1,
+   "restated": 134,
+   "approaches": 5,
    "pending": false
   },
   {

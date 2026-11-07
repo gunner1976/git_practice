@@ -35,3 +35,10 @@ def test_closure_grounding_lock_in_and_reopening(tmp_path):
     assert b["grounded"] and b["reopened"]["at"] == [2, 1] and openness(c["bo"]) == 1.0
     assert c["cy"] == [] and openness(c["cy"]) == 1.0
     assert c["di"][0]["pending"] and openness(c["di"]) == 1.0
+
+
+def test_restating_a_no_retry_policy_is_not_reopening(tmp_path):
+    _write(tmp_path, "ada", 1, [_say(1, "The moon is way too far to reach.")])
+    _write(tmp_path, "ada", 2, [_say(1, "I'm sticking to my idle policy: no re-testing of the moon climb unless a new idea comes up.")])
+    (a,) = closures(tmp_path)["ada"]
+    assert a["reopened"] is None

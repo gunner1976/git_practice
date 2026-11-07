@@ -38,7 +38,7 @@ CLOSE = re.compile(
     r"unattainable|hopeless|out of the question|no mechanism)\b", re.I)
 # "I can't reach it there, so I'll knock it over instead" is a change of plan, not a verdict
 PIVOT = re.compile(r"\b(instead|so I'll|I'll try|I will try|another way|a different way|but I (?:can|could))\b", re.I)
-REFUSE = re.compile(r"\b(no new|nothing new|don'?t|do not|won'?t|not going to|without|still (?:stuck|out of reach|unreachable|infeasible))\b", re.I)
+REFUSE = re.compile(r"\b(no new|nothing new|no (?:re-?test\w*|more|further)|sticking to|idle policy|don'?t|do not|won'?t|not going to|without|still (?:stuck|out of reach|unreachable|infeasible))\b", re.I)
 REOPEN = re.compile(r"\b(try|tried|test|idea|what if|maybe|perhaps|could|measure|estimate|calculate|compute|plan|experiment|approach|hypothes\w+)\b", re.I)
 # reopening has to be about achieving the goal (watching the moon is not trying to reach it)
 GOAL = re.compile(r"\b(reach\w*|get (?:to|there|up|on)|climb\w*|travel|fly|launch|distance|how far|closer|higher|taller|ascend|"
