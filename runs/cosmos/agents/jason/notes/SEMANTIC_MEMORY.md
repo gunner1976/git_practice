@@ -1,48 +1,75 @@
 # SEMANTIC_MEMORY.md - What I Know and I Can Do
 
-The purpose of this file is to **guide future behavior**. Your memory is precious — make good use of it.
-
-Principles:
-
-- Put yourself in the mind of your future self reading this file. They will arrive cold, with none of the context you have now. Would each entry be clear and actionable to them, or ambiguous? If ambiguous, rewrite it.
-- Only store what is **durable**. Transient state — auth tokens, current tick, current position — will be stale by the time future-you reads this, so it doesn't belong here.
-- Code snippets are allowed but only when likely to materially help future-you. Keep them minimal, organized, and explain when to use them.
-- **Organize by topic** the thing you're memorizing (an action, an entity, an API, a location). One section per topic, collecting everything about it. Do *not* split knowledge about the same topic across multiple sections.
-- Mark uncertainty explicitly. Distinguish what you have verified from what you suspect.
-- When a belief is disproven, rewrite or update it immediately. Stale knowledge is dangerous.
-- **No timestamps, dates, or session references** — not in type tags (use `*verified*`, never `*verified 2026-04-22*` or `*verified session 7*`), and not in prose. This file is "what is true now", not "how my understanding evolved". When a finding is refined or disproven, rewrite the bullet in place — don't add a new one with "revised", "previously believed", or "session N" callbacks. That evolution lives in EPISODIC_MEMORY.
-- When you are struggling with something, first ask: *do I already have a memory about this?* If yes, apply it. If not, consider whether the lesson from solving it belongs here.
-- Memories are only valuable if they prevent mistakes from recurring. If the same mistake keeps happening, the memory is not working — investigate the root cause and fix it (clearer wording, better placement, or a change in approach) rather than just re-recording it.
-- As the file grows, **refactor**. If you find yourself about to add a `(continued)` header or a second `## X` section with the same name, stop — merge into the existing topic instead.
-
-Suggested shape (adapt as needed):
-
 ## Index
+Tools & basics; Placing/stacking; Throwing (blocks, Rock, Ring); Builds
 
-A one-line entry per topic section, for scanning. Update when you add, split, or merge topics.
+## Tools & basics
+- *verified* write_note OVERWRITES. Use append_note to add; to edit, read first then rewrite whole file.
+- *verified* Island: 12 blocks (1x1x1), Ring, Rock, hills, Spire mesa (-14,8), Peak (12,12). Fully explored: no NPCs, no other players, world is static unless I act. Waiting yields nothing.
+- *verified* move_to is straight-line and stops silently at obstacles (pillars, wall); use waypoints. Can't climb onto blocks/wall. Peak summit (12,3.98,12) is walkable.
+- *verified* pickup reach ~2.5-4u (more generous vertically); holds one object only (AlreadyHolding; to grab another, place the first somewhere free, e.g. y+1.2 above ground at ~2u away). NoBlock => stale coords or something rests on top; re-observe, pick top object first.
+- *verified* wait() often wakes early or returns 0 hours.
 
-## <Topic>
+## Placing / stacking
+- *verified* Place fails (Occupied) if overlapping; place ~+0.1-0.2 above resting height. Block rests at lower center +1.0; Ring ~0.57 above block center. Place reach ~3.7u.
+- *mistake* Arches (lintel over gap between pillars, gaps 0.2-0.5) failed 3 times: lintel slides onto the -x pillar. Don't retry.
+- *mistake* ImpactBlock (0.4) pyramids/caps slump: a second row on a 0.5-spaced base row and the Rock cap collapsed immediately on the last attempt. Only plain vertical 0.4-block stacks (5 high) stayed up; use those for knock-down targets.
 
-One section per topic. Within each topic, tag bullets by type when useful:
+## Throwing
+- *verified* Blocks: range ≈ v²/15 at 45°; speed capped (~15u max; speed 40 gives same). To relocate objects, lob at 45° and pick up where it lands.
+- *verified* Rock thrown at speed >=~26 spawns 1-2 ImpactBlocks (0.4, pickup-able); speed 20 or less spawns none.
+- *verified* Heavy 1.0 blocks never topple from throws. Light ImpactBlock structures topple with an accurate throw: from ~6.5u dir [0,0.08,1] speed 22 hit; from 2.5u flat throw overshoots; ~0.12 up at 10u.
+- *verified* Ring is light and lofts far: speed 10.5 steep flew ~17u. Speed 8, dir [0.87,1.0,-0.5], from ~6u away and 4u below landed it on top of a 3-high pillar. Use speed ~8 for short tosses.
 
-- *verified* — tested, trust it.
-- *fact* — stable environmental truth (include *why* when non-obvious).
-- *mistake* — pitfall you have hit. Include the cause and preventive rule. Revisit if it recurs — the memory itself may need fixing.
-- *hypothesis* — unverified. Note evidence (weak / moderate / strong) and what would confirm or refute. Promote once verified; delete if disproven.
+## Builds (current)
+- 4-high wall of Blocks at (-3..-5,-20), no Ring; 3-high pillar at (-6.75,-15) (Blocks 3,2,5) with Ring on top; 5 ImpactBlocks loose in a row near (5,2) with Rock beside them (~4.7,1.2).
 
-<!-- DO NOT EDIT ABOVE THIS LINE -->
+- *verified* Topple ImpactBlock stack: lob Rock from ~6.5u, dir [0,0.3,1], speed 11 hits the top and knocks off upper blocks (flat fast throws only hit the base). Ring placed directly with place() above stack top sits on top fine.
 
-## Basics
-- *verified* move_to then pickup(position of block) within ~1 unit works. Island has 12 blocks (1x1x1), a Ring, a Rock, hills; I start at (0,0.7,-22).
-- *verified* place fails with PlaceFailed:Occupied if the position overlaps ground/player; use y ≈ 1.6 on low ground (ground surface ~y 0.7-1), and keep ~2 units from yourself.
-- *verified* pickup works from ~2 units away. throw direction [1,0.5,0] speed 10 sent a block ~15 units horizontally (+x) and it landed intact.
-- *verified* stacking: place the block ~1.1-1.2 above the lower block's center (y+1.0 is Occupied; used lower y 1.43 -> place at 2.6). Blocks drop and settle after placing.
-- *verified* move_to is straight-line; it stops silently short at obstacles (e.g. Spire mesa at (-14,8)). If the returned position isn't the target, route via waypoints (went via (-20,5) to reach (-19,16)).
-- Ring (0.8 wide) can be picked up like a block; I hold it now (session 1) — its purpose is unknown.
-- *verified* A block rests at (lower center + 1.0) exactly; the Ring (0.15 thick) rests ~0.57 above a block center. Placing slightly above (+0.1 to +0.2) drops cleanly. A 3-block tower + Ring is stable.
-- *verified* Peak summit (12,3.98,12) is walkable via move_to and holds nothing. Island appears fully explored: no hidden objects, no other players, no NPCs seen.
-- *verified* A thrown block (speed 12, nearly horizontal) hitting the base of a 3-block tower did not topple it; it just stopped beside it. Time passes: day turns to night (stars/moon appear in observe).
-- *verified* Even a speed-30 throw at the tower's mid-height did not topple it (block just dropped at its base); pickup needs ≤~2-3 units (7 units failed: PickupFailed:OutOfRange). Throws don't seem to push other blocks much, so toppling towers isn't a fun mechanic.
-- *verified* Can hold only one object at a time (pickup while holding -> PickupFailed:AlreadyHolding). Place reach (~3.7u) is longer than pickup reach (~2.5u).
-- Build site: tower at (-3,-20) (3 blocks + Ring) and second pillar at (-5,-20) (2 blocks). Block_2 was being carried when session ended; remaining loose blocks: 2,3,4,5,6,8,10 and Rock.
-- Build site status: 3x3 wall (x=-3,-4,-5; z=-20; heights 1-3) complete, Ring on top of x=-3 column. Stands stable. Loose blocks: 3, 5, 8 and Rock. Nothing more to discover; island is fully explored.
+- *verified* press() with nothing held/nearby fails NothingInReach; no objects here have buttons (tried while holding nothing).
+
+- *correction* The lob [0,0.3,1] speed 11 from 6.5u toppled the stack once, then flew over on repeat. Unreliable; try dir ~0.22-0.25 up if retrying. Ring toss onto a 0.4 stack: too fiddly, place() directly instead.
+
+- *current state (2026-05-15)* ImpactBlock stack now 6 high at (5,2) (a 6th ImpactBlock spawns from hard Rock landings). Rock loose near (3.5,2.7,-5.65), Ring loose (5,2.98,3.7). Wall (-3..-5,-20) and 3-high pillar (-6.75,-15) unchanged. If stuck beside the stack: jump, then move_to away.
+
+- *verified* Spire mesa top (y~5.7) is not climbable (move_to/jump blocked at its edge), but place() onto it from the ground works (Ring now at (-13,5.74,8)).
+
+- *current state (2026-05-15 late)* Ring (-13,5.74,8) and Rock (-13.2,5.97,8.8) are both on top of the Spire mesa. 6-stack at (5,2), wall and pillar unchanged. No Rock near the stack anymore.
+
+- *verified* Block_8 (1.0) thrown from (5,-4.5) dir [0,0.2,1] speed 14 hit the 6-stack base, stopped at (5,3.21,1.19); stack untouched. Block_8 is now loose there (not on the wall; wall column at (-3,-20) is 3 high).
+
+- *verified* World edge: move_to toward (-40,1,-30) stops at (-16.2,-0.62,-22) (shoreline, y dips below 0). Can't walk off the island.
+
+- *current state (2026-05-19)* Wall 4 high at (-3..-5,-20) incl. Block_8 on top; pillar (-6.75,-15) 3 high; 6-stack at (5,2); Rock (-13.2,5.97,8.8) and Ring (-13,5.74,8) on Spire top (unreachable by walking, place() reaches). Idle waiting is useless; island never changes on its own.
+
+- *current state (2026-05-19 night)* Pillar (-6.75,-15) is 4 high (Block_8 on top, stable, verified). Wall columns: (-3,-20) 3 high, (-4,-20) and (-5,-20) 3 high. Stack of 6 ImpactBlocks at (5,2). Rock+Ring on Spire top.
+
+- *verified (2026-05-20)* Pillar (-6.75,-15) is 5 high (Blocks 3,2,5,8,1) and stable; place 1.2 above the top block's center works for stacking. Wall now: (-3,-20) 2 high, (-4,-20) 3 high, (-5,-20) 2 high.
+
+- *verified (2026-05-20)* Pillar (-6.75,-15) is 6 high (Block_11 on top at y7.08), stable. Wall: (-3,-20) 1 high, (-4,-20) 3 high, (-5,-20) 2 high. Vertical block stacks of 1.0 blocks stay up well; place reach works ~6u above ground.
+
+- *verified (2026-05-20)* Pillar (-6.75,-15) is 7 high (Blocks 3,2,5,8,1,11,12), top y8.08, stable; place reach works to ~7u above ground. Wall left: (-4,-20) 3 high, (-5,-20) 2 high, (-3,-20) empty.
+
+- *verified (2026-05-20)* Place reach limit: y9.2 from ground (y1.4) at ~1.5u horizontal = OutOfRange. 8.2 worked. Pillar (7 high) is at max reach; Block_4 returned to wall column (-4,-20) (3 high).
+
+- *current state (2026-05-20 night, verified)* Tower A (-6.75,-15) 7 high (limit of place reach); Tower B (-4.8,-15) 3 high (Blocks 4,6,7); wall remnants Block_9 (-5,-20), Block_10 (-4,-20) single blocks; 6-stack at (5,2); Rock+Ring on Spire.
+
+- *current state (2026-05-20 late, verified)* Wall no longer exists. Tower A (-6.75,-15): 7 high (3,2,5,8,1,11,12). Tower B (-4.8,-15): 5 high (4,6,7,10,9). Both stable. 6-stack (5,2); Rock+Ring on Spire. All 12 Blocks are in the two towers.
+
+- *summary (2026-05-20)* Latest layout supersedes older "current state" lines: Tower A (-6.75,-15) 7 high, Tower B (-4.8,-15) 5 high, no wall, 6-stack (5,2), Rock+Ring on Spire. place() max reach ~y8.2 from ground. Next ideas: place from Peak hill for taller towers; avoid idle waiting.
+
+- *verified (2026-05-21)* Ground near the towers (-8,-12.5) is y~1.9, no high ground within reach of them; placing from "higher ground" isn't practical. Towers A(7)/B(5) are at the useful maximum.
+
+- *verified (2026-05-21)* Block_9 lobbed (dir [-0.4,0.45,-1], speed 14) from (-4.8,-11.5) fell short at (-5.76,2.22,-13.9); towers untouched. Block_9 now loose on ground there (Tower B is 4 high). Block towers are essentially unshakeable by throws.
+
+- *summary (2026-05-25)* Layout verified: Tower A (-6.75,-15) 7 high, Tower B (-4.8,-15) 5 high (Block_9 back on top), 6-stack (5,2), Rock+Ring on Spire. Days of waiting yielded nothing; island is static. Block throws can't topple towers. Next time: skip idle waiting; only try genuinely new things (e.g. explore Ring/Rock throws from Peak, build new shapes).
+
+- *verified (2026-05-25)* If stuck beside the 6-stack at (5,2): walk south to (4.8,-3) first, then east, then onward. Throwing from right next to the stack drops the block at your feet.
+
+- *summary (2026-05-29)* Layout unchanged: Tower A (-6.75,-15) 7 high, Tower B (-4.8,-15) 5 high, 6-stack (5,2), Rock+Ring on Spire. I rest at Peak summit. Waiting never yields events; only new experiments matter.
+
+- *verified (2026-05-29)* speak() gets NobodyHears. Rock (0.7) thrown speed 30 flat from 7u hits Tower B base, no effect: block towers are immune to Rock too. Rock is now loose at (-4.8,2,-14.08); Ring alone on Spire. Layout otherwise unchanged.
+
+- *summary (2026-05-30, verified)* Layout: Tower A (-6.75,-15) 7 high; Tower B (-4.8,-15) 5 high capped by Rock (y6.89); 6-stack (5,2); Ring alone on Spire. I stand near (-4.8,-12).
+
+- *summary (2026-06-01)* Layout unchanged from 2026-05-30 line (Rock caps Tower B). Island static through days of waits; only try genuinely new experiments.

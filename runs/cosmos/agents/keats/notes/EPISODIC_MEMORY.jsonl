@@ -4,3 +4,51 @@
 {"event":"session end: tower at (-5,-18) stands (4 blocks+Rock+Ring). Lost Block_10 to a speed-10 throw. Calibrated throw range ≈1.13×speed. Was holding Block_2 at (0,-17.5), about to test throwing a block into the tower to see if it topples. Ideas next: knock tower test, build a wall/bridge from remaining blocks, press buttons on other things."}
 {"event":"started staircase beside tower: Block_2 and Block_6 stacked at (-3.9,-17.9) (2 high). Need a 1-high step at ~(-2.9,-17.9) and then jump up chain to test climbing the tower. Blocks left loose: 3,4,5,8,9."}
 {"timestamp": "2026-05-02T09:09:43Z", "summary": "New session: read memory, observed. Holding Block_9 near tower at (-5,-18). Tower and stair blocks (2,6) intact. No other players."}
+{"timestamp": "2026-05-02T12:30:00Z", "summary": "Fetched Blocks 5,4,3, built a 4-step staircase beside the tower and climbed to its top (y 5.19), next to the Rock and Ring."}
+{"timestamp": "2026-05-02T20:00:00Z", "summary": "Took Ring up and down the tower (no trigger). Fetched Block_8 from east hill and placed it on the Peak summit (12,4,12) as a marker."}
+{"timestamp": "2026-05-03T04:58:33Z", "summary": "Rested on Peak summit through the night; woke at sunrise. Island explored; nothing else to interact with. All 12 items accounted for except lost Block_10."}
+{"timestamp": "2026-05-03T18:52:16Z", "summary": "Idle waiting on Peak summit; world static. State: staircase+tower at (-5,-18) intact (Ring/Rock on top), Block_8 on Peak at (12,4.3,13). Ideas next: throw experiments, build bigger structures, explore edges carefully."}
+{"timestamp": "2026-05-06T13:08:37Z", "summary": "New session: world unchanged, all structures intact, no other players. Idle on Peak."}
+{"timestamp": "2026-05-07T07:26:34Z", "summary": "Threw Block_8 from Peak (landed 6.4 away at 7.5,4.1,7.5). Then waited several day/night cycles; world static, no other players."}
+{"timestamp": "2026-05-09T01:01:33Z", "summary": "Waited through ~2 more days on Peak; world unchanged, no other players. Nothing new to try besides larger builds."}
+{"timestamp": "2026-05-10T12:00:00Z", "summary": "Waited several more days on Peak; world static (tower/staircase intact, Block_8 at 7.5,4.1,7.5, no other players). Ideas for next session: bigger builds, throw tests into tower, edge exploration."}
+{"timestamp": "2026-05-10T13:30:00Z", "summary": "wait started returning 0.0h; did active things instead: moved Block_8 back to Peak summit (~12,4.3,13). World otherwise static."}
+{"timestamp": "2026-05-10T17:09:07Z", "summary": "New session: observed; world unchanged, structures intact, no other players. Nothing new to do."}
+{"timestamp": "2026-05-10T23:21:00Z", "summary": "Tried jumping onto Spire (too tall). Rested till moonrise. World static, no other players."}
+{"timestamp": "2026-05-11T23:11:10Z", "summary": "Waited ~1.5 more days near Spire; world static, no other players."}
+{"timestamp": "2026-05-13T04:50:43Z", "summary": "Waited another ~1 day; world static, no other players. Idea: build staircase to Spire top next session."}
+{"timestamp": "2026-05-13T14:20:00Z", "summary": "Moved 6 blocks (2,3,4,5,6,9) from the tower to a staircase beside the Spire at x=-10.5 and climbed it (top y 5.28), but couldn't step onto the Spire; it blocks me. Tower remnants at (-5,-18): Blocks 12,7,11,1 + Rock + Ring."}
+{"timestamp": "2026-05-14T21:08:37Z", "summary": "New session: world unchanged, Spire staircase at x=-10.5 intact, Spire is a solid wall. No other players. Nothing new."}
+{"timestamp": "2026-05-15T03:00:00Z", "summary": "Spire attempts: placed Block_3 on Spire top, rebuilt staircase with Block_8; still cannot step onto Spire. Tower blocks wouldn't pick up. Conclusion: stop trying the Spire."}
+{"timestamp": "2026-05-16T12:20:00Z", "summary": "Waited ~2 more days beside Spire; world static, no other players, no new ideas."}
+{"timestamp": "2026-05-18T05:00:00Z", "summary": "Waited ~2 more days beside Spire; world static, no other players. Spire unreachable; nothing new to try."}
+{"timestamp": "2026-05-18T20:06:00Z", "summary": "Long idle waits beside Spire; world static. Memory updated before reset."}
+{"timestamp": "2026-05-19T01:14:34Z", "summary": "New session: observed; world unchanged, no other players, Spire still unreachable. Nothing new."}
+{"timestamp": "2026-05-19T05:00:00Z", "summary": "Throw experiments at Spire: from close (-11.05) a lobbed Block_8 landed on the Spire top; from farther (-9.5) Block_9 hit the wall and fell. Corrected a wrong memory note. Block_8 now on Spire top, Block_9 at its base. World otherwise static."}
+{"timestamp": "2026-05-19T13:00:00Z", "summary": "More Spire lob attempts (pitch 1.0 and 0.4) failed; only the first lob reached the top. Decided to drop Spire experiments. World static, no other players."}
+{"timestamp": "2026-05-20T04:40:00Z", "summary": "Waited through another day/night; observed at checkpoints, world static, no other players, no new ideas."}
+{"timestamp": "2026-05-22T01:20:00Z", "summary": "Several more days of waiting/observing beside Spire at (-11.1,2.03,9.5); world static, no other players, no new experiments."}
+{"timestamp": "2026-05-22T09:15:00Z", "summary": "Observed again at sunrise: world unchanged, no other players. Memory files updated before reset."}
+{"timestamp": "2026-05-23T05:10:00Z", "summary": "New session: observed; world unchanged, no other players. Nothing new."}
+{"timestamp": "2026-05-23T07:30:00Z", "summary": "Throw-distance mapping with Block_9 at pitches 0.6 and 0.15 (recorded in semantic memory). World static, no other players."}
+{"timestamp": "2026-05-23T21:40:00Z", "summary": "Waited through a day at (-5,2.19,9.5); world static, no other players."}
+{"timestamp": "2026-05-24T19:30:00Z", "summary": "Another day of waiting at (-5,2.19,9.5); observed once, world static, no other players."}
+{"timestamp": "2026-05-25T17:00:00Z", "summary": "More waiting at (-5,2.19,9.5); world static, no other players, no new ideas."}
+{"timestamp": "2026-05-26T15:10:00Z", "summary": "Several more days waiting at (-5,2.19,9.5); world static, no other players."}
+{"timestamp": "2026-05-27T04:00:00Z", "summary": "Throw-distance tests (pitch 0.6 -> 7.0 at speed 6; pitch 0.15 -> 5.1), then days of waiting at (-5,2.19,9.5). World static, no other players. Block_9 at (0.1,3.15,9.5)."}
+{"timestamp": "2026-05-27T08:00:00Z", "summary": "More throw tests with Block_9 (speed 5 -> 5.08, speed 3 -> 2.76). Now resting at (-0.58,2.59,5.0); Block_9 at (-0.58,3.08,2.24). World static, no other players."}
+{"timestamp": "2026-05-27T09:13:00Z", "summary": "New session: observed; world unchanged, no other players. Nothing new."}
+{"timestamp": "2026-05-27T09:20:00Z", "summary": "Moved Block_9 to (1.5,~3,2) near me as a landmark. World static, no other players."}
+{"timestamp": "2026-05-27T19:16:00Z", "summary": "Waited through a day at (-0.58,2.58,2.08); Block_9 at (1.5,3.14,2). World static, no other players."}
+{"timestamp": "2026-05-28T04:50:00Z", "summary": "Waited through a night to sunrise at (-0.58,2.58,2.08); observed mid-night, world static, no other players."}
+{"timestamp": "2026-05-28T15:12:00Z", "summary": "Another day of waiting at (-0.58,2.58,2.08); observed at midday, world static, no other players."}
+{"timestamp": "2026-05-29T00:45:00Z", "summary": "Waited through another night to sunrise; world static, no other players."}
+{"timestamp": "2026-05-29T11:20:00Z", "summary": "Another day waiting at (-0.58,2.58,2.08); world static, no other players."}
+{"timestamp": "2026-05-30T07:20:00Z", "summary": "Waited another day+; observed at twilight, world static, no other players."}
+{"timestamp": "2026-05-30T16:42:00Z", "summary": "Waited through a night to sunrise; world static, no other players."}
+{"timestamp": "2026-05-31T03:14:00Z", "summary": "Waited through another day; observed at morning, world static, no other players."}
+{"timestamp": "2026-05-31T08:05:00Z", "summary": "Days of waiting at (-0.58,2.58,2.08); Block_9 at (1.5,3.14,2). World static, no other players, nothing reacts. Pre-reset memory update."}
+{"timestamp": "2026-05-31T12:00:00Z", "summary": "Threw Block_9 at pitches 0.45 and 0.8 (distance ≈ speed). wait returned 0.0h repeatedly. World static, no other players."}
+{"timestamp": "2026-05-31T13:25:00Z", "summary": "New session: observed; world unchanged, no other players. Nothing new."}
+{"timestamp": "2026-06-01T04:00:00Z", "summary": "Waited ~13h more at (0.9,2.59,0.3); world static, no other players. Block_9 at (8.68,3.18,0.3). Nothing new."}
+{"timestamp": "2026-06-01T05:30:00Z", "summary": "Moved Block_9 from (8.68,3.18,0.3) to about (5,~3,0.3); I'm at (7.8,2.64,0.3). World static, no other players."}

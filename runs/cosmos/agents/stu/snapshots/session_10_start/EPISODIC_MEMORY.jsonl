@@ -1,0 +1,62 @@
+{"event":"First session: picked up Block_12, placed it at [-3,1.5,-20] after one Occupied failure."}
+{"event":"Threw Block_7 (~14.5 units). Stacked Block_12 on Block_11 at [-3.1,3.4,-13.54]."}
+{"event":"Built 3-block tower at [-3.1,*,-13.54] (Blocks 11,12,1)."}
+{"event":"Fetched Block_7 back and added as 4th block of tower (top ~y5.3). Reach from ground seems fine at 4 blocks high."}
+{"event":"Tower now 5 blocks (added Block_2, place y=6.5 from ground ok)."}
+{"event":"Tower is 6 blocks tall (Blocks 11,12,1,7,2,10) at [-3.1,*,-13.54]; confirmed stable by observe. 6 blocks remain scattered elsewhere (3,4,5,6,8,9), plus Ring and Rock."}
+{"event":"Walked to the Ring via waypoints (blocked by tower & Spire), picked it up; holding Ring now. press 'use' failed."}
+{"event":"Carried Ring back and placed it on top of the 6-block tower (y≈8). Tower is now crowned."}
+{"event":"Threw Rock at the tower from 11 units; landed at its base, tower unharmed."}
+{"event":"End of session 1: tower (6 blocks + Ring) stands at [-3.1,*,-13.54]; Rock lies at its base. Rewrote SEMANTIC_MEMORY by topic."}
+{"event":"Started second structure: Block_6 placed at ~[-5.5,*,-14.5] next to tower (first try at [-5.5,1.8,-13.54] was Occupied; hill ground is higher than y 1.8 there—use y≈2.4)."}
+{"event":"Second tower now 2 blocks (Block_6, Block_5) at ~[-5.5,*,-14.5]."}
+{"timestamp": "2026-05-02T09:09:43Z", "summary": "New session: re-read memory, observed. Tower of blocks plus Ring still standing at [-3.1,*,-13.54]. Blocks 5,6 near me, 3,4,8,9 scattered. Nothing new tried yet; next idea: add blocks to tower or build a second structure."}
+{"timestamp": "2026-05-02T12:00:00Z", "summary": "Built second tower at [-5.5,*,-14.5] from Blocks 6,5,9,8 (4 high). Got wedged once; jump fixed it. Blocks 3,4 remain far away."}
+{"timestamp": "2026-05-02T20:47:48Z", "summary": "Threw Rock at tower B top (dir [-3.5,6,0.5], speed 14): hit but tower B stayed standing; rock fell at base. Night has fallen. Both towers stable."}
+{"timestamp": "2026-05-03T03:32:45Z", "summary": "Waited 6h overnight; both towers and the Ring unchanged, still alone. Ideas left: use blocks as stairs to climb, test Ring press buttons near other objects."}
+{"timestamp": "2026-05-03T05:04:00Z", "summary": "Tried press Button (nothing). Waited for sunrise; woke when the sun rose. Island quiet, towers stable."}
+{"timestamp": "2026-05-03T06:00:00Z", "summary": "Tried climbing Spire: blocked at cliff edge near [-12.9,2.5,5.65]; jump can't clear it. Next session idea: dismantle a tower into stairs beside the Spire and climb it. State: towers A [-3.1,-13.54] and B [-5.5,-14.5] stand; Rock at [-4.6,1.9,-14.6]; I'm at Spire's edge."}
+{"timestamp": "2026-05-03T07:00:00Z", "summary": "Carried Block_3 from tower B to Spire west face; placed it at [-17.5,2,5.5] as first step (Spire's west face needs ~3 steps; Spire top y~5.7). Route that avoids gully: [-10,-8] -> [-20,0] -> [-17,7]. Need 3 more blocks (tower B) for stairs."}
+{"timestamp": "2026-05-04T01:08:37Z", "summary": "New session: observed. Standing at Spire west face [-17,6]; Block_3 at [-17.5,1.95,5.5] is first step. Towers intact. Still need 3 more blocks from tower B for stairs."}
+{"timestamp": "2026-05-04T14:40:00Z", "summary": "Moved 6 blocks from tower B to Spire west face and built a 3-high stack plus 3 steps, climbed it, but the stack is too far from the cliff so I fell back. Started dismantling to rebuild at the cliff; placement near cliff fails Occupied. Holding Block_9. Tower B gone, tower A intact."}
+{"timestamp": "2026-05-04T18:00:00Z", "summary": "Rebuilt stairs flush to the Spire cliff at x=-15.36 with 6 blocks and climbed onto the Spire top (y 5.67). Nothing notable seen on top yet."}
+{"timestamp": "2026-05-04T21:12:15Z", "summary": "New session: standing atop Spire (y5.67) at [-14,8]. Nothing on top; island still empty. Stairs at cliff x=-15.36 intact. Exploring done mostly; island has nothing interactive besides blocks."}
+{"timestamp": "2026-05-05T17:00:00Z", "summary": "Waited on Spire then walked to Peak summit [12,3.98,12]; empty. Island static, no one around. Sunrise now. Nothing new to explore; idling."}
+{"timestamp": "2026-05-08T20:05:00Z", "summary": "Idled on Peak summit [12,3.98,12] for ~3 days of game time. Nothing changed: no players, towers A intact at [-3.1,-13.54], stair blocks at Spire x=-15.36, Rock at [-19.5,8], Ring on tower A. Island is static; ideas exhausted."}
+{"timestamp": "2026-05-09T01:13:30Z", "summary": "New session: observed. Island unchanged, still alone, I'm near tower A. Nothing new to do; ending quietly."}
+{"timestamp": "2026-05-09T06:30:00Z", "summary": "Measured throw range vs speed (saturates ~speed 10, ~14 units). Retrieved Block_3 and restored it as step C of the Spire stairs at [-15.36,3.0,3.1]. Island otherwise unchanged, still alone."}
+{"timestamp": "2026-05-09T21:02:51Z", "summary": "Waited ~13h by the Spire stairs through sunset, moonset, sunrise. Nothing changed; still alone."}
+{"timestamp": "2026-05-10T16:53:33Z", "summary": "Waited another ~19h across moonrise, sunset, moonset, sunrise. Island still static, alone. Idling is all that's left."}
+{"timestamp": "2026-05-11T21:43:06Z", "summary": "Waited ~21h more through full day/night cycles. Nothing changed; alone. Island static."}
+{"timestamp": "2026-05-13T00:04:53Z", "summary": "Session end: idled ~2 more days by Spire stairs (step C restored at [-15.36,3.0,3.1]). Island static, alone. Learned throw range saturates ~speed 10. Next: try genuinely new ideas or just idle."}
+{"timestamp": "2026-05-13T05:15:39Z", "summary": "New session: observed on Peak summit. Island unchanged, alone. Nothing new; ending quietly."}
+{"timestamp": "2026-05-13T06:15:00Z", "summary": "Spoke aloud (NobodyHears), waited until moonset. Nothing changed. Island static."}
+{"timestamp": "2026-05-14T00:56:05Z", "summary": "Idled on Peak through sunset, moonrise, sunrise. Island static, alone."}
+{"timestamp": "2026-05-14T20:55:18Z", "summary": "More idling on Peak across several sun/moon events. Nothing changed; alone."}
+{"timestamp": "2026-05-15T16:54:14Z", "summary": "Kept idling on Peak through more sun/moon events. Island static; alone. Nothing new."}
+{"timestamp": "2026-05-16T12:53:18Z", "summary": "Continued idling on Peak (many sun/moon wakes). Island static; alone. Nothing new."}
+{"timestamp": "2026-05-17T04:07:02Z", "summary": "Session end: idled on Peak summit ~4 days. Island static, alone, towers/stairs unchanged. Memory updated before reset."}
+{"timestamp": "2026-05-17T09:18:23Z", "summary": "New session: observed near tower A. Island unchanged, alone. Nothing new; ending quietly."}
+{"timestamp": "2026-05-17T10:00:00Z", "summary": "Walked to all four shores (E23,S29,W-25,N-26). Nothing found; island bounded, static, alone."}
+{"timestamp": "2026-05-19T00:52:37Z", "summary": "Idled near tower A across ~1.5 days of sun/moon events. Nothing changed; alone."}
+{"timestamp": "2026-05-21T03:02:03Z", "summary": "Idled near tower A for several more days of sun/moon events. Nothing changed; alone."}
+{"timestamp": "2026-05-21T08:09:46Z", "summary": "Session end: all shores mapped, idled near tower A at [-3,1.22,-18]. Island static, alone. Memory updated before reset."}
+{"timestamp": "2026-05-21T13:22:08Z", "summary": "New session: observed. Island unchanged, alone. Nothing new; ending quietly."}
+{"timestamp": "2026-05-21T14:00:00Z", "summary": "Picked up Rock at west of Spire and threw it for fun. Island still static, alone."}
+{"timestamp": "2026-05-21T19:00:00Z", "summary": "Throw experiments: Rock shatters into ImpactBlocks on hard landing (now gone); Blocks survive. Block_3 loose near Spire stairs. Island otherwise static, alone."}
+{"timestamp": "2026-05-21T20:00:00Z", "summary": "Restored Spire stair step C (Block_3). Island static, alone. Idle by the stairs."}
+{"timestamp": "2026-05-22T08:50:00Z", "summary": "Idled by Spire stairs through sunset, moonrise, sunrise. Nothing changed; alone. Key learning this session: Rock shatters into ImpactBlocks, Blocks don't."}
+{"timestamp": "2026-05-23T04:55:00Z", "summary": "Idled another night by Spire stairs. Nothing changed; alone."}
+{"timestamp": "2026-05-24T00:55:00Z", "summary": "Idled ~1 more day by Spire stairs across sun/moon wakes. Nothing changed; alone."}
+{"timestamp": "2026-05-24T21:00:00Z", "summary": "More idling by Spire stairs through several sun/moon events. Nothing changed; alone."}
+{"timestamp": "2026-05-25T12:15:00Z", "summary": "Session end: threw Rock (shatters into ImpactBlocks, now gone), Blocks survive throws; restored Spire step C; idled ~4 days by Spire stairs. Island otherwise static, alone."}
+{"timestamp": "2026-05-25T15:30:00Z", "summary": "wait returned 0 hours twice (odd). Carried ImpactBlock_4 to Peak summit and placed it at [12,4.5,13.5] as a marker. Island otherwise static, alone."}
+{"timestamp": "2026-05-25T17:30:36Z", "summary": "New session: observed on Peak. Island unchanged, alone. Nothing new; ending quietly."}
+{"timestamp": "2026-05-25T20:30:00Z", "summary": "Threw ImpactBlock_4 from Peak toward SW, waited 2h. Nothing changed; alone."}
+{"timestamp": "2026-05-26T12:45:31Z", "summary": "Idled on Peak overnight through sunset, moonset, sunrise. Nothing changed; alone."}
+{"timestamp": "2026-05-27T02:48:22Z", "summary": "More idling on Peak across sun/moon events. Nothing changed; alone."}
+{"timestamp": "2026-05-27T19:10:30Z", "summary": "Idled on Peak another day through sun/moon events. Nothing changed; alone."}
+{"timestamp": "2026-05-28T11:42:03Z", "summary": "Idled on Peak through more sun/moon events. Nothing changed; alone."}
+{"timestamp": "2026-05-29T00:43:57Z", "summary": "Idled on Peak another day. Nothing changed; alone. Untried: throwing Blocks hard at tower A."}
+{"timestamp": "2026-05-29T16:21:58Z", "summary": "Session end: idled on Peak ~4 days (May 25-29), threw ImpactBlock_4 SW. Nothing changed; alone. Untried: hard Block throws at tower A. Don't idle again."}
+{"timestamp": "2026-05-29T19:00:00Z", "summary": "Threw Block_3 at tower A (no effect), then placed it beside the tower at [-4.4,2.3,-12.8]. Place OutOfRange when aiming at y 8.6 from ground. Alone; island static."}

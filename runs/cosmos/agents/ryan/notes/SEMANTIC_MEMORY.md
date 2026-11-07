@@ -1,35 +1,21 @@
 # SEMANTIC_MEMORY.md - What I Know and I Can Do
 
-## Index
-- World layout
-- Pickup / place / stack
-- Throw
-- Movement
-- Press
+## World
+- Island with hills (Peak (12,4,12), Hill_1..4), mesa Spire (-14,8) top y≈5.7, 12 blocks, Ring, Rock, Phone. Tower (Blocks 12,7,1,10 + Ring + Rock capstone) at (-5.07,_,-18.5) with buttress Blocks 2,9. Column Block_6 at (-9.7,2.65,8.6). Block_3 on Spire top. Block_11 lost to sea.
+- Spire top: anchored Tablet ("too small to read"), unpickable. Spire walled on all sides; unclimbable (blocks, jumps, corners all fail).
+- Shoreline dips (y≈-0.7) trap move_to: e.g. (23,-3), (-19,-16), (-5,26), (15,19). Escape by targeting inland point. No entities at any edge.
+- move_to is straight-line, no pathfinding. From Spire base heading east, step south first (-10.5,2,12).
 
-## World layout
-- *fact* Island with hills (Peak, Hill_1..4), a mesa "Spire" at (-14,8), 12 loose 1x1 blocks (Block_1..12), a Ring, a Rock. Start at (0,0.7,-22). Day/night cycle passes quickly (a few ticks = hours).
-- *fact* I built a tower (Blocks 12,7,1,10 + Ring) at x=-5.07, z=-18.5 near the start. Remaining loose blocks: 2,3,4,5,6,8,9 and Rock. Block_11 was lost to the sea.
+## Mechanics
+- Pickup/place work at range (~4+ units, even onto Spire top). One held item at a time.
+- Place needs space above ground; Occupied if inside things. Stack at 1.0 spacing.
+- Throw: range roughly speed/2..0.8*speed. Thrown items lose momentum; tower can't be toppled. Lob onto Spire: from (-10.5,2.04,10) dir [-2.5,4,-1.5] speed 9.
+- Speed 15 toward edge loses item.
+- Phone: buttons call / end call. Call always NoAnswer (any place/time/eclipse); end call NoCall. Ring/Rock have no buttons. Speaking: NobodyHears. press "read": NothingInReach.
 
-## Pickup / place / stack
-- *verified* move_to within ~1.5 units, then pickup at the object's position -> PickupSuccess.
-- *verified* place only succeeds if the target is above ground/other blocks; aim ~1.5 above surface (or higher; it falls and settles). Too low = PlaceFailed:Occupied (inside terrain).
-- *verified* Stacking: place at same x,z, y a bit above top block; settles at 1.0 spacing. Reach up to ~5 units high from the ground works.
-- *verified* Ring can be picked/placed, but has no buttons.
-
-## Throw
-- *verified* throw {direction, speed}: speed 15 toward the island edge makes the item vanish (lost). Don't throw toward edges unless you accept losing it.
-- *mistake* Throwing beside a tower collides and drops the item at my feet / I can end up standing on it. Step away first.
-
-## Movement
-- *fact* move_to is a straight line with no pathfinding; it stops early at blocks/terrain (Spire, tower). Use waypoints (e.g. x=-20 around the Spire, z=-22 south of the tower).
-- *mistake* Near (-15,-14) I dropped to y≈-0.8 and move_to stalled. Choosing a different inland target freed me.
-
-## Press
-- *verified* press fails (NothingInReach) when holding the Ring. No entity with buttons found yet; explore for one.
-- *hypothesis* Remaining unexplored: Rock, Peak summit, and whether blocks can be thrown to hit things.
-- *verified* Thrown Rock at speed 14 (direction mostly horizontal, slight upward) traveled ~11 units and landed short; on impact it spawned a small debris entity "ImpactBlock_1" (0.4 cube). Throws are short-range/arcing; to hit a target ~15 away use more speed/upward angle.
-- *verified* Throw calibration: direction vector [-4.6,1.5,-2.1] (target 5 away, slight upward) at speed 10 landed the Rock right beside its target. Direction is normalized by aim; speed ~10 reaches ~5 units, so range grows with speed (14 reached ~11). Light rock does not topple the tower.
-- *verified* Throw calibration: direction [-4.6,1.5,-2.1] (target ~5 away, slight upward) at speed 10 landed the Rock right beside the tower; speed 14 earlier reached ~11. Range grows with speed. A light rock does not topple the tower.
-- *verified* Block thrown at speed 13 (direction [-1,0.15,0]) from 8 units away stopped ~1.5 short of the tower and did not topple it; rough rule: flat range ≈ speed/2 to speed*0.8 units. The tower is very stable.
-- *verified* Peak summit (12,4,12) is empty: no buttons or objects. Peak is the plain top of a hill (height ~4). Nothing pressable found anywhere so far; world seems to have no interactive entities besides movable parts.
+## Lessons
+- Waiting (days) and repeated calls change nothing. Viewing Tablet from other spots doesn't help. Only try genuinely new ideas.
+- State (2026-05-23): holding Phone at (-12,2.53,3).
+- *state* (2026-05-26) Holding Phone at (0.5,2.98,16.5) near Block_4. Spire column Block_5/6 at (-10,8) blocks move_to; go via (-10.5,5) then east. Still nothing new; stop pure waiting.
+- *state* (2026-05-31) Holding Phone at Hill_2 (16,2.44,-7). Block_8 placed at (16,3.2,-9). Days of waiting there changed nothing; calls NoAnswer. Tablet unread.
+- *state* (2026-06-01) Holding Phone at (-3,1.93,-12) near tower. NW shore (-16,-14) is a dip trap. Calls still NoAnswer; world static; Tablet unread.

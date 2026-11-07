@@ -40,3 +40,21 @@ Actions; World layout; Climbing/Spire; Tower; Moon; Idle policy
 
 ## Status (2026-05-10)
 - World still static; half moon seen at 63deg, unreachable. Idle policy stands: cheap move_to, brief notes.
+
+## Status (2026-05-14)
+- World still static after days of waiting at center (wait tool wakes on sunrise/sunset/moonrise/moonset). Idle policy stands: use wait(8) and brief episodic notes; no re-testing tower/moon/Spire.
+
+## Status (2026-05-18)
+- World still static after many more wait(8) cycles (wakes on sun/moon events). Idle policy stands: wait(8), brief episodic note every few waits; no re-testing tower/moon/Spire.
+
+## Status (2026-05-23)
+- World still static (full observe on 05-20 and 05-21: nothing moved). Many more wait(8) cycles. Idle policy stands: wait(8), brief episodic note every few waits; no re-testing tower/moon/Spire.
+
+## Status (2026-05-27)
+- World still static (full observes 05-24, 05-25: nothing moved). Many more wait(8) cycles. Idle policy stands: wait(8), brief episodic note every few waits; no re-testing tower/moon/Spire.
+
+## Status (2026-05-31)
+- World still static (observed 05-27). Many more wait(8) cycles through sun/moon events. Idle policy stands: wait(8), brief episodic note every few waits; no re-testing tower/moon/Spire.
+
+## Status (2026-06-01)
+- World still static (observed 05-31). More wait(8) cycles. Idle policy stands: wait(8), brief episodic note every few waits; no re-testing tower/moon/Spire.

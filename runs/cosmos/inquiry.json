@@ -45,8 +45,60 @@
    ]
   }
  },
- "eric": {},
- "fitch": {},
+ "eric": {
+  "lunar eclipse": {
+   "seen": [
+    2,
+    7
+   ],
+   "mentioned": [
+    2,
+    7
+   ],
+   "recorded": [
+    2,
+    7
+   ]
+  }
+ },
+ "fitch": {
+  "rock shattering": {
+   "seen": [
+    2,
+    44
+   ],
+   "mentioned": [
+    2,
+    44
+   ],
+   "recorded": [
+    2,
+    44
+   ],
+   "explained": [
+    2,
+    53
+   ]
+  },
+  "lost at sea": {
+   "seen": [
+    4,
+    10
+   ],
+   "mentioned": [
+    4,
+    10
+   ],
+   "recorded": [
+    4,
+    10
+   ],
+   "explained": [
+    4,
+    14
+   ]
+  }
+ },
  "jamie": {
   "rock shattering": {
    "seen": [
@@ -69,9 +121,50 @@
     1,
     31
    ]
+  },
+  "lost at sea": {
+   "seen": [
+    3,
+    27
+   ],
+   "mentioned": [
+    3,
+    27
+   ],
+   "recorded": [
+    3,
+    27
+   ]
   }
  },
- "jason": {},
+ "jason": {
+  "rock shattering": {
+   "seen": [
+    3,
+    5
+   ],
+   "mentioned": [
+    3,
+    5
+   ],
+   "recorded": [
+    3,
+    5
+   ],
+   "questioned": [
+    3,
+    8
+   ],
+   "explained": [
+    3,
+    8
+   ],
+   "tested": [
+    3,
+    16
+   ]
+  }
+ },
  "keats": {
   "lost at sea": {
    "seen": [
@@ -92,7 +185,34 @@
    ]
   }
  },
- "kip": {},
+ "kip": {
+  "rock shattering": {
+   "seen": [
+    8,
+    23
+   ],
+   "mentioned": [
+    8,
+    23
+   ],
+   "recorded": [
+    8,
+    23
+   ],
+   "questioned": [
+    8,
+    27
+   ],
+   "explained": [
+    8,
+    27
+   ],
+   "tested": [
+    9,
+    35
+   ]
+  }
+ },
  "ryan": {
   "lost at sea": {
    "seen": [
@@ -128,10 +248,117 @@
    "recorded": [
     1,
     52
+   ],
+   "questioned": [
+    2,
+    36
+   ]
+  },
+  "the tablet": {
+   "seen": [
+    2,
+    34
+   ],
+   "mentioned": [
+    2,
+    42
+   ],
+   "recorded": [
+    3,
+    3
+   ],
+   "questioned": [
+    3,
+    3
+   ],
+   "tested": [
+    5,
+    0
+   ]
+  },
+  "the phone": {
+   "seen": [
+    2,
+    34
+   ],
+   "mentioned": [
+    2,
+    42
+   ],
+   "recorded": [
+    3,
+    3
+   ],
+   "questioned": [
+    3,
+    3
+   ],
+   "tested": [
+    5,
+    0
+   ]
+  },
+  "lunar eclipse": {
+   "seen": [
+    2,
+    34
+   ],
+   "mentioned": [
+    2,
+    34
+   ],
+   "questioned": [
+    2,
+    36
+   ],
+   "recorded": [
+    2,
+    42
    ]
   }
  },
- "stu": {},
+ "stu": {
+  "rock shattering": {
+   "seen": [
+    8,
+    3
+   ],
+   "mentioned": [
+    8,
+    3
+   ],
+   "recorded": [
+    8,
+    3
+   ],
+   "questioned": [
+    8,
+    6
+   ],
+   "explained": [
+    8,
+    6
+   ]
+  },
+  "lost at sea": {
+   "seen": [
+    8,
+    9
+   ],
+   "mentioned": [
+    8,
+    9
+   ],
+   "questioned": [
+    8,
+    9
+   ],
+   "recorded": [
+    8,
+    9
+   ]
+  }
+ },
  "vern": {
   "rock shattering": {
    "seen": [

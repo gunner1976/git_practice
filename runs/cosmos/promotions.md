@@ -12,5 +12,5 @@ Criterion: deduced that the world is round by reasoning from its own observation
 | keats | no | 0 |  |  |  |
 | kip | no | 0 |  |  |  |
 | ryan | no | 0 |  |  |  |
-| stu | no | 0 |  |  |  |
+| stu | no | 1 |  |  | claude-haiku-5-5 |
 | vern | no | 0 |  |  |  |

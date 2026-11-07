@@ -308,6 +308,987 @@
    "clock_seconds": 1110.1,
    "eko_tau_end": 2682576.0,
    "eko_hours_waited": 81.66
+  },
+  "eric/2": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 9,
+   "api_calls": 97,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1034.8,
+   "eko_tau_end": 450027.4,
+   "eko_hours_waited": 82.76
+  },
+  "christian/12": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 14,
+   "api_calls": 106,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1104.8,
+   "eko_tau_end": 1170530.9,
+   "eko_hours_waited": 81.73
+  },
+  "kip/2": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 24,
+   "api_calls": 91,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1012.0,
+   "eko_tau_end": 450359.4,
+   "eko_hours_waited": 83.23
+  },
+  "jason/2": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 32,
+   "api_calls": 101,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1187.1,
+   "eko_tau_end": 450165.9,
+   "eko_hours_waited": 80.26
+  },
+  "jamie/2": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 69,
+   "api_calls": 89,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1210.1,
+   "eko_tau_end": 169803.9,
+   "eko_hours_waited": 2.0
+  },
+  "stu/2": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 74,
+   "api_calls": 96,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1212.1,
+   "eko_tau_end": 184925.5,
+   "eko_hours_waited": 6.17
+  },
+  "ryan/2": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 47,
+   "api_calls": 95,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1203.9,
+   "eko_tau_end": 238434.2,
+   "eko_hours_waited": 21.17
+  },
+  "keats/2": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 68,
+   "api_calls": 91,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1202.5,
+   "eko_tau_end": 434952.0,
+   "eko_hours_waited": 75.78
+  },
+  "fitch/2": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 70,
+   "api_calls": 89,
+   "spawn_steps": [
+    44
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     44
+    ]
+   },
+   "clock_seconds": 1204.2,
+   "eko_tau_end": 201851.0,
+   "eko_hours_waited": 11.0
+  },
+  "keats/3": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 8,
+   "api_calls": 81,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 826.7,
+   "eko_tau_end": 810030.2,
+   "eko_hours_waited": 86.23
+  },
+  "christian/13": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 6,
+   "api_calls": 80,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 811.4,
+   "eko_tau_end": 1530649.6,
+   "eko_hours_waited": 86.51
+  },
+  "eric/3": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 21,
+   "api_calls": 79,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 957.6,
+   "eko_tau_end": 810483.0,
+   "eko_hours_waited": 84.17
+  },
+  "kip/3": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 113,
+   "api_calls": 73,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1212.9,
+   "eko_tau_end": 582536.2,
+   "eko_hours_waited": 16.5
+  },
+  "jason/3": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 67,
+   "api_calls": 94,
+   "spawn_steps": [
+    5,
+    5,
+    11,
+    16,
+    16
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     5,
+     5,
+     11,
+     16,
+     16
+    ]
+   },
+   "clock_seconds": 1207.4,
+   "eko_tau_end": 522607.7,
+   "eko_hours_waited": 0.0
+  },
+  "jamie/3": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 37,
+   "api_calls": 105,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1208.5,
+   "eko_tau_end": 576562.5,
+   "eko_hours_waited": 75.02
+  },
+  "fitch/3": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 68,
+   "api_calls": 95,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1205.1,
+   "eko_tau_end": 577824.0,
+   "eko_hours_waited": 75.42
+  },
+  "ryan/3": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 28,
+   "api_calls": 94,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1098.3,
+   "eko_tau_end": 598746.2,
+   "eko_hours_waited": 81.78
+  },
+  "stu/3": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 145,
+   "api_calls": 71,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1203.6,
+   "eko_tau_end": 306217.8,
+   "eko_hours_waited": 0.0
+  },
+  "stu/4": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 13,
+   "api_calls": 70,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 756.2,
+   "eko_tau_end": 666293.1,
+   "eko_hours_waited": 87.42
+  },
+  "christian/14": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 6,
+   "api_calls": 70,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 737.3,
+   "eko_tau_end": 1890890.3,
+   "eko_hours_waited": 87.78
+  },
+  "kip/4": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 25,
+   "api_calls": 83,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 951.4,
+   "eko_tau_end": 954640.4,
+   "eko_hours_waited": 84.32
+  },
+  "eric/4": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 8,
+   "api_calls": 86,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 950.5,
+   "eko_tau_end": 1171002.1,
+   "eko_hours_waited": 84.3
+  },
+  "jamie/4": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 86,
+   "api_calls": 75,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1201.4,
+   "eko_tau_end": 774687.0,
+   "eko_hours_waited": 30.17
+  },
+  "fitch/4": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 38,
+   "api_calls": 87,
+   "spawn_steps": [
+    10
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     10
+    ]
+   },
+   "clock_seconds": 1116.0,
+   "eko_tau_end": 956534.2,
+   "eko_hours_waited": 82.1
+  },
+  "ryan/4": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 29,
+   "api_calls": 107,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1200.2,
+   "eko_tau_end": 951400.7,
+   "eko_hours_waited": 77.96
+  },
+  "keats/4": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 58,
+   "api_calls": 97,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1203.2,
+   "eko_tau_end": 1162238.5,
+   "eko_hours_waited": 77.78
+  },
+  "jason/4": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 62,
+   "api_calls": 92,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1207.4,
+   "eko_tau_end": 714450.1,
+   "eko_hours_waited": 33.17
+  },
+  "eric/5": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 0,
+   "api_calls": 75,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 752.3,
+   "eko_tau_end": 1531287.1,
+   "eko_hours_waited": 87.54
+  },
+  "kip/5": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 10,
+   "api_calls": 85,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 945.2,
+   "eko_tau_end": 1315157.9,
+   "eko_hours_waited": 84.39
+  },
+  "christian/15": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 9,
+   "api_calls": 74,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 777.1,
+   "eko_tau_end": 2251011.1,
+   "eko_hours_waited": 87.08
+  },
+  "jamie/5": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 1,
+   "api_calls": 78,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 788.7,
+   "eko_tau_end": 1170190.5,
+   "eko_hours_waited": 86.91
+  },
+  "ryan/5": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 14,
+   "api_calls": 104,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1138.3,
+   "eko_tau_end": 1314454.5,
+   "eko_hours_waited": 81.16
+  },
+  "fitch/5": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 62,
+   "api_calls": 95,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1202.9,
+   "eko_tau_end": 1303185.7,
+   "eko_hours_waited": 76.24
+  },
+  "stu/5": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 22,
+   "api_calls": 93,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 998.2,
+   "eko_tau_end": 1026422.3,
+   "eko_hours_waited": 83.4
+  },
+  "jason/5": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 11,
+   "api_calls": 96,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 991.3,
+   "eko_tau_end": 1098381.0,
+   "eko_hours_waited": 83.58
+  },
+  "keats/5": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 41,
+   "api_calls": 102,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1205.9,
+   "eko_tau_end": 1530356.9,
+   "eko_hours_waited": 80.0
+  },
+  "christian/16": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 7,
+   "api_calls": 63,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 693.5,
+   "eko_tau_end": 2611753.1,
+   "eko_hours_waited": 88.65
+  },
+  "jamie/6": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 17,
+   "api_calls": 85,
+   "spawn_steps": [
+    3
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     3
+    ]
+   },
+   "clock_seconds": 892.3,
+   "eko_tau_end": 1530331.4,
+   "eko_hours_waited": 85.17
+  },
+  "stu/6": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 8,
+   "api_calls": 72,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 739.8,
+   "eko_tau_end": 1386586.1,
+   "eko_hours_waited": 87.72
+  },
+  "eric/6": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 9,
+   "api_calls": 84,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 886.9,
+   "eko_tau_end": 1891792.7,
+   "eko_hours_waited": 85.36
+  },
+  "kip/6": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 53,
+   "api_calls": 100,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1205.0,
+   "eko_tau_end": 1551255.2,
+   "eko_hours_waited": 45.5
+  },
+  "fitch/6": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 27,
+   "api_calls": 108,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1210.0,
+   "eko_tau_end": 1670276.7,
+   "eko_hours_waited": 78.8
+  },
+  "keats/6": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 21,
+   "api_calls": 111,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1202.4,
+   "eko_tau_end": 1883084.9,
+   "eko_hours_waited": 77.94
+  },
+  "ryan/6": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 26,
+   "api_calls": 104,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1204.0,
+   "eko_tau_end": 1550496.2,
+   "eko_hours_waited": 45.5
+  },
+  "jason/6": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 57,
+   "api_calls": 90,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1210.4,
+   "eko_tau_end": 1171005.9,
+   "eko_hours_waited": 0.0
+  },
+  "christian/17": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 10,
+   "api_calls": 36,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 381.3,
+   "eko_tau_end": 2682710.7,
+   "eko_hours_waited": 13.35
+  },
+  "eric/7": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 0,
+   "api_calls": 74,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 733.3,
+   "eko_tau_end": 2252143.7,
+   "eko_hours_waited": 87.88
+  },
+  "jamie/7": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 3,
+   "api_calls": 76,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 781.8,
+   "eko_tau_end": 1890613.4,
+   "eko_hours_waited": 87.05
+  },
+  "stu/7": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 15,
+   "api_calls": 83,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 909.3,
+   "eko_tau_end": 1746811.1,
+   "eko_hours_waited": 84.91
+  },
+  "keats/7": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 14,
+   "api_calls": 86,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 923.8,
+   "eko_tau_end": 2250258.3,
+   "eko_hours_waited": 84.67
+  },
+  "fitch/7": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 3,
+   "api_calls": 79,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 799.9,
+   "eko_tau_end": 2034422.3,
+   "eko_hours_waited": 86.79
+  },
+  "ryan/7": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 28,
+   "api_calls": 106,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1205.8,
+   "eko_tau_end": 1889750.0,
+   "eko_hours_waited": 59.83
+  },
+  "jason/7": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 58,
+   "api_calls": 100,
+   "spawn_steps": [
+    40
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     40
+    ]
+   },
+   "clock_seconds": 1200.9,
+   "eko_tau_end": 1243058.5,
+   "eko_hours_waited": 0.0
+  },
+  "kip/7": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 40,
+   "api_calls": 104,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1207.2,
+   "eko_tau_end": 1956144.0,
+   "eko_hours_waited": 78.25
+  },
+  "eric/8": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 0,
+   "api_calls": 76,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 771.5,
+   "eko_tau_end": 2612353.7,
+   "eko_hours_waited": 87.2
+  },
+  "fitch/8": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 1,
+   "api_calls": 69,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 696.0,
+   "eko_tau_end": 2395055.3,
+   "eko_hours_waited": 88.57
+  },
+  "jamie/8": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 6,
+   "api_calls": 76,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 771.5,
+   "eko_tau_end": 2251046.1,
+   "eko_hours_waited": 87.26
+  },
+  "keats/8": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 12,
+   "api_calls": 81,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 882.2,
+   "eko_tau_end": 2610898.5,
+   "eko_hours_waited": 85.47
+  },
+  "jason/8": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 28,
+   "api_calls": 106,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1203.1,
+   "eko_tau_end": 1596985.0,
+   "eko_hours_waited": 78.26
+  },
+  "stu/8": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 29,
+   "api_calls": 95,
+   "spawn_steps": [
+    3,
+    3,
+    9,
+    9
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     3,
+     3,
+     9,
+     9
+    ]
+   },
+   "clock_seconds": 1068.6,
+   "eko_tau_end": 2107318.7,
+   "eko_hours_waited": 82.33
+  },
+  "ryan/8": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 22,
+   "api_calls": 106,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1202.7,
+   "eko_tau_end": 2239998.0,
+   "eko_hours_waited": 77.18
+  },
+  "kip/8": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 62,
+   "api_calls": 95,
+   "spawn_steps": [
+    23,
+    23,
+    36
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     23,
+     23,
+     36
+    ]
+   },
+   "clock_seconds": 1204.9,
+   "eko_tau_end": 2034291.4,
+   "eko_hours_waited": 0.0
+  },
+  "keats/9": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 5,
+   "api_calls": 37,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 378.9,
+   "eko_tau_end": 2682522.5,
+   "eko_hours_waited": 13.58
+  },
+  "eric/9": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 0,
+   "api_calls": 41,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 410.7,
+   "eko_tau_end": 2682483.0,
+   "eko_hours_waited": 12.64
+  },
+  "fitch/9": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 0,
+   "api_calls": 68,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 699.3,
+   "eko_tau_end": 2682234.0,
+   "eko_hours_waited": 68.12
+  },
+  "stu/9": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 12,
+   "api_calls": 71,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 776.8,
+   "eko_tau_end": 2467539.4,
+   "eko_hours_waited": 87.11
+  },
+  "jamie/9": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 25,
+   "api_calls": 96,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1051.2,
+   "eko_tau_end": 2611299.6,
+   "eko_hours_waited": 82.55
+  },
+  "ryan/9": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 18,
+   "api_calls": 86,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 946.2,
+   "eko_tau_end": 2610045.8,
+   "eko_hours_waited": 84.24
+  },
+  "kip/9": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 75,
+   "api_calls": 93,
+   "spawn_steps": [
+    35,
+    35,
+    57,
+    57
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     35,
+     35,
+     57,
+     57
+    ]
+   },
+   "clock_seconds": 1211.2,
+   "eko_tau_end": 2177163.0,
+   "eko_hours_waited": 19.5
+  },
+  "jason/9": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 45,
+   "api_calls": 102,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1208.7,
+   "eko_tau_end": 1727323.0,
+   "eko_hours_waited": 14.67
+  },
+  "jamie/10": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 4,
+   "api_calls": 42,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 438.4,
+   "eko_tau_end": 2682360.0,
+   "eko_hours_waited": 12.43
+  },
+  "ryan/10": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 28,
+   "api_calls": 52,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 654.1,
+   "eko_tau_end": 2682460.7,
+   "eko_hours_waited": 9.21
+  },
+  "stu/10": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 17,
+   "api_calls": 76,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 830.9,
+   "eko_tau_end": 2682631.6,
+   "eko_hours_waited": 45.9
+  },
+  "jason/10": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 5,
+   "api_calls": 86,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 905.8,
+   "eko_tau_end": 2106115.5,
+   "eko_hours_waited": 84.94
+  },
+  "kip/10": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 41,
+   "api_calls": 106,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 1203.0,
+   "eko_tau_end": 2535134.0,
+   "eko_hours_waited": 79.15
+  },
+  "kip/11": {
+   "done": true,
+   "end_reason": "session_time_up",
+   "steps_used": 63,
+   "api_calls": 97,
+   "spawn_steps": [
+    5,
+    5,
+    30,
+    30,
+    54,
+    54
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     5,
+     5,
+     30,
+     30,
+     54,
+     54
+    ]
+   },
+   "clock_seconds": 1209.5,
+   "eko_tau_end": 2610567.8,
+   "eko_hours_waited": 0.0
+  },
+  "jason/11": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 12,
+   "api_calls": 88,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 952.2,
+   "eko_tau_end": 2466187.5,
+   "eko_hours_waited": 84.15
+  },
+  "jason/12": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 15,
+   "api_calls": 80,
+   "spawn_steps": [],
+   "rule_fires": {},
+   "clock_seconds": 890.3,
+   "eko_tau_end": 2682441.8,
+   "eko_hours_waited": 45.23
+  },
+  "kip/12": {
+   "done": true,
+   "end_reason": "session_span_over",
+   "steps_used": 120,
+   "api_calls": 74,
+   "spawn_steps": [
+    18,
+    18,
+    42,
+    42,
+    66,
+    66,
+    90,
+    90,
+    116,
+    116
+   ],
+   "rule_fires": {
+    "rock_impact": [
+     18,
+     18,
+     42,
+     42,
+     66,
+     66,
+     90,
+     90,
+     116,
+     116
+    ]
+   },
+   "clock_seconds": 1193.9,
+   "eko_tau_end": 2682201.9,
+   "eko_hours_waited": 0.0
   }
  },
  "phase_b": {},

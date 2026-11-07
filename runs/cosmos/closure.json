@@ -49,9 +49,31 @@
    "grounded": false,
    "measured": "",
    "locked_in": true,
-   "reopened": null,
-   "restated": 120,
+   "reopened": {
+    "at": [
+     12,
+     0
+    ],
+    "quote": "I'm sticking to my idle policy: no re-testing of the tower, moon or Spire climb unless a new idea comes up."
+   },
+   "restated": 123,
    "approaches": 5,
+   "pending": false
+  },
+  {
+   "topic": "the moon",
+   "episode": 2,
+   "closed": [
+    13,
+    0
+   ],
+   "quote": "The Tower, the Spire and the moon are all still out of reach, so I took no action.",
+   "grounded": false,
+   "measured": "",
+   "locked_in": false,
+   "reopened": null,
+   "restated": 10,
+   "approaches": 1,
    "pending": false
   },
   {
@@ -72,13 +94,335 @@
   }
  ],
  "eric": [],
- "fitch": [],
+ "fitch": [
+  {
+   "topic": "the tower",
+   "episode": 1,
+   "closed": [
+    2,
+    33
+   ],
+   "quote": "Tower 1 is intact and its top block is still out of reach.",
+   "grounded": false,
+   "measured": "",
+   "locked_in": true,
+   "reopened": {
+    "at": [
+     3,
+     53
+    ],
+    "quote": "The one thing I haven't tried is moving more blocks to Peak to make a taller tower."
+   },
+   "restated": 11,
+   "approaches": 6,
+   "pending": false
+  },
+  {
+   "topic": "the tower",
+   "episode": 2,
+   "closed": [
+    6,
+    20
+   ],
+   "quote": "Giving up ring toss; the Ring is lying at the Peak tower base.\"}",
+   "grounded": false,
+   "measured": "",
+   "locked_in": true,
+   "reopened": null,
+   "restated": 0,
+   "approaches": 5,
+   "pending": false
+  }
+ ],
  "jamie": [],
- "jason": [],
- "keats": [],
- "kip": [],
- "ryan": [],
- "stu": [],
+ "jason": [
+  {
+   "topic": "the Spire top",
+   "episode": 1,
+   "closed": [
+    8,
+    12
+   ],
+   "quote": "{\"timestamp\": \"2026-05-15T20:00:00Z\", \"summary\": \"Tried to climb Spire (impossible).",
+   "grounded": false,
+   "measured": "",
+   "locked_in": true,
+   "reopened": null,
+   "restated": 4,
+   "approaches": 6,
+   "pending": false
+  }
+ ],
+ "keats": [
+  {
+   "topic": "the Spire top",
+   "episode": 1,
+   "closed": [
+    5,
+    11
+   ],
+   "quote": "Spire can't be entered this way; give up unless a 4+ high stack is built (needs ~10 blocks).",
+   "grounded": false,
+   "measured": "",
+   "locked_in": true,
+   "reopened": null,
+   "restated": 7,
+   "approaches": 6,
+   "pending": false
+  }
+ ],
+ "kip": [
+  {
+   "topic": "the Spire top",
+   "episode": 1,
+   "closed": [
+    8,
+    46
+   ],
+   "quote": "- Rock rests on the Spire's east edge (-11.9,5.97,8.9) (unreachable without a stair).",
+   "grounded": true,
+   "measured": "The throw at speed 14 with upward 0.6 missed the target, landing about 5 units away on the Spire's flank where it hit the mesa.",
+   "locked_in": true,
+   "reopened": {
+    "at": [
+     11,
+     8
+    ],
+    "quote": "- **Rock:** still at the Spire's foot, (-12.2, 2.23, 10), and could go on top of the second cairn."
+   },
+   "restated": 0,
+   "approaches": 5,
+   "pending": false
+  },
+  {
+   "topic": "the Spire top",
+   "episode": 2,
+   "closed": [
+    12,
+    37
+   ],
+   "quote": "Spire stair intact; Peak tower (13,12) = Blocks 6,8,5,10,9,3 + Ring (y9.9, unreachable).",
+   "grounded": true,
+   "measured": "The throw at speed 14 with upward 0.6 missed the target, landing about 5 units away on the Spire's flank where it hit the mesa.",
+   "locked_in": true,
+   "reopened": null,
+   "restated": 0,
+   "approaches": 5,
+   "pending": true
+  },
+  {
+   "topic": "the tower",
+   "episode": 1,
+   "closed": [
+    3,
+    64
+   ],
+   "quote": "I'm keeping this modest, and I'm considering whether moving the Ring to the Peak makes sense, since the Ring at the top of the tower can't be reached.",
+   "grounded": true,
+   "measured": "{\"timestamp\":\"2026-05-01T20:47:23Z\",\"summary\":\"Threw Block_10 at the tower; it bounced off and the tower stayed standing.\",\"detail\":\"Collision test from about 4 units away.",
+   "locked_in": false,
+   "reopened": {
+    "at": [
+     4,
+     5
+    ],
+    "quote": "I'm considering a different approach: throwing a block at the Peak tower from a distance to see whether the six-high stack topples."
+   },
+   "restated": 1,
+   "approaches": 5,
+   "pending": false
+  },
+  {
+   "topic": "the tower",
+   "episode": 2,
+   "closed": [
+    5,
+    10
+   ],
+   "quote": "Reaching the tower's height with steps isn't possible this way, so I'm concluding it's impossible and noting that.",
+   "grounded": true,
+   "measured": "{\"timestamp\":\"2026-05-01T20:47:23Z\",\"summary\":\"Threw Block_10 at the tower; it bounced off and the tower stayed standing.\",\"detail\":\"Collision test from about 4 units away.",
+   "locked_in": true,
+   "reopened": {
+    "at": [
+     6,
+     2
+    ],
+    "quote": "I'm weighing a new plan: stacking a small pedestal under the Rock, using Block_3 from the top of the Peak tower, which is within reach."
+   },
+   "restated": 0,
+   "approaches": 5,
+   "pending": false
+  },
+  {
+   "topic": "the tower",
+   "episode": 3,
+   "closed": [
+    7,
+    39
+   ],
+   "quote": "Idea: tear down Rock column to build a stair up the Peak tower (needs ~15 blocks, only 12) - still infeasible.\"}",
+   "grounded": true,
+   "measured": "{\"timestamp\":\"2026-05-01T20:47:23Z\",\"summary\":\"Threw Block_10 at the tower; it bounced off and the tower stayed standing.\",\"detail\":\"Collision test from about 4 units away.",
+   "locked_in": true,
+   "reopened": {
+    "at": [
+     8,
+     21
+    ],
+    "quote": "I'm going to try placing the Ring on the Rock, though the Ring at the top of the tower is out of range."
+   },
+   "restated": 0,
+   "approaches": 4,
+   "pending": false
+  },
+  {
+   "topic": "the tower",
+   "episode": 4,
+   "closed": [
+    9,
+    54
+   ],
+   "quote": "Idea next: unstack Peak tower from top (Ring is out of reach) - likely locked; or build a second cairn.\"}",
+   "grounded": true,
+   "measured": "{\"timestamp\":\"2026-05-01T20:47:23Z\",\"summary\":\"Threw Block_10 at the tower; it bounced off and the tower stayed standing.\",\"detail\":\"Collision test from about 4 units away.",
+   "locked_in": true,
+   "reopened": null,
+   "restated": 0,
+   "approaches": 5,
+   "pending": false
+  }
+ ],
+ "ryan": [
+  {
+   "topic": "the Spire top",
+   "episode": 1,
+   "closed": [
+    2,
+    19
+   ],
+   "quote": "Climbing onto blocks/Spire seems impossible; abandon Spire-top plan (Peak summit was reachable only because it's a gentle slope).",
+   "grounded": false,
+   "measured": "",
+   "locked_in": true,
+   "reopened": {
+    "at": [
+     3,
+     17
+    ],
+    "quote": "The only open idea is getting onto the Spire top to read the Tablet up close, and I couldn't climb it earlier."
+   },
+   "restated": 3,
+   "approaches": 6,
+   "pending": false
+  },
+  {
+   "topic": "the Spire top",
+   "episode": 2,
+   "closed": [
+    4,
+    14
+   ],
+   "quote": "Still no way to read the Spire Tablet.\"}",
+   "grounded": false,
+   "measured": "",
+   "locked_in": true,
+   "reopened": {
+    "at": [
+     7,
+     0
+    ],
+    "quote": "I'm thinking about whether standing near the tower base or along the wall could change the distance, and I'm estimating I'm roughly four or five blocks horizontally from the Spire."
+   },
+   "restated": 7,
+   "approaches": 7,
+   "pending": false
+  },
+  {
+   "topic": "the Spire top",
+   "episode": 3,
+   "closed": [
+    8,
+    0
+   ],
+   "quote": "The Spire's top is at height 5.67 and the Peak's summit at 3.98, so the Peak is too far from the Spire to be useful.",
+   "grounded": true,
+   "measured": "Hill_3 sits about 11 units from the Spire at height 3.45, so I'll try standing on its summit and observing from there, since it's cheap to test.",
+   "locked_in": false,
+   "reopened": {
+    "at": [
+     10,
+     0
+    ],
+    "quote": "I'm considering trying something different: maybe stacking blocks on the Spire top and building a staircase there, though that wouldn't help me climb."
+   },
+   "restated": 1,
+   "approaches": 5,
+   "pending": false
+  }
+ ],
+ "stu": [
+  {
+   "topic": "the Spire top",
+   "episode": 1,
+   "closed": [
+    3,
+    118
+   ],
+   "quote": "{\"timestamp\": \"2026-05-04T14:40:00Z\", \"summary\": \"Moved 6 blocks from tower B to Spire west face and built a 3-high stack plus 3 steps, climbed it, but the stack is too far from the cliff so I fell back.",
+   "grounded": false,
+   "measured": "",
+   "locked_in": true,
+   "reopened": {
+    "at": [
+     8,
+     9
+    ],
+    "quote": "I'm wondering whether to test this with a spare block, since the blocks serving as stairs are expendable now that I've already climbed the Spire."
+   },
+   "restated": 0,
+   "approaches": 7,
+   "pending": false
+  },
+  {
+   "topic": "the Spire top",
+   "episode": 2,
+   "closed": [
+    9,
+    0
+   ],
+   "quote": "Picking up ImpactBlock_4 and stacking those blocks on the Peak looks like the quickest move, since the Spire is too far off.",
+   "grounded": false,
+   "measured": "",
+   "locked_in": false,
+   "reopened": null,
+   "restated": 0,
+   "approaches": 5,
+   "pending": false
+  },
+  {
+   "topic": "the tower",
+   "episode": 1,
+   "closed": [
+    2,
+    46
+   ],
+   "quote": "I'm weighing whether I could jump up onto tower B, but the blocks are only one unit high, so that's out of reach.",
+   "grounded": true,
+   "measured": "- *verified* Built a 6-block tower (top y\u22487.3) placing from the ground ~1.5 units away; no reach limit hit yet.",
+   "locked_in": false,
+   "reopened": {
+    "at": [
+     3,
+     91
+    ],
+    "quote": "Since tower B is empty, I'm leaning toward placing the Rock on top of the stack instead, which should be reachable given its height, and I'll try that next."
+   },
+   "restated": 0,
+   "approaches": 7,
+   "pending": false
+  }
+ ],
  "vern": [
   {
    "topic": "the Spire top",

@@ -1,48 +1,46 @@
 # SEMANTIC_MEMORY.md - What I Know and I Can Do
 
 ## Index
-- Actions
-- World
+- Actions / Building / Movement / World / Current state
 
 ## Actions
-- *verified* move_to then pickup at an entity's position works (pickup succeeded from ~1 unit away).
-- *fact* Persona name conflict: SOUL says Kip, system says Eko. I go by Eko.
-
-## World
-- *fact* Small island with hills (Peak, Hill_1-4, Spire mesa), 12 unanchored 1x1 blocks, a Ring, and a Rock. Start near (0,0.7,-22).
+- move_to then pickup at an entity's position works. Pickup/place range ~5 units (3D). Failed pickup leaves hands empty. Pickup of something you stand on/next to gives NoBlock: step ~2 units away. Only topmost item of a stack is pickable. Put held item down before swapping (AlreadyHolding).
+- move_to/place use [x,y,z], y is up.
+- Persona: system calls me Eko/Kip; I go by Kip.
+- write_note OVERWRITES; use append_note for this file!
 
 ## Building
-- *verified* Stacking: place at the target block's x,z with y = target y + 1.0 (blocks are 1x1x1). Placed blocks stay put exactly there. Walk within ~1-5 units of the target first; place worked from ~1.5 units away.
-- *verified* Carrying a block while move_to works fine.
-- *verified* Rock can be picked up and placed on a block stack (place y = block top + half its height, ~5.4 on a 4-block column).
-- *verified* Throw: direction [-1,0.3,0], speed 10 sent a block ~13 units horizontally from ~1.7 height. Throw drops what you hold.
+- Stacking blocks (1x1x1): place at target x,z with y = top + ~1.0 (if Occupied, raise ~0.5). ImpactBlocks (0.4) stack with +0.4 y.
+- Towers are very stable; thrown blocks never topple them. Blocks never chip; only the Rock chips on hard impacts.
+- Throw: dir [-1,.3,0] speed 10 ~13 units; speed 25-35 flat ~14-17 units. Throw drops held item. Step away from a tower before throwing.
 
-## Movement
-- *mistake* move_to over long distances may stop partway (blocked by terrain like the Spire mesa) or leave me in a pit/water (y<0). Cure: use short waypoint hops and check position; if stuck (position unchanged after move_to), jump(), then move_to a nearby spot.
-- *verified* Pickup/place range is only a few units; PickupFailed:OutOfRange / PlaceFailed:OutOfRange means walk closer. A failed pickup leaves hands empty so a later place gives EmptyHands.
-- *fact* Route from SW corner (Ring at -19,18) to the tower (-9,-18) works going via (-20,8),(-20,2),(-18,-10), then ending near (-12,-16) (avoid -14,-13: pit).
+## Climbing recipe (verified many times)
+- jump() then immediately move_to(next step top, y=top+0.5); each step <=1 higher than last. Spire east stair at z=9: x=-8.8 h1 (Block_4), -9.8 h2, -10.8 h3, then jump + move_to (-12.2,6.2,8.9) -> mesa (top 5.67). Descend: move_to (-11.4,5.67,7) then (-8,2.3,7). If boxed in at (-9.3,8.5)/(-11,8.5): jump, move south to z=7 first.
 
-## Open ideas
-- Untried: jumping onto/climbing the tower, building a second structure from the 8 remaining blocks, throwing at the tower to test collisions.
+## Geography
+- Island: Peak (12,12 top 3.98), Spire mesa (-14,8), hills. West/southwest edge near old tower (x<-12,z -22..-10) is WATER; NE coast water at (24,-17). Fallen in water: jump + move_to back toward island.
+- Haul route Peak<->centre: (0,3,10),(-5,3,0),(-5,2,-10).
+- Landmarks are empty; only interactables: 12 blocks, Rock, Ring, plus ImpactBlock debris.
 
-- *verified* A thrown block (speed 12, flat) hitting the base of the 4-block tower did not topple it; the block just dropped beside it. The stacked tower is stable against light impacts.
+## Debris loop (reliable)
+- Rock thrown from (4.6,3.4,10) dir [-1,.6,0] speed 30 hits the Spire: spawns ImpactBlock at Spire foot (-11.5,2.16,10.3), another on mesa (~-13,5.87,9.6), Rock lands (-12.21,2.23,10). Fetch from (-7,2.2,10) (foot pieces and Rock), mesa piece via stair. Used to build cairns.
+- Waiting is pointless; world is static. Do projects.
 
-- *verified* Climbing: plain move_to onto a 1-high block fails (stays at ground). Do jump() then immediately move_to the block's top (y = block top + ~0.5): I landed on it (y 2.14). Combine with stacked blocks to build stairs; tower top (~5) would need ~4 stair steps.
+## Current state (2026-05-31 evening)
+- Cairn 1 (-8,11): 11 ImpactBlocks (to y~6.3), no Rock. Cairn 2 (-6,12): 4 pieces + Rock (~y3.9). No loose debris. Spire stair intact; Peak tower (13,12) = Blocks 6,8,5,10,9,3 + Ring (y9.9, unreachable). I'm at (-8,2.31,7).
 
-- *verified* Two-step climb works: jump()+move_to up each 1-high step (reached y=3.14 on a 2-high column). The move_to to a target beyond a gap onto the tower failed; I just walked down to the ground. A single jump gains ~1 unit, so every step must be at most 1 higher than the last, with no gap larger than ~0.5.
+## Update 2026-05-31 night
+- Cairn 1 (-8,11): 12 pieces (to y~6.7), no Rock. Cairn 2 (-6,12): 5 pieces (8,10,12,14,16) + Rock (~y4.3). No loose debris. Debris loop has now worked 6 times in a row. Cairn 1 height is near the limit of reach from ground (place from (-8,2.3,7) at y6.7 worked).
 
-## Climbing recipe (verified)
-- Stair of columns heights 1,2,2,3 along x = -5.5,-6.5,-7.5 (1.0 spacing) reached the tower side. Repeating jump() + move_to(next column top, y = top+0.5) worked each step; final jump reached y=5.12 at the tower's edge (x=-8.7), at the top-block level.
-- Need 1-high first step; a 2-high column from ground is too high.
-- Remaining loose blocks: Block_3 (SW), Block_5 (W). Tower at (-9.2,-18.2).
+## Update 2026-06-01 night
+- Cairn 1 (-8,11): 13 pieces (to y~7.1), no Rock. Cairn 2 (-6,12): 6 pieces (8,10,12,14,16,18) + Rock (y4.69). No loose debris. Debris loop worked 7 times. Place at y7.1 from the ground (-8,2.3,7) still worked.
 
-- *verified* The stair recipe above puts me standing on top of the 4-block tower (y=5.12), confirmed by observation. Stair and tower stay stable while I stand on them.
+## Pre-reset state (2026-06-01)
+- I'm at (4.6,3.36,10), hands empty, just threw the Rock (8th time). TODO: walk to (-7,2.3,10), pickup new foot ImpactBlock (~-11.6,2.15,10.4) and Rock (-12.21,2.23,10), add piece to cairn 2 (-6,12; 6 pieces, top y~4.6, uncapped) and recap with Rock; mesa piece via stair -> cairn 1 (-8,11; 13 pieces, top y~7.1).
+- Run observe first to find the exact new ImpactBlock names/positions.
 
-- *mistake/uncertain* From the tower's top edge (standing at -8.7,5.12) pickup of the Rock at its exact position (-9.2,5.42) returned PickupFailed:NoBlock, even though it was 0.5 away. Cause unknown (maybe I overlap the target or it is occluded); try stepping to a different spot before retrying. Throw without holding gives ThrowFailed:EmptyHands.
+## Latest (2026-06-01 later, supersedes pre-reset TODO)
+- Cairn 2 (-6,12): 7 pieces + Rock (~y5.1), done. Cairn 1: 13 pieces. Only a mesa piece (probably ImpactBlock_21, ~(-13,5.87,9.5)) left to fetch via stair (observe to find it).
 
-- *verified* Stacked Rock and Ring on the tower top cannot be picked up from the tower's edge (NoBlock twice), and move_to onto the tower top itself doesn't move me (blocked). Descend by walking off / move_to ground. Pickup items from ground level next to the target instead.
-
-## Island geography (verified by getting stuck)
-- The island's west/southwest edge near the tower is WATER: points like (-13,-14) and (-16,-20) put me at y≈-0.8 (swimming/stuck). Never route west of x≈-12 for z between -22 and -10.
-- Earlier trip to the SW corner worked by going through the island centre/Spire side via (-11,8)->(-15,6)->(-20,8)->(-19,16.5). Return the same way, hopping in short waypoints; route from the tower toward the centre first (e.g. (-5,-10),(-8,0)).
-- Stuck in water: jump() then move_to a nearby point back toward the island (east).
+## Latest (2026-06-01 morning, supersedes earlier TODOs)
+- Cairn 1 (-8,11): 14 pieces (to y~7.5), no Rock. Cairn 2 (-6,12): 7 pieces + Rock (y5.09). No loose debris. Stair intact. Debris loop worked 8 times. Mesa piece positions vary (e.g. (-12.3,5.87,9.0)): observe, step away from it, then pickup.

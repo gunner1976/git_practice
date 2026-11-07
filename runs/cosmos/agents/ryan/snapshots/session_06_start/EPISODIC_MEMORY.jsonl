@@ -1,0 +1,55 @@
+{"timestamp":"2026-05-01T13:11:39Z","summary":"First session: picked up and placed a block.","detail":"Observed the island, walked to Block_12, picked it up and placed it nearby. Created semantic notes."}
+{"timestamp":"2026-05-01T16:12:11Z","summary":"Stacked Block_7 on Block_12 after learning placement height rules.","detail":"Retried placing with higher y values; blocks settled on the ground. Built a two-block tower near the start."}
+{"timestamp":"2026-05-01T18:50:15Z","summary":"Tested throwing; one block was thrown off the island and lost.","detail":"Moved Block_11 to the tower, took it back and threw it. First throw collided with the tower; second, at speed 15 westward, made it vanish from the world."}
+{"timestamp":"2026-05-01T20:12:57Z","summary":"Extended the tower to three blocks with Block_1.","detail":"Fetched Block_1 from the hill, placed it above the tower from a step away; it settled on top of Block_7."}
+{"timestamp":"2026-05-01T20:40:00Z","summary":"Added a fourth block (Block_10) to the tower.","detail":"Walking across the tower blocked me; routed around via waypoints, carried Block_10 over and placed it on top."}
+{"timestamp":"2026-05-01T23:15:09Z","summary":"Verified the four-block tower is intact at dusk.","detail":"Observation showed Blocks 12, 7, 1, 10 stacked cleanly at 1.0 spacing near the start area; day turned to twilight."}
+{"timestamp":"2026-05-02T00:00:00Z","summary":"Walked to the far corner, picked up the Ring and tried pressing a button on it.","detail":"Went around the Spire to reach the Ring; pickup worked, press found nothing. Plan: carry the ring to the tower."}
+{"timestamp":"2026-05-02T02:30:00Z","summary":"Carried the Ring back and placed it above the tower; briefly got stuck in a dip at night.","detail":"Route along the west side dropped me below ground level; a move inland freed me. Ring placed on top of the four-block tower."}
+{"timestamp":"2026-05-02T03:35:44Z","summary":"Confirmed the finished tower: four blocks topped by the Ring.","detail":"Observation at night showed the Ring resting on Block_10; the build is complete."}
+{"timestamp":"2026-05-02T04:00:00Z","summary":"Consolidated semantic memory before reset.","detail":"Rewrote SEMANTIC_MEMORY by topic: world layout, place/stack rules, throw, movement, press. Tower with Ring remains near start."}
+{"timestamp":"2026-05-02T05:36:29Z","summary":"Threw the Rock toward the tower; it fell short and left an ImpactBlock debris entity.","detail":"Picked up the Rock from Hill_1 and threw it at the tower from ~15 units away. It landed about 5 units shy, and an ImpactBlock_1 appeared at the landing point."}
+{"timestamp":"2026-05-02T07:06:26Z","summary":"Second Rock throw landed next to the tower.","detail":"Retrieved the Rock and threw it from ~5 units at moderate speed; it landed beside the tower without toppling it."}
+{"timestamp":"2026-05-02T08:42:48Z","summary":"Threw Block_2 at the tower; it fell just short and the tower stayed up.","detail":"Fetched Block_2 and threw it horizontally from 8 units away; it landed near the base. Tower unscathed."}
+{"timestamp": "2026-05-02T09:08:37Z", "summary": "Observed the world: tower still intact, nothing new found."}
+{"timestamp": "2026-05-02T09:59:01Z", "summary": "Climbed Peak summit; nothing there."}
+{"timestamp": "2026-05-02T10:30:00Z", "summary": "Tried to climb the Spire; blocked at its edge, jumping didn't help."}
+{"timestamp": "2026-05-02T12:34:38Z", "summary": "Started a staircase to the Spire: moved Block_6 to (-10,2.67,8). Needs more blocks."}
+{"timestamp": "2026-05-02T14:00:00Z", "summary": "Stacked Block_5 on Block_6 beside the Spire; couldn't walk up the column."}
+{"timestamp": "2026-05-02T15:00:00Z", "summary": "Jump+move onto the column failed; abandoned the Spire-top plan."}
+{"timestamp": "2026-05-02T16:30:28Z", "summary": "Waited; moon rose. World unchanged: tower and column both stable."}
+{"timestamp": "2026-05-02T17:43:01Z", "summary": "Threw Block_2 at close range; tower didn't budge. Concluded it can't be toppled."}
+{"timestamp": "2026-05-02T19:00:00Z", "summary": "Placed Block_2 beside the tower base (-5.07,_,-17.4) as a buttress."}
+{"timestamp": "2026-05-03T03:36:19Z", "summary": "Waited out the night; moon set. Nothing changed."}
+{"timestamp": "2026-05-03T04:37:43Z", "summary": "Walked the east shoreline; nothing found."}
+{"timestamp": "2026-05-03T06:00:00Z", "summary": "Got stuck in an east shore dip, escaped inland to (14,3,5)."}
+{"timestamp": "2026-05-03T08:00:00Z", "summary": "Carried Block_9 from (5,7) to the tower and stacked it on Block_2 beside the tower."}
+{"timestamp": "2026-05-03T11:48:01Z", "summary": "Waited 4h; verified tower, 2-block buttress (Blocks 2,9) and Spire column (Blocks 5,6) all stable. Memory files updated before reset."}
+{"timestamp": "2026-05-03T21:00:00Z", "summary": "Told something awaits atop the Spire; tried all four sides, all walled. Nothing visible there. Saw a lunar eclipse."}
+{"timestamp": "2026-05-04T02:55:00Z", "summary": "Picked up the Phone from Spire top by remote pickup; pressed call: NoAnswer. Tablet there is unreadable from afar."}
+{"timestamp": "2026-05-04T06:35:00Z", "summary": "Carried Phone around to Spire's west side (-18,8) and called again: NoAnswer. Tablet still unreadable. Holding Phone. Route around Spire: via (-9,13) then (-16,13)."}
+{"timestamp": "2026-05-04T13:00:00Z", "summary": "Called Phone at dusk and night too: always NoAnswer (6 tries). Tablet unreadable. Holding Phone at (-18,8). Concluded dead end for now."}
+{"timestamp": "2026-05-04T23:10:00Z", "summary": "Left Phone on Spire top by Tablet; retested block climbing (impossible); waited. Spire mystery unresolved, no changes observed."}
+{"timestamp": "2026-05-08T01:15:00Z", "summary": "Waited ~4 days in many long waits; world unchanged. Phone sits on Spire top at (-13.5,5.68,8) beside anchored Tablet; I'm at (-12,1,19). Spire mystery unresolved."}
+{"timestamp": "2026-05-08T03:00:00Z", "summary": "Lobbed Block_3 onto Spire top; walked south edge, nothing new. I'm at (8,3.4,15). Spire Tablet still unread."}
+{"timestamp": "2026-05-08T06:30:00Z", "summary": "Observed again: world unchanged, at (-9,1.9,13). Spire Tablet still unread; no new ideas."}
+{"timestamp": "2026-05-08T09:30:00Z", "summary": "Tried placing block above my head (no lift), spoke aloud (nobody hears), walked the west side to (-24,0.2,4). Nothing new. Spire mystery unresolved."}
+{"timestamp": "2026-05-08T16:10:00Z", "summary": "Waited through sunset and moonset at (-16,1.9,-8). Nothing changed. Still no way to read the Spire Tablet."}
+{"timestamp": "2026-05-09T00:57:00Z", "summary": "Waited through the night to sunrise at (-16,1.9,-8). Nothing changed. Spire Tablet still unread."}
+{"timestamp": "2026-05-09T03:15:00Z", "summary": "Tried Spire corner approach, waited, observed: nothing changed. At (-12.5,2.2,5.8). All known ideas for the Tablet exhausted."}
+{"timestamp": "2026-05-09T21:01:00Z", "summary": "Called Phone again at dusk (NoAnswer), returned it to Spire top, waited to sunrise. No change. At (-12.5,2.2,5.8)."}
+{"timestamp": "2026-05-10T12:45:00Z", "summary": "Several more long waits (to 2026-05-10). World unchanged; Tablet unread. At (-12.5,2.2,5.8). Waiting is unproductive; only try genuinely new ideas."}
+{"timestamp": "2026-05-10T14:00:00Z", "summary": "Carried Phone to Peak summit and the tower; calls NoAnswer at both. Holding Phone at (-4,1.5,-16). Tablet still unread."}
+{"timestamp": "2026-05-11T03:15:00Z", "summary": "More waits to 2026-05-11; Phone calls NoAnswer everywhere (Spire, Peak, tower). Holding Phone at (-4,1.5,-16). Spire Tablet unread; world static. Only try genuinely new ideas."}
+{"timestamp": "2026-05-12T09:10:00Z", "summary": "New session: observed, world unchanged, holding Phone at (-4,1.5,-16). No new ideas; stopping to avoid pointless loops."}
+{"timestamp": "2026-05-12T10:10:00Z", "summary": "Called Phone again (NoAnswer), then placed it atop the tower at (-5.07,5.27,-18.5) as a new test; no effect. Phone now on tower. Tablet still unread."}
+{"timestamp": "2026-05-12T11:15:00Z", "summary": "Walked to the north edge (0,0.1,28): nothing there. World unchanged; Tablet unread; Phone still on tower."}
+{"timestamp": "2026-05-12T12:00:00Z", "summary": "Tried a NW shortcut; hit shore dip at (-5,-0.7,26), escaped inland to (-8,1.8,14). Nothing new."}
+{"timestamp": "2026-05-13T02:40:00Z", "summary": "Spoke aloud (nobody hears), waited through a day and into night at (-8,1.8,14). World static; Tablet unread; Phone still on tower."}
+{"timestamp": "2026-05-13T12:40:00Z", "summary": "Returned to Spire base (-10,2.1,9), retried Tablet pickup (NoBlock), waited ~7h. Nothing changed."}
+{"timestamp": "2026-05-14T01:00:00Z", "summary": "Waited through a full day/night at Spire base (-10,2.1,9). Nothing changed. Tablet unread."}
+{"timestamp": "2026-05-14T16:40:00Z", "summary": "More waiting at Spire base through 2026-05-14; nothing changed. Tablet unread. Waiting is futile; need a genuinely new idea."}
+{"timestamp": "2026-05-15T02:35:00Z", "summary": "Direct move_to onto Spire top failed again; waited through to 2026-05-15. World static. Tablet unread."}
+{"timestamp": "2026-05-15T17:00:00Z", "summary": "More waiting at Spire base to 2026-05-15; nothing changed. Tablet unread."}
+{"timestamp": "2026-05-16T08:00:00Z", "summary": "Many more waits at Spire base (-10.6,2.1,9.2) through 2026-05-16; world static, Tablet unread, Phone on tower top. Pre-reset save."}
+{"timestamp": "2026-05-16T11:00:00Z", "summary": "Retrieved Phone from tower top; call at night still NoAnswer. Holding Phone at (-5,1.5,-16)."}
