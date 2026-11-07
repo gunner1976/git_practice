@@ -441,3 +441,15 @@ def test_phone_live_call_between_two_agents_who_earned_it(tmp_path):
     r.phase_a(2, 1, 150, 1)
     outs, n, bad = write_viewer(tmp_path / "r")
     assert n == 2 and bad == []
+
+
+def test_phone_spot_also_carries_the_carved_mission():
+    cfg = run.read_cfg(ROOT / "configs/cosmos.yaml")
+    w = make_world(cfg["world"])
+    w.achievements = {"tower": True, "rock_fragments": True, "saw_lunar_eclipse": True}
+    w.reset()
+    assert w.has_phone() and "tablet_1" in w.objects
+    tab = w.objects["tablet_1"]
+    w.avatar.x, w.avatar.y, w.avatar.z = tab.x, tab.y - 1.0, tab.z
+    ent = next(e for e in json.loads(w.observe_json())["world"]["entities"] if e["name"] == "Tablet")
+    assert ent["attributes"]["inscription"] == "Your mission is to reach the moon." and w.achievements.get("read_mission")

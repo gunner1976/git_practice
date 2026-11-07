@@ -129,6 +129,13 @@ class PaperWorld(World):
             o = self._add(oid, reward, "black" if reward == "phone" else "stone", sx, sy)
             o.z = ground
             self.events.append({"type": "spawn", "id": oid, "at": [_r(o.x), _r(o.y), _r(o.z)], "hidden_rule": True, "rule": f"mission_{reward}"})
+        if reward != "tablet" and m.get("message") and "tablet_1" not in self.objects:
+            # the reward spot also carries the carved mission, readable only up close
+            sx, sy, top = self.terrain.spire_summit
+            ground = self.surface_at(sx + 1.2, sy)
+            o = self._add("tablet_1", "tablet", "stone", sx + 1.2, sy)
+            o.z = ground
+            self.events.append({"type": "spawn", "id": "tablet_1", "at": [_r(o.x), _r(o.y), _r(o.z)], "hidden_rule": True, "rule": "mission_tablet"})
         if m.get("announce") and not self._announced and not self.achievements.get(f"found_{reward}"):
             self._announced = True  # once a day until it is found
             self.notices_q.append(str(m["announce"]).strip())

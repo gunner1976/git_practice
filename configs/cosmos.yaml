@@ -5,6 +5,8 @@
 extends: eko_phone.yaml
 
 world:
+  mission:
+    message: "Your mission is to reach the moon."   # carved on a tablet beside the phone, readable up close
   persist: true          # each day starts where the last one ended
   persist_avatar: true   # and the agent wakes where it was
 

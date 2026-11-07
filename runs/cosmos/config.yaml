@@ -148,6 +148,7 @@ world:
     reward: phone
     announce: Something is waiting for you at the top of the Spire.
     ring_seconds: 120
+    message: Your mission is to reach the moon.
   persist: true
   persist_avatar: true
 agent:
